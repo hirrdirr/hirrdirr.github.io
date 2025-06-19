@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>YouTube Player API Loop</title>
+  <title>Hirrdirr</title>
   <style>
     html, body {
       margin: 0; padding: 0; height: 100%; background: black; overflow: hidden;
@@ -72,6 +72,7 @@
           iv_load_policy: 3,
           disablekb: 1,
           fs: 0
+          mute: 1 
         },
         events: {
           'onReady': onPlayerReady,
@@ -81,7 +82,7 @@
     }
 
     function onPlayerReady(event) {
-      player.setVolume(20);  // låg volym direkt
+      player.setVolume(10);  // låg volym direkt
       player.playVideo();
       player.setPlaybackQuality('hd720'); // försök sätta 720p
     }
