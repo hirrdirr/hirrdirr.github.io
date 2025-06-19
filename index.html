@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Hirrdirr</title>
+  <title>YouTube Player API Loop</title>
   <style>
     html, body {
       margin: 0; padding: 0; height: 100%; background: black; overflow: hidden;
@@ -41,11 +41,11 @@
 
   <div id="player"></div>
 
-  <div id="leftBtn" class="text-button" onclick="prevVideo()">back</div>
-  <div id="rightBtn" class="text-button" onclick="nextVideo()">next</div>
+  <div id="leftBtn" class="text-button" onclick="prevVideo()"><</div>
+  <div id="rightBtn" class="text-button" onclick="nextVideo()">></div>
 
   <script>
-    // Load YouTube IFrame Player API asynchronously
+    // Ladda YouTube IFrame API asynkront
     let tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -58,45 +58,44 @@
     let index = 0;
     let player;
 
-    // Called by YouTube API when ready
     function onYouTubeIframeAPIReady() {
-player = new YT.Player('player', {
-  videoId: videos[index],
-  playerVars: {
-    autoplay: 1,
-    controls: 1,         // visa kontroller
-    modestbranding: 1,
-    loop: 1,
-    rel: 0,
-    playlist: videos[index],
-    showinfo: 0,
-    iv_load_policy: 3,
-    disablekb: 1,
-    fs: 0
-  },
-  events: {
-    'onReady': onPlayerReady,
-    'onStateChange': onPlayerStateChange
-  }
-});
+      player = new YT.Player('player', {
+        videoId: videos[index],
+        playerVars: {
+          autoplay: 1,
+          controls: 1,           // visa kontroller
+          modestbranding: 1,
+          loop: 1,
+          rel: 0,
+          playlist: videos[index],
+          showinfo: 0,
+          iv_load_policy: 3,
+          disablekb: 1,
+          fs: 0
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
 
-function onPlayerReady(event) {
-  player.setVolume(20);   // låg volym direkt
-  player.playVideo();
-}
-
+    function onPlayerReady(event) {
+      player.setVolume(20);  // låg volym direkt
+      player.playVideo();
+      player.setPlaybackQuality('hd720'); // försök sätta 720p
+    }
 
     function onPlayerStateChange(event) {
-      // Om videon slutar (state 0) starta om (loop)
       if (event.data === YT.PlayerState.ENDED) {
-        player.playVideo();
+        player.playVideo();  // loop
       }
     }
 
     function updateVideo() {
       player.loadVideoById(videos[index]);
-      player.setPlaybackQuality('hd720');
       player.setVolume(20);
+      player.setPlaybackQuality('hd720');
       player.playVideo();
 
       const left = document.getElementById("leftBtn");
