@@ -55,7 +55,7 @@
 <body>
   <iframe
     id="videoFrame"
-    src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&loop=1&playlist=Auss7fLMiIE"
+    src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&loop=1&playlist=Auss7fLMiIE&modestbranding=1&rel=0&showinfo=0&controls=0"
     allow="autoplay; encrypted-media"
     allowfullscreen>
   </iframe>
@@ -65,22 +65,16 @@
 
   <script>
     const videos = [
-      {
-        id: "Auss7fLMiIE"
-      },
-      {
-        id: "FGZndqSzgbg"
-      },
-      {
-        id: "x_FQXDfmamw"
-      }
+      { id: "Auss7fLMiIE" },
+      { id: "FGZndqSzgbg" },
+      { id: "x_FQXDfmamw" }
     ];
 
     let index = 0;
 
     function updateVideo() {
       const videoId = videos[index].id;
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&controls=0`;
       const frame = document.getElementById("videoFrame");
       frame.src = embedUrl;
 
