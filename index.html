@@ -2,25 +2,17 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>YouTube Loop</title>
+  <title>YouTube Player API Loop</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: black;
-      overflow: hidden;
+      margin: 0; padding: 0; height: 100%; background: black; overflow: hidden;
     }
-
-    iframe {
+    #player {
+      position: absolute;
+      top: 0; left: 0;
       width: 100vw;
       height: 100vh;
-      border: none;
-      position: absolute;
-      top: 0;
-      left: 0;
     }
-
     .text-button {
       position: absolute;
       top: 50%;
@@ -31,20 +23,13 @@
       text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
       cursor: pointer;
       user-select: none;
+      z-index: 10;
     }
-
-    #leftBtn {
-      left: 20px;
-    }
-
-    #rightBtn {
-      right: 20px;
-    }
-
+    #leftBtn { left: 20px; }
+    #rightBtn { right: 20px; }
     .pulse {
       animation: pulse 1.5s ease-in-out;
     }
-
     @keyframes pulse {
       0%   { opacity: 1; transform: scale(1); }
       50%  { opacity: 0.7; transform: scale(1.05); }
@@ -53,30 +38,69 @@
   </style>
 </head>
 <body>
-  <iframe
-    id="videoFrame"
-    src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&loop=1&playlist=Auss7fLMiIE&modestbranding=1&rel=0&showinfo=0&controls=0"
-    allow="autoplay; encrypted-media"
-    allowfullscreen>
-  </iframe>
+
+  <div id="player"></div>
 
   <div id="leftBtn" class="text-button" onclick="prevVideo()">back</div>
   <div id="rightBtn" class="text-button" onclick="nextVideo()">next</div>
 
   <script>
-    const videos = [
-      { id: "Auss7fLMiIE" },
-      { id: "FGZndqSzgbg" },
-      { id: "x_FQXDfmamw" }
-    ];
+    // Load YouTube IFrame Player API asynchronously
+    let tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
 
+    const videos = [
+      "Auss7fLMiIE",
+      "FGZndqSzgbg",
+      "x_FQXDfmamw"
+    ];
     let index = 0;
+    let player;
+
+    // Called by YouTube API when ready
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        videoId: videos[index],
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          modestbranding: 1,
+          loop: 1,
+          mute: 1,
+          rel: 0,
+          playlist: videos[index],
+          showinfo: 0,
+          iv_load_policy: 3,
+          disablekb: 1,
+          fs: 0
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      player.setVolume(20); // Sätt volym till 20% (lägre än 100%)
+      player.playVideo();
+      // Försök sätta kvalité (API kan ignorera)
+      player.setPlaybackQuality('hd720');
+    }
+
+    function onPlayerStateChange(event) {
+      // Om videon slutar (state 0) starta om (loop)
+      if (event.data === YT.PlayerState.ENDED) {
+        player.playVideo();
+      }
+    }
 
     function updateVideo() {
-      const videoId = videos[index].id;
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&controls=0`;
-      const frame = document.getElementById("videoFrame");
-      frame.src = embedUrl;
+      player.loadVideoById(videos[index]);
+      player.setPlaybackQuality('hd720');
+      player.setVolume(20);
+      player.playVideo();
 
       const left = document.getElementById("leftBtn");
       const right = document.getElementById("rightBtn");
@@ -106,5 +130,6 @@
       updateVideo();
     }
   </script>
+
 </body>
 </html>
