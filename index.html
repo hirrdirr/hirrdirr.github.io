@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>GIF med text</title>
+  <title>GIFs</title>
   <style>
     html, body {
       margin: 0;
@@ -26,20 +26,64 @@
     }
     .text {
       position: absolute;
-      top: 189px;          /* ca 5 cm */
+      top: 189px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 4vw;
       font-weight: bold;
       text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
       user-select: none;
+      cursor: pointer;
+    }
+    .pulse {
+      animation: pulse 1.5s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%   { opacity: 1; transform: translateX(-50%) scale(1); }
+      50%  { opacity: 0.7; transform: translateX(-50%) scale(1.05); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1); }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzZwdGo0YXBpMWswd2ZnMjMwNGQ1NjNpbGN3a3E5cGV2NWZwZnk5ZSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/NkorVjqWfFRPxyB4fn/giphy.gif" alt="Fullscreen GIF" />
-    <div class="text">well hello there</div>
+    <img id="mainGif" src="https://media.giphy.com/media/NkorVjqWfFRPxyB4fn/giphy.gif" alt="Fullscreen GIF" />
+    <div class="text" id="mainText" onclick="swapGifAndText()">well hello there</div>
   </div>
+
+  <script>
+    const gifList = [
+      "https://media.giphy.com/media/NkorVjqWfFRPxyB4fn/giphy.gif",
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzNpNnJvZHN2a2Mwd2l1bG4zeGUzOWFlbXNqMHFzcnBmdmhpcWJoMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/139eZBmH1HTyRa/giphy.gif"
+    ];
+
+    const textList = [
+      "well hello there",
+      "do not question the pig zombie"
+    ];
+
+    let currentIndex = 0;
+
+    function swapGifAndText() {
+      currentIndex = (currentIndex + 1) % gifList.length;
+
+      const gifEl = document.getElementById("mainGif");
+      const textEl = document.getElementById("mainText");
+
+      gifEl.src = gifList[currentIndex];
+      textEl.innerText = textList[currentIndex];
+
+      // Återställ animation genom att ta bort och lägga till klassen
+      textEl.classList.remove("pulse");
+      void textEl.offsetWidth; // Tvinga omstart av animationen
+      textEl.classList.add("pulse");
+
+      // Ta bort animationen efter den kört klart (1.5s)
+      setTimeout(() => {
+        textEl.classList.remove("pulse");
+      }, 1500);
+    }
+  </script>
 </body>
 </html>
