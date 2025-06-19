@@ -41,38 +41,35 @@
 
   <div id="player"></div>
 
-  <div id="leftBtn" class="text-button" onclick="prevVideo()"><</div>
-  <div id="rightBtn" class="text-button" onclick="nextVideo()">></div>
+  <div id="leftBtn" class="text-button" onclick="prevVideo()">back</div>
+  <div id="rightBtn" class="text-button" onclick="nextVideo()">next</div>
 
   <script>
-    // Ladda YouTube IFrame API asynkront
-    let tag = document.createElement('script');
+    var tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
-    const videos = [
-      "Auss7fLMiIE",
-      "FGZndqSzgbg",
-      "x_FQXDfmamw"
-    ];
-    let index = 0;
-    let player;
+    var player;
+    var videos = ["Auss7fLMiIE", "FGZndqSzgbg", "x_FQXDfmamw"];
+    var index = 0;
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
         videoId: videos[index],
         playerVars: {
           autoplay: 1,
-          controls: 1,           // visa kontroller
+          controls: 1,
           modestbranding: 1,
           loop: 1,
           rel: 0,
-          playlist: videos[index],
+          playlist: videos.join(','), // alla videos för loop
           showinfo: 0,
           iv_load_policy: 3,
           disablekb: 1,
-          fs: 0
-          mute: 1 
+          fs: 0,
+          mute: 1
         },
         events: {
           'onReady': onPlayerReady,
@@ -82,20 +79,19 @@
     }
 
     function onPlayerReady(event) {
-      player.setVolume(10);  // låg volym direkt
-      player.playVideo();
-      player.setPlaybackQuality('hd720'); // försök sätta 720p
+      event.target.setVolume(10);
+      event.target.playVideo();
     }
 
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.ENDED) {
-        player.playVideo();  // loop
+        player.playVideo();
       }
     }
 
     function updateVideo() {
       player.loadVideoById(videos[index]);
-      player.setVolume(20);
+      player.setVolume(10);
       player.setPlaybackQuality('hd720');
       player.playVideo();
 
@@ -105,7 +101,7 @@
       left.classList.remove("pulse");
       right.classList.remove("pulse");
 
-      void left.offsetWidth;
+      void left.offsetWidth;  // restart animation
       void right.offsetWidth;
 
       left.classList.add("pulse");
