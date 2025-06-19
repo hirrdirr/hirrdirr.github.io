@@ -60,34 +60,31 @@
 
     // Called by YouTube API when ready
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        videoId: videos[index],
-        playerVars: {
-          autoplay: 1,
-          controls: 1,
-          modestbranding: 1,
-          loop: 1,
-          mute: 1,
-          rel: 0,
-          playlist: videos[index],
-          showinfo: 0,
-          iv_load_policy: 3,
-          disablekb: 1,
-          fs: 0
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
-      });
-    }
+player = new YT.Player('player', {
+  videoId: videos[index],
+  playerVars: {
+    autoplay: 1,
+    controls: 1,         // visa kontroller
+    modestbranding: 1,
+    loop: 1,
+    rel: 0,
+    playlist: videos[index],
+    showinfo: 0,
+    iv_load_policy: 3,
+    disablekb: 1,
+    fs: 0
+  },
+  events: {
+    'onReady': onPlayerReady,
+    'onStateChange': onPlayerStateChange
+  }
+});
 
-    function onPlayerReady(event) {
-      player.setVolume(20); // Sätt volym till 20% (lägre än 100%)
-      player.playVideo();
-      // Försök sätta kvalité (API kan ignorera)
-      player.setPlaybackQuality('hd720');
-    }
+function onPlayerReady(event) {
+  player.setVolume(20);   // låg volym direkt
+  player.playVideo();
+}
+
 
     function onPlayerStateChange(event) {
       // Om videon slutar (state 0) starta om (loop)
