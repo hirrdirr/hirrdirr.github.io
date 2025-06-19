@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Video Loop</title>
+  <title>YouTube Loop</title>
   <style>
     html, body {
       margin: 0;
@@ -53,40 +53,44 @@
   </style>
 </head>
 <body>
-  <!-- Första videon visas direkt -->
-  <iframe id="videoFrame" src="https://drive.google.com/uc?export=preview&id=1XSn6S7sfaooFNr4JOb5BuWPj4xwIuc95" allow="autoplay"></iframe>
+  <iframe
+    id="videoFrame"
+    src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&loop=1&playlist=Auss7fLMiIE"
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+  </iframe>
 
-  <!-- Knappar -->
   <div id="leftBtn" class="text-button" onclick="prevVideo()">back</div>
   <div id="rightBtn" class="text-button" onclick="nextVideo()">next</div>
 
   <script>
     const videos = [
       {
-        url: "https://drive.google.com/uc?export=preview&id=1XSn6S7sfaooFNr4JOb5BuWPj4xwIuc95"
+        id: "Auss7fLMiIE"
       },
       {
-        url: "https://drive.google.com/uc?export=preview&id=1daefYeXQ0L_OZoV2QryUhIFrTbrtGiIr"
+        id: "FGZndqSzgbg"
       },
       {
-        url: "https://drive.google.com/uc?export=preview&id=1yunJpeXM-JPWFCbZHnV8xIOll5acM7jr"
+        id: "x_FQXDfmamw"
       }
     ];
 
     let index = 0;
 
     function updateVideo() {
+      const videoId = videos[index].id;
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
       const frame = document.getElementById("videoFrame");
-      frame.src = videos[index].url;
+      frame.src = embedUrl;
 
-      // Trigga pulsanimation
       const left = document.getElementById("leftBtn");
       const right = document.getElementById("rightBtn");
 
       left.classList.remove("pulse");
       right.classList.remove("pulse");
 
-      void left.offsetWidth; // tvinga omritning
+      void left.offsetWidth;
       void right.offsetWidth;
 
       left.classList.add("pulse");
