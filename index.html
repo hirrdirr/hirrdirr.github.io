@@ -2,22 +2,88 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Hirrdirr</title>
+  <title>Min Coola Sida</title>
   <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; background: black; overflow: hidden;
+    :root {
+      --dominant: #E5E4E2;     /* Platinum */
+      --secondary: #C0C0C8;    /* French gray */
+      --accent: #2A3439;       /* Gunmetal */
     }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: black;
+    }
+
+    /* Layout */
+    .topbar {
+      background: var(--dominant);
+      color: var(--accent);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 20;
+    }
+
+    .topbar h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .menu {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .menu a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.3s;
+    }
+
+    .menu a:hover {
+      opacity: 0.6;
+    }
+
+    .bottombar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--secondary);
+      color: var(--accent);
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      z-index: 20;
+    }
+
+    /* Video player */
     #player {
       position: absolute;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 60px; /* under topbar */
+      bottom: 40px; /* ovan bottombar */
+      left: 0;
+      right: 0;
+      z-index: 1;
     }
+
+    /* Navigeringsknappar */
     .text-button {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      color: white;
+      color: var(--dominant);
       font-size: 4vw;
       font-weight: bold;
       text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
@@ -25,11 +91,14 @@
       user-select: none;
       z-index: 10;
     }
+
     #leftBtn { left: 20px; }
     #rightBtn { right: 20px; }
+
     .pulse {
       animation: pulse 1.5s ease-in-out;
     }
+
     @keyframes pulse {
       0%   { opacity: 1; transform: scale(1); }
       50%  { opacity: 0.7; transform: scale(1.05); }
@@ -39,10 +108,23 @@
 </head>
 <body>
 
+  <div class="topbar">
+    <h1>Min Coola Hemsida</h1>
+    <div class="menu">
+      <a href="#">Hem</a>
+      <a href="#">Om</a>
+      <a href="#">Kontakt</a>
+    </div>
+  </div>
+
   <div id="player"></div>
 
   <div id="leftBtn" class="text-button" onclick="prevVideo()">←</div>
   <div id="rightBtn" class="text-button" onclick="nextVideo()">→</div>
+
+  <div class="bottombar">
+    &copy; 2025 Min Hemsida. All rights reserved.
+  </div>
 
   <script>
     var tag = document.createElement('script');
@@ -64,7 +146,7 @@
           modestbranding: 1,
           loop: 1,
           rel: 0,
-          playlist: videos.join(','), // alla videos för loop
+          playlist: videos.join(','),
           showinfo: 0,
           iv_load_policy: 3,
           disablekb: 1,
@@ -101,7 +183,7 @@
       left.classList.remove("pulse");
       right.classList.remove("pulse");
 
-      void left.offsetWidth;  // restart animation
+      void left.offsetWidth;
       void right.offsetWidth;
 
       left.classList.add("pulse");
