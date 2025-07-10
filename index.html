@@ -13,7 +13,6 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
       font-family: Arial, sans-serif;
       background: var(--dominant);
     }
@@ -62,65 +61,28 @@
     }
 
     .bottombar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
       background: var(--secondary);
       color: var(--accent);
       text-align: center;
       padding: 0.7rem;
       font-size: 0.9rem;
       z-index: 10;
+      position: relative;
+      margin-top: 3rem;
     }
 
-    .player-wrapper {
-      margin-top: 80px;
-      margin-bottom: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-      box-sizing: border-box;
-    }
-
-    .player-inner {
-      width: 100%;
+    .video-section {
       max-width: 960px;
-      aspect-ratio: 16 / 9;
+      margin: 120px auto 60px auto;
       background: black;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      aspect-ratio: 16 / 9;
     }
 
-    #player {
+    iframe {
       width: 100%;
       height: 100%;
-    }
-
-    .text-button {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--dominant);
-      font-size: 4vw;
-      font-weight: bold;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
-      cursor: pointer;
-      user-select: none;
-      z-index: 15;
-    }
-
-    #leftBtn { left: 20px; }
-    #rightBtn { right: 20px; }
-
-    .pulse {
-      animation: pulse 1.5s ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%   { opacity: 1; transform: scale(1); }
-      50%  { opacity: 0.7; transform: scale(1.05); }
-      100% { opacity: 1; transform: scale(1); }
+      border: none;
     }
   </style>
 </head>
@@ -135,97 +97,23 @@
     </div>
   </div>
 
-  <div class="player-wrapper">
-    <div class="player-inner">
-      <div id="player"></div>
-    </div>
+  <div class="video-section">
+    <iframe src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-  <div id="leftBtn" class="text-button" onclick="prevVideo()">←</div>
-  <div id="rightBtn" class="text-button" onclick="nextVideo()">→</div>
+  <div class="video-section">
+    <iframe src="https://www.youtube.com/embed/FGZndqSzgbg?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+
+  <div class="video-section">
+    <iframe src="https://www.youtube.com/embed/x_FQXDfmamw?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
   <div class="bottombar">
     &copy; 2025 Hirrdirr. All rights reserved.
   </div>
 
   <script>
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-
-    let player;
-    const videos = ["Auss7fLMiIE", "FGZndqSzgbg", "x_FQXDfmamw"];
-    let index = 0;
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        videoId: videos[index],
-        playerVars: {
-          autoplay: 1,
-          controls: 1,
-          modestbranding: 1,
-          loop: 1,
-          rel: 0,
-          playlist: videos.join(','),
-          showinfo: 0,
-          iv_load_policy: 3,
-          disablekb: 1,
-          fs: 0,
-          mute: 1
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
-      });
-    }
-
-    function onPlayerReady(event) {
-      event.target.setVolume(10);
-      event.target.playVideo();
-    }
-
-    function onPlayerStateChange(event) {
-      if (event.data === YT.PlayerState.ENDED) {
-        player.playVideo();
-      }
-    }
-
-    function updateVideo() {
-      player.loadVideoById(videos[index]);
-      player.setVolume(10);
-      player.setPlaybackQuality('hd720');
-      player.playVideo();
-
-      const left = document.getElementById("leftBtn");
-      const right = document.getElementById("rightBtn");
-
-      left.classList.remove("pulse");
-      right.classList.remove("pulse");
-
-      void left.offsetWidth;
-      void right.offsetWidth;
-
-      left.classList.add("pulse");
-      right.classList.add("pulse");
-
-      setTimeout(() => {
-        left.classList.remove("pulse");
-        right.classList.remove("pulse");
-      }, 1500);
-    }
-
-    function nextVideo() {
-      index = (index + 1) % videos.length;
-      updateVideo();
-    }
-
-    function prevVideo() {
-      index = (index - 1 + videos.length) % videos.length;
-      updateVideo();
-    }
-
-    // Scroll-funktion för att tona ut header
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
 
