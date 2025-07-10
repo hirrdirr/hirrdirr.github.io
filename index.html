@@ -11,11 +11,19 @@
       --accent: #2D3142;
     }
 
+    body.dark-mode {
+      --dominant: #2D3142;
+      --secondary: #3E4252;
+      --accent: #D8D5DB;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
       background: var(--dominant);
+      color: var(--accent);
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .topbar {
@@ -32,7 +40,7 @@
       height: 60px;
       z-index: 1000;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, background 0.3s ease;
     }
 
     .topbar.hidden {
@@ -43,6 +51,20 @@
     .topbar h1 {
       font-size: 1.5rem;
       margin: 0;
+    }
+
+    .topbar .right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .dark-toggle {
+      font-size: 1.3rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--accent);
     }
 
     .hamburger {
@@ -110,6 +132,7 @@
       z-index: 10;
       position: relative;
       margin-top: 3rem;
+      transition: background 0.3s ease;
     }
 
     .video-wrapper {
@@ -149,10 +172,13 @@
   <div class="topbar" id="topbar">
     <h1>Hirrdirr</h1>
 
-    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-      <div></div>
-      <div></div>
-      <div></div>
+    <div class="right">
+      <button class="dark-toggle" onclick="toggleDarkMode()" id="darkBtn">🌙</button>
+      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
     </div>
 
     <div class="menu" id="menu">
@@ -208,6 +234,12 @@
         hamburger.classList.remove("active");
       }
     });
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      const btn = document.getElementById("darkBtn");
+      btn.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+    }
 
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
