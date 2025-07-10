@@ -5,9 +5,9 @@
   <title>Hirrdirr</title>
   <style>
     :root {
-      --dominant: #D8D5DB;     /* Platinum */
-      --secondary: #ADACB5;    /* French gray */
-      --accent: #2D3142;       /* Gunmetal */
+      --dominant: #D8D5DB;
+      --secondary: #ADACB5;
+      --accent: #2D3142;
     }
 
     html, body {
@@ -85,8 +85,16 @@
 
     .video-section {
       background: black;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      transform: scale(1);
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       height: 600px;
+    }
+
+    .video-section.active {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+      z-index: 1;
     }
 
     #player1, #player2, #player3 {
@@ -151,9 +159,9 @@
     document.head.appendChild(tag);
 
     const videoMap = [
-      { id: 'player1', videoId: 'Auss7fLMiIE' }, // Video 1
-      { id: 'player2', videoId: 'x_FQXDfmamw' }, // Video 2
-      { id: 'player3', videoId: 'FGZndqSzgbg' }  // Video 3
+      { id: 'player1', videoId: 'Auss7fLMiIE', sectionId: 'video1' },
+      { id: 'player2', videoId: 'x_FQXDfmamw', sectionId: 'video2' },
+      { id: 'player3', videoId: 'FGZndqSzgbg', sectionId: 'video3' }
     ];
 
     const players = {};
@@ -164,7 +172,7 @@
         players[id] = new YT.Player(id, {
           videoId,
           playerVars: {
-            autoplay: index === 0 ? 1 : 0, // Only first video autoplay
+            autoplay: index === 0 ? 1 : 0,
             mute: 1,
             controls: 1,
             modestbranding: 1,
@@ -174,7 +182,6 @@
           events: {
             onReady: () => {
               readyPlayers.add(id);
-              if (index === 0) players[id].playVideo(); // First video autoplay
               if (readyPlayers.size === videoMap.length) {
                 setupScrollControl();
               }
@@ -187,17 +194,22 @@
     function setupScrollControl() {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          const id = entry.target.querySelector('div').id;
-          const player = players[id];
-          if (!player) return;
+          const section = entry.target;
+          const id = section.querySelector('div').id;
 
           if (entry.isIntersecting) {
-            player.playVideo();
+            // Aktivera aktuell
+            Object.keys(players).forEach(key => {
+              if (key !== id) players[key].pauseVideo();
+            });
+            players[id].playVideo();
+            section.classList.add("active");
           } else {
-            player.pauseVideo();
+            players[id].pauseVideo();
+            section.classList.remove("active");
           }
         });
-      }, { threshold: 0.5 });
+      }, { threshold: 0.6 });
 
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
