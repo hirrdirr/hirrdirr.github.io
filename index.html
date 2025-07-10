@@ -24,7 +24,6 @@
       background: var(--dominant);
       color: var(--accent);
       transition: background 0.3s ease, color 0.3s ease;
-      height: 100%;
     }
 
     .topbar {
@@ -52,6 +51,28 @@
     .topbar h1 {
       font-size: 1.5rem;
       margin: 0;
+    }
+
+    #topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    #darkBtn {
+      padding: 0.5rem 0.7rem;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      background-color: var(--secondary);
+      color: var(--accent);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #darkBtn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
 
     .hamburger {
@@ -152,30 +173,19 @@
       width: 100%;
       height: 100%;
     }
-
-    #darkBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1002;
-      padding: 0.5rem 0.7rem;
-      border: none;
-      border-radius: 50%;
-      font-size: 1.3rem;
-      background-color: var(--secondary);
-      color: var(--accent);
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
 
   <div class="topbar" id="topbar">
     <h1>Hirrdirr</h1>
-    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-      <div></div>
-      <div></div>
-      <div></div>
+    <div id="topbar-controls">
+      <button id="darkBtn" onclick="toggleDarkMode()">🌙</button>
+      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
     </div>
     <div class="menu" id="menu">
       <a href="#video1" onclick="closeMenu()">Hem</a>
@@ -183,8 +193,6 @@
       <a href="#video3" onclick="closeMenu()">Kontakt</a>
     </div>
   </div>
-
-  <button id="darkBtn" onclick="toggleDarkMode()">🌙</button>
 
   <div class="video-wrapper">
     <h2>Video 1</h2>
@@ -212,7 +220,6 @@
   </div>
 
   <script>
-    // Hamburger
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
       document.getElementById("hamburger").classList.toggle("active");
@@ -231,7 +238,6 @@
       }
     });
 
-    // Dark mode toggle + save to localStorage
     function toggleDarkMode() {
       const body = document.body;
       const btn = document.getElementById("darkBtn");
@@ -248,7 +254,6 @@
       }
     };
 
-    // Scroll-hide topbar
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
     window.addEventListener('scroll', () => {
@@ -257,7 +262,6 @@
       lastScrollTop = st <= 0 ? 0 : st;
     });
 
-    // YouTube Embed
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -322,28 +326,6 @@
 
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
-
-    // Draggable dark mode button
-    const darkBtn = document.getElementById("darkBtn");
-    let isDragging = false, offsetX = 0, offsetY = 0;
-
-    darkBtn.addEventListener("mousedown", function(e) {
-      isDragging = true;
-      offsetX = e.clientX - darkBtn.offsetLeft;
-      offsetY = e.clientY - darkBtn.offsetTop;
-      darkBtn.style.position = "absolute";
-    });
-
-    document.addEventListener("mousemove", function(e) {
-      if (isDragging) {
-        darkBtn.style.left = `${e.clientX - offsetX}px`;
-        darkBtn.style.top = `${e.clientY - offsetY}px`;
-      }
-    });
-
-    document.addEventListener("mouseup", function() {
-      isDragging = false;
-    });
   </script>
 </body>
 </html>
