@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Min Coola Hemsida</title>
+  <title>Hirrdirr</title>
   <style>
     :root {
       --dominant: #D8D5DB;     /* Platinum */
@@ -16,10 +16,8 @@
       height: 100%;
       font-family: Arial, sans-serif;
       background: black;
-      color: var(--accent);
     }
 
-    /* Topbar */
     .topbar {
       background: var(--dominant);
       color: var(--accent);
@@ -32,8 +30,7 @@
       left: 0;
       right: 0;
       height: 60px;
-      z-index: 20;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 10;
     }
 
     .topbar h1 {
@@ -57,7 +54,6 @@
       opacity: 0.6;
     }
 
-    /* Bottombar */
     .bottombar {
       position: fixed;
       bottom: 0;
@@ -66,20 +62,18 @@
       background: var(--secondary);
       color: var(--accent);
       text-align: center;
-      padding: 0.5rem;
+      padding: 0.7rem;
       font-size: 0.9rem;
-      z-index: 20;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
+      z-index: 10;
     }
 
-    /* Video container */
     .player-wrapper {
-      margin-top: 80px; /* nedanför topbar */
-      margin-bottom: 60px; /* ovanför bottombar */
+      margin-top: 80px;   /* lämna plats för topbar */
+      margin-bottom: 60px; /* lämna plats för footer */
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 2rem 5vw;
+      padding: 2rem;
       box-sizing: border-box;
     }
 
@@ -88,6 +82,7 @@
       max-width: 960px;
       aspect-ratio: 16 / 9;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      background: black;
     }
 
     #player {
@@ -95,7 +90,6 @@
       height: 100%;
     }
 
-    /* Navigeringsknappar */
     .text-button {
       position: fixed;
       top: 50%;
@@ -106,7 +100,7 @@
       text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
       cursor: pointer;
       user-select: none;
-      z-index: 10;
+      z-index: 15;
     }
 
     #leftBtn { left: 20px; }
@@ -148,13 +142,13 @@
   </div>
 
   <script>
-    var tag = document.createElement('script');
+    const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
-    var player;
-    var videos = ["Auss7fLMiIE", "FGZndqSzgbg", "x_FQXDfmamw"];
-    var index = 0;
+    let player;
+    const videos = ["Auss7fLMiIE", "FGZndqSzgbg", "x_FQXDfmamw"];
+    let index = 0;
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
