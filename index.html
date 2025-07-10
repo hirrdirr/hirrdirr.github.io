@@ -45,14 +45,38 @@
       margin: 0;
     }
 
-    .menu {
-      display: none;
+    .hamburger {
+      cursor: pointer;
+      display: flex;
       flex-direction: column;
+      gap: 5px;
+      z-index: 1001;
+    }
+
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: var(--accent);
+      transition: 0.3s;
+    }
+
+    .menu {
       position: absolute;
       top: 60px;
       right: 20px;
       background: var(--dominant);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      flex-direction: column;
+      display: none;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .menu.show {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .menu a {
@@ -62,23 +86,6 @@
       display: block;
       font-weight: bold;
       border-bottom: 1px solid var(--secondary);
-    }
-
-    .hamburger {
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .hamburger div {
-      width: 25px;
-      height: 3px;
-      background: var(--accent);
-    }
-
-    .menu.show {
-      display: flex;
     }
 
     .bottombar {
@@ -124,15 +131,18 @@
     }
 
     @media(min-width: 768px) {
-      .menu {
-        display: flex !important;
-        position: static;
-        flex-direction: row;
-        box-shadow: none;
-      }
-
       .hamburger {
         display: none;
+      }
+
+      .menu {
+        position: static;
+        display: flex !important;
+        flex-direction: row;
+        transform: none !important;
+        opacity: 1 !important;
+        background: transparent;
+        box-shadow: none;
       }
 
       .menu a {
@@ -154,9 +164,9 @@
     </div>
 
     <div class="menu" id="menu">
-      <a href="#" onclick="closeMenu()">Hem</a>
-      <a href="#" onclick="closeMenu()">Om</a>
-      <a href="#" onclick="closeMenu()">Kontakt</a>
+      <a href="#video1" onclick="closeMenu()">Hem</a>
+      <a href="#video2" onclick="closeMenu()">Om</a>
+      <a href="#video3" onclick="closeMenu()">Kontakt</a>
     </div>
   </div>
 
@@ -186,7 +196,7 @@
   </div>
 
   <script>
-    // Toggle meny
+    // Menyfunktioner
     function toggleMenu() {
       const menu = document.getElementById("menu");
       menu.classList.toggle("show");
@@ -195,6 +205,14 @@
     function closeMenu() {
       document.getElementById("menu").classList.remove("show");
     }
+
+    window.addEventListener("click", function (e) {
+      const menu = document.getElementById("menu");
+      const hamburger = document.querySelector(".hamburger");
+      if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+        menu.classList.remove("show");
+      }
+    });
 
     // Scrollande header
     let lastScrollTop = 0;
