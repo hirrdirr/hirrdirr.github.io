@@ -24,6 +24,7 @@
       background: var(--dominant);
       color: var(--accent);
       transition: background 0.3s ease, color 0.3s ease;
+      height: 100%;
     }
 
     .topbar {
@@ -161,10 +162,9 @@
       border: none;
       border-radius: 50%;
       font-size: 1.3rem;
-      cursor: move;
       background-color: var(--secondary);
       color: var(--accent);
-      transition: background 0.3s ease;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -212,11 +212,10 @@
   </div>
 
   <script>
+    // Hamburger
     function toggleMenu() {
-      const menu = document.getElementById("menu");
-      const hamburger = document.getElementById("hamburger");
-      menu.classList.toggle("show");
-      hamburger.classList.toggle("active");
+      document.getElementById("menu").classList.toggle("show");
+      document.getElementById("hamburger").classList.toggle("active");
     }
 
     function closeMenu() {
@@ -228,11 +227,11 @@
       const menu = document.getElementById("menu");
       const hamburger = document.getElementById("hamburger");
       if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
-        menu.classList.remove("show");
-        hamburger.classList.remove("active");
+        closeMenu();
       }
     });
 
+    // Dark mode toggle + save to localStorage
     function toggleDarkMode() {
       const body = document.body;
       const btn = document.getElementById("darkBtn");
@@ -242,7 +241,6 @@
       btn.textContent = isDark ? "☀️" : "🌙";
     }
 
-    // Apply saved mode on load
     window.onload = () => {
       if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
@@ -259,7 +257,7 @@
       lastScrollTop = st <= 0 ? 0 : st;
     });
 
-    // YouTube players
+    // YouTube Embed
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -325,25 +323,27 @@
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
 
-    // Make dark button draggable
+    // Draggable dark mode button
     const darkBtn = document.getElementById("darkBtn");
     let isDragging = false, offsetX = 0, offsetY = 0;
 
-    darkBtn.addEventListener("mousedown", (e) => {
+    darkBtn.addEventListener("mousedown", function(e) {
       isDragging = true;
-      offsetX = e.offsetX;
-      offsetY = e.offsetY;
+      offsetX = e.clientX - darkBtn.offsetLeft;
+      offsetY = e.clientY - darkBtn.offsetTop;
+      darkBtn.style.position = "absolute";
     });
 
-    document.addEventListener("mousemove", (e) => {
+    document.addEventListener("mousemove", function(e) {
       if (isDragging) {
-        darkBtn.style.left = `${e.pageX - offsetX}px`;
-        darkBtn.style.top = `${e.pageY - offsetY}px`;
-        darkBtn.style.position = "absolute";
+        darkBtn.style.left = `${e.clientX - offsetX}px`;
+        darkBtn.style.top = `${e.clientY - offsetY}px`;
       }
     });
 
-    document.addEventListener("mouseup", () => isDragging = false);
+    document.addEventListener("mouseup", function() {
+      isDragging = false;
+    });
   </script>
 </body>
 </html>
