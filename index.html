@@ -140,7 +140,7 @@
   </div>
 
   <script>
-    // Scroll-funktion för header
+    // Scrollande header
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
     window.addEventListener('scroll', () => {
@@ -195,18 +195,24 @@
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const section = entry.target;
-          const id = section.querySelector('div').id;
+          const playerDiv = section.querySelector('div');
+          const playerId = playerDiv.id;
 
           if (entry.isIntersecting) {
-            // Aktivera aktuell
-            Object.keys(players).forEach(key => {
-              if (key !== id) players[key].pauseVideo();
-            });
-            players[id].playVideo();
-            section.classList.add("active");
+            // Stop all other videos
+            for (let id in players) {
+              if (id !== playerId) {
+                players[id].pauseVideo();
+                const secId = videoMap.find(v => v.id === id)?.sectionId;
+                if (secId) document.getElementById(secId).classList.remove('active');
+              }
+            }
+
+            players[playerId].playVideo();
+            section.classList.add('active');
           } else {
-            players[id].pauseVideo();
-            section.classList.remove("active");
+            players[playerId].pauseVideo();
+            section.classList.remove('active');
           }
         });
       }, { threshold: 0.6 });
