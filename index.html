@@ -51,13 +51,26 @@
       flex-direction: column;
       gap: 5px;
       z-index: 1001;
+      transition: transform 0.3s ease;
     }
 
     .hamburger div {
       width: 25px;
       height: 3px;
       background: var(--accent);
-      transition: 0.3s;
+      transition: all 0.3s ease;
+    }
+
+    .hamburger.active div:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger.active div:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active div:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
     }
 
     .menu {
@@ -129,27 +142,6 @@
       width: 100%;
       height: 100%;
     }
-
-    @media(min-width: 768px) {
-      .hamburger {
-        display: none;
-      }
-
-      .menu {
-        position: static;
-        display: flex !important;
-        flex-direction: row;
-        transform: none !important;
-        opacity: 1 !important;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .menu a {
-        border: none;
-        padding: 0 1rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -157,7 +149,7 @@
   <div class="topbar" id="topbar">
     <h1>Hirrdirr</h1>
 
-    <div class="hamburger" onclick="toggleMenu()">
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
       <div></div>
       <div></div>
       <div></div>
@@ -196,25 +188,27 @@
   </div>
 
   <script>
-    // Menyfunktioner
     function toggleMenu() {
       const menu = document.getElementById("menu");
+      const hamburger = document.getElementById("hamburger");
       menu.classList.toggle("show");
+      hamburger.classList.toggle("active");
     }
 
     function closeMenu() {
       document.getElementById("menu").classList.remove("show");
+      document.getElementById("hamburger").classList.remove("active");
     }
 
     window.addEventListener("click", function (e) {
       const menu = document.getElementById("menu");
-      const hamburger = document.querySelector(".hamburger");
+      const hamburger = document.getElementById("hamburger");
       if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
         menu.classList.remove("show");
+        hamburger.classList.remove("active");
       }
     });
 
-    // Scrollande header
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
     window.addEventListener('scroll', () => {
@@ -227,7 +221,6 @@
       lastScrollTop = st <= 0 ? 0 : st;
     });
 
-    // YouTube Player API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -279,7 +272,6 @@
           const playerId = playerDiv.id;
 
           if (entry.isIntersecting) {
-            // Stop others
             Object.keys(players).forEach(id => {
               if (id !== playerId) {
                 players[id].pauseVideo();
