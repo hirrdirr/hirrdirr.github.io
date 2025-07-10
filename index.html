@@ -31,7 +31,13 @@
       right: 0;
       height: 60px;
       z-index: 10;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* ← Skuggan */
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: opacity 0.3s ease;
+    }
+
+    .topbar.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .topbar h1 {
@@ -120,7 +126,7 @@
 </head>
 <body>
 
-  <div class="topbar">
+  <div class="topbar" id="topbar">
     <h1>Hirrdirr</h1>
     <div class="menu">
       <a href="#">Hem</a>
@@ -218,6 +224,20 @@
       index = (index - 1 + videos.length) % videos.length;
       updateVideo();
     }
+
+    // Scroll-funktion för att tona ut header
+    let lastScrollTop = 0;
+    const topbar = document.getElementById('topbar');
+
+    window.addEventListener('scroll', () => {
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      if (st > lastScrollTop && st > 100) {
+        topbar.classList.add('hidden');
+      } else {
+        topbar.classList.remove('hidden');
+      }
+      lastScrollTop = st <= 0 ? 0 : st;
+    });
   </script>
 
 </body>
