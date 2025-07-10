@@ -53,20 +53,6 @@
       margin: 0;
     }
 
-    .topbar .right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .dark-toggle {
-      font-size: 1.3rem;
-      cursor: pointer;
-      background: none;
-      border: none;
-      color: var(--accent);
-    }
-
     .hamburger {
       cursor: pointer;
       display: flex;
@@ -165,28 +151,40 @@
       width: 100%;
       height: 100%;
     }
+
+    #darkBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1002;
+      padding: 0.5rem 0.7rem;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      cursor: move;
+      background-color: var(--secondary);
+      color: var(--accent);
+      transition: background 0.3s ease;
+    }
   </style>
 </head>
 <body>
 
   <div class="topbar" id="topbar">
     <h1>Hirrdirr</h1>
-
-    <div class="right">
-      <button class="dark-toggle" onclick="toggleDarkMode()" id="darkBtn">🌙</button>
-      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
-
     <div class="menu" id="menu">
       <a href="#video1" onclick="closeMenu()">Hem</a>
       <a href="#video2" onclick="closeMenu()">Om</a>
       <a href="#video3" onclick="closeMenu()">Kontakt</a>
     </div>
   </div>
+
+  <button id="darkBtn" onclick="toggleDarkMode()">🌙</button>
 
   <div class="video-wrapper">
     <h2>Video 1</h2>
@@ -236,23 +234,32 @@
     });
 
     function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
+      const body = document.body;
       const btn = document.getElementById("darkBtn");
-      btn.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+      body.classList.toggle("dark-mode");
+      const isDark = body.classList.contains("dark-mode");
+      localStorage.setItem("darkMode", isDark);
+      btn.textContent = isDark ? "☀️" : "🌙";
     }
 
+    // Apply saved mode on load
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("darkBtn").textContent = "☀️";
+      }
+    };
+
+    // Scroll-hide topbar
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
     window.addEventListener('scroll', () => {
       const st = window.pageYOffset || document.documentElement.scrollTop;
-      if (st > lastScrollTop && st > 100) {
-        topbar.classList.add('hidden');
-      } else {
-        topbar.classList.remove('hidden');
-      }
+      topbar.classList.toggle('hidden', st > lastScrollTop && st > 100);
       lastScrollTop = st <= 0 ? 0 : st;
     });
 
+    // YouTube players
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -282,18 +289,13 @@
             onReady: () => {
               readyFlags[id] = true;
               if (Object.keys(readyFlags).length === videoMap.length) {
-                startFirstVideo();
+                players['player1'].playVideo();
                 setupScrollControl();
               }
             }
           }
         });
       });
-    }
-
-    function startFirstVideo() {
-      players['player1'].playVideo();
-      document.getElementById('video1').classList.add('active');
     }
 
     function setupScrollControl() {
@@ -322,7 +324,26 @@
 
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
-  </script>
 
+    // Make dark button draggable
+    const darkBtn = document.getElementById("darkBtn");
+    let isDragging = false, offsetX = 0, offsetY = 0;
+
+    darkBtn.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        darkBtn.style.left = `${e.pageX - offsetX}px`;
+        darkBtn.style.top = `${e.pageY - offsetY}px`;
+        darkBtn.style.position = "absolute";
+      }
+    });
+
+    document.addEventListener("mouseup", () => isDragging = false);
+  </script>
 </body>
 </html>
