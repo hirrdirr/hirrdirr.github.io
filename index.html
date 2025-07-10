@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Hirrdirr</title>
+  <title>Min Coola Hemsida</title>
   <style>
     :root {
       --dominant: #D8D5DB;     /* Platinum */
@@ -18,7 +18,6 @@
       background: black;
     }
 
-    /* Layout */
     .topbar {
       background: var(--dominant);
       color: var(--accent);
@@ -68,19 +67,34 @@
       z-index: 20;
     }
 
-    /* Video player */
-    #player {
-      position: absolute;
-      top: 60px; /* under topbar */
-      bottom: 40px; /* ovan bottombar */
-      left: 0;
-      right: 0;
+    .player-wrapper {
+      position: relative;
+      top: 60px;
+      bottom: 40px;
+      height: calc(100vh - 100px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: black;
+      padding: 0 5vw;
+      box-sizing: border-box;
       z-index: 1;
     }
 
-    /* Navigeringsknappar */
+    .player-inner {
+      width: 100%;
+      max-width: 1000px;
+      aspect-ratio: 16 / 9;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+
     .text-button {
-      position: absolute;
+      position: fixed;
       top: 50%;
       transform: translateY(-50%);
       color: var(--dominant);
@@ -109,7 +123,7 @@
 <body>
 
   <div class="topbar">
-    <h1>Hirrdirr</h1>
+    <h1>Min Coola Hemsida</h1>
     <div class="menu">
       <a href="#">Hem</a>
       <a href="#">Om</a>
@@ -117,7 +131,11 @@
     </div>
   </div>
 
-  <div id="player"></div>
+  <div class="player-wrapper">
+    <div class="player-inner">
+      <div id="player"></div>
+    </div>
+  </div>
 
   <div id="leftBtn" class="text-button" onclick="prevVideo()">←</div>
   <div id="rightBtn" class="text-button" onclick="nextVideo()">→</div>
@@ -137,8 +155,6 @@
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
         videoId: videos[index],
         playerVars: {
           autoplay: 1,
