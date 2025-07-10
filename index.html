@@ -71,9 +71,19 @@
       margin-top: 3rem;
     }
 
-    .video-section {
+    .video-wrapper {
       max-width: 960px;
       margin: 120px auto 60px auto;
+      padding: 0 1rem;
+      text-align: center;
+    }
+
+    .video-wrapper h2 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .video-section {
       background: black;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       aspect-ratio: 16 / 9;
@@ -97,16 +107,25 @@
     </div>
   </div>
 
-  <div class="video-section">
-    <iframe src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <div class="video-wrapper">
+    <h2>Video 1</h2>
+    <div class="video-section">
+      <iframe src="https://www.youtube.com/embed/Auss7fLMiIE?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
   </div>
 
-  <div class="video-section">
-    <iframe src="https://www.youtube.com/embed/FGZndqSzgbg?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <div class="video-wrapper">
+    <h2>Video 2</h2>
+    <div class="video-section">
+      <iframe src="https://www.youtube.com/embed/FGZndqSzgbg?autoplay=0&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
   </div>
 
-  <div class="video-section">
-    <iframe src="https://www.youtube.com/embed/x_FQXDfmamw?autoplay=1&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <div class="video-wrapper">
+    <h2>Video 3</h2>
+    <div class="video-section">
+      <iframe src="https://www.youtube.com/embed/x_FQXDfmamw?autoplay=0&mute=1&rel=0&showinfo=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
   </div>
 
   <div class="bottombar">
