@@ -132,9 +132,9 @@
   </div>
 
   <script>
+    // Scroll-funktion för header
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
-
     window.addEventListener('scroll', () => {
       const st = window.pageYOffset || document.documentElement.scrollTop;
       if (st > lastScrollTop && st > 100) {
@@ -145,46 +145,51 @@
       lastScrollTop = st <= 0 ? 0 : st;
     });
 
-    // YouTube API
+    // YouTube Player API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
-    let players = {};
-
     const videoMap = [
-      { id: 'player1', videoId: 'Auss7fLMiIE' },
-      { id: 'player2', videoId: 'x_FQXDfmamw' }, // flyttad till mitten
-      { id: 'player3', videoId: 'FGZndqSzgbg' }  // nu sist
+      { id: 'player1', videoId: 'Auss7fLMiIE' }, // Video 1
+      { id: 'player2', videoId: 'x_FQXDfmamw' }, // Video 2
+      { id: 'player3', videoId: 'FGZndqSzgbg' }  // Video 3
     ];
 
+    const players = {};
+    const readyPlayers = new Set();
+
     function onYouTubeIframeAPIReady() {
-      videoMap.forEach(({ id, videoId }) => {
+      videoMap.forEach(({ id, videoId }, index) => {
         players[id] = new YT.Player(id, {
           videoId,
           playerVars: {
-            autoplay: 0,
+            autoplay: index === 0 ? 1 : 0, // Only first video autoplay
+            mute: 1,
             controls: 1,
             modestbranding: 1,
             rel: 0,
-            showinfo: 0,
-            mute: 1
+            showinfo: 0
+          },
+          events: {
+            onReady: () => {
+              readyPlayers.add(id);
+              if (index === 0) players[id].playVideo(); // First video autoplay
+              if (readyPlayers.size === videoMap.length) {
+                setupScrollControl();
+              }
+            }
           }
         });
       });
-
-      setupScrollControl();
     }
 
     function setupScrollControl() {
-      const options = {
-        threshold: 0.5
-      };
-
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const id = entry.target.querySelector('div').id;
           const player = players[id];
+          if (!player) return;
 
           if (entry.isIntersecting) {
             player.playVideo();
@@ -192,7 +197,7 @@
             player.pauseVideo();
           }
         });
-      }, options);
+      }, { threshold: 0.5 });
 
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
