@@ -5,9 +5,9 @@
   <title>Hirrdirr</title>
   <style>
     :root {
-      --dominant: #D8D5DB;
-      --secondary: #ADACB5;
-      --accent: #2D3142;
+      --dominant: #D8D5DB;     /* Platinum */
+      --secondary: #ADACB5;    /* French gray */
+      --accent: #2D3142;       /* Gunmetal */
     }
 
     html, body {
@@ -73,7 +73,7 @@
 
     .video-wrapper {
       max-width: 960px;
-      margin: 150px auto 100px auto;
+      margin: 140px auto 100px auto;
       padding: 0 1rem;
       text-align: center;
     }
@@ -86,11 +86,10 @@
     .video-section {
       background: black;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      width: 100%;
       height: 600px;
     }
 
-    .video-placeholder {
+    #player1, #player2, #player3 {
       width: 100%;
       height: 100%;
     }
@@ -109,17 +108,23 @@
 
   <div class="video-wrapper">
     <h2>Video 1</h2>
-    <div class="video-section" id="player1"></div>
-  </div>
-
-  <div class="video-wrapper">
-    <h2>Video 3</h2>
-    <div class="video-section" id="player3"></div>
+    <div class="video-section" id="video1">
+      <div id="player1"></div>
+    </div>
   </div>
 
   <div class="video-wrapper">
     <h2>Video 2</h2>
-    <div class="video-section" id="player2"></div>
+    <div class="video-section" id="video2">
+      <div id="player2"></div>
+    </div>
+  </div>
+
+  <div class="video-wrapper">
+    <h2>Video 3</h2>
+    <div class="video-section" id="video3">
+      <div id="player3"></div>
+    </div>
   </div>
 
   <div class="bottombar">
@@ -129,6 +134,7 @@
   <script>
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
+
     window.addEventListener('scroll', () => {
       const st = window.pageYOffset || document.documentElement.scrollTop;
       if (st > lastScrollTop && st > 100) {
@@ -138,48 +144,57 @@
       }
       lastScrollTop = st <= 0 ? 0 : st;
     });
-  </script>
 
-  <script>
+    // YouTube API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
     let players = {};
 
+    const videoMap = [
+      { id: 'player1', videoId: 'Auss7fLMiIE' },
+      { id: 'player2', videoId: 'x_FQXDfmamw' }, // flyttad till mitten
+      { id: 'player3', videoId: 'FGZndqSzgbg' }  // nu sist
+    ];
+
     function onYouTubeIframeAPIReady() {
-      players.player1 = new YT.Player('player1', {
-        videoId: 'Auss7fLMiIE',
-        playerVars: { modestbranding: 1, rel: 0, showinfo: 0, mute: 1 },
+      videoMap.forEach(({ id, videoId }) => {
+        players[id] = new YT.Player(id, {
+          videoId,
+          playerVars: {
+            autoplay: 0,
+            controls: 1,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            mute: 1
+          }
+        });
       });
 
-      players.player2 = new YT.Player('player2', {
-        videoId: 'FGZndqSzgbg',
-        playerVars: { modestbranding: 1, rel: 0, showinfo: 0, mute: 1 },
-      });
-
-      players.player3 = new YT.Player('player3', {
-        videoId: 'x_FQXDfmamw',
-        playerVars: { modestbranding: 1, rel: 0, showinfo: 0, mute: 1 },
-      });
-
-      setupIntersectionObservers();
+      setupScrollControl();
     }
 
-    function setupIntersectionObservers() {
-      Object.entries(players).forEach(([id, player]) => {
-        const el = document.getElementById(id);
-        const observer = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              player.playVideo();
-            } else {
-              player.pauseVideo();
-            }
-          });
-        }, { threshold: 0.5 });
-        observer.observe(el);
-      });
+    function setupScrollControl() {
+      const options = {
+        threshold: 0.5
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const id = entry.target.querySelector('div').id;
+          const player = players[id];
+
+          if (entry.isIntersecting) {
+            player.playVideo();
+          } else {
+            player.pauseVideo();
+          }
+        });
+      }, options);
+
+      document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
   </script>
 
