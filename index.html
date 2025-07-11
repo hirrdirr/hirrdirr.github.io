@@ -105,9 +105,9 @@
       transform: rotate(-45deg) translate(5px, -5px);
     }
     .menu {
-      position: absolute;
-      top: 70px;    /* <-- NU visas menyn direkt under headern */
-      right: 20px;
+      position: fixed;       /* <-- Nu är menyn alltid mot sidans topp */
+      top: 70px;             /* Samma som headerns höjd */
+      right: 40px;           /* Justera så den hamnar snyggt till höger */
       background: var(--dominant);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       flex-direction: column;
