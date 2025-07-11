@@ -10,21 +10,11 @@
       --secondary: #ADACB5;
       --accent: #2D3142;
     }
-
     body.dark-mode {
       --dominant: #2D3142;
       --secondary: #3E4252;
       --accent: #D8D5DB;
     }
-
-    html {
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow-x: hidden !important;
-      background-color: var(--dominant);
-      height: 100%;
-    }
-
     html, body {
       margin: 0 !important;
       padding: 0 !important;
@@ -35,14 +25,12 @@
       color: var(--accent);
       transition: background 0.3s ease, color 0.3s ease;
     }
-
     .topbar {
-      height: 600px;
+      height: 70px;                  /* <-- Snygg höjd på headern */
       background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, var(--dominant) 95%),
                   url('./header.png') no-repeat center center / cover !important;
-      background: var(--dominant);
       color: var(--accent);
-      padding: 1rem 2rem;
+      padding: 8px 2rem 8px 2rem;    /* Extra space uppe och nere */
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -50,33 +38,30 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 60px;
       z-index: 1000;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       transition: opacity 0.3s ease, background 0.3s ease;
     }
-
     .topbar.hidden {
       opacity: 0;
       pointer-events: none;
     }
-
     .topbar h1 {
       font-size: 1.5rem;
       margin: 0;
     }
-
     #topbar-controls {
       display: flex;
-      align-items: center;
+      align-items: flex-end;  /* Flytta knapparna nedåt */
       gap: 1rem;
-      margin-top: 8px; /* >>> Flyttar ner meny och darkmode lite snyggare! <<< */
+      height: 100%;
+      padding-bottom: 8px;   /* Extra space nedtill */
     }
     #darkBtn,
     .hamburger {
       margin-top: 0 !important;
+      margin-bottom: 0 !important;
     }
-
     #darkBtn {
       padding: 0.5rem 0.7rem;
       border: none;
@@ -89,16 +74,13 @@
       align-items: center;
       justify-content: center;
     }
-
     #darkBtn:hover {
       transform: scale(1.1);
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
-
     svg {
       stroke: var(--accent);
     }
-
     .hamburger {
       cursor: pointer;
       display: flex;
@@ -107,29 +89,24 @@
       z-index: 1001;
       transition: transform 0.3s ease;
     }
-
     .hamburger div {
       width: 25px;
       height: 3px;
       background: var(--accent);
       transition: all 0.3s ease;
     }
-
     .hamburger.active div:nth-child(1) {
       transform: rotate(45deg) translate(5px, 5px);
     }
-
     .hamburger.active div:nth-child(2) {
       opacity: 0;
     }
-
     .hamburger.active div:nth-child(3) {
       transform: rotate(-45deg) translate(5px, -5px);
     }
-
     .menu {
       position: absolute;
-      top: 60px;
+      top: 70px;
       right: 20px;
       background: var(--dominant);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -139,13 +116,11 @@
       transform: translateY(-10px);
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
-
     .menu.show {
       display: flex;
       opacity: 1;
       transform: translateY(0);
     }
-
     .menu a {
       color: var(--accent);
       text-decoration: none;
@@ -154,7 +129,6 @@
       font-weight: bold;
       border-bottom: 1px solid var(--secondary);
     }
-
     .bottombar {
       background: var(--secondary);
       color: var(--accent);
@@ -166,19 +140,16 @@
       margin-top: 3rem;
       transition: background 0.3s ease;
     }
-
     .video-wrapper {
       max-width: 960px;
-      margin: 140px auto 100px auto;
+      margin: 120px auto 100px auto;
       padding: 0 1rem;
       text-align: center;
     }
-
     .video-wrapper h2 {
       color: var(--accent);
       margin-bottom: 1rem;
     }
-
     .video-section {
       background: black;
       transition: transform 0.4s ease, box-shadow 0.4s ease;
@@ -186,13 +157,11 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       height: 600px;
     }
-
     .video-section.active {
       transform: scale(1.05);
       box-shadow: 0 0 40px rgba(0,0,0,0.8);
       z-index: 1;
     }
-
     .player-container {
       width: 100%;
       height: 100%;
@@ -202,7 +171,6 @@
   <meta name="theme-color" content="#D8D5DB" media="(prefers-color-scheme: light)">
 </head>
 <body>
-
   <div class="topbar" id="topbar">
     <h1>Hirrdirr</h1>
     <div id="topbar-controls">
@@ -236,45 +204,36 @@
       <a href="#video3" onclick="closeMenu()">Kontakt</a>
     </div>
   </div>
-
   <div class="video-wrapper">
     <h2>Video 1</h2>
     <div class="video-section" id="video1">
       <div class="player-container" id="player1"></div>
     </div>
   </div>
-
   <div class="video-wrapper">
     <h2>Video 2</h2>
     <div class="video-section" id="video2">
       <div class="player-container" id="player2"></div>
     </div>
   </div>
-
   <div class="video-wrapper">
     <h2>Video 3</h2>
     <div class="video-section" id="video3">
       <div class="player-container" id="player3"></div>
     </div>
   </div>
-
   <div class="bottombar">
     &copy; 2025 Hirrdirr. All rights reserved.
   </div>
-
-  <!-- (JS-script är samma som du hade innan, och ligger kvar) -->
   <script>
-    // ... exakt samma JavaScript-kod som innan ...
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
       document.getElementById("hamburger").classList.toggle("active");
     }
-
     function closeMenu() {
       document.getElementById("menu").classList.remove("show");
       document.getElementById("hamburger").classList.remove("active");
     }
-
     function toggleDarkMode() {
       const body = document.body;
       const isDark = body.classList.toggle("dark-mode");
@@ -282,7 +241,6 @@
       document.getElementById("icon-sun").style.display = isDark ? "inline" : "none";
       document.getElementById("icon-moon").style.display = isDark ? "none" : "inline";
     }
-
     window.onload = () => {
       const isDark = localStorage.getItem("darkMode") === "true";
       if (isDark) {
@@ -291,7 +249,6 @@
         document.getElementById("icon-moon").style.display = "none";
       }
     };
-
     window.addEventListener("click", function (e) {
       const menu = document.getElementById("menu");
       const hamburger = document.getElementById("hamburger");
@@ -299,7 +256,6 @@
         closeMenu();
       }
     });
-
     let lastScrollTop = 0;
     const topbar = document.getElementById('topbar');
     window.addEventListener('scroll', () => {
@@ -307,20 +263,16 @@
       topbar.classList.toggle('hidden', st > lastScrollTop && st > 100);
       lastScrollTop = st <= 0 ? 0 : st;
     });
-
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
-
     const videoMap = [
       { id: 'player1', videoId: 'Auss7fLMiIE', sectionId: 'video1' },
       { id: 'player2', videoId: 'x_FQXDfmamw', sectionId: 'video2' },
       { id: 'player3', videoId: 'FGZndqSzgbg', sectionId: 'video3' }
     ];
-
     const players = {};
     const readyFlags = {};
-
     function onYouTubeIframeAPIReady() {
       videoMap.forEach(({ id, videoId }) => {
         players[id] = new YT.Player(id, {
@@ -345,14 +297,12 @@
         });
       });
     }
-
     function setupScrollControl() {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const section = entry.target;
           const playerDiv = section.querySelector('.player-container');
           const playerId = playerDiv.id;
-
           if (entry.isIntersecting) {
             Object.keys(players).forEach(id => {
               if (id !== playerId) {
@@ -369,7 +319,6 @@
           }
         });
       }, { threshold: 0.6 });
-
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
   </script>
