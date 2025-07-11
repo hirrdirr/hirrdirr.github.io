@@ -189,13 +189,34 @@ html, body {
       height: 100%;
     }
   
-    iframe {
-      background-color: transparent;
-      display: block;
+    *, *::before, *::after {
+      box-sizing: border-box;
+      border: none;
+      outline: none;
+    }
+
+    html {
+      background-color: var(--dominant);
+      height: 100%;
+      overflow-x: hidden;
     }
 
     body {
+      margin: 0;
+      padding: 0;
       background-color: var(--dominant) !important;
+      overflow-x: hidden;
+    }
+
+    iframe {
+      background-color: var(--dominant);
+      color-scheme: dark light;
+      border: none;
+      display: block;
+    }
+
+    .video-section, .player-container {
+      background-color: var(--dominant);
     }
     </style>
 
