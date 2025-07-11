@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -19,25 +18,18 @@
     }
 
     html {
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow-x: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow-x: hidden !important;
+      background-color: var(--dominant);
+      height: 100%;
+    }
 
-  background-color: var(--dominant);
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow-x: hidden;
-}
-
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  background-color: var(--dominant) !important;
-  overflow-x: hidden !important;
-
-      margin: 0;
-      padding: 0;
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: var(--dominant) !important;
+      overflow-x: hidden !important;
       font-family: Arial, sans-serif;
       background: var(--dominant);
       color: var(--accent);
@@ -45,10 +37,9 @@ html, body {
     }
 
     .topbar {
-  height: 600px;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, var(--dominant) 95%),
-              url('./header.png') no-repeat center center / cover !important;
-
+      height: 600px;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, var(--dominant) 95%),
+                  url('./header.png') no-repeat center center / cover !important;
       background: var(--dominant);
       color: var(--accent);
       padding: 1rem 2rem;
@@ -79,6 +70,11 @@ html, body {
       display: flex;
       align-items: center;
       gap: 1rem;
+      margin-top: 8px; /* >>> Flyttar ner meny och darkmode lite snyggare! <<< */
+    }
+    #darkBtn,
+    .hamburger {
+      margin-top: 0 !important;
     }
 
     #darkBtn {
@@ -266,7 +262,9 @@ html, body {
     &copy; 2025 Hirrdirr. All rights reserved.
   </div>
 
+  <!-- (JS-script är samma som du hade innan, och ligger kvar) -->
   <script>
+    // ... exakt samma JavaScript-kod som innan ...
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
       document.getElementById("hamburger").classList.toggle("active");
@@ -375,6 +373,5 @@ html, body {
       document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
     }
   </script>
-
 </body>
 </html>
