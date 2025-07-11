@@ -26,11 +26,11 @@
       transition: background 0.3s ease, color 0.3s ease;
     }
     .topbar {
-      height: 70px;                  /* <-- Snygg höjd på headern */
+      height: 70px;
       background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, var(--dominant) 95%),
                   url('./header.png') no-repeat center center / cover !important;
       color: var(--accent);
-      padding: 8px 2rem 8px 2rem;    /* Extra space uppe och nere */
+      padding: 8px 2rem 8px 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -52,10 +52,10 @@
     }
     #topbar-controls {
       display: flex;
-      align-items: flex-end;  /* Flytta knapparna nedåt */
+      align-items: flex-end;
       gap: 1rem;
       height: 100%;
-      padding-bottom: 8px;   /* Extra space nedtill */
+      padding-bottom: 8px;
     }
     #darkBtn,
     .hamburger {
@@ -106,15 +106,16 @@
     }
     .menu {
       position: absolute;
-      top: 70px;
+      top: 70px;    /* <-- NU visas menyn direkt under headern */
       right: 20px;
       background: var(--dominant);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       flex-direction: column;
       display: none;
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(0);
       transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1100;
     }
     .menu.show {
       display: flex;
