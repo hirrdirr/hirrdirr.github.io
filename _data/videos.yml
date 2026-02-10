@@ -3,21 +3,21 @@
 # Exempel: https://www.youtube.com/watch?v=dQw4w9WgXcQ  -> id: dQw4w9WgXcQ
 
 - title: "Video 1"
-  id: "dQw4w9WgXcQ"
-  badge: "SHORTS"
-  desc: "Byt titel/id/desc till din egen."
+  id: "Auss7fLMiIE"
+  badge: "VIDEO"
+  desc: ""
 
 - title: "Video 2"
-  id: "dQw4w9WgXcQ"
+  id: "FGZndqSzgbg"
   badge: "VIDEO"
-  desc: "Byt till riktig video-id."
+  desc: ""
 
 - title: "Video 3"
-  id: "dQw4w9WgXcQ"
-  badge: "SHORTS"
-  desc: "Byt till riktig video-id."
+  id: "x_FQXDfmamw"
+  badge: "VIDEO"
+  desc: ""
 
 - title: "Video 4"
-  id: "dQw4w9WgXcQ"
+  id: "wXifh0nB72Y"
   badge: "VIDEO"
-  desc: "Byt till riktig video-id."
+  desc: "Valfri från @FreudianSlipProductions (byt om du vill)."
