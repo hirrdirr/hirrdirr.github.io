@@ -3,408 +3,131 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hirrdirr • Games</title>
-
-  <style>
-    :root {
-      --dominant: #D8D5DB;
-      --secondary: #ADACB5;
-      --accent: #2D3142;
-    }
-    body.dark-mode {
-      --dominant: #2D3142;
-      --secondary: #3E4252;
-      --accent: #D8D5DB;
-    }
-
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background-color: var(--dominant) !important;
-      overflow-x: hidden !important;
-      font-family: Arial, sans-serif;
-      background: var(--dominant);
-      color: var(--accent);
-      transition: background 0.3s ease, color 0.3s ease;
-      padding-bottom: 80px; /* plats för footer */
-    }
-
-    /* Topbar (matchar startsidan) */
-    .topbar {
-      height: 70px;
-      box-sizing: border-box;
-      background:
-        linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, var(--dominant) 95%),
-        url('/header.png') no-repeat center center / cover !important;
-      color: var(--accent);
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 2000;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      transition: opacity 0.25s ease;
-    }
-    .topbar.hidden { opacity: 0; pointer-events: none; }
-    .topbar h1 {
-      font-size: 1.5rem;
-      margin: 0;
-      letter-spacing: 0.3px;
-    }
-
-    #topbar-controls {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      height: 100%;
-    }
-
-    button#darkBtn {
-      cursor: pointer;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: none;
-      background: var(--secondary);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    button#darkBtn:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.20); }
-    svg { stroke: var(--accent); }
-
-    .hamburger {
-      cursor: pointer;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      gap: 5px;
-      flex-direction: column;
-      z-index: 2001;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    .hamburger:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.20); }
-    .hamburger div {
-      width: 18px;
-      height: 3px;
-      background: var(--accent);
-      transition: all 0.3s ease;
-    }
-    .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
-    .hamburger.active div:nth-child(2) { opacity: 0; }
-    .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
-
-    .menu {
-      position: fixed;
-      top: 70px;              /* ligger direkt under topbaren */
-      right: 30px;
-      min-width: 200px;
-      background: #2D3142 !important;
-      background-color: #2D3142 !important;
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
-      border-radius: 12px;
-      padding: 8px 0;
-      z-index: 1900;          /* under topbaren */
-      display: none;
-      flex-direction: column;
-      align-items: stretch;
-      justify-content: flex-start;
-      opacity: 1 !important;
-      filter: none !important;
-      mix-blend-mode: normal !important;
-    }
-    body:not(.dark-mode) .menu {
-      background: #D8D5DB !important;
-      background-color: #D8D5DB !important;
-    }
-    .menu.show { display: flex !important; }
-    .menu a {
-      color: var(--accent);
-      text-decoration: none;
-      padding: 0.95rem 1.25rem;
-      display: block;
-      font-weight: bold;
-      border-bottom: 1px solid var(--secondary);
-      text-align: left;
-      transition: background 0.2s;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .menu a:last-child { border-bottom: none; }
-    .menu a:hover { background: var(--secondary); }
-
-    /* Page layout */
-    .page {
-      max-width: 1100px;
-      min-height: calc(100vh - 70px - 80px);
-      margin: 110px auto 80px auto;  /* under topbar */
-      padding: 0 1rem;
-    }
-
-    .hero {
-      background: rgba(0,0,0,0.12);
-      border: 1px solid rgba(0,0,0,0.12);
-      border-radius: 16px;
-      padding: 18px 18px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.10);
-      backdrop-filter: blur(4px);
-    }
-    body.dark-mode .hero {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.10);
-    }
-    .hero h2 {
-      margin: 0 0 6px 0;
-      font-size: 1.25rem;
-    }
-    .hero p {
-      margin: 0;
-      opacity: 0.92;
-      line-height: 1.5;
-    }
-
-    /* Game grid */
-    .game-grid {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-    @media (max-width: 720px) {
-      .game-grid { grid-template-columns: 1fr; }
-      .menu { right: 16px; }
-      .topbar { padding: 0 1rem; }
-    }
-
-    .game-card {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      background: rgba(0,0,0,0.10);
-      border: 1px solid rgba(0,0,0,0.12);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 14px 34px rgba(0,0,0,0.10);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-      position: relative;
-      min-height: 150px;
-    }
-    body.dark-mode .game-card {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.10);
-    }
-    .game-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 18px 44px rgba(0,0,0,0.16);
-    }
-
-    .thumb {
-      height: 84px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      letter-spacing: 0.8px;
-      background: linear-gradient(135deg, rgba(0,0,0,0.15), rgba(0,0,0,0.02));
-      border-bottom: 1px solid rgba(0,0,0,0.10);
-    }
-    body.dark-mode .thumb {
-      background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
-      border-bottom-color: rgba(255,255,255,0.10);
-    }
-
-    .card-body { padding: 12px 14px 14px 14px; }
-    .card-title {
-      margin: 0 0 6px 0;
-      font-size: 1.05rem;
-    }
-    .card-desc {
-      margin: 0;
-      opacity: 0.9;
-      line-height: 1.4;
-      font-size: 0.95rem;
-    }
-    .badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: var(--secondary);
-      color: var(--accent);
-      border: 1px solid rgba(0,0,0,0.10);
-    }
-    body.dark-mode .badge { border-color: rgba(255,255,255,0.10); }
-
-    
-    .bottombar {
-      background: var(--secondary);
-      color: var(--accent);
-      text-align: center;
-      padding: 0.9rem;
-      font-size: 0.9rem;
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100%;
-      z-index: 1200;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.10);
-      transition: background 0.3s ease, color 0.3s ease;
-      padding-bottom: 80px; /* plats för footer */
-    }
-</style>
-
-  <meta name="theme-color" content="#2D3142" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#D8D5DB" media="(prefers-color-scheme: light)">
+  <title>hirrdirr • games</title>
+  <link rel="stylesheet" href="/assets/site.css" />
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
 </head>
-
 <body>
-  <div class="topbar" id="topbar">
-    <h1>Hirrdirr</h1>
 
-    <div id="topbar-controls">
-      <button id="darkBtn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
-        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
+<header class="gh-topbar">
+  <div class="gh-left">
+    <a class="gh-brand" href="/">
+      <span class="gh-dot" aria-hidden="true"></span>
+      <span>hirrdirr</span>
+    </a>
 
-      <div class="hamburger" id="hamburger" onclick="toggleMenu()" role="button" tabindex="0" aria-label="Öppna meny">
-        <div></div><div></div><div></div>
-      </div>
-
-      <div class="menu" id="menu">
-        <a href="/" onclick="closeMenu()">Hem</a>
-        <a href="/games/" onclick="closeMenu()">Games</a>
-      </div>
+    <div class="gh-crumbs" aria-label="Breadcrumb">
+      <span class="sep">/</span>
+      <span class="current" id="pageLabel">home</span>
     </div>
   </div>
 
-  <main class="page">
-    <div class="hero">
-      <h2>Games</h2>
-      <p>Små webbläsarspel byggda för att vara snabba, enkla och lite beroendeframkallande. Välj en ruta och kör.</p>
+  <div class="gh-right">
+    <div class="gh-iconrow" role="navigation" aria-label="Snabbknappar">
+      <a class="iconbtn" href="/" data-route="/" title="Home" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <a class="iconbtn" href="/games/" data-route="/games/" title="Games" aria-label="Games">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 8a3 3 0 1 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 14h12a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-2l-2-3H8l-2 3H4a2 2 0 0 1-2-2v-1a4 4 0 0 1 4-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M9.5 16.5h-2m1-1v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M16 16.2h.01M18 17.8h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </a>
+
+      <button class="iconbtn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path id="moon" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path id="sun" d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="none" stroke="currentColor" stroke-width="2" opacity="0"/>
+        </svg>
+      </button>
     </div>
+  </div>
+</header>
 
-    <section class="game-grid" aria-label="Spel">
-      <a class="game-card" href="/games/dnd/">
+
+<main>
+  <div class="container">
+    <section class="card hero">
+      <h1>Games</h1>
+      <p>Välj en ruta. Kör en runda. Förlora. Skyll på fysikmotorn.</p>
+    </section>
+
+    <section class="grid" aria-label="Spel">
+      <a class="game" href="/games/dnd/">
         <div class="badge">LIVE</div>
-        <div class="thumb">DND</div>
-        <div class="card-body">
-          <h3 class="card-title">Dodge & Drift</h3>
-          <p class="card-desc">Överlev så länge du kan. Hinder blir snabbare. Universum skrattar.</p>
+        <div class="row">
+          <div class="gicon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 8a3 3 0 1 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 14h12a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-2l-2-3H8l-2 3H4a2 2 0 0 1-2-2v-1a4 4 0 0 1 4-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M9.5 16.5h-2m1-1v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M16 16.2h.01M18 17.8h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Dodge & Drift</h3>
+            <p>Överlev så länge du kan. Hinder blir snabbare. Universum blir gladare.</p>
+          </div>
         </div>
       </a>
 
-      <a class="game-card" href="#" onclick="return false;">
+      <a class="game" href="#" onclick="return false;">
         <div class="badge">SNART</div>
-        <div class="thumb">Spel 2</div>
-        <div class="card-body">
-          <h3 class="card-title">Kommer snart</h3>
-          <p class="card-desc">Plats för nästa idé. Byt href när du lagt till spelet.</p>
+        <div class="row">
+          <div class="gicon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 6v6l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Spel 2</h3>
+            <p>Plats för nästa idé. Byt href när du har skapat /games/spel2/</p>
+          </div>
         </div>
       </a>
 
-      <a class="game-card" href="#" onclick="return false;">
+      <a class="game" href="#" onclick="return false;">
         <div class="badge">SNART</div>
-        <div class="thumb">Spel 3</div>
-        <div class="card-body">
-          <h3 class="card-title">Kommer snart</h3>
-          <p class="card-desc">Här kan du slänga in en mini-tower-defense, reaktionsspel, vad du vill.</p>
+        <div class="row">
+          <div class="gicon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Spel 3</h3>
+            <p>Reaktionsspel? Puzzle? 1-lane tower defense? Du bestämmer.</p>
+          </div>
         </div>
       </a>
 
-      <a class="game-card" href="#" onclick="return false;">
+      <a class="game" href="#" onclick="return false;">
         <div class="badge">SNART</div>
-        <div class="thumb">Spel 4</div>
-        <div class="card-body">
-          <h3 class="card-title">Kommer snart</h3>
-          <p class="card-desc">När du är redo: skapa /games/spel4/ och peka hit.</p>
+        <div class="row">
+          <div class="gicon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Spel 4</h3>
+            <p>En till slot för framtida galenskap.</p>
+          </div>
         </div>
       </a>
     </section>
 
-    </main>
+    <div class="footer">© 2025 hirrdirr.se</div>
+  </div>
+</main>
 
-  <div class="bottombar">© 2025 Hirrdirr. All rights reserved.</div>
-
-  <script>
-    function toggleMenu() {
-      document.getElementById("menu").classList.toggle("show");
-      document.getElementById("hamburger").classList.toggle("active");
-    }
-    function closeMenu() {
-      document.getElementById("menu").classList.remove("show");
-      document.getElementById("hamburger").classList.remove("active");
-    }
-    document.getElementById("hamburger").addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggleMenu();
-      }
-    });
-
-    function toggleDarkMode() {
-      const body = document.body;
-      const isDark = body.classList.toggle("dark-mode");
-      localStorage.setItem("darkMode", isDark);
-      document.getElementById("icon-sun").style.display = isDark ? "inline" : "none";
-      document.getElementById("icon-moon").style.display = isDark ? "none" : "inline";
-    }
-
-    window.onload = () => {
-      const isDark = localStorage.getItem("darkMode") === "true";
-      if (isDark) {
-        document.body.classList.add("dark-mode");
-        document.getElementById("icon-sun").style.display = "inline";
-        document.getElementById("icon-moon").style.display = "none";
-      }
-    };
-
-    window.addEventListener("click", function (e) {
-      const menu = document.getElementById("menu");
-      const hamburger = document.getElementById("hamburger");
-      if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
-        closeMenu();
-      }
-    });
-
-    // (valfritt) samma "hide topbar on scroll"-känsla som startsidan
-    let lastScrollTop = 0;
-    const topbar = document.getElementById('topbar');
-    window.addEventListener('scroll', () => {
-      const st = window.pageYOffset || document.documentElement.scrollTop;
-      topbar.classList.toggle('hidden', st > lastScrollTop && st > 100);
-      lastScrollTop = st <= 0 ? 0 : st;
-    });
-  </script>
+<script src="/assets/site.js"></script>
 </body>
 </html>
