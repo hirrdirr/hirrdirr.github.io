@@ -2,22 +2,22 @@
 # id = YouTube-video-id (delen efter v= i länken, eller efter youtu.be/)
 # Exempel: https://www.youtube.com/watch?v=dQw4w9WgXcQ  -> id: dQw4w9WgXcQ
 
-- title: "Video 1"
+- title: "Clutch"
   id: "Auss7fLMiIE"
   badge: "VIDEO"
-  desc: ""
+  desc: "4v1 Clutch"
 
-- title: "Video 2"
+- title: "RessChamp"
   id: "FGZndqSzgbg"
   badge: "VIDEO"
-  desc: ""
+  desc: "Insane ress"
 
-- title: "Video 3"
+- title: "Onetap"
   id: "x_FQXDfmamw"
   badge: "VIDEO"
-  desc: ""
+  desc: "Sus Onetap"
 
-- title: "Video 4"
+- title: "Flickväncentralen"
   id: "wXifh0nB72Y"
   badge: "VIDEO"
-  desc: "Valfri från @FreudianSlipProductions (byt om du vill)."
+  desc: "@Freudian Slip Productions"
