@@ -1,0 +1,42 @@
+/* --- Inline YouTube players inside video cards --- */
+.video-card { cursor: default; }
+.video-card:hover { transform: none; }
+
+.video-embed{
+  width: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+}
+
+.video-embed iframe{
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+.video-links{
+  margin-top: 10px;
+  font-size: 13px;
+}
+.video-links a{
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(88,166,255,0.45);
+}
+body.light .video-links a{
+  border-bottom-color: rgba(9,105,218,0.35);
+}
+.video-links a:hover{
+  border-bottom-style: solid;
+}
+
+@media (max-width: 760px){
+  .video-embed{
+    width: 120px;
+  }
+}
