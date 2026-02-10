@@ -1,317 +1,292 @@
+/* hirrdirr.se — GitHub-ish theme (single-file site.css)
+   Replace your existing /assets/site.css with this file.
+*/
+
 :root{
   --bg: #0d1117;
-  --panel: #161b22;
-  --panel2: rgba(22,27,34,0.75);
+  --panel: #0f1723;
+  --panel2: #111a27;
   --text: #c9d1d9;
   --muted: #8b949e;
-  --border: rgba(240,246,252,0.12);
-  --hover: rgba(56,139,253,0.15);
+  --border: rgba(255,255,255,0.10);
+  --shadow: 0 10px 30px rgba(0,0,0,0.35);
   --accent: #58a6ff;
-  --shadow: 0 18px 40px rgba(0,0,0,0.35);
-  --radius: 14px;
+  --accent2: #a371f7;
+  --good: #3fb950;
+  --warn: #d29922;
+  --bad: #f85149;
 }
 
 body.light{
   --bg: #f6f8fa;
   --panel: #ffffff;
-  --panel2: rgba(255,255,255,0.75);
-  --text: #24292f;
+  --panel2: #f2f4f7;
+  --text: #1f2328;
   --muted: #57606a;
   --border: rgba(31,35,40,0.14);
-  --hover: rgba(9,105,218,0.10);
+  --shadow: 0 10px 30px rgba(27,31,36,0.12);
   --accent: #0969da;
-  --shadow: 0 18px 40px rgba(0,0,0,0.10);
+  --accent2: #8250df;
 }
 
 *{ box-sizing: border-box; }
-
-html,body{
-  margin:0;
-  background: var(--bg);
+html,body{ height: 100%; }
+body{
+  margin: 0;
+  background: radial-gradient(1200px 700px at 20% -10%, rgba(88,166,255,0.16), transparent 55%),
+              radial-gradient(1200px 700px at 80% -10%, rgba(163,113,247,0.12), transparent 55%),
+              var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font: 15px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-a{ color: inherit; }
+/* Links */
+a{ color: var(--accent); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95em;
+}
 
+/* Layout container */
+main{ padding: 24px 16px 48px; }
+.container{
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* --- Topbar --- */
 .gh-topbar{
-  position: fixed;
-  top:0; left:0; right:0;
-  height: 60px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 0 14px;
-  background: rgba(13,17,23,0.78);
-  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
-  z-index: 3000;
+  background: rgba(13,17,23,0.72);
+  backdrop-filter: blur(10px);
 }
-
 body.light .gh-topbar{
-  background: rgba(246,248,250,0.78);
+  background: rgba(246,248,250,0.80);
 }
 
-.gh-left{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  min-width: 240px;
-}
-
+.gh-left{ display: flex; align-items: center; gap: 12px; min-width: 0; }
 .gh-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  text-decoration:none;
-  color: var(--text);
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
   border-radius: 10px;
+  color: var(--text);
 }
-.gh-brand:hover{ background: rgba(255,255,255,0.04); }
-body.light .gh-brand:hover{ background: rgba(0,0,0,0.04); }
+.gh-brand:hover{ text-decoration: none; background: rgba(255,255,255,0.06); }
+body.light .gh-brand:hover{ background: rgba(31,35,40,0.06); }
 
 .gh-dot{
-  width: 10px; height: 10px;
-  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
   background: var(--accent);
-  box-shadow: 0 0 18px rgba(88,166,255,0.35);
+  box-shadow: 0 0 0 4px rgba(88,166,255,0.18);
 }
+body.light .gh-dot{ box-shadow: 0 0 0 4px rgba(9,105,218,0.16); }
 
 .gh-crumbs{
-  display:flex;
-  align-items:center;
+  display: inline-flex;
+  align-items: baseline;
   gap: 8px;
   color: var(--muted);
-  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.gh-crumbs .current{ color: var(--text); }
-.gh-crumbs .sep{ opacity: 0.7; }
+.gh-crumbs .sep{ opacity: 0.6; }
+.gh-crumbs .current{ color: var(--text); opacity: 0.9; }
 
-.gh-right{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-}
-
-.gh-iconrow{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-}
+.gh-right{ display: flex; align-items: center; gap: 10px; }
+.gh-iconrow{ display: flex; align-items: center; gap: 10px; }
 
 .iconbtn{
   width: 38px;
   height: 38px;
+  display: inline-grid;
+  place-items: center;
   border-radius: 10px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background: transparent;
   border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
   color: var(--text);
   cursor: pointer;
-  text-decoration:none;
-  transition: background .15s ease, transform .15s ease, border-color .15s ease;
 }
-.iconbtn svg{ width: 20px; height: 20px; }
+.iconbtn:hover{ background: rgba(255,255,255,0.08); text-decoration: none; }
+body.light .iconbtn{ background: rgba(31,35,40,0.03); }
+body.light .iconbtn:hover{ background: rgba(31,35,40,0.06); }
 
-.iconbtn:hover{
-  background: var(--hover);
-  border-color: rgba(88,166,255,0.35);
-  transform: translateY(-1px);
-}
+.iconbtn svg{ width: 18px; height: 18px; }
 
-.iconbtn.active{
-  background: rgba(88,166,255,0.18);
-  border-color: rgba(88,166,255,0.55);
-}
-
-/* Layout */
-main{
-  padding-top: 80px; /* under topbar */
-}
-
-.container{
-  width: min(1100px, calc(100vw - 24px));
-  margin: 0 auto;
-}
-
+/* --- Cards / Hero --- */
 .card{
-  background: var(--panel2);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 16px;
   box-shadow: var(--shadow);
+}
+body.light .card{
+  background: linear-gradient(180deg, rgba(31,35,40,0.02), rgba(31,35,40,0.01));
 }
 
 .hero{
-  padding: 18px;
-  overflow: hidden;
-  position: relative;
+  padding: 20px 20px 18px;
+  margin-bottom: 16px;
+}
+.hero h1{
+  margin: 0 0 8px;
+  font-size: 28px;
+  letter-spacing: -0.3px;
+}
+.hero p{
+  margin: 0;
+  color: var(--muted);
 }
 
-.hero::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(800px 300px at 20% 10%, rgba(88,166,255,0.18), transparent 60%),
-    radial-gradient(700px 260px at 80% 20%, rgba(88,166,255,0.12), transparent 62%),
-    linear-gradient(to bottom, rgba(255,255,255,0.03), transparent 55%);
-  pointer-events:none;
-}
-
-body.light .hero::before{
-  background:
-    radial-gradient(800px 300px at 20% 10%, rgba(9,105,218,0.10), transparent 60%),
-    radial-gradient(700px 260px at 80% 20%, rgba(9,105,218,0.08), transparent 62%),
-    linear-gradient(to bottom, rgba(0,0,0,0.02), transparent 55%);
-}
-
-.hero > *{ position: relative; }
-.hero h1{ margin: 0 0 6px 0; font-size: 26px; letter-spacing: .2px; }
-.hero p{ margin: 0; color: var(--muted); line-height: 1.5; }
-
-.actions{
-  margin-top: 14px;
-  display:flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
+/* Buttons */
+.actions{ display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
 .btn{
-  display:inline-flex;
-  align-items:center;
+  display: inline-flex;
+  align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: transparent;
-  text-decoration:none;
-  font-weight: 750;
-  transition: background .15s ease, transform .15s ease, border-color .15s ease;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-weight: 700;
 }
-.btn:hover{
-  background: var(--hover);
-  border-color: rgba(88,166,255,0.35);
-  transform: translateY(-1px);
-}
+.btn:hover{ text-decoration: none; background: rgba(255,255,255,0.08); }
+body.light .btn{ background: rgba(31,35,40,0.03); }
+body.light .btn:hover{ background: rgba(31,35,40,0.06); }
 .btn svg{ width: 18px; height: 18px; }
 
-/* Games grid */
+/* --- Grid of cards (games/videos) --- */
 .grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 16px;
   margin-top: 16px;
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
 }
-@media (max-width: 760px){
+@media (max-width: 460px){
   .grid{ grid-template-columns: 1fr; }
-  .gh-crumbs{ display:none; }
 }
 
+/* Base card style used by both <a class="game"> and <div class="game"> */
 .game{
-  display:block;
-  text-decoration:none;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--panel2);
-  box-shadow: var(--shadow);
-  transition: transform .15s ease, border-color .15s ease, background .15s ease;
   position: relative;
-  min-height: 150px;
-  overflow:hidden;
-}
-.game::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  background: radial-gradient(600px 220px at 15% 25%, rgba(88,166,255,0.14), transparent 55%);
-  pointer-events:none;
-}
-body.light .game::before{
-  background: radial-gradient(600px 220px at 15% 25%, rgba(9,105,218,0.10), transparent 55%);
+  display: block;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  color: var(--text);
+  overflow: hidden;
+  transform: translateY(0);
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
 .game:hover{
+  text-decoration: none;
   transform: translateY(-2px);
-  border-color: rgba(88,166,255,0.45);
-  background: rgba(56,139,253,0.06);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.16);
+}
+body.light .game{
+  background: rgba(31,35,40,0.02);
+  box-shadow: 0 8px 20px rgba(27,31,36,0.08);
 }
 body.light .game:hover{
-  background: rgba(9,105,218,0.05);
+  background: rgba(31,35,40,0.04);
+  border-color: rgba(31,35,40,0.18);
 }
 
 .game .row{
-  display:flex;
-  gap: 12px;
-  align-items:flex-start;
-  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
 }
-.gicon{
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex: 0 0 auto;
-  background: rgba(0,0,0,0.18);
-}
-body.light .gicon{ background: rgba(0,0,0,0.04); }
 
+.gicon{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
 .gicon svg{ width: 22px; height: 22px; }
 
 .game h3{
-  margin: 0;
-  font-size: 16px;
-  letter-spacing: .2px;
+  margin: 0 0 6px;
+  font-size: 18px;
+  letter-spacing: -0.2px;
 }
 .game p{
-  margin: 6px 0 0 0;
+  margin: 0;
   color: var(--muted);
-  line-height: 1.45;
-  font-size: 14px;
 }
 
+/* Generic badge (top-right) */
 .badge{
-  position:absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 12px;
-  font-weight: 800;
+  position: absolute;
+  top: 10px;
+  right: 10px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(88,166,255,0.15);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--text);
+  background: rgba(88,166,255,0.18);
+  border: 1px solid rgba(88,166,255,0.35);
 }
 body.light .badge{
-  background: rgba(9,105,218,0.10);
+  background: rgba(9,105,218,0.12);
+  border-color: rgba(9,105,218,0.26);
 }
 
-/* Footer */
+/* --- Footer --- */
 .footer{
-  margin-top: 18px;
-  padding: 14px 0 28px 0;
+  margin-top: 22px;
+  padding: 14px 10px;
+  text-align: center;
   color: var(--muted);
-  text-align:center;
-  font-size: 13px;
+  border-top: 1px solid var(--border);
 }
-  /* --- Better scaling for inline video cards --- */
-.video-card { cursor: default; }
-.video-card:hover { transform: none; }
 
-/* Gör layouten till en grid så video+text får vettig yta */
+/* =========================================================
+   VIDEO CARDS (inline players) + responsive per-card + badge in card bottom-right
+   ========================================================= */
+
+.video-card{
+  position: relative;
+  padding-bottom: 44px; /* space for bottom-right badge */
+  cursor: default;
+  container-type: inline-size;
+}
+.video-card:hover{ transform: none; }
+
+/* Default layout: player + meta */
 .video-card .row{
   display: grid;
-  grid-template-columns: minmax(260px, 1.2fr) minmax(200px, 1fr);
+  grid-template-columns: minmax(280px, 1.2fr) minmax(220px, 1fr);
   gap: 14px;
   align-items: start;
 }
 
-/* Gör embed responsiv (inte fast 150px) */
+/* Inline YouTube player */
 .video-embed{
   width: 100%;
   border-radius: 12px;
@@ -320,7 +295,6 @@ body.light .badge{
   background: #000;
   aspect-ratio: 16 / 9;
 }
-
 .video-embed iframe{
   width: 100%;
   height: 100%;
@@ -328,13 +302,12 @@ body.light .badge{
   border: 0;
 }
 
-/* På mobil: stacka video över text (mycket snyggare) */
-@media (max-width: 900px){
-  .video-card .row{
-    grid-template-columns: 1fr;
-  }
+/* When the card itself becomes narrow: stack */
+@container (max-width: 520px){
+  .video-card .row{ grid-template-columns: 1fr; }
 }
 
+/* Link styling under meta */
 .video-links{
   margin-top: 10px;
   font-size: 13px;
@@ -347,54 +320,13 @@ body.light .badge{
 body.light .video-links a{
   border-bottom-color: rgba(9,105,218,0.35);
 }
-.video-links a:hover{
-  border-bottom-style: solid;
-}
-/* === Fix: responsiv per video-kort (container queries) === */
+.video-links a:hover{ border-bottom-style: solid; }
 
-/* Gör varje video-card till en "container" vi kan mäta bredd på */
-.video-card{
-  container-type: inline-size;
-}
-
-/* Default: video + text sida vid sida */
-.video-card .row{
-  display: grid;
-  grid-template-columns: minmax(280px, 1.2fr) minmax(220px, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-
-.video-embed{
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #000;
-  aspect-ratio: 16 / 9;
-}
-
-.video-embed iframe{
-  width: 100%;
-  height: 100%;
-  display: block;
-  border: 0;
-}
-
-/* När ett KORT blir smalt: stacka video över text */
-@container (max-width: 520px){
-  .video-card .row{
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Badge overlay on video (bottom-right) */
-.video-embed { position: relative; }
-
-.video-badge{
+/* Badge pinned to the whole card (bottom-right) */
+.card-badge{
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 12px;
+  bottom: 12px;
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -405,9 +337,9 @@ body.light .video-links a{
   background: rgba(0,0,0,0.55);
   border: 1px solid var(--border);
   backdrop-filter: blur(6px);
-  pointer-events: none; /* stör inte klick/play */
+  pointer-events: none;
+  z-index: 3;
 }
-
-body.light .video-badge{
+body.light .card-badge{
   background: rgba(255,255,255,0.65);
 }
