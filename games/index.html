@@ -26,6 +26,7 @@
       background: var(--dominant);
       color: var(--accent);
       transition: background 0.3s ease, color 0.3s ease;
+      padding-bottom: 80px; /* plats för footer */
     }
 
     /* Topbar (matchar startsidan) */
@@ -147,6 +148,7 @@
     /* Page layout */
     .page {
       max-width: 1100px;
+      min-height: calc(100vh - 70px - 80px);
       margin: 110px auto 80px auto;  /* under topbar */
       padding: 0 1rem;
     }
@@ -248,18 +250,24 @@
     }
     body.dark-mode .badge { border-color: rgba(255,255,255,0.10); }
 
+    
     .bottombar {
       background: var(--secondary);
       color: var(--accent);
       text-align: center;
-      padding: 0.7rem;
+      padding: 0.9rem;
       font-size: 0.9rem;
-      z-index: 10;
-      position: relative;
-      margin-top: 3rem;
-      transition: background 0.3s ease;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      z-index: 1200;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.10);
+      transition: background 0.3s ease, color 0.3s ease;
+      padding-bottom: 80px; /* plats för footer */
     }
-  </style>
+</style>
 
   <meta name="theme-color" content="#2D3142" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#D8D5DB" media="(prefers-color-scheme: light)">
@@ -344,8 +352,9 @@
       </a>
     </section>
 
-    <div class="bottombar">© hirrdirr.se</div>
-  </main>
+    </main>
+
+  <div class="bottombar">© 2025 Hirrdirr. All rights reserved.</div>
 
   <script>
     function toggleMenu() {
