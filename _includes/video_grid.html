@@ -6,22 +6,22 @@
 <section class="grid" aria-label="Videos">
   {%- for v in vids -%}
     <div class="game video-card">
+      {%- if v.badge -%}
+        <div class="card-badge">{{ v.badge }}</div>
+      {%- endif -%}
+
       <div class="row">
         <div class="video-embed" aria-hidden="true">
           <iframe
-            src="https://www.youtube-nocookie.com/embed/{{ v.id }}?rel=0&modestbranding=1"
+            src="https://www.youtube-nocookie.com/embed/{{ v.id }}?autoplay=0&rel=0&modestbranding=1"
             title="{{ v.title | escape }}"
             loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen>
           </iframe>
-
-          {%- if v.badge -%}
-            <div class="video-badge">{{ v.badge }}</div>
-          {%- endif -%}
         </div>
 
-        <div>
+        <div class="video-meta">
           <h3>{{ v.title }}</h3>
           {%- if v.desc -%}
             <p>{{ v.desc }}</p>
