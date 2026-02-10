@@ -5,24 +5,32 @@
 
 <section class="grid" aria-label="Videos">
   {%- for v in vids -%}
-    <a class="game" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer">
+    <div class="game video-card">
       {%- if v.badge -%}
         <div class="badge">{{ v.badge }}</div>
       {%- endif -%}
 
       <div class="row">
-        <img class="video-thumb"
-             src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg"
-             alt=""
-             loading="lazy" />
+        <div class="video-embed" aria-hidden="true">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/{{ v.id }}?rel=0&modestbranding=1"
+            title="{{ v.title | escape }}"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+        </div>
 
         <div>
           <h3>{{ v.title }}</h3>
           {%- if v.desc -%}
             <p>{{ v.desc }}</p>
           {%- endif -%}
+          <p class="video-links">
+            <a href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer">Öppna på YouTube</a>
+          </p>
         </div>
       </div>
-    </a>
+    </div>
   {%- endfor -%}
 </section>
