@@ -6,10 +6,6 @@
 <section class="grid" aria-label="Videos">
   {%- for v in vids -%}
     <div class="game video-card">
-      {%- if v.badge -%}
-        <div class="badge">{{ v.badge }}</div>
-      {%- endif -%}
-
       <div class="row">
         <div class="video-embed" aria-hidden="true">
           <iframe
@@ -19,6 +15,10 @@
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen>
           </iframe>
+
+          {%- if v.badge -%}
+            <div class="video-badge">{{ v.badge }}</div>
+          {%- endif -%}
         </div>
 
         <div>
