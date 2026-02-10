@@ -1,0 +1,23 @@
+# Lägg till dina videos här.
+# id = YouTube-video-id (delen efter v= i länken, eller efter youtu.be/)
+# Exempel: https://www.youtube.com/watch?v=dQw4w9WgXcQ  -> id: dQw4w9WgXcQ
+
+- title: "Video 1"
+  id: "dQw4w9WgXcQ"
+  badge: "SHORTS"
+  desc: "Byt titel/id/desc till din egen."
+
+- title: "Video 2"
+  id: "dQw4w9WgXcQ"
+  badge: "VIDEO"
+  desc: "Byt till riktig video-id."
+
+- title: "Video 3"
+  id: "dQw4w9WgXcQ"
+  badge: "SHORTS"
+  desc: "Byt till riktig video-id."
+
+- title: "Video 4"
+  id: "dQw4w9WgXcQ"
+  badge: "VIDEO"
+  desc: "Byt till riktig video-id."

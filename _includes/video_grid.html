@@ -1,0 +1,28 @@
+{%- assign vids = site.data.videos -%}
+{%- if include.limit -%}
+  {%- assign vids = vids | slice: 0, include.limit -%}
+{%- endif -%}
+
+<section class="grid" aria-label="Videos">
+  {%- for v in vids -%}
+    <a class="game" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer">
+      {%- if v.badge -%}
+        <div class="badge">{{ v.badge }}</div>
+      {%- endif -%}
+
+      <div class="row">
+        <img class="video-thumb"
+             src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg"
+             alt=""
+             loading="lazy" />
+
+        <div>
+          <h3>{{ v.title }}</h3>
+          {%- if v.desc -%}
+            <p>{{ v.desc }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </a>
+  {%- endfor -%}
+</section>

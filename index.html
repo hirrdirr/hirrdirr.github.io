@@ -10,24 +10,17 @@ navlabel: home
     <p>En liten hörna på internet för spel, tester och annat nörderi.</p>
 
     <div class="actions">
-      <a class="btn" href="/games/">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 8a3 3 0 1 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <path d="M6 14h12a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-2l-2-3H8l-2 3H4a2 2 0 0 1-2-2v-1a4 4 0 0 1 4-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-        Games
-      </a>
-
-      <a class="btn" href="/videos/">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" />
-          <path d="M11 9l4 3-4 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M16 10l4-2v8l-4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-        Videos
-      </a>
+      <a class="btn" href="/games/">Games</a>
+      <a class="btn" href="/videos/">Videos</a>
     </div>
   </section>
+
+  <section class="card hero" style="margin-top:16px;">
+    <h1 style="font-size:20px;margin-bottom:6px;">Senaste videos</h1>
+    <p style="margin-bottom:0;">Tar de första 4 från <code>_data/videos.yml</code>.</p>
+  </section>
+
+  {% include video_grid.html limit=4 %}
 
   <div class="footer">© 2025 hirrdirr.se</div>
 </div>

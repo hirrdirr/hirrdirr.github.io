@@ -1,0 +1,17 @@
+/* --- Video cards (thumbnails) --- */
+.video-thumb{
+  width: 150px;
+  height: 84px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: #000;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px){
+  .video-thumb{
+    width: 120px;
+    height: 68px;
+  }
+}

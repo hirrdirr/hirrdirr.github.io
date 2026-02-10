@@ -7,78 +7,10 @@ navlabel: videos
 <div class="container">
   <section class="card hero">
     <h1>Videos</h1>
-    <p>Här samlar du dina videos/Shorts. Du kan lägga in länkar, thumbnails eller YouTube-embeds.</p>
+    <p>Här är dina videos/Shorts. Klicka på en ruta för att öppna på YouTube.</p>
   </section>
 
-  <section class="grid" aria-label="Videos">
-    <a class="game" href="#" onclick="return false;">
-      <div class="badge">SNART</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" />
-            <path d="M11 9l4 3-4 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M16 10l4-2v8l-4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div>
-          <h3>Video 1</h3>
-          <p>Byt till riktig länk/thumbnail när du vill.</p>
-        </div>
-      </div>
-    </a>
-
-    <a class="game" href="#" onclick="return false;">
-      <div class="badge">SNART</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" />
-            <path d="M11 9l4 3-4 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M16 10l4-2v8l-4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div>
-          <h3>Video 2</h3>
-          <p>Du kan lista Shorts, playlists, eller “senaste 10”.</p>
-        </div>
-      </div>
-    </a>
-
-    <a class="game" href="#" onclick="return false;">
-      <div class="badge">SNART</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" />
-            <path d="M11 9l4 3-4 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M16 10l4-2v8l-4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div>
-          <h3>Video 3</h3>
-          <p>En till plats för innehåll.</p>
-        </div>
-      </div>
-    </a>
-
-    <a class="game" href="#" onclick="return false;">
-      <div class="badge">SNART</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" />
-            <path d="M11 9l4 3-4 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M16 10l4-2v8l-4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div>
-          <h3>Video 4</h3>
-          <p>Fyll på när du vill.</p>
-        </div>
-      </div>
-    </a>
-  </section>
+  {% include video_grid.html %}
 
   <div class="footer">© 2025 hirrdirr.se</div>
 </div>
