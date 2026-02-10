@@ -1,365 +1,84 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <title></title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    :root {
-      --dominant: #D8D5DB;
-      --secondary: #ADACB5;
-      --accent: #2D3142;
-    }
-    body.dark-mode {
-      --dominant: #2D3142;
-      --secondary: #3E4252;
-      --accent: #D8D5DB;
-    }
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background-color: var(--dominant) !important;
-      overflow-x: hidden !important;
-      font-family: Arial, sans-serif;
-      background: var(--dominant);
-      color: var(--accent);
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-    .topbar {
-      height: 70px;
-      box-sizing: border-box;
-      background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, var(--dominant) 95%),
-                  url('./header.png') no-repeat center center / cover !important;
-      color: var(--accent);
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 2000;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      transition: opacity 0.3s ease, background 0.3s ease;
-    }
-.topbar.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .topbar h1 {
-      font-size: 1.5rem;
-      margin: 0;
-    }
-    #topbar-controls {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      height: 100%;
-      padding-bottom: 0;
-    }
-#darkBtn,
-    #darkBtn {
-      padding: 0.5rem 0.7rem;
-      border: none;
-      border-radius: 50%;
-      background-color: var(--secondary);
-      color: var(--accent);
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #darkBtn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-    svg {
-      stroke: var(--accent);
-    }
-    .hamburger {
-      cursor: pointer;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      gap: 5px;
-      flex-direction: column;
-      z-index: 2001;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-.hamburger div {
-      width: 18px;
-      height: 3px;
-      background: var(--accent);
-      transition: all 0.3s ease;
-    }
-    .hamburger.active div:nth-child(1) {
-      transform: rotate(45deg) translate(4px, 4px);
-    }
-    .hamburger.active div:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger.active div:nth-child(3) {
-      transform: rotate(-45deg) translate(4px, -4px);
-    }
-    .menu {
-      position: fixed;
-      top: 70px;
-      right: 30px;
-      min-width: 180px;
-
-      background: #2D3142 !important;
-      background-color: #2D3142 !important;
-
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      padding: 8px 0;
-      z-index: 1900;
-
-      display: none;
-      flex-direction: column;
-      align-items: stretch;
-      justify-content: flex-start;
-
-      opacity: 1 !important;
-      filter: none !important;
-      mix-blend-mode: normal !important;
-    }
-
-    body:not(.dark-mode) .menu {
-      background: #D8D5DB !important;
-      background-color: #D8D5DB !important;
-      filter: none !important;
-      mix-blend-mode: normal !important;
-    }
-
-    .menu.show {
-      display: flex !important;
-      opacity: 1 !important;
-      transform: translateY(0);
-    }
-
-    .menu a {
-      color: var(--accent);
-      text-decoration: none;
-      padding: 1rem 2rem;
-      display: block;
-      font-weight: bold;
-      border-bottom: 1px solid var(--secondary);
-      text-align: left;
-      transition: background 0.2s;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .menu a:last-child { border-bottom: none; }
-    .menu a:hover { background: var(--secondary); }
-
-    .bottombar {
-      background: var(--secondary);
-      color: var(--accent);
-      text-align: center;
-      padding: 0.7rem;
-      font-size: 0.9rem;
-      z-index: 10;
-      position: relative;
-      margin-top: 3rem;
-      transition: background 0.3s ease;
-    }
-    .video-wrapper {
-      max-width: 960px;
-      margin: 120px auto 100px auto;
-      padding: 0 1rem;
-      text-align: center;
-    }
-    .video-wrapper h2 {
-      color: var(--accent);
-      margin-bottom: 1rem;
-    }
-    .video-section {
-      background: black;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-      transform: scale(1);
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      height: 600px;
-    }
-    .video-section.active {
-      transform: scale(1.05);
-      box-shadow: 0 0 40px rgba(0,0,0,0.8);
-      z-index: 1;
-    }
-    .player-container {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-  <meta name="theme-color" content="#2D3142" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#D8D5DB" media="(prefers-color-scheme: light)">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>hirrdirr</title>
+  <link rel="stylesheet" href="/assets/site.css" />
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
 </head>
 <body>
-  <div class="topbar" id="topbar">
-    <h1>Hirrdirr</h1>
-    <div id="topbar-controls">
-      <button id="darkBtn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
-        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+
+<header class="gh-topbar">
+  <div class="gh-left">
+    <a class="gh-brand" href="/">
+      <span class="gh-dot" aria-hidden="true"></span>
+      <span>hirrdirr</span>
+    </a>
+
+    <div class="gh-crumbs" aria-label="Breadcrumb">
+      <span class="sep">/</span>
+      <span class="current" id="pageLabel">home</span>
+    </div>
+  </div>
+
+  <div class="gh-right">
+    <div class="gh-iconrow" role="navigation" aria-label="Snabbknappar">
+      <a class="iconbtn" href="/" data-route="/" title="Home" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
         </svg>
-        <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </a>
+
+      <a class="iconbtn" href="/games/" data-route="/games/" title="Games" aria-label="Games">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 8a3 3 0 1 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 14h12a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-2l-2-3H8l-2 3H4a2 2 0 0 1-2-2v-1a4 4 0 0 1 4-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M9.5 16.5h-2m1-1v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M16 16.2h.01M18 17.8h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </a>
+
+      <button class="iconbtn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path id="moon" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path id="sun" d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="none" stroke="currentColor" stroke-width="2" opacity="0"/>
         </svg>
       </button>
-      <div class="hamburger" id="hamburger" onclick="toggleMenu()" role="button" tabindex="0" aria-label="Öppna meny">
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
+    </div>
+  </div>
+</header>
 
-      <div class="menu" id="menu">
-        <a href="/games/" onclick="closeMenu()">Games</a>
-      </div>
-    </div>
 
+<main>
+  <div class="container">
+    <section class="card hero">
+      <h1>Hem</h1>
+      <p>En liten hörna på internet för spel, tester och annat nörderi. Snabbknapparna uppe till höger funkar som “inkorg”-känsla: klicka och hoppa.</p>
+
+      <div class="actions">
+        <a class="btn" href="/games/">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 8a3 3 0 1 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6 14h12a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2h-2l-2-3H8l-2 3H4a2 2 0 0 1-2-2v-1a4 4 0 0 1 4-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          Games
+        </a>
+
+        <a class="btn" href="https://github.com/hirrdirr" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 19c-4 1.5-4-2.5-5-3m10 6v-3.9c0-1.1.1-2-.6-2.7 2.2-.3 4.6-1.1 4.6-5A3.9 3.9 0 0 0 17 6.3 3.6 3.6 0 0 0 16.9 3s-.9-.3-3 1a10.4 10.4 0 0 0-5.8 0c-2.1-1.3-3-1-3-1A3.6 3.6 0 0 0 5 6.3 3.9 3.9 0 0 0 4 9.4c0 3.9 2.4 4.7 4.6 5-.6.5-.7 1.3-.6 2.7V22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </section>
+
+    <div class="footer">© 2025 hirrdirr.se</div>
   </div>
-  <div class="video-wrapper">
-    <h2>Clutch</h2>
-    <div class="video-section" id="video1">
-      <div class="player-container" id="player1"></div>
-    </div>
-  </div>
-  <div class="video-wrapper">
-    <h2>Onetap</h2>
-    <div class="video-section" id="video2">
-      <div class="player-container" id="player2"></div>
-    </div>
-  </div>
-  <div class="video-wrapper">
-    <h2>Resschamp</h2>
-    <div class="video-section" id="video3">
-      <div class="player-container" id="player3"></div>
-    </div>
-  </div>
-  <div class="bottombar">
-    &copy; 2025 Hirrdirr. All rights reserved.
-  </div>
-  <script>
-    function toggleMenu() {
-      document.getElementById("menu").classList.toggle("show");
-      document.getElementById("hamburger").classList.toggle("active");
-    }
-    function closeMenu() {
-      document.getElementById("menu").classList.remove("show");
-      document.getElementById("hamburger").classList.remove("active");
-    }
-    // Keyboard accessibility for the hamburger button
-    document.getElementById("hamburger").addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggleMenu();
-      }
-    });
-    function toggleDarkMode() {
-      const body = document.body;
-      const isDark = body.classList.toggle("dark-mode");
-      localStorage.setItem("darkMode", isDark);
-      document.getElementById("icon-sun").style.display = isDark ? "inline" : "none";
-      document.getElementById("icon-moon").style.display = isDark ? "none" : "inline";
-    }
-    window.onload = () => {
-      const isDark = localStorage.getItem("darkMode") === "true";
-      if (isDark) {
-        document.body.classList.add("dark-mode");
-        document.getElementById("icon-sun").style.display = "inline";
-        document.getElementById("icon-moon").style.display = "none";
-      }
-    };
-    window.addEventListener("click", function (e) {
-      const menu = document.getElementById("menu");
-      const hamburger = document.getElementById("hamburger");
-      if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
-        closeMenu();
-      }
-    });
-    let lastScrollTop = 0;
-    const topbar = document.getElementById('topbar');
-    window.addEventListener('scroll', () => {
-      const st = window.pageYOffset || document.documentElement.scrollTop;
-      topbar.classList.toggle('hidden', st > lastScrollTop && st > 100);
-      lastScrollTop = st <= 0 ? 0 : st;
-    });
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-    const videoMap = [
-      { id: 'player1', videoId: 'Auss7fLMiIE', sectionId: 'video1' },
-      { id: 'player2', videoId: 'x_FQXDfmamw', sectionId: 'video2' },
-      { id: 'player3', videoId: 'FGZndqSzgbg', sectionId: 'video3' }
-    ];
-    const players = {};
-    const readyFlags = {};
-    function onYouTubeIframeAPIReady() {
-      videoMap.forEach(({ id, videoId }) => {
-        players[id] = new YT.Player(id, {
-          videoId,
-          playerVars: {
-            autoplay: 0,
-            mute: 1,
-            controls: 1,
-            modestbranding: 1,
-            rel: 0,
-            showinfo: 0
-          },
-          events: {
-            onReady: () => {
-              readyFlags[id] = true;
-              if (Object.keys(readyFlags).length === videoMap.length) {
-                players['player1'].playVideo();
-                setupScrollControl();
-              }
-            }
-          }
-        });
-      });
-    }
-    function setupScrollControl() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const section = entry.target;
-          const playerDiv = section.querySelector('.player-container');
-          const playerId = playerDiv.id;
-          if (entry.isIntersecting) {
-            Object.keys(players).forEach(id => {
-              if (id !== playerId) {
-                players[id].pauseVideo();
-                const sec = document.getElementById(videoMap.find(v => v.id === id).sectionId);
-                sec.classList.remove('active');
-              }
-            });
-            players[playerId].playVideo();
-            section.classList.add('active');
-          } else {
-            players[playerId].pauseVideo();
-            section.classList.remove('active');
-          }
-        });
-      }, { threshold: 0.6 });
-      document.querySelectorAll('.video-section').forEach(section => observer.observe(section));
-    }
-  </script>
+</main>
+
+<script src="/assets/site.js"></script>
 </body>
 </html>
