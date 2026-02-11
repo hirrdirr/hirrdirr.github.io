@@ -1,0 +1,50 @@
+/* TD (Tower Defense) page-specific styles */
+#ui{
+  display:flex;
+  flex-wrap: wrap;
+  gap:12px;
+  align-items:center;
+  padding:10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+}
+
+#ui button{
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding:8px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight: 700;
+}
+#ui button:hover{ background: rgba(255,255,255,0.08); }
+#ui button.active{ outline: 2px solid rgba(125,211,252,0.9); }
+
+#ui .pill{
+  padding:6px 10px;
+  border: 1px solid var(--border);
+  border-radius:999px;
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.td-stage{
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.20);
+  box-shadow: var(--shadow);
+}
+
+/* Make canvas responsive while keeping internal resolution */
+#c{
+  display:block;
+  width: 100%;
+  height: auto;
+  background:#0f1623;
+  border-top: 1px solid var(--border);
+}
