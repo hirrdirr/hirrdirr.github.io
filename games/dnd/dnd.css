@@ -1,0 +1,118 @@
+/* Dodge & Drift — page-scoped styles (works with your site.css + topbar) */
+:root { color-scheme: dark; }
+
+/* Make the game full-bleed inside the Jekyll layout's padded <main> */
+.dnd-page{
+  position: relative;
+  /* negate main padding from site.css: 24px 16px 48px */
+  margin: -24px -16px -48px;
+  height: calc(100vh - 62px); /* approx topbar height; keeps it from hiding under the topbar */
+  background: #0b0f14;
+  overflow: hidden;
+}
+
+/* Canvas fills the available page area */
+.dnd-page canvas{
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+/* HUD / overlays */
+.hud{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 16px;
+  color: #d8e2ff;
+  text-shadow: 0 1px 0 rgba(0,0,0,.5);
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+
+.panel{
+  background: rgba(10,14,20,.45);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 10px 12px;
+  backdrop-filter: blur(8px);
+}
+
+.small{ font-weight: 500; opacity:.9; font-size: 13px; }
+
+.center{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  width: min(520px, calc(100% - 24px));
+  pointer-events: none;
+  text-align: center;
+  color: #e7eeff;
+}
+
+.center .card{
+  pointer-events: auto;
+  background: rgba(10,14,20,.72);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 18px 16px;
+  box-shadow: 0 20px 80px rgba(0,0,0,.35);
+}
+
+.title{ margin:0 0 6px 0; }
+.help{ margin:0 0 14px 0; line-height:1.4; }
+
+button{
+  pointer-events: auto;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(120,160,255,.18);
+  color: #e7eeff;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover{ background: rgba(120,160,255,.28); }
+
+.kbd{
+  display:inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  font-size: 12px;
+}
+
+/* Highscore list */
+.hs-wrap{
+  margin-top: 14px;
+  text-align: left;
+  border-top: 1px solid rgba(255,255,255,.10);
+  padding-top: 12px;
+}
+.hs-title{ margin: 0 0 8px 0; font-size: 14px; opacity: .95; }
+ol.hs{
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+ol.hs li{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  opacity: .92;
+}
+.hs-score{ font-weight: 800; }
+.hs-date{ opacity:.75; font-weight: 500; white-space: nowrap; }
+
+/* On small screens, keep HUD readable */
+@media (max-width: 520px){
+  .hud{ padding: 12px; }
+}
