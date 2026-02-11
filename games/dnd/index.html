@@ -31,8 +31,264 @@ navlabel: games
         <div class="hs-title">Topplista</div>
         <ol class="hs" id="hsList"></ol>
       </div>
+
+      <div id="latestWrap" class="small" style="margin-top:10px; opacity:.9;">
+        Latest attempt – <span id="latestScore">—</span> score
+      </div>
+
+      <div id="nameEntry" style="display:none; margin-top:12px;">
+        <div class="small" style="margin: 6px 0 6px; opacity:.9;">
+          Ny highscore! Skriv ditt namn:
+        </div>
+        <form id="nameForm" autocomplete="off">
+          <input id="playerName" type="text" maxlength="12" placeholder="Ditt namn"
+            style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.25); color:inherit;" />
+          <button type="submit" style="margin-top:8px; width:100%;">Spara</button>
+        </form>
+        <div id="nameHint" class="small" style="margin-top:6px; opacity:.8; display:none;"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="/games/dnd/dnd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+  // === Supabase config ===
+  // 1) Replace with your values from Supabase: Project Settings -> API
+  const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
+  const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_PUBLIC_KEY_HERE";
+
+  // 2) Your table or view name
+  // If you created the view from earlier instructions, keep "top10_scores".
+  // Otherwise set this to "scores" and we'll query+limit in code.
+  const TOP_SOURCE = "top10_scores"; // or "scores"
+  const TABLE_INSERT = "scores";
+
+  const HS_MAX = 10;
+  const LS_LATEST = "dnd.latestAttempt.v1";
+  const LS_PLAYER = "dnd.playerName.v1";
+
+  const hsListEl = document.getElementById("hsList");
+  const highEl = document.getElementById("high");
+  const scoreEl = document.getElementById("score");
+  const overlayEl = document.getElementById("overlay");
+  const startBtn = document.getElementById("start");
+
+  const latestScoreEl = document.getElementById("latestScore");
+
+  const nameEntryEl = document.getElementById("nameEntry");
+  const nameFormEl = document.getElementById("nameForm");
+  const playerNameEl = document.getElementById("playerName");
+  const nameHintEl = document.getElementById("nameHint");
+
+  let client = null;
+  let cachedTop = [];
+  let pendingScore = null;
+  let wasRunning = false;
+
+  function hasConfig() {
+    return SUPABASE_URL && SUPABASE_ANON_KEY &&
+      !SUPABASE_URL.includes("PASTE_YOUR_SUPABASE") &&
+      !SUPABASE_ANON_KEY.includes("PASTE_YOUR_SUPABASE");
+  }
+
+  function parseIntSafe(s) {
+    const n = parseInt(String(s).replace(/[^0-9-]/g, ""), 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function setLatest(score) {
+    localStorage.setItem(LS_LATEST, String(score));
+    if (latestScoreEl) latestScoreEl.textContent = String(score);
+  }
+
+  function renderLatestFromStorage() {
+    const v = localStorage.getItem(LS_LATEST);
+    if (latestScoreEl) latestScoreEl.textContent = v ? v : "—";
+  }
+
+  function renderTop(list) {
+    if (!hsListEl) return;
+    hsListEl.innerHTML = "";
+    list.slice(0, HS_MAX).forEach((row, i) => {
+      const li = document.createElement("li");
+      li.style.display = "flex";
+      li.style.justifyContent = "space-between";
+      li.style.gap = "12px";
+
+      const left = document.createElement("span");
+      left.textContent = `${i + 1}. ${row.name}`;
+
+      const right = document.createElement("span");
+      right.textContent = `${row.score} score`;
+
+      li.appendChild(left);
+      li.appendChild(right);
+      hsListEl.appendChild(li);
+    });
+
+    // Set High (HUD) to global #1 (optional)
+    if (highEl) highEl.textContent = list.length ? String(list[0].score) : "0";
+  }
+
+  function qualifies(score, list) {
+    if (score <= 0) return false;
+    if (list.length < HS_MAX) return true;
+    const last = list[list.length - 1]?.score ?? 0;
+    return score > last;
+  }
+
+  function showNameEntry(score) {
+    pendingScore = score;
+    if (!nameEntryEl) return;
+
+    nameHintEl && (nameHintEl.style.display = "none");
+    nameEntryEl.style.display = "block";
+
+    const savedName = localStorage.getItem(LS_PLAYER) || "";
+    if (playerNameEl) {
+      playerNameEl.value = savedName;
+      setTimeout(() => playerNameEl.focus(), 0);
+      setTimeout(() => playerNameEl.select(), 0);
+    }
+  }
+
+  function hideNameEntry() {
+    pendingScore = null;
+    if (nameEntryEl) nameEntryEl.style.display = "none";
+  }
+
+  function normalizeName(name) {
+    const n = String(name ?? "").trim().slice(0, 12);
+    return n.length ? n : "Anon";
+  }
+
+  async function fetchTop10() {
+    if (!client) return [];
+
+    try {
+      if (TOP_SOURCE === "top10_scores") {
+        const { data, error } = await client.from("top10_scores").select("name,score,created_at");
+        if (error) throw error;
+        // view already sorted+limited
+        return (data || []).map(r => ({ name: String(r.name), score: Number(r.score) || 0 }));
+      } else {
+        const { data, error } = await client
+          .from("scores")
+          .select("name,score,created_at")
+          .order("score", { ascending: false })
+          .order("created_at", { ascending: true })
+          .limit(HS_MAX);
+        if (error) throw error;
+        return (data || []).map(r => ({ name: String(r.name), score: Number(r.score) || 0 }));
+      }
+    } catch (e) {
+      console.warn("[Supabase] fetchTop10 failed:", e);
+      return [];
+    }
+  }
+
+  async function submitScore(name, score) {
+    if (!client) return false;
+
+    const safeName = normalizeName(name);
+    const safeScore = Math.max(0, parseIntSafe(score));
+
+    try {
+      const { error } = await client.from(TABLE_INSERT).insert([{ name: safeName, score: safeScore }]);
+      if (error) throw error;
+
+      localStorage.setItem(LS_PLAYER, safeName);
+      return true;
+    } catch (e) {
+      console.warn("[Supabase] submitScore failed:", e);
+      if (nameHintEl) {
+        nameHintEl.textContent = "Kunde inte spara. Kolla att RLS policies är satta och att name/score är inom gränserna.";
+        nameHintEl.style.display = "block";
+      }
+      return false;
+    }
+  }
+
+  function overlayVisible() {
+    // overlay is always in DOM; consider visible when it has a layout box and is not hidden
+    if (!overlayEl) return false;
+    const style = getComputedStyle(overlayEl);
+    if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") return false;
+    return overlayEl.offsetParent !== null || style.position === "fixed" || style.position === "absolute";
+  }
+
+  async function refreshTop() {
+    cachedTop = await fetchTop10();
+    renderTop(cachedTop);
+  }
+
+  function onGameStart() {
+    wasRunning = true;
+    hideNameEntry();
+  }
+
+  async function onGameEnd(finalScore) {
+    setLatest(finalScore);
+
+    // Ensure we have fresh top10 before deciding qualification
+    await refreshTop();
+
+    if (qualifies(finalScore, cachedTop)) {
+      showNameEntry(finalScore);
+    } else {
+      hideNameEntry();
+    }
+  }
+
+  // Hook start button: when user starts, we mark running
+  if (startBtn) startBtn.addEventListener("click", onGameStart);
+
+  // Detect game end by overlay re-appearing while we were running
+  let lastOverlay = null;
+  function tick() {
+    const vis = overlayVisible();
+
+    if (lastOverlay === null) lastOverlay = vis;
+
+    // Transition from hidden -> visible while running => game ended (most common pattern)
+    if (wasRunning && !lastOverlay && vis) {
+      const finalScore = parseIntSafe(scoreEl?.textContent ?? "0");
+      wasRunning = false;
+      onGameEnd(finalScore);
+    }
+
+    lastOverlay = vis;
+    requestAnimationFrame(tick);
+  }
+
+  // Submit form
+  if (nameFormEl) {
+    nameFormEl.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (pendingScore == null) return;
+
+      const ok = await submitScore(playerNameEl?.value, pendingScore);
+      if (ok) {
+        hideNameEntry();
+        await refreshTop();
+      }
+    });
+  }
+
+  // Init
+  renderLatestFromStorage();
+
+  if (hasConfig()) {
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    refreshTop();
+  } else {
+    console.warn("[Supabase] Missing config. Paste Project URL + anon key in index.html.");
+  }
+
+  tick();
+})();
+</script>
+
