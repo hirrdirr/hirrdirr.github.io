@@ -6,7 +6,6 @@
   const statusEl = document.getElementById('status');
   const overlay = document.getElementById('overlay');
   const startBtn = document.getElementById('start');
-  const hsListEl = document.getElementById('hsList');
 
   let W=0,H=0, DPR=1;
   function resize(){
@@ -17,45 +16,6 @@
     canvas.width = W; canvas.height = H;
   }
   addEventListener('resize', resize);
-
-  // --- Highscore storage ---
-  const HS_KEY = 'dd_scores';
-  function loadScores(){
-    try{
-      const raw = localStorage.getItem(HS_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    }catch{
-      return [];
-    }
-  }
-  function saveScores(arr){
-    localStorage.setItem(HS_KEY, JSON.stringify(arr));
-  }
-  function fmtDate(ts){
-    const d = new Date(ts);
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${dd}`;
-  }
-  function renderHighscores(list){
-    const top = (list || []).slice(0,10);
-    hsListEl.innerHTML = top.length ? top.map((e,i) => {
-      return `<li>
-        <span>${i+1}. <span class="hs-score">${e.score}</span></span>
-        <span class="hs-date">${fmtDate(e.ts)}</span>
-      </li>`;
-    }).join('') : `<li><span>Inga highscores ännu.</span><span class="hs-date">—</span></li>`;
-  }
-  function pushHighscore(score){
-    const list = loadScores();
-    list.push({ score, ts: Date.now() });
-    list.sort((a,b) => b.score - a.score);
-    const trimmed = list.slice(0, 10);
-    saveScores(trimmed);
-    return trimmed;
-  }
 
   // state
   const S = {
@@ -75,12 +35,6 @@
     spawn: 0,
     difficulty: 0
   };
-
-  // init highs
-  const initList = loadScores();
-  const initHigh = initList.length ? initList[0].score : 0;
-  highEl.textContent = initHigh;
-  renderHighscores(initList);
 
   function reset(){
     S.t=0; S.score=0; S.dead=false;
@@ -171,9 +125,10 @@
 
     burst(S.p.x, S.p.y, 80);
 
-    const list = pushHighscore(S.score);
-    highEl.textContent = list.length ? list[0].score : 0;
-    renderHighscores(list);
+    // Notify external UI (e.g., Supabase leaderboard) that the run ended.
+    try{
+      window.dispatchEvent(new CustomEvent('dnd:gameover', { detail: { score: S.score, ts: Date.now() } }));
+    }catch{}
 
     overlay.style.display = "block";
     startBtn.textContent = "Spela igen";
