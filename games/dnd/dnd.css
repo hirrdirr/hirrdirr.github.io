@@ -1,8 +1,8 @@
 /* Dodge & Drift — page-scoped styles (works with your site.css + topbar) */
-:root { color-scheme: dark; }
 
 /* Make the game full-bleed inside the Jekyll layout's padded <main> */
 .dnd-page{
+  color-scheme: dark;
   position: relative;
   /* negate main padding from site.css: 24px 16px 48px */
   margin: -24px -16px -48px;
@@ -19,7 +19,7 @@
 }
 
 /* HUD / overlays */
-.hud{
+.dnd-page .hud{
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -34,7 +34,7 @@
   letter-spacing: .2px;
 }
 
-.panel{
+.dnd-page .panel{
   background: rgba(10,14,20,.45);
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 14px;
@@ -42,9 +42,9 @@
   backdrop-filter: blur(8px);
 }
 
-.small{ font-weight: 500; opacity:.9; font-size: 13px; }
+.dnd-page .small{ font-weight: 500; opacity:.9; font-size: 13px; }
 
-.center{
+.dnd-page .center{
   position: absolute;
   left: 50%;
   top: 50%;
@@ -55,7 +55,7 @@
   color: #e7eeff;
 }
 
-.center .card{
+.dnd-page .center .card{
   pointer-events: auto;
   background: rgba(10,14,20,.72);
   border: 1px solid rgba(255,255,255,.10);
@@ -64,10 +64,10 @@
   box-shadow: 0 20px 80px rgba(0,0,0,.35);
 }
 
-.title{ margin:0 0 6px 0; }
-.help{ margin:0 0 14px 0; line-height:1.4; }
+.dnd-page .title{ margin:0 0 6px 0; }
+.dnd-page .help{ margin:0 0 14px 0; line-height:1.4; }
 
-button{
+.dnd-page button{
   pointer-events: auto;
   border: 1px solid rgba(255,255,255,.15);
   background: rgba(120,160,255,.18);
@@ -77,9 +77,9 @@ button{
   font-weight: 700;
   cursor: pointer;
 }
-button:hover{ background: rgba(120,160,255,.28); }
+.dnd-page button:hover{ background: rgba(120,160,255,.28); }
 
-.kbd{
+.dnd-page .kbd{
   display:inline-block;
   padding: 2px 8px;
   border-radius: 10px;
@@ -89,30 +89,30 @@ button:hover{ background: rgba(120,160,255,.28); }
 }
 
 /* Highscore list */
-.hs-wrap{
+.dnd-page .hs-wrap{
   margin-top: 14px;
   text-align: left;
   border-top: 1px solid rgba(255,255,255,.10);
   padding-top: 12px;
 }
-.hs-title{ margin: 0 0 8px 0; font-size: 14px; opacity: .95; }
-ol.hs{
+.dnd-page .hs-title{ margin: 0 0 8px 0; font-size: 14px; opacity: .95; }
+.dnd-page ol.hs{
   margin: 0;
   padding-left: 20px;
   display: grid;
   gap: 6px;
 }
-ol.hs li{
+.dnd-page ol.hs li{
   display:flex;
   justify-content: space-between;
   gap: 10px;
   font-size: 13px;
   opacity: .92;
 }
-.hs-score{ font-weight: 800; }
-.hs-date{ opacity:.75; font-weight: 500; white-space: nowrap; }
+.dnd-page .hs-score{ font-weight: 800; }
+.dnd-page .hs-date{ opacity:.75; font-weight: 500; white-space: nowrap; }
 
 /* On small screens, keep HUD readable */
 @media (max-width: 520px){
-  .hud{ padding: 12px; }
+  .dnd-page .hud{ padding: 12px; }
 }
