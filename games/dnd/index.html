@@ -74,6 +74,7 @@ navlabel: games
   const LS_LATEST = "dnd.latestAttempt.v1";
   const LS_PLAYER = "dnd.playerName.v1";
   const LS_TOPCACHE = "dnd.top10.cache.v1";
+  const LS_PB = "dnd.personalBest.v1";
 
   const hsListEl = document.getElementById("hsList");
   const highEl = document.getElementById("high");
@@ -107,6 +108,24 @@ navlabel: games
   function renderLatestFromStorage() {
     const v = localStorage.getItem(LS_LATEST);
     if (latestScoreEl) latestScoreEl.textContent = v ? v : "—";
+  }
+
+  function getPB() {
+    const v = localStorage.getItem(LS_PB);
+    const n = parseIntSafe(v ?? 0);
+    return Math.max(0, n);
+  }
+
+  function setPB(score) {
+    const s = Math.max(0, parseIntSafe(score));
+    const pb = getPB();
+    const next = Math.max(pb, s);
+    localStorage.setItem(LS_PB, String(next));
+    if (highEl) highEl.textContent = String(next);
+  }
+
+  function renderPBFromStorage() {
+    if (highEl) highEl.textContent = String(getPB());
   }
 
   function loadTopCache() {
@@ -158,9 +177,6 @@ navlabel: games
       li.appendChild(right);
       hsListEl.appendChild(li);
     });
-
-    // High (HUD) = global #1 score, but don't force 0 if list is empty.
-    if (highEl && list.length) highEl.textContent = String(list[0].score);
   }
 
   function qualifies(score, list) {
@@ -227,21 +243,23 @@ navlabel: games
     if (showLoading) renderTop(cachedTop, { loading: true });
 
     const fresh = await fetchTop10();
+
     if (fresh && fresh.length) {
       cachedTop = fresh;
       saveTopCache(cachedTop);
       renderTop(cachedTop);
-    } else if (fresh && fresh.length === 0) {
-      // Fresh response but empty result: only wipe UI if we truly have no cache.
-      if (!cachedTop.length) {
-        cachedTop = [];
-        saveTopCache([]);
-        if (hsListEl) hsListEl.innerHTML = '<li style="opacity:.75;">Ingen score ännu. Bli den första. 😈</li>';
-        if (highEl) highEl.textContent = "0";
-      }
-    } else {
-      // null => fetch failed; keep cached render as-is
+      return;
     }
+
+    if (Array.isArray(fresh) && fresh.length === 0) {
+      // Supabase says: leaderboard is empty. Clear cache so ALL users see the reset on next refresh.
+      cachedTop = [];
+      saveTopCache([]);
+      if (hsListEl) hsListEl.innerHTML = '<li style="opacity:.75;">Ingen score ännu. Bli den första. 😈</li>';
+            return;
+    }
+
+    // null => fetch failed; keep cached render as-is (avoid flicker on transient network issues)
   }
 
   async function submitScore(name, score) {
@@ -271,6 +289,7 @@ navlabel: games
   async function onGameOver(detail) {
     const finalScore = Math.max(0, parseIntSafe(detail?.score ?? 0));
     setLatest(finalScore);
+    setPB(finalScore);
 
     // Get fresh top10 before deciding qualification.
     await refreshTop();
@@ -298,12 +317,16 @@ navlabel: games
       if (ok) {
         hideNameEntry();
         await refreshTop({ showLoading: true });
+        // Periodic refresh so resets propagate automatically
+        setInterval(() => refreshTop(), 20000);
+        window.addEventListener('focus', () => refreshTop());
       }
     });
   }
 
   // --- Init ---
   renderLatestFromStorage();
+  renderPBFromStorage();
 
   // Load cached Top 10 immediately to avoid refresh blink
   cachedTop = loadTopCache();
@@ -316,6 +339,9 @@ navlabel: games
       if (window.supabase?.createClient) {
         client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         refreshTop({ showLoading: true });
+        // Periodic refresh so resets propagate automatically
+        setInterval(() => refreshTop(), 20000);
+        window.addEventListener('focus', () => refreshTop());
       } else {
         setTimeout(initClient, 50);
       }
