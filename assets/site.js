@@ -1,20 +1,37 @@
 // /assets/site.js
-// Keeps theme + nav stable, and plays nicely with Lucide icons.
-//
-// IMPORTANT:
-// If you moved lucide.createIcons() into your HTML layout, remove that inline init,
-// and let this file handle it (prevents double-renders and timing issues).
-
+// Hirrdirr site helpers: Lucide init, theme toggle, and active topbar buttons.
 (() => {
   const THEME_KEY = "hirrdirr_theme";
 
-  function applyTheme(mode) {
+  const normPath = (p) => {
+    if (!p) return "/";
+    // Keep trailing slash for directory-style routes
+    if (p === "/") return "/";
+    return p.endsWith("/") ? p : p + "/";
+  };
+
+  const getPreferredTheme = () => {
+    // If user has chosen before, respect it.
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") return saved;
+
+    // Otherwise, follow OS preference.
+    try {
+      return window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: light)").matches
+        ? "light"
+        : "dark";
+    } catch {
+      return "dark";
+    }
+  };
+
+  const setTheme = (mode) => {
     const isLight = mode === "light";
     document.body.classList.toggle("light", isLight);
     localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
 
-    // Optional: if you use separate sun/moon icons, fade one out.
-    // Works whether Lucide has swapped <i> -> <svg> or not.
+    // Toggle the theme icons (works whether they're <i> placeholders or <svg> after Lucide)
     const sun =
       document.getElementById("sun") ||
       document.querySelector(".lucide-sun,[data-lucide='sun']");
@@ -33,49 +50,53 @@
         "aria-label",
         isLight ? "Switch to dark mode" : "Switch to light mode"
       );
+      btn.title = isLight ? "Switch to dark mode" : "Switch to light mode";
     }
-  }
+  };
 
-  function initTheme() {
+  const initTheme = () => {
     const btn = document.getElementById("themeBtn");
-    const saved = localStorage.getItem(THEME_KEY) || "dark";
-    applyTheme(saved);
+    setTheme(getPreferredTheme());
 
     if (btn) {
       btn.addEventListener("click", () => {
         const next = document.body.classList.contains("light") ? "dark" : "light";
-        applyTheme(next);
+        setTheme(next);
       });
     }
-  }
+  };
 
-  function initActiveNavAndLabel() {
-    const path = location.pathname.endsWith("/")
-      ? location.pathname
-      : location.pathname + "/";
+  const initActiveNav = () => {
+    const path = normPath(location.pathname);
 
     document.querySelectorAll(".iconbtn[data-route]").forEach((a) => {
-      const r = a.getAttribute("data-route");
+      const r = normPath(a.getAttribute("data-route"));
       if (r === path) a.classList.add("active");
+      else a.classList.remove("active");
     });
 
+    // Optional breadcrumb fallback: only change if it's empty/missing
     const label = document.getElementById("pageLabel");
-    if (label) {
-      // Extend this mapping as you add sections.
-      label.textContent = path.startsWith("/games/") ? "games" : "home";
+    if (label && !label.textContent.trim()) {
+      if (path.startsWith("/games/")) label.textContent = "games";
+      else if (path.startsWith("/videos/")) label.textContent = "videos";
+      else label.textContent = "home";
     }
-  }
+  };
 
-  function initLucide() {
+  const initLucide = () => {
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       window.lucide.createIcons();
     }
-  }
+  };
 
-  // Run once DOM is ready. Render Lucide icons first so theme icon tweaks hit the final SVGs.
+  // Run once the DOM is ready, in an order that keeps theme icons consistent:
+  // 1) Render Lucide icons (so placeholders become SVG)
+  // 2) Apply theme (so sun/moon opacity hits the final elements)
+  // 3) Mark active nav
   window.addEventListener("DOMContentLoaded", () => {
     initLucide();
     initTheme();
-    initActiveNavAndLabel();
+    initActiveNav();
   });
 })();
