@@ -1,6 +1,14 @@
 (() => {
   const canvas = document.getElementById('c');
+  if (!canvas) {
+    console.warn('[DND] Canvas #c not found. Aborting game init.');
+    return;
+  }
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.warn('[DND] 2D context unavailable.');
+    return;
+  }
   const scoreEl = document.getElementById('score');
   const highEl = document.getElementById('high');
   const statusEl = document.getElementById('status');
