@@ -1,50 +1,60 @@
-/* TD (Tower Defense) page-specific styles */
-#ui{
-  display:flex;
-  flex-wrap: wrap;
-  gap:12px;
-  align-items:center;
-  padding:10px 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.03);
+/* Self-contained + scoped so it doesn't fight your site.css / topbar */
+.td-page{
+  padding: 16px 12px 24px;
+  color: #e6edf3;
 }
 
-#ui button{
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  border: 1px solid var(--border);
+.td-ui{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin: 0 auto 12px;
+  max-width: 1100px;
+}
+
+.td-btn{
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
   padding:8px 10px;
   border-radius:10px;
   cursor:pointer;
-  font-weight: 700;
 }
-#ui button:hover{ background: rgba(255,255,255,0.08); }
-#ui button.active{ outline: 2px solid rgba(125,211,252,0.9); }
 
-#ui .pill{
+.td-btn.active{ outline:2px solid #7dd3fc; }
+
+.td-pill{
   padding:6px 10px;
-  border: 1px solid var(--border);
+  border:1px solid #324155;
   border-radius:999px;
-  background: rgba(255,255,255,0.03);
-  color: var(--muted);
-  white-space: nowrap;
+  background:#121b2a;
+  color:#e6edf3;
 }
 
-.td-stage{
-  border: 1px solid var(--border);
-  border-radius: 16px;
+.td-hint{ opacity:.9; }
+
+.td-page kbd{
+  background:#0b1220;
+  border:1px solid #223045;
+  border-bottom-width:2px;
+  padding:1px 6px;
+  border-radius:6px;
+  font-size:.9em;
+}
+
+.td-wrap{
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: 14px;
   overflow: hidden;
-  background: rgba(0,0,0,0.20);
-  box-shadow: var(--shadow);
+  border:1px solid #223045;
+  box-shadow: 0 6px 22px rgba(0,0,0,.35);
 }
 
-/* Make canvas responsive while keeping internal resolution */
-#c{
+.td-wrap canvas{
   display:block;
-  width: 100%;
-  height: auto;
+  width:100%;
+  height:auto;
   background:#0f1623;
-  border-top: 1px solid var(--border);
 }

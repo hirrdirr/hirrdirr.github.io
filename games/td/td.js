@@ -2,10 +2,12 @@
   const canvas = document.getElementById("c");
   const ctx = canvas.getContext("2d");
 
+  // Grid
   const tile = 30;
   const cols = Math.floor(canvas.width / tile);
   const rows = Math.floor(canvas.height / tile);
 
+  // Waypoints (bana). Enkelt och stabilt.
   const path = [
     {x: 0.5, y: 8.5},
     {x: 10.5, y: 8.5},
@@ -15,6 +17,7 @@
     {x: 30.5, y: 13.5},
   ].map(p => ({ x: p.x * tile, y: p.y * tile }));
 
+  // Markera vilka rutor som är "väg"
   const isRoad = new Set();
   function markRoad() {
     for (let i = 0; i < path.length - 1; i++) {
@@ -34,10 +37,11 @@
   }
   markRoad();
 
+  // Game state
   let gold = 120;
   let lives = 20;
   let wave = 0;
-  let placing = null;
+  let placing = null; // "sniper" | "gatling" | null
 
   const towers = [];
   const enemies = [];
@@ -48,6 +52,13 @@
     gatling: { cost:35, range: 95, fireRate:4.5, damage: 5, bulletSpeed:520 },
   };
 
+  // Selection/hover + ghost preview + debug toggle for ranges
+  let hoveredTower = -1;
+  let selectedTower = -1;
+  let showAllRanges = false;
+  let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
+
+  // UI
   const btn1 = document.getElementById("t1");
   const btn2 = document.getElementById("t2");
   const btnStart = document.getElementById("start");
@@ -60,7 +71,6 @@
   }
   btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper");
   btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling");
-
   btnStart.onclick = () => startWave();
 
   function startWave() {
@@ -70,10 +80,10 @@
   }
 
   function makeEnemy(delay) {
-    const hp = 30 + wave * 8;
     return {
       t: -delay,
-      hp, maxHp: hp,
+      hp: 30 + wave * 8,
+      maxHp: 30 + wave * 8,
       speed: 55 + wave * 3,
       idx: 0,
       x: path[0].x,
@@ -94,26 +104,61 @@
     const my = (ev.clientY - rect.top) * (canvas.height / rect.height);
     const gx = Math.floor(mx / tile);
     const gy = Math.floor(my / tile);
-    return {gx, gy};
+    const inside = (mx >= 0 && my >= 0 && mx < canvas.width && my < canvas.height);
+    return {mx, my, gx, gy, inside};
   }
 
+  // Input
   canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+  canvas.addEventListener("mousemove", (ev) => {
+    mouse = gridFromMouse(ev);
+
+    // Hover-detection
+    hoveredTower = -1;
+    let bestD2 = Infinity;
+    for (let i = 0; i < towers.length; i++) {
+      const t = towers[i];
+      const d2 = dist2(t.x, t.y, mouse.mx, mouse.my);
+      const hitR = tile * 0.55;
+      if (d2 < hitR * hitR && d2 < bestD2) {
+        hoveredTower = i;
+        bestD2 = d2;
+      }
+    }
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    mouse.inside = false;
+    hoveredTower = -1;
+  });
+
   canvas.addEventListener("mousedown", (ev) => {
     const {gx, gy} = gridFromMouse(ev);
     if (gx < 0 || gy < 0 || gx >= cols || gy >= rows) return;
 
     const key = `${gx},${gy}`;
-    const occupied = towers.some(t => t.gx === gx && t.gy === gy);
+    const occupiedIdx = towers.findIndex(t => t.gx === gx && t.gy === gy);
+    const occupied = occupiedIdx !== -1;
 
-    if (ev.button === 2) {
-      const idx = towers.findIndex(t => t.gx === gx && t.gy === gy);
-      if (idx !== -1) towers.splice(idx, 1);
+    if (ev.button === 2) { // remove
+      if (occupiedIdx !== -1) {
+        towers.splice(occupiedIdx, 1);
+        if (selectedTower === occupiedIdx) selectedTower = -1;
+      }
+      return;
+    }
+
+    // Click-select när du INTE placerar
+    if (!placing && ev.button === 0) {
+      selectedTower = occupied ? occupiedIdx : -1;
       return;
     }
 
     if (!placing) return;
-    if (isRoad.has(key) || occupied) return;
 
+    // Placing
+    if (isRoad.has(key) || occupied) return;
     const type = towerTypes[placing];
     if (gold < type.cost) return;
 
@@ -127,17 +172,59 @@
     });
   });
 
+  window.addEventListener("keydown", (ev) => {
+    if (ev.key.toLowerCase() === "r") showAllRanges = !showAllRanges;
+    if (ev.key === "Escape") setPlacing(null);
+  });
+
+  // Drawing helpers
+  function drawRangeRing(x, y, r, strong=false) {
+    ctx.save();
+    ctx.globalAlpha = strong ? 0.95 : 0.35;
+    ctx.strokeStyle = "#93c5fd";
+    ctx.lineWidth = strong ? 2.2 : 1;
+    ctx.setLineDash(strong ? [7, 6] : [4, 10]);
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGhostTower(gx, gy, kind, ok) {
+    const x = (gx + 0.5) * tile;
+    const y = (gy + 0.5) * tile;
+    const tt = towerTypes[kind];
+
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = kind === "sniper" ? "#eab308" : "#22c55e";
+    ctx.fillRect(gx * tile + 6, gy * tile + 6, tile - 12, tile - 12);
+
+    ctx.globalAlpha = 0.9;
+    ctx.strokeStyle = ok ? "#22c55e" : "#ef4444";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.strokeRect(gx * tile + 4, gy * tile + 4, tile - 8, tile - 8);
+    ctx.restore();
+
+    drawRangeRing(x, y, tt.range, true);
+  }
+
+  // Loop
   let last = performance.now();
   function tick(now) {
     const dt = Math.min(0.033, (now - last) / 1000);
     last = now;
+
     update(dt);
     render();
+
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
   function update(dt) {
+    // Enemies
     for (let i = enemies.length - 1; i >= 0; i--) {
       const e = enemies[i];
       e.t += dt;
@@ -163,6 +250,7 @@
       }
     }
 
+    // Towers shoot
     for (const t of towers) {
       const tt = towerTypes[t.kind];
       t.cd -= dt;
@@ -173,18 +261,30 @@
       for (const e of enemies) {
         if (e.t < 0) continue;
         const d2 = dist2(t.x, t.y, e.x, e.y);
-        if (d2 <= tt.range * tt.range && d2 < bestD2) { best = e; bestD2 = d2; }
+        if (d2 <= tt.range * tt.range && d2 < bestD2) {
+          best = e; bestD2 = d2;
+        }
       }
       if (best) {
         t.cd = 1 / tt.fireRate;
-        bullets.push({ x: t.x, y: t.y, speed: tt.bulletSpeed, dmg: tt.damage, target: best, life: 1.2 });
+        bullets.push({
+          x: t.x, y: t.y,
+          speed: tt.bulletSpeed,
+          dmg: tt.damage,
+          target: best,
+          life: 1.2
+        });
       }
     }
 
+    // Bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
       const b = bullets[i];
       b.life -= dt;
-      if (b.life <= 0 || !b.target || b.target.hp <= 0) { bullets.splice(i, 1); continue; }
+      if (b.life <= 0 || !b.target || b.target.hp <= 0) {
+        bullets.splice(i, 1);
+        continue;
+      }
 
       const dx = b.target.x - b.x;
       const dy = b.target.y - b.y;
@@ -205,24 +305,39 @@
       }
     }
 
-    stats.textContent = `Guld: ${gold} | Liv: ${lives} | Våg: ${wave} | Fiender: ${enemies.filter(e=>e.t>=0).length}`;
+    stats.textContent =
+      `Guld: ${gold} | Liv: ${lives} | Våg: ${wave} | Fiender: ${enemies.filter(e=>e.t>=0).length}` +
+      (showAllRanges ? " | Ranges: ALLA (R)" : " | Ranges: VALD/HOVER (R)");
   }
 
   function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.globalAlpha = 0.25;
+    // Grid
+    ctx.globalAlpha = 0.22;
     ctx.strokeStyle = "#2b3b55";
-    for (let x = 0; x <= cols; x++) { ctx.beginPath(); ctx.moveTo(x*tile, 0); ctx.lineTo(x*tile, canvas.height); ctx.stroke(); }
-    for (let y = 0; y <= rows; y++) { ctx.beginPath(); ctx.moveTo(0, y*tile); ctx.lineTo(canvas.width, y*tile); ctx.stroke(); }
+    for (let x = 0; x <= cols; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * tile, 0);
+      ctx.lineTo(x * tile, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= rows; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * tile);
+      ctx.lineTo(canvas.width, y * tile);
+      ctx.stroke();
+    }
     ctx.globalAlpha = 1;
 
+    // Road tiles
     for (const key of isRoad) {
       const [gx, gy] = key.split(",").map(Number);
       ctx.fillStyle = "#172235";
       ctx.fillRect(gx * tile, gy * tile, tile, tile);
     }
 
+    // Path line
     ctx.strokeStyle = "#3b82f6";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -231,20 +346,41 @@
     ctx.stroke();
     ctx.lineWidth = 1;
 
-    for (const t of towers) {
-      const tt = towerTypes[t.kind];
+    // Towers
+    for (let i = 0; i < towers.length; i++) {
+      const t = towers[i];
+
       ctx.fillStyle = t.kind === "sniper" ? "#eab308" : "#22c55e";
       ctx.fillRect((t.gx * tile) + 6, (t.gy * tile) + 6, tile - 12, tile - 12);
 
-      ctx.globalAlpha = 0.12;
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, tt.range, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      if (i === hoveredTower || i === selectedTower) {
+        ctx.save();
+        ctx.strokeStyle = (i === selectedTower) ? "#7dd3fc" : "#94a3b8";
+        ctx.lineWidth = 2;
+        ctx.strokeRect((t.gx * tile) + 4, (t.gy * tile) + 4, tile - 8, tile - 8);
+        ctx.restore();
+      }
     }
 
+    // Ranges: default = only selected/hover, debug = all
+    if (showAllRanges) {
+      for (const t of towers) {
+        const tt = towerTypes[t.kind];
+        drawRangeRing(t.x, t.y, tt.range, false);
+      }
+    } else {
+      const showIdx = hoveredTower !== -1 ? hoveredTower : selectedTower;
+      if (showIdx !== -1) {
+        const t = towers[showIdx];
+        const tt = towerTypes[t.kind];
+        drawRangeRing(t.x, t.y, tt.range, true);
+      }
+    }
+
+    // Enemies
     for (const e of enemies) {
       if (e.t < 0) continue;
+
       ctx.fillStyle = "#ef4444";
       ctx.beginPath();
       ctx.arc(e.x, e.y, e.r, 0, Math.PI*2);
@@ -258,9 +394,27 @@
       ctx.fillRect(e.x - w/2, e.y - e.r - 10, w * pct, h);
     }
 
+    // Bullets
     ctx.fillStyle = "#e5e7eb";
-    for (const b of bullets) { ctx.beginPath(); ctx.arc(b.x, b.y, 3, 0, Math.PI*2); ctx.fill(); }
+    for (const b of bullets) {
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
 
+    // Ghost placement preview
+    if (placing && mouse.inside) {
+      const gx = mouse.gx, gy = mouse.gy;
+      if (gx >= 0 && gy >= 0 && gx < cols && gy < rows) {
+        const key = `${gx},${gy}`;
+        const occupied = towers.some(t => t.gx === gx && t.gy === gy);
+        const enoughGold = gold >= towerTypes[placing].cost;
+        const ok = !isRoad.has(key) && !occupied && enoughGold;
+        drawGhostTower(gx, gy, placing, ok);
+      }
+    }
+
+    // Game over
     if (lives <= 0) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
