@@ -1,28 +1,470 @@
----
-layout: default
-title: hirrdirr • td
-navlabel: games
----
-
-<div class="container">
-  <section class="card hero">
-    <h1>TD</h1>
-    <p>Tower Defense (MVP). Vänsterklick: placera. Högerklick: ta bort.</p>
-  </section>
-
-  <link rel="stylesheet" href="/games/td/td.css" />
-
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tower Defense (MVP)</title>
+  <style>
+    body { margin: 0; background:#0b0f14; color:#e6edf3; font-family: system-ui, Segoe UI, Arial; }
+    #ui { display:flex; gap:12px; align-items:center; padding:10px 12px; flex-wrap:wrap; }
+    button { background:#1f2a37; color:#e6edf3; border:1px solid #324155; padding:8px 10px; border-radius:10px; cursor:pointer; }
+    button.active { outline:2px solid #7dd3fc; }
+    canvas { display:block; margin:0 auto; background:#0f1623; border-top:1px solid #223045; }
+    .pill { padding:6px 10px; border:1px solid #324155; border-radius:999px; background:#121b2a; }
+    .hint { opacity:.9; }
+    kbd{ background:#0b1220; border:1px solid #223045; border-bottom-width:2px; padding:1px 6px; border-radius:6px; font-size:.9em; }
+  </style>
+</head>
+<body>
   <div id="ui">
     <span class="pill" id="stats"></span>
     <button id="t1">Torn: Sniper (50)</button>
     <button id="t2">Torn: Gatling (35)</button>
     <button id="start">Starta våg</button>
-    <span class="pill">Klicka på rutnätet för att placera. Högerklick = ta bort.</span>
+    <span class="pill hint">Placera: klick. Ta bort: högerklick. Visa alla ranges (debug): <kbd>R</kbd></span>
   </div>
+  <canvas id="c" width="960" height="540"></canvas>
 
-  <div class="td-stage">
-    <canvas id="c" width="960" height="540"></canvas>
-  </div>
+<script>
+(() => {
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
 
-  <script src="/games/td/td.js"></script>
-</div>
+  // Grid
+  const tile = 30;
+  const cols = Math.floor(canvas.width / tile);
+  const rows = Math.floor(canvas.height / tile);
+
+  // Waypoints (bana). Enkelt och stabilt.
+  const path = [
+    {x: 0.5, y: 8.5},
+    {x: 10.5, y: 8.5},
+    {x: 10.5, y: 3.5},
+    {x: 22.5, y: 3.5},
+    {x: 22.5, y: 13.5},
+    {x: 30.5, y: 13.5},
+  ].map(p => ({ x: p.x * tile, y: p.y * tile }));
+
+  // Markera vilka rutor som är "väg"
+  const isRoad = new Set();
+  function markRoad() {
+    for (let i = 0; i < path.length - 1; i++) {
+      const a = path[i], b = path[i+1];
+      const dx = Math.sign(b.x - a.x);
+      const dy = Math.sign(b.y - a.y);
+      let x = a.x, y = a.y;
+      for (let steps = 0; steps < 2000; steps++) {
+        const gx = Math.floor(x / tile);
+        const gy = Math.floor(y / tile);
+        isRoad.add(`${gx},${gy}`);
+        if (Math.abs(x - b.x) < 1 && Math.abs(y - b.y) < 1) break;
+        x += dx * tile * 0.2;
+        y += dy * tile * 0.2;
+      }
+    }
+  }
+  markRoad();
+
+  // Game state
+  let gold = 120;
+  let lives = 20;
+  let wave = 0;
+  let placing = null; // "sniper" | "gatling" | null
+
+  const towers = [];
+  const enemies = [];
+  const bullets = [];
+
+  const towerTypes = {
+    sniper:  { cost:50, range:150, fireRate:0.8, damage:18, bulletSpeed:420 },
+    gatling: { cost:35, range: 95, fireRate:4.5, damage: 5, bulletSpeed:520 },
+  };
+
+  // --- NEW: selection/hover + ghost preview + debug toggle for ranges ---
+  let hoveredTower = -1;
+  let selectedTower = -1;
+  let showAllRanges = false;
+
+  let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
+
+  // UI
+  const btn1 = document.getElementById("t1");
+  const btn2 = document.getElementById("t2");
+  const btnStart = document.getElementById("start");
+  const stats = document.getElementById("stats");
+
+  function setPlacing(t) {
+    placing = t;
+    btn1.classList.toggle("active", t === "sniper");
+    btn2.classList.toggle("active", t === "gatling");
+  }
+  btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper");
+  btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling");
+  btnStart.onclick = () => startWave();
+
+  function startWave() {
+    wave++;
+    const count = 8 + wave * 2;
+    for (let i = 0; i < count; i++) enemies.push(makeEnemy(i * 0.7));
+  }
+
+  function makeEnemy(delay) {
+    return {
+      t: -delay,
+      hp: 30 + wave * 8,
+      maxHp: 30 + wave * 8,
+      speed: 55 + wave * 3,
+      idx: 0,
+      x: path[0].x,
+      y: path[0].y,
+      r: 10,
+      reward: 7 + Math.floor(wave/2),
+    };
+  }
+
+  const dist2 = (ax,ay,bx,by) => {
+    const dx=ax-bx, dy=ay-by;
+    return dx*dx+dy*dy;
+  };
+
+  function gridFromMouse(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (ev.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (ev.clientY - rect.top) * (canvas.height / rect.height);
+    const gx = Math.floor(mx / tile);
+    const gy = Math.floor(my / tile);
+    const inside = (mx >= 0 && my >= 0 && mx < canvas.width && my < canvas.height);
+    return {mx, my, gx, gy, inside};
+  }
+
+  // Input
+  canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+  canvas.addEventListener("mousemove", (ev) => {
+    mouse = gridFromMouse(ev);
+
+    // Hover-detection: välj närmaste torn inom en liten hitbox
+    hoveredTower = -1;
+    let bestD2 = Infinity;
+
+    for (let i = 0; i < towers.length; i++) {
+      const t = towers[i];
+      const d2 = dist2(t.x, t.y, mouse.mx, mouse.my);
+      const hitR = tile * 0.55;
+      if (d2 < hitR * hitR && d2 < bestD2) {
+        hoveredTower = i;
+        bestD2 = d2;
+      }
+    }
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    mouse.inside = false;
+    hoveredTower = -1;
+  });
+
+  canvas.addEventListener("mousedown", (ev) => {
+    const {gx, gy} = gridFromMouse(ev);
+    if (gx < 0 || gy < 0 || gx >= cols || gy >= rows) return;
+
+    const key = `${gx},${gy}`;
+    const occupiedIdx = towers.findIndex(t => t.gx === gx && t.gy === gy);
+    const occupied = occupiedIdx !== -1;
+
+    if (ev.button === 2) { // remove
+      if (occupiedIdx !== -1) {
+        towers.splice(occupiedIdx, 1);
+        if (selectedTower === occupiedIdx) selectedTower = -1;
+      }
+      return;
+    }
+
+    // Click-select när du INTE placerar
+    if (!placing && ev.button === 0) {
+      selectedTower = occupied ? occupiedIdx : -1;
+      return;
+    }
+
+    if (!placing) return;
+
+    // Placing
+    if (isRoad.has(key) || occupied) return;
+
+    const type = towerTypes[placing];
+    if (gold < type.cost) return;
+
+    gold -= type.cost;
+    towers.push({
+      kind: placing,
+      gx, gy,
+      x: (gx + 0.5) * tile,
+      y: (gy + 0.5) * tile,
+      cd: 0,
+    });
+  });
+
+  window.addEventListener("keydown", (ev) => {
+    if (ev.key.toLowerCase() === "r") showAllRanges = !showAllRanges;
+    if (ev.key === "Escape") setPlacing(null);
+  });
+
+  // Drawing helpers
+  function drawRangeRing(x, y, r, strong=false) {
+    ctx.save();
+    ctx.globalAlpha = strong ? 0.95 : 0.35;
+    ctx.strokeStyle = "#93c5fd";
+    ctx.lineWidth = strong ? 2.2 : 1;
+    ctx.setLineDash(strong ? [7, 6] : [4, 10]);
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGhostTower(gx, gy, kind, ok) {
+    const x = (gx + 0.5) * tile;
+    const y = (gy + 0.5) * tile;
+    const tt = towerTypes[kind];
+
+    // tower ghost
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = kind === "sniper" ? "#eab308" : "#22c55e";
+    ctx.fillRect(gx * tile + 6, gy * tile + 6, tile - 12, tile - 12);
+
+    // OK/NOT OK outline
+    ctx.globalAlpha = 0.9;
+    ctx.strokeStyle = ok ? "#22c55e" : "#ef4444";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.strokeRect(gx * tile + 4, gy * tile + 4, tile - 8, tile - 8);
+    ctx.restore();
+
+    // range ring (strong)
+    drawRangeRing(x, y, tt.range, true);
+  }
+
+  // Loop
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+
+    update(dt);
+    render();
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function update(dt) {
+    // Enemies
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      e.t += dt;
+      if (e.t < 0) continue;
+
+      const target = path[Math.min(e.idx + 1, path.length - 1)];
+      const dx = target.x - e.x;
+      const dy = target.y - e.y;
+      const d = Math.hypot(dx, dy) || 1;
+
+      const step = e.speed * dt;
+      if (d <= step) {
+        e.x = target.x; e.y = target.y;
+        if (e.idx < path.length - 2) e.idx++;
+        else {
+          lives--;
+          enemies.splice(i, 1);
+          continue;
+        }
+      } else {
+        e.x += (dx / d) * step;
+        e.y += (dy / d) * step;
+      }
+    }
+
+    // Towers shoot
+    for (const t of towers) {
+      const tt = towerTypes[t.kind];
+      t.cd -= dt;
+      if (t.cd > 0) continue;
+
+      let best = null;
+      let bestD2 = Infinity;
+      for (const e of enemies) {
+        if (e.t < 0) continue;
+        const d2 = dist2(t.x, t.y, e.x, e.y);
+        if (d2 <= tt.range * tt.range && d2 < bestD2) {
+          best = e; bestD2 = d2;
+        }
+      }
+      if (best) {
+        t.cd = 1 / tt.fireRate;
+        bullets.push({
+          x: t.x, y: t.y,
+          speed: tt.bulletSpeed,
+          dmg: tt.damage,
+          target: best,
+          life: 1.2
+        });
+      }
+    }
+
+    // Bullets
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      b.life -= dt;
+      if (b.life <= 0 || !b.target || b.target.hp <= 0) {
+        bullets.splice(i, 1);
+        continue;
+      }
+
+      const dx = b.target.x - b.x;
+      const dy = b.target.y - b.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const step = b.speed * dt;
+
+      if (d <= step + b.target.r) {
+        b.target.hp -= b.dmg;
+        if (b.target.hp <= 0) {
+          gold += b.target.reward;
+          const idx = enemies.indexOf(b.target);
+          if (idx !== -1) enemies.splice(idx, 1);
+        }
+        bullets.splice(i, 1);
+      } else {
+        b.x += (dx / d) * step;
+        b.y += (dy / d) * step;
+      }
+    }
+
+    stats.textContent =
+      `Guld: ${gold} | Liv: ${lives} | Våg: ${wave} | Fiender: ${enemies.filter(e=>e.t>=0).length}` +
+      (showAllRanges ? " | Ranges: ALLA (R)" : " | Ranges: VALD/HOVER (R)");
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Grid
+    ctx.globalAlpha = 0.22;
+    ctx.strokeStyle = "#2b3b55";
+    for (let x = 0; x <= cols; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * tile, 0);
+      ctx.lineTo(x * tile, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= rows; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * tile);
+      ctx.lineTo(canvas.width, y * tile);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Road tiles
+    for (const key of isRoad) {
+      const [gx, gy] = key.split(",").map(Number);
+      ctx.fillStyle = "#172235";
+      ctx.fillRect(gx * tile, gy * tile, tile, tile);
+    }
+
+    // Path line
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+
+    // Towers
+    for (let i = 0; i < towers.length; i++) {
+      const t = towers[i];
+
+      // base
+      ctx.fillStyle = t.kind === "sniper" ? "#eab308" : "#22c55e";
+      ctx.fillRect((t.gx * tile) + 6, (t.gy * tile) + 6, tile - 12, tile - 12);
+
+      // subtle highlight on hover/selected
+      if (i === hoveredTower || i === selectedTower) {
+        ctx.save();
+        ctx.strokeStyle = (i === selectedTower) ? "#7dd3fc" : "#94a3b8";
+        ctx.lineWidth = 2;
+        ctx.strokeRect((t.gx * tile) + 4, (t.gy * tile) + 4, tile - 8, tile - 8);
+        ctx.restore();
+      }
+    }
+
+    // Ranges (fix for "kladd"):
+    // - default: only show selected/hovered (NO green soup)
+    // - debug: press R to show all as thin dashed rings
+    if (showAllRanges) {
+      for (const t of towers) {
+        const tt = towerTypes[t.kind];
+        drawRangeRing(t.x, t.y, tt.range, false);
+      }
+    } else {
+      const showIdx = hoveredTower !== -1 ? hoveredTower : selectedTower;
+      if (showIdx !== -1) {
+        const t = towers[showIdx];
+        const tt = towerTypes[t.kind];
+        drawRangeRing(t.x, t.y, tt.range, true);
+      }
+    }
+
+    // Enemies
+    for (const e of enemies) {
+      if (e.t < 0) continue;
+
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r, 0, Math.PI*2);
+      ctx.fill();
+
+      // hp bar
+      const w = 26, h = 4;
+      const pct = Math.max(0, e.hp / e.maxHp);
+      ctx.fillStyle = "#111827";
+      ctx.fillRect(e.x - w/2, e.y - e.r - 10, w, h);
+      ctx.fillStyle = "#93c5fd";
+      ctx.fillRect(e.x - w/2, e.y - e.r - 10, w * pct, h);
+    }
+
+    // Bullets
+    ctx.fillStyle = "#e5e7eb";
+    for (const b of bullets) {
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // Ghost placement preview
+    if (placing && mouse.inside) {
+      const gx = mouse.gx, gy = mouse.gy;
+      if (gx >= 0 && gy >= 0 && gx < cols && gy < rows) {
+        const key = `${gx},${gy}`;
+        const occupied = towers.some(t => t.gx === gx && t.gy === gy);
+        const enoughGold = gold >= towerTypes[placing].cost;
+        const ok = !isRoad.has(key) && !occupied && enoughGold;
+        drawGhostTower(gx, gy, placing, ok);
+      }
+    }
+
+    // Game over
+    if (lives <= 0) {
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 48px system-ui";
+      ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2);
+      ctx.font = "18px system-ui";
+      ctx.fillText("Refresh för att spela igen (ja, brutalt. som livet).", canvas.width/2 - 190, canvas.height/2 + 36);
+    }
+  }
+})();
+</script>
+</body>
+</html>
