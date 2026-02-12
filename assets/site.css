@@ -48,6 +48,39 @@ code{
   font-size: 0.95em;
 }
 
+/* =========================
+   LUCIDE ICONS (global fix)
+   ========================= */
+
+/* <i> is italic by default — can cause baseline/spacing weirdness before Lucide swaps to <svg> */
+i[data-lucide]{ font-style: normal; }
+
+/* Lucide generates: <svg class="lucide"> ... */
+.lucide,
+svg.lucide{
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em; /* nicer baseline in text/buttons */
+  flex: 0 0 auto;          /* prevent flex containers from squishing icons */
+  color: inherit;
+}
+
+/* Optional helper class when you want a consistent icon size */
+.icon,
+.icon > svg,
+svg.icon{
+  width: 18px;
+  height: 18px;
+}
+
+/* Slightly bolder strokes where icons are tiny (buttons/topbar etc.) */
+.iconbtn .lucide,
+.btn .lucide,
+.gicon .lucide{
+  stroke-width: 2.25;
+}
+
 /* Layout container */
 main{ padding: 24px 16px 48px; }
 .container{
