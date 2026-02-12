@@ -56,26 +56,24 @@ navlabel: games
 <script>
 (() => {
   // === Supabase config ===
-  // 1) Replace with your values from Supabase: Project Settings -> API
-  const SUPABASE_URL = "https://fmpkucepmfgfyihfsoqc.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_gI2NXReXI2EA3HjSmKCP7A_mONU6zZb";
+  const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
+  const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_PUBLIC_KEY_HERE";
 
-  // 2) Your table or view name
-  // If you created the view from earlier instructions, keep "top10_scores".
-  // Otherwise set this to "scores" and we'll query+limit in code.
-  const TOP_SOURCE = "top10_scores"; // or "scores"
+  // Your table or view name:
+  // - If you created the view: "top10_scores" (recommended)
+  // - Otherwise: "scores"
+  const TOP_SOURCE = "top10_scores";
   const TABLE_INSERT = "scores";
 
   const HS_MAX = 10;
+
+  // Local caches (UX): avoids empty leaderboard/high=0 flashes on refresh.
   const LS_LATEST = "dnd.latestAttempt.v1";
   const LS_PLAYER = "dnd.playerName.v1";
+  const LS_TOPCACHE = "dnd.top10.cache.v1";
 
   const hsListEl = document.getElementById("hsList");
   const highEl = document.getElementById("high");
-  const scoreEl = document.getElementById("score");
-  const overlayEl = document.getElementById("overlay");
-  const startBtn = document.getElementById("start");
-
   const latestScoreEl = document.getElementById("latestScore");
 
   const nameEntryEl = document.getElementById("nameEntry");
@@ -86,7 +84,6 @@ navlabel: games
   let client = null;
   let cachedTop = [];
   let pendingScore = null;
-  let wasRunning = false;
 
   function hasConfig() {
     return SUPABASE_URL && SUPABASE_ANON_KEY &&
@@ -109,8 +106,39 @@ navlabel: games
     if (latestScoreEl) latestScoreEl.textContent = v ? v : "—";
   }
 
-  function renderTop(list) {
+  function loadTopCache() {
+    try {
+      const raw = localStorage.getItem(LS_TOPCACHE);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .map(r => ({ name: String(r?.name ?? "Anon").slice(0, 12), score: Number(r?.score ?? 0) || 0 }))
+        .filter(r => r.score >= 0)
+        .slice(0, HS_MAX);
+    } catch {
+      return [];
+    }
+  }
+
+  function saveTopCache(list) {
+    try {
+      localStorage.setItem(LS_TOPCACHE, JSON.stringify(list.slice(0, HS_MAX)));
+    } catch {}
+  }
+
+  function renderTop(list, { loading = false } = {}) {
     if (!hsListEl) return;
+
+    // If we have nothing, show a tiny placeholder instead of "blink-empty".
+    if (!list.length && loading) {
+      hsListEl.innerHTML = '<li style="opacity:.75;">Laddar topplistan…</li>';
+      return;
+    }
+
+    // Keep existing list if we have no new data (e.g. fetch failed).
+    if (!list.length && hsListEl.children.length) return;
+
     hsListEl.innerHTML = "";
     list.slice(0, HS_MAX).forEach((row, i) => {
       const li = document.createElement("li");
@@ -129,8 +157,8 @@ navlabel: games
       hsListEl.appendChild(li);
     });
 
-    // Set High (HUD) to global #1 (optional)
-    if (highEl) highEl.textContent = list.length ? String(list[0].score) : "0";
+    // High (HUD) = global #1 score, but don't force 0 if list is empty.
+    if (highEl && list.length) highEl.textContent = String(list[0].score);
   }
 
   function qualifies(score, list) {
@@ -144,7 +172,11 @@ navlabel: games
     pendingScore = score;
     if (!nameEntryEl) return;
 
-    nameHintEl && (nameHintEl.style.display = "none");
+    if (nameHintEl) {
+      nameHintEl.style.display = "none";
+      nameHintEl.textContent = "";
+    }
+
     nameEntryEl.style.display = "block";
 
     const savedName = localStorage.getItem(LS_PLAYER) || "";
@@ -166,13 +198,12 @@ navlabel: games
   }
 
   async function fetchTop10() {
-    if (!client) return [];
+    if (!client) return null;
 
     try {
       if (TOP_SOURCE === "top10_scores") {
         const { data, error } = await client.from("top10_scores").select("name,score,created_at");
         if (error) throw error;
-        // view already sorted+limited
         return (data || []).map(r => ({ name: String(r.name), score: Number(r.score) || 0 }));
       } else {
         const { data, error } = await client
@@ -186,7 +217,29 @@ navlabel: games
       }
     } catch (e) {
       console.warn("[Supabase] fetchTop10 failed:", e);
-      return [];
+      return null; // null = keep cache
+    }
+  }
+
+  async function refreshTop({ showLoading = false } = {}) {
+    if (showLoading) renderTop(cachedTop, { loading: true });
+
+    const fresh = await fetchTop10();
+    if (fresh && fresh.length) {
+      cachedTop = fresh;
+      saveTopCache(cachedTop);
+      renderTop(cachedTop);
+    } else if (fresh && fresh.length === 0) {
+      // Fresh response but empty result: only wipe UI if we truly have no cache.
+      // This prevents the "High=0 + empty list" blink during refresh if Supabase temporarily returns 0 rows.
+      if (!cachedTop.length) {
+        cachedTop = [];
+        saveTopCache([]);
+        if (hsListEl) hsListEl.innerHTML = '<li style="opacity:.75;">Ingen score ännu. Bli den första. 😈</li>';
+        if (highEl) highEl.textContent = "0";
+      }
+    } else {
+      // null => fetch failed; keep cached render as-is
     }
   }
 
@@ -205,90 +258,70 @@ navlabel: games
     } catch (e) {
       console.warn("[Supabase] submitScore failed:", e);
       if (nameHintEl) {
-        nameHintEl.textContent = "Kunde inte spara. Kolla att RLS policies är satta och att name/score är inom gränserna.";
+        nameHintEl.textContent = "Kunde inte spara. Dubbelkolla RLS policies + att name/score är inom gränserna.";
         nameHintEl.style.display = "block";
       }
       return false;
     }
   }
 
-  function overlayVisible() {
-    // overlay is always in DOM; consider visible when it has a layout box and is not hidden
-    if (!overlayEl) return false;
-    const style = getComputedStyle(overlayEl);
-    if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") return false;
-    return overlayEl.offsetParent !== null || style.position === "fixed" || style.position === "absolute";
-  }
-
-  async function refreshTop() {
-    cachedTop = await fetchTop10();
-    renderTop(cachedTop);
-  }
-
-  function onGameStart() {
-    wasRunning = true;
-    hideNameEntry();
-  }
-
-  async function onGameEnd(finalScore) {
+  // --- Game-over integration ---
+  // dnd_clean.js dispatches: window.dispatchEvent(new CustomEvent('dnd:gameover', { detail: { score, ts } }))
+  async function onGameOver(detail) {
+    const finalScore = Math.max(0, parseIntSafe(detail?.score ?? 0));
     setLatest(finalScore);
 
-    // Ensure we have fresh top10 before deciding qualification
+    // Get fresh top10 before deciding qualification.
     await refreshTop();
 
-    if (qualifies(finalScore, cachedTop)) {
-      showNameEntry(finalScore);
-    } else {
-      hideNameEntry();
-    }
+    if (qualifies(finalScore, cachedTop)) showNameEntry(finalScore);
+    else hideNameEntry();
   }
 
-  // Hook start button: when user starts, we mark running
-  if (startBtn) startBtn.addEventListener("click", onGameStart);
+  window.addEventListener("dnd:gameover", (e) => onGameOver(e.detail));
 
-  // Detect game end by overlay re-appearing while we were running
-  let lastOverlay = null;
-  function tick() {
-    const vis = overlayVisible();
-
-    if (lastOverlay === null) lastOverlay = vis;
-
-    // Transition from hidden -> visible while running => game ended (most common pattern)
-    if (wasRunning && !lastOverlay && vis) {
-      const finalScore = parseIntSafe(scoreEl?.textContent ?? "0");
-      wasRunning = false;
-      onGameEnd(finalScore);
-    }
-
-    lastOverlay = vis;
-    requestAnimationFrame(tick);
-  }
-
-  // Submit form
+  // --- Submit form ---
   if (nameFormEl) {
     nameFormEl.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (pendingScore == null) return;
 
+      // Basic UX: disable button while saving
+      const btn = nameFormEl.querySelector("button[type='submit']");
+      if (btn) { btn.disabled = true; btn.textContent = "Sparar…"; }
+
       const ok = await submitScore(playerNameEl?.value, pendingScore);
+
+      if (btn) { btn.disabled = false; btn.textContent = "Spara"; }
+
       if (ok) {
         hideNameEntry();
-        await refreshTop();
+        await refreshTop({ showLoading: true });
       }
     });
   }
 
-  // Init
+  // --- Init ---
   renderLatestFromStorage();
 
+  // Load cached Top 10 immediately to avoid refresh blink
+  cachedTop = loadTopCache();
+  if (cachedTop.length) renderTop(cachedTop);
+  else renderTop([], { loading: true });
+
   if (hasConfig()) {
-    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    refreshTop();
+    // Wait until supabase UMD is actually available
+    const initClient = () => {
+      if (window.supabase?.createClient) {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        refreshTop({ showLoading: true });
+      } else {
+        setTimeout(initClient, 50);
+      }
+    };
+    initClient();
   } else {
     console.warn("[Supabase] Missing config. Paste Project URL + anon key in index.html.");
   }
-
-  tick();
 })();
 </script>
-
