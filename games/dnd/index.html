@@ -1,27 +1,66 @@
-<!-- 1) Load Supabase config first (must exist!) -->
+---
+layout: default
+title: hirrdirr • Dodge & Drift
+navlabel: games
+---
+
+<link rel="stylesheet" href="/games/dnd/dnd.css" />
+
+<div class="dnd-page">
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div class="panel">
+      <div>Score: <span id="score">0</span></div>
+      <div class="small">High: <span id="high">0</span></div>
+    </div>
+    <div class="panel small" id="status">Ready</div>
+  </div>
+
+  <div class="center" id="overlay">
+    <div class="card">
+      <h2 class="title">Dodge &amp; Drift</h2>
+      <div class="small help">
+        Styr med <span class="kbd">WASD</span> / <span class="kbd">Pilar</span>.
+        Pausa med <span class="kbd">P</span>. Mobil: dra fingret.
+        Överlev så länge du kan. Hinder blir snabbare… för att universum är elakt.
+      </div>
+      <button id="start">Starta</button>
+
+      <div class="hs-wrap">
+        <div class="hs-title">Topplista</div>
+        <ol class="hs" id="hsList"></ol>
+      </div>
+
+      <div id="latestWrap" class="small" style="margin-top:10px; opacity:.9;">
+        Latest attempt – <span id="latestScore">—</span> score
+      </div>
+
+      <div id="nameEntry" style="display:none; margin-top:12px;">
+        <div class="small" style="margin: 6px 0 6px; opacity:.9;">
+          Ny highscore! Skriv ditt namn:
+        </div>
+        <form id="nameForm" autocomplete="off">
+          <input id="playerName" type="text" maxlength="12" placeholder="Ditt namn"
+            style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.25); color:inherit;" />
+          <button type="submit" style="margin-top:8px; width:100%;">Spara</button>
+        </form>
+        <div id="nameHint" class="small" style="margin-top:6px; opacity:.8; display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts MUST be placed after the canvas/DOM exists -->
 <script src="/games/dnd/supabase-config.js"></script>
-
-<!-- 2) Game code -->
 <script src="/games/dnd/dnd.js"></script>
-
-<!-- 3) Supabase client (UMD) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-<!-- 4) Leaderboard logic -->
 <script>
 (() => {
   // === Supabase config ===
   const SUPABASE_URL = window.SUPABASE_URL;
   const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
-
-  // If config file is missing or keys not set, fail loudly and keep UI usable.
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.warn("[Supabase] Missing config. Ensure /games/dnd/supabase-config.js is loaded and sets window.SUPABASE_URL + window.SUPABASE_ANON_KEY.");
-    // Optional: show something in the leaderboard area instead of infinite loading
-    const hsListEl = document.getElementById("hsList");
-    if (hsListEl) hsListEl.innerHTML = '<li style="opacity:.75;">Leaderboard offline (saknar Supabase-config).</li>';
-    return;
-  }
 
   // Your table or view name:
   // - If you created the view: "top10_scores" (recommended)
@@ -48,6 +87,12 @@
   let client = null;
   let cachedTop = [];
   let pendingScore = null;
+
+  function hasConfig() {
+    return SUPABASE_URL && SUPABASE_ANON_KEY &&
+      !String(SUPABASE_URL).includes("PASTE_YOUR_SUPABASE") &&
+      !String(SUPABASE_ANON_KEY).includes("PASTE_YOUR_SUPABASE");
+  }
 
   function parseIntSafe(s) {
     const n = parseInt(String(s).replace(/[^0-9-]/g, ""), 10);
@@ -80,7 +125,9 @@
   }
 
   function saveTopCache(list) {
-    try { localStorage.setItem(LS_TOPCACHE, JSON.stringify(list.slice(0, HS_MAX))); } catch {}
+    try {
+      localStorage.setItem(LS_TOPCACHE, JSON.stringify(list.slice(0, HS_MAX)));
+    } catch {}
   }
 
   function renderTop(list, { loading = false } = {}) {
@@ -112,6 +159,7 @@
       hsListEl.appendChild(li);
     });
 
+    // High (HUD) = global #1 score, but don't force 0 if list is empty.
     if (highEl && list.length) highEl.textContent = String(list[0].score);
   }
 
@@ -171,7 +219,7 @@
       }
     } catch (e) {
       console.warn("[Supabase] fetchTop10 failed:", e);
-      return null;
+      return null; // null = keep cache
     }
   }
 
@@ -184,6 +232,7 @@
       saveTopCache(cachedTop);
       renderTop(cachedTop);
     } else if (fresh && fresh.length === 0) {
+      // Fresh response but empty result: only wipe UI if we truly have no cache.
       if (!cachedTop.length) {
         cachedTop = [];
         saveTopCache([]);
@@ -191,7 +240,7 @@
         if (highEl) highEl.textContent = "0";
       }
     } else {
-      // keep cache
+      // null => fetch failed; keep cached render as-is
     }
   }
 
@@ -204,6 +253,7 @@
     try {
       const { error } = await client.from(TABLE_INSERT).insert([{ name: safeName, score: safeScore }]);
       if (error) throw error;
+
       localStorage.setItem(LS_PLAYER, safeName);
       return true;
     } catch (e) {
@@ -216,21 +266,28 @@
     }
   }
 
+  // --- Game-over integration ---
+  // dnd_clean.js dispatches: window.dispatchEvent(new CustomEvent('dnd:gameover', { detail: { score, ts } }))
   async function onGameOver(detail) {
     const finalScore = Math.max(0, parseIntSafe(detail?.score ?? 0));
     setLatest(finalScore);
+
+    // Get fresh top10 before deciding qualification.
     await refreshTop();
+
     if (qualifies(finalScore, cachedTop)) showNameEntry(finalScore);
     else hideNameEntry();
   }
 
   window.addEventListener("dnd:gameover", (e) => onGameOver(e.detail));
 
+  // --- Submit form ---
   if (nameFormEl) {
     nameFormEl.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (pendingScore == null) return;
 
+      // Basic UX: disable button while saving
       const btn = nameFormEl.querySelector("button[type='submit']");
       if (btn) { btn.disabled = true; btn.textContent = "Sparar…"; }
 
@@ -245,22 +302,28 @@
     });
   }
 
-  // Init
+  // --- Init ---
   renderLatestFromStorage();
 
+  // Load cached Top 10 immediately to avoid refresh blink
   cachedTop = loadTopCache();
   if (cachedTop.length) renderTop(cachedTop);
   else renderTop([], { loading: true });
 
-  // Wait until supabase UMD is actually available
-  const initClient = () => {
-    if (window.supabase?.createClient) {
-      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      refreshTop({ showLoading: true });
-    } else {
-      setTimeout(initClient, 50);
-    }
-  };
-  initClient();
+  if (hasConfig()) {
+    // Wait until supabase UMD is actually available
+    const initClient = () => {
+      if (window.supabase?.createClient) {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        refreshTop({ showLoading: true });
+      } else {
+        setTimeout(initClient, 50);
+      }
+    };
+    initClient();
+  } else {
+    console.warn("[Supabase] Missing config. Ensure /games/dnd/supabase-config.js sets window.SUPABASE_URL and window.SUPABASE_ANON_KEY.");
+    if (hsListEl) hsListEl.innerHTML = '<li style="opacity:.75;">Leaderboard offline (saknar Supabase-config).</li>';
+  }
 })();
 </script>
