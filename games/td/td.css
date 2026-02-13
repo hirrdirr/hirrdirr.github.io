@@ -139,3 +139,89 @@
   margin-left:6px;
   vertical-align:-2px;
 }
+
+/* Hide the old inline hint pill (replaced by help icon + tooltip) */
+.td-hint{ display:none !important; }
+
+/* Overlay layout: left HUD + right help */
+.td-overlay{
+  justify-content: space-between;
+}
+
+.td-ol-left, .td-ol-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.td-ol-right{
+  justify-content:flex-end;
+}
+
+/* Help icon + tooltip */
+.td-help{ position:relative; pointer-events:auto; }
+.td-help-btn{
+  width:40px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
+  border-radius:10px;
+  cursor:pointer;
+}
+.td-help-tip{
+  position:absolute;
+  top:44px;
+  right:0;
+  min-width: 240px;
+  max-width: 320px;
+  padding:10px 12px;
+  border:1px solid #324155;
+  border-radius:12px;
+  background: rgba(18,27,42,0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  color:#e6edf3;
+  opacity:0;
+  transform: translateY(-4px);
+  pointer-events:none;
+  transition: opacity .12s ease, transform .12s ease;
+}
+.td-help:hover .td-help-tip,
+.td-help:focus-within .td-help-tip{
+  opacity:1;
+  transform: translateY(0);
+}
+.td-help-title{
+  font-weight:800;
+  letter-spacing:.04em;
+  margin-bottom:6px;
+}
+.td-help-line{
+  opacity:.95;
+  margin:3px 0;
+  font-size:.92em;
+}
+
+/* Tower buttons: centered stack */
+.td-tower-btn{
+  align-items:center;
+  text-align:center;
+}
+.td-tower-btn .td-tower-cost{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Fix: play/pause icon centered (no SVG margin) */
+.td-btn-icon .td-ico{
+  margin-right:0 !important;
+  margin-left:0 !important;
+}
