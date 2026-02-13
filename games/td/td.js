@@ -7,7 +7,7 @@
   const cols = Math.floor(canvas.width / tile);
   const rows = Math.floor(canvas.height / tile);
 
-  // Waypoints (bana). Enkelt och stabilt.
+  // Waypoints
   const path = [
     {x: 0.5, y: 8.5},
     {x: 10.5, y: 8.5},
@@ -17,7 +17,7 @@
     {x: 30.5, y: 13.5},
   ].map(p => ({ x: p.x * tile, y: p.y * tile }));
 
-  // Markera vilka rutor som är "väg"
+  // Road tiles
   const isRoad = new Set();
   function markRoad() {
     for (let i = 0; i < path.length - 1; i++) {
@@ -37,11 +37,11 @@
   }
   markRoad();
 
-  // Game state
+  // State
   let gold = 120;
   let lives = 20;
   let wave = 0;
-  let placing = null; // "sniper" | "gatling" | null
+  let placing = null;
 
   const towers = [];
   const enemies = [];
@@ -52,11 +52,13 @@
     gatling: { cost:35, range: 95, fireRate:4.5, damage: 5, bulletSpeed:520 },
   };
 
-  // Selection/hover + ghost preview + debug toggle for ranges
   let hoveredTower = -1;
   let selectedTower = -1;
   let showAllRanges = false;
-  
+  let paused = false;
+
+  let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
+
   // --- Icons (inline Lucide SVG, no external deps) ---
   const LUCIDE = {
     circleDollarSign: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
@@ -69,30 +71,36 @@
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path>
     </svg>`,
-    play: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+    play: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
       <polygon points="6 3 20 12 6 21 6 3"></polygon>
     </svg>`,
-    pause: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+    pause: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
       <rect x="6" y="4" width="4" height="16" rx="1"></rect>
       <rect x="14" y="4" width="4" height="16" rx="1"></rect>
     </svg>`
   };
 
-  // --- Pause state ---
-  let paused = false;
-
-  function setPaused(v) {
-    paused = v;
-    updatePlayPauseButton();
-  }
-let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
-
-  // UI
+  // UI refs
   const btn1 = document.getElementById("t1");
   const btn2 = document.getElementById("t2");
-  
+  const btnStart = document.getElementById("start");
+  const stats = document.getElementById("stats");
+
+  // --- Move HUD into overlay above the canvas ---
+  const wrap = canvas.parentElement; // .td-wrap
+  if (wrap) {
+    let overlay = wrap.querySelector(".td-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "td-overlay";
+      wrap.appendChild(overlay);
+    }
+    if (stats) overlay.appendChild(stats);
+    if (btnStart) overlay.appendChild(btnStart);
+  }
+
   function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
       <span class="td-tower-name">SNIPER</span>
@@ -102,70 +110,29 @@ let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
       <span class="td-tower-name">GATLING</span>
       <span class="td-tower-cost"><span class="td-cost-num">${towerTypes.gatling.cost}</span><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span></span>
     `;
-  }</strong><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span>`;
-    if (btn2) btn2.innerHTML = `Gatling <strong>${towerTypes.gatling.cost}</strong><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span>`;
   }
-const btnStart = document.getElementById("start");
-  
-  function updatePlayPauseButton() {
-    if (!btnStart) return;
-
-    const waveActive = enemies.length > 0; // includes delayed spawns
-    const showPlay = paused || !waveActive;
-
-    btnStart.classList.add("td-btn-icon");
-    btnStart.innerHTML = showPlay ? LUCIDE.play(18) : LUCIDE.pause(18);
-    btnStart.title = showPlay ? (paused ? "Fortsätt" : "Starta våg") : "Pausa";
-    btnStart.setAttribute("aria-label", btnStart.title);
-  }
-
-  // Start/Play/Pause button behavior
-  btnStart.onclick = () => {
-    const waveActive = enemies.length > 0;
-
-    if (paused) { setPaused(false); return; }
-    if (!waveActive) { startWave(); setPaused(false); return; }
-
-    setPaused(true);
-  };
-
-  updatePlayPauseButton();
-const stats = document.getElementById("stats");
-
-  
-  // --- Move HUD into an overlay above the canvas ---
-  const wrap = canvas.parentElement; // .td-wrap
-  if (wrap) {
-    let overlay = wrap.querySelector(".td-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "td-overlay";
-      wrap.appendChild(overlay);
-    }
-    // Ensure HUD items are inside overlay (stats + play/pause button)
-    if (stats) overlay.appendChild(stats);
-    if (btnStart) overlay.appendChild(btnStart);
-  }
-function setPlacing(t) {
-    placing = t;
-    btn1.classList.toggle("active", t === "sniper");
-    btn2.classList.toggle("active", t === "gatling");
-  }
-  btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper");
-  btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling");
-
   updateTowerButtonLabels();
-function startWave() {
+
+  function setPlacing(t) {
+    placing = t;
+    btn1?.classList.toggle("active", t === "sniper");
+    btn2?.classList.toggle("active", t === "gatling");
+  }
+  btn1 && (btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper"));
+  btn2 && (btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling"));
+
+  function startWave() {
     wave++;
     const count = 8 + wave * 2;
     for (let i = 0; i < count; i++) enemies.push(makeEnemy(i * 0.7));
   }
 
   function makeEnemy(delay) {
+    const hp = 30 + wave * 8;
     return {
       t: -delay,
-      hp: 30 + wave * 8,
-      maxHp: 30 + wave * 8,
+      hp,
+      maxHp: hp,
       speed: 55 + wave * 3,
       idx: 0,
       x: path[0].x,
@@ -175,6 +142,34 @@ function startWave() {
     };
   }
 
+  function setPaused(v) {
+    paused = v;
+    updatePlayPauseButton();
+  }
+
+  function updatePlayPauseButton() {
+    if (!btnStart) return;
+    btnStart.classList.add("td-btn-icon");
+
+    const waveActive = enemies.length > 0; // includes delayed spawns
+    const showPlay = paused || !waveActive;
+
+    btnStart.innerHTML = showPlay ? LUCIDE.play(18) : LUCIDE.pause(18);
+    btnStart.title = showPlay ? (paused ? "Fortsätt" : "Starta våg") : "Pausa";
+    btnStart.setAttribute("aria-label", btnStart.title);
+  }
+
+  btnStart && (btnStart.onclick = () => {
+    const waveActive = enemies.length > 0;
+
+    if (paused) { setPaused(false); return; }
+    if (!waveActive) { startWave(); setPaused(false); return; }
+
+    setPaused(true);
+  });
+  updatePlayPauseButton();
+
+  // Helpers
   const dist2 = (ax,ay,bx,by) => {
     const dx=ax-bx, dy=ay-by;
     return dx*dx+dy*dy;
@@ -196,7 +191,6 @@ function startWave() {
   canvas.addEventListener("mousemove", (ev) => {
     mouse = gridFromMouse(ev);
 
-    // Hover-detection
     hoveredTower = -1;
     let bestD2 = Infinity;
     for (let i = 0; i < towers.length; i++) {
@@ -216,6 +210,8 @@ function startWave() {
   });
 
   canvas.addEventListener("mousedown", (ev) => {
+    if (paused) return; // don't allow interactions while paused
+
     const {gx, gy} = gridFromMouse(ev);
     if (gx < 0 || gy < 0 || gx >= cols || gy >= rows) return;
 
@@ -231,7 +227,7 @@ function startWave() {
       return;
     }
 
-    // Click-select när du INTE placerar
+    // select when not placing
     if (!placing && ev.button === 0) {
       selectedTower = occupied ? occupiedIdx : -1;
       return;
@@ -239,8 +235,8 @@ function startWave() {
 
     if (!placing) return;
 
-    // Placing
     if (isRoad.has(key) || occupied) return;
+
     const type = towerTypes[placing];
     if (gold < type.cost) return;
 
@@ -257,6 +253,10 @@ function startWave() {
   window.addEventListener("keydown", (ev) => {
     if (ev.key.toLowerCase() === "r") showAllRanges = !showAllRanges;
     if (ev.key === "Escape") setPlacing(null);
+    if (ev.key === " "){ // space toggles pause
+      ev.preventDefault();
+      if (enemies.length > 0) setPaused(!paused);
+    }
   });
 
   // Drawing helpers
@@ -301,7 +301,8 @@ function startWave() {
     if (!paused) update(dt);
     render();
     updatePlayPauseButton();
-requestAnimationFrame(tick);
+
+    requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
@@ -387,14 +388,16 @@ requestAnimationFrame(tick);
       }
     }
 
-        const aliveCount = enemies.filter(e => e.t >= 0).length;
-
-    stats.innerHTML =
-      `${LUCIDE.circleDollarSign(16)}<strong>${gold}</strong>` +
-      `&nbsp; | &nbsp; ${LUCIDE.heart(16)}<strong>${lives}</strong>` +
-      `&nbsp; | &nbsp; <span class="td-hud-label">Wave</span> <strong>${wave}</strong>` +
-      `&nbsp; | &nbsp; <span class="td-hud-label">Fiender</span> <strong>${aliveCount}</strong>`;
-}
+    // HUD (overlay)
+    const aliveCount = enemies.filter(e => e.t >= 0).length;
+    if (stats) {
+      stats.innerHTML =
+        `${LUCIDE.circleDollarSign(16)}<strong>${gold}</strong>` +
+        `&nbsp; | &nbsp; ${LUCIDE.heart(16)}<strong>${lives}</strong>` +
+        `&nbsp; | &nbsp; <span class="td-hud-label">Wave</span> <strong>${wave}</strong>` +
+        `&nbsp; | &nbsp; <span class="td-hud-label">Fiender</span> <strong>${aliveCount}</strong>`;
+    }
+  }
 
   function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -416,7 +419,7 @@ requestAnimationFrame(tick);
     }
     ctx.globalAlpha = 1;
 
-    // Road tiles
+    // Road
     for (const key of isRoad) {
       const [gx, gy] = key.split(",").map(Number);
       ctx.fillStyle = "#172235";
@@ -448,18 +451,14 @@ requestAnimationFrame(tick);
       }
     }
 
-    // Ranges: default = only selected/hover, debug = all
+    // Ranges
     if (showAllRanges) {
-      for (const t of towers) {
-        const tt = towerTypes[t.kind];
-        drawRangeRing(t.x, t.y, tt.range, false);
-      }
+      for (const t of towers) drawRangeRing(t.x, t.y, towerTypes[t.kind].range, false);
     } else {
       const showIdx = hoveredTower !== -1 ? hoveredTower : selectedTower;
       if (showIdx !== -1) {
         const t = towers[showIdx];
-        const tt = towerTypes[t.kind];
-        drawRangeRing(t.x, t.y, tt.range, true);
+        drawRangeRing(t.x, t.y, towerTypes[t.kind].range, true);
       }
     }
 
@@ -489,7 +488,7 @@ requestAnimationFrame(tick);
     }
 
     // Ghost placement preview
-    if (placing && mouse.inside) {
+    if (placing && mouse.inside && !paused) {
       const gx = mouse.gx, gy = mouse.gy;
       if (gx >= 0 && gy >= 0 && gx < cols && gy < rows) {
         const key = `${gx},${gy}`;
@@ -500,6 +499,17 @@ requestAnimationFrame(tick);
       }
     }
 
+    // Pause overlay
+    if (paused) {
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#e6edf3";
+      ctx.font = "700 28px system-ui";
+      ctx.fillText("PAUSED", 24, 44);
+      ctx.font = "14px system-ui";
+      ctx.fillText("Tryck Space eller Play för att fortsätta", 24, 66);
+    }
+
     // Game over
     if (lives <= 0) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -508,7 +518,7 @@ requestAnimationFrame(tick);
       ctx.font = "bold 48px system-ui";
       ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2);
       ctx.font = "18px system-ui";
-      ctx.fillText("Refresh för att spela igen (ja, brutalt. som livet).", canvas.width/2 - 190, canvas.height/2 + 36);
+      ctx.fillText("Refresh för att spela igen.", canvas.width/2 - 110, canvas.height/2 + 36);
     }
   }
 })();

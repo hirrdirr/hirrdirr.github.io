@@ -1,49 +1,15 @@
-/* Self-contained + scoped so it doesn't fight your site.css / topbar */
+/* Base (scoped) */
 .td-page{
-  padding: 16px 12px 24px;
-  color: #e6edf3;
-}
-
-.td-ui{
-  display:flex;
+  display:flex !important;
+  flex-direction:column !important;
   gap:12px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin: 0 auto 12px;
-  max-width: 1100px;
-}
-
-.td-btn{
-  background:#1f2a37;
+  padding: 16px 12px 24px;
   color:#e6edf3;
-  border:1px solid #324155;
-  padding:8px 10px;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-.td-btn.active{ outline:2px solid #7dd3fc; }
-
-.td-pill{
-  padding:6px 10px;
-  border:1px solid #324155;
-  border-radius:999px;
-  background:#121b2a;
-  color:#e6edf3;
-}
-
-.td-hint{ opacity:.9; }
-
-.td-page kbd{
-  background:#0b1220;
-  border:1px solid #223045;
-  border-bottom-width:2px;
-  padding:1px 6px;
-  border-radius:6px;
-  font-size:.9em;
 }
 
 .td-wrap{
+  position:relative;
+  order:1 !important;
   max-width: 1100px;
   margin: 0 auto;
   border-radius: 14px;
@@ -59,23 +25,50 @@
   background:#0f1623;
 }
 
-/* --- HUD / icons --- */
-.td-ico{
-  vertical-align: -3px;
-  margin-right: 6px;
+.td-ui{
+  order:2 !important;
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+  flex-wrap:wrap;
+  margin: 0 auto !important;
+  max-width: 1100px;
 }
 
-.td-btn .td-ico{
-  margin-right: 0; /* icon-only play/pause */
-  vertical-align: -2px;
+.td-btn{
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
+  padding:10px 12px;
+  border-radius:10px;
+  cursor:pointer;
 }
 
-.td-hud-label{
-  opacity: .9;
-  font-weight: 600;
+.td-btn.active{ outline:2px solid #7dd3fc; }
+
+.td-pill{
+  padding:6px 10px;
+  border:1px solid #324155;
+  border-radius:999px;
+  background: rgba(18,27,42,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  color:#e6edf3;
 }
 
-/* --- Overlay HUD fixes --- */
+.td-hint{ opacity:.9; }
+
+.td-page kbd{
+  background:#0b1220;
+  border:1px solid #223045;
+  border-bottom-width:2px;
+  padding:1px 6px;
+  border-radius:6px;
+  font-size:.9em;
+}
+
+/* Overlay HUD */
 .td-overlay{
   position:absolute;
   top:10px;
@@ -85,22 +78,13 @@
   display:flex;
   align-items:center;
   gap:10px;
-  pointer-events:none; /* let canvas receive clicks */
+  pointer-events:none; /* clicks pass through by default */
 }
 
-.td-overlay > *{
-  pointer-events:none;
-}
+.td-overlay > *{ pointer-events:none; }
+.td-overlay #start{ pointer-events:auto; }
 
-.td-overlay .td-pill{
-  pointer-events:none;
-}
-
-/* Make play/pause clickable even though overlay is pointer-events:none */
-.td-overlay #start{
-  pointer-events:auto;
-}
-
+/* Icon-only play/pause button */
 .td-btn-icon{
   width:40px;
   height:34px;
@@ -110,37 +94,22 @@
   padding:0;
 }
 
-/* If SVG steals clicks, disable pointer events on icons */
+/* Icons: make them click-transparent and aligned */
 .td-btn svg, .td-btn-icon svg, .td-ico{
   pointer-events:none;
 }
 
-.td-wrap{ position:relative; }
-
-/* --- FORCE layout: map first, controls below --- */
-.td-page{
-  display:flex !important;
-  flex-direction:column !important;
+.td-ico{
+  vertical-align:-3px;
+  margin-right:6px;
 }
 
-.td-wrap{
-  order: 1 !important;
+.td-hud-label{
+  opacity:.9;
+  font-weight:600;
 }
 
-.td-ui{
-  order: 2 !important;
-  margin-top: 12px !important;
-  margin-bottom: 0 !important;
-}
-
-/* Icon placed AFTER text (e.g., costs on tower buttons) */
-.td-ico-after .td-ico{
-  margin-right: 0;
-  margin-left: 6px;
-  vertical-align: -2px;
-}
-
-/* --- Tower button typography --- */
+/* Tower button typography: stacked */
 .td-btn{
   display:flex;
   flex-direction:column;
@@ -150,23 +119,23 @@
 }
 
 .td-tower-name{
-  font-weight: 800;
-  letter-spacing: .06em;
-  font-size: .88em;
-  opacity: .98;
+  font-weight:800;
+  letter-spacing:.06em;
+  font-size:.88em;
+  opacity:.98;
 }
 
 .td-tower-cost{
-  font-weight: 700; /* label row weight; numbers overridden below */
-  opacity: .92;
+  font-weight:700;
+  opacity:.92;
 }
 
 .td-cost-num{
-  font-weight: 400; /* NOT bold on numbers */
+  font-weight:400; /* NOT bold */
 }
 
 .td-ico-after .td-ico{
-  margin-left: 6px;
-  margin-right: 0;
-  vertical-align: -2px;
+  margin-right:0;
+  margin-left:6px;
+  vertical-align:-2px;
 }
