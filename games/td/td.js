@@ -123,6 +123,16 @@
       stage.appendChild(wrap);
     }
 
+    function syncStageWidth(){
+      // Keep drawer aligned to the map edge even when responsive scaling changes.
+      stage.style.setProperty("--wrapW", wrap.getBoundingClientRect().width + "px");
+    }
+    syncStageWidth();
+    // Update on resize
+    const ro = new ResizeObserver(syncStageWidth);
+    ro.observe(wrap);
+    window.addEventListener("resize", syncStageWidth);
+
     if (stage.querySelector("#td-drawer")) return;
 
     const drawer = document.createElement("aside");

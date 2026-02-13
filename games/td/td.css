@@ -57,7 +57,7 @@
   color:#e6edf3;
 }
 
-.td-hint{ opacity:.9; }
+.td-hint{ display:none !important; }
 
 .td-page kbd{
   background:#0b1220;
@@ -253,3 +253,23 @@
 
 /* Make sure the existing td-wrap order doesn't fight stage */
 .td-wrap{ order: unset !important; }
+
+/* V2: reserve space to the right so the drawer can slide OUT without shrinking/overlaying the map */
+.td-stage{
+  display:block;
+  overflow: visible;
+  padding-right: 276px; /* panelW - handleW */
+}
+
+/* V2: position relative to the actual map width (set by JS on .td-stage as --wrapW) */
+.td-stage{ --wrapW: 960px; } /* fallback */
+
+.td-drawer{
+  left: calc(var(--wrapW) - var(--panelW)); /* start behind the map */
+}
+
+/* Keep handle on the map edge (not inside the panel box) */
+.td-drawer-handle{
+  left: calc(var(--wrapW) - var(--handleW) + 0px);
+  right: auto;
+}
