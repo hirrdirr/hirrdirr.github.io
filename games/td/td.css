@@ -58,3 +58,38 @@
   height:auto;
   background:#0f1623;
 }
+
+/* --- Layout upgrade: canvas first, controls below, stats as overlay --- */
+.td-page{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.td-wrap{ 
+  position:relative; /* anchor overlay */
+  order: 1;
+}
+
+.td-ui{
+  order: 2;
+  margin: 0 auto; /* now sits below */
+}
+
+.td-overlay{
+  position:absolute;
+  top:10px;
+  left:10px;
+  right:10px;
+  z-index:5;
+  display:flex;
+  justify-content:flex-start;
+  pointer-events:none; /* clicks pass through to canvas */
+}
+
+.td-overlay .td-pill{
+  background: rgba(18,27,42,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}

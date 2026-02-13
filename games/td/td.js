@@ -64,6 +64,17 @@
   const btnStart = document.getElementById("start");
   const stats = document.getElementById("stats");
 
+  // --- UI layout upgrade (no HTML changes needed) ---
+  // Move the stats pill into an overlay on top of the canvas.
+  const wrap = canvas.parentElement; // .td-wrap
+  if (wrap && stats) {
+    const overlay = document.createElement("div");
+    overlay.className = "td-overlay";
+    wrap.appendChild(overlay);
+    overlay.appendChild(stats);
+  }
+
+
   function setPlacing(t) {
     placing = t;
     btn1.classList.toggle("active", t === "sniper");
