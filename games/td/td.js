@@ -123,39 +123,39 @@
       stage.appendChild(wrap);
     }
 
-    function syncStageWidth(){
-      // Keep drawer aligned to the map edge even when responsive scaling changes.
+    // Keep a CSS variable synced to the map's rendered width (responsive safe)
+    function syncStageWidth() {
       stage.style.setProperty("--wrapW", wrap.getBoundingClientRect().width + "px");
     }
     syncStageWidth();
-    // Update on resize
     const ro = new ResizeObserver(syncStageWidth);
     ro.observe(wrap);
     window.addEventListener("resize", syncStageWidth);
 
-    if (stage.querySelector("#td-drawer")) return;
+    // Create drawer once
+    let drawer = stage.querySelector("#td-drawer");
+    if (!drawer) {
+      drawer = document.createElement("aside");
+      drawer.id = "td-drawer";
+      drawer.className = "td-drawer";
 
-    const drawer = document.createElement("aside");
-    drawer.id = "td-drawer";
-    drawer.className = "td-drawer"; // behind drawer
+      drawer.innerHTML = `
+        <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
+          <div class="td-drawer-head">
+            <div class="td-drawer-title">Instruktioner</div>
+          </div>
 
-    drawer.innerHTML = `
-      <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
-        <div class="td-drawer-head">
-          <div class="td-drawer-title">Instruktioner</div>
+          <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
+          <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
+          <div class="td-drawer-line"><strong>Range:</strong> R</div>
+          <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
+          <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
         </div>
+      `;
+      stage.appendChild(drawer);
+    }
 
-        <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
-        <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
-        <div class="td-drawer-line"><strong>Range:</strong> R</div>
-        <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
-        <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
-      </div>
-    `;
-
-    stage.appendChild(drawer);
-
-    // Floating handle ABOVE the map (separate stacking context)
+    // Floating handle ABOVE the map edge (separate stacking context, always visible)
     let handle = wrap.querySelector("#td-drawer-handle");
     if (!handle) {
       handle = document.createElement("button");
@@ -167,33 +167,31 @@
       wrap.appendChild(handle);
     }
 
-
-    const handle = drawer.querySelector(".td-drawer-handle");    function syncIcons() {
+    function syncIcon() {
       const open = drawer.classList.contains("open");
       handle.innerHTML = open ? LUCIDE.chevronLeft(18) : LUCIDE.chevronRight(18);
+      handle.setAttribute("aria-label", open ? "Stäng instruktioner" : "Öppna instruktioner");
     }
 
     function setOpen(v) {
       drawer.classList.toggle("open", v);
-      handle.setAttribute("aria-label", v ? "Stäng instruktioner" : "Öppna instruktioner");
-      syncIcons();
+      syncIcon();
     }
 
-    handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
+    // Bind once (idempotent)
+    if (!handle.dataset.bound) {
+      handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
+      window.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
+      });
+      handle.dataset.bound = "1";
+    }
 
-    window.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
-    });
-
-    setOpen(false);
-    });
-
-    setOpen(false);
+    syncIcon();
   }
 
   createBehindDrawer();
-
-  function updateTowerButtonLabels() {
+function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
       <span class="td-tower-name">SNIPER</span>
       <span class="td-tower-cost"><span class="td-cost-num">${towerTypes.sniper.cost}</span><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span></span>
