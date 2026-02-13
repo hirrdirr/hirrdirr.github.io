@@ -143,10 +143,7 @@
       <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
         <div class="td-drawer-head">
           <div class="td-drawer-title">Instruktioner</div>
-          <button type="button" class="td-drawer-close" aria-label="Stäng instruktioner" title="Stäng">
-            ${LUCIDE.chevronLeft(18)}
-          </button>
-        </div>
+</div>
 
         <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
         <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
@@ -162,13 +159,9 @@
 
     stage.appendChild(drawer);
 
-    const handle = drawer.querySelector(".td-drawer-handle");
-    const closeBtn = drawer.querySelector(".td-drawer-close");
-
-    function syncIcons() {
+    const handle = drawer.querySelector(".td-drawer-handle");    function syncIcons() {
       const open = drawer.classList.contains("open");
       handle.innerHTML = open ? LUCIDE.chevronLeft(18) : LUCIDE.chevronRight(18);
-      closeBtn.innerHTML = LUCIDE.chevronLeft(18);
     }
 
     function setOpen(v) {
@@ -177,10 +170,7 @@
       syncIcons();
     }
 
-    handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
-    closeBtn.addEventListener("click", () => setOpen(false));
-
-    window.addEventListener("keydown", (ev) => {
+    handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));    window.addEventListener("keydown", (ev) => {
       if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
     });
 
