@@ -81,17 +81,13 @@
       <rect x="14" y="4" width="4" height="16" rx="1"></rect>
     </svg>`
 ,
-    chevronLeft: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <path d="m15 18-6-6 6-6"></path>
-    </svg>`,
     chevronRight: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
       <path d="m9 18 6-6-6-6"></path>
     </svg>`,
-    circleQuestionMark: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+    chevronLeft: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path><path d="M12 17h.01"></path>
+      <path d="m15 18-6-6 6-6"></path>
     </svg>`  };
 
   // UI refs
@@ -113,22 +109,33 @@
     if (btnStart) overlay.appendChild(btnStart);
   }
 
-  // --- Right-side slide-out Instructions Drawer (like a hidden tab) ---
-  function createInstructionsDrawer() {
-    if (!wrap) return;
-    if (wrap.querySelector("#td-drawer")) return;
+  // --- Drawer that lives BEHIND the map and slides out to the right ---
+  function createBehindDrawer() {
+    const page = document.querySelector(".td-page");
+    if (!page || !wrap) return;
+
+    // Build a stage wrapper around the map so we can layer the drawer behind it.
+    let stage = page.querySelector(".td-stage");
+    if (!stage) {
+      stage = document.createElement("div");
+      stage.className = "td-stage";
+      page.insertBefore(stage, wrap);
+      stage.appendChild(wrap);
+    }
+
+    if (stage.querySelector("#td-drawer")) return;
 
     const drawer = document.createElement("aside");
     drawer.id = "td-drawer";
-    drawer.className = "td-drawer";
+    drawer.className = "td-drawer"; // behind drawer
 
     drawer.innerHTML = `
-      <button type="button" class="td-drawer-handle" aria-label="Öppna instruktioner" title="Instruktioner">${LUCIDE.chevronRight(18)}</button>
-
       <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
         <div class="td-drawer-head">
           <div class="td-drawer-title">Instruktioner</div>
-          <button type="button" class="td-drawer-close" aria-label="Stäng instruktioner" title="Stäng">${LUCIDE.chevronLeft(18)}</button>
+          <button type="button" class="td-drawer-close" aria-label="Stäng instruktioner" title="Stäng">
+            ${LUCIDE.chevronLeft(18)}
+          </button>
         </div>
 
         <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
@@ -137,14 +144,18 @@
         <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
         <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
       </div>
+
+      <button type="button" class="td-drawer-handle" aria-label="Öppna instruktioner" title="Instruktioner">
+        ${LUCIDE.chevronRight(18)}
+      </button>
     `;
 
-    wrap.appendChild(drawer);
+    stage.appendChild(drawer);
 
     const handle = drawer.querySelector(".td-drawer-handle");
     const closeBtn = drawer.querySelector(".td-drawer-close");
 
-    function syncDrawerIcons() {
+    function syncIcons() {
       const open = drawer.classList.contains("open");
       handle.innerHTML = open ? LUCIDE.chevronLeft(18) : LUCIDE.chevronRight(18);
       closeBtn.innerHTML = LUCIDE.chevronLeft(18);
@@ -153,19 +164,20 @@
     function setOpen(v) {
       drawer.classList.toggle("open", v);
       handle.setAttribute("aria-label", v ? "Stäng instruktioner" : "Öppna instruktioner");
-      syncDrawerIcons();
+      syncIcons();
     }
 
     handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
     closeBtn.addEventListener("click", () => setOpen(false));
-    syncDrawerIcons();
 
     window.addEventListener("keydown", (ev) => {
       if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
     });
+
+    setOpen(false);
   }
 
-  createInstructionsDrawer();
+  createBehindDrawer();
 
   function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `

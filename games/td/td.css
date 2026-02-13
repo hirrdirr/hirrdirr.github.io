@@ -92,8 +92,7 @@
   align-items:center;
   justify-content:center;
   padding:0;
-
-  line-height: 0;}
+}
 
 /* Icons: make them click-transparent and aligned */
 .td-btn svg, .td-btn-icon svg, .td-ico{
@@ -111,13 +110,12 @@
 }
 
 /* Tower button typography: stacked */
-.td-tower-btn{
+.td-btn{
   display:flex;
   flex-direction:column;
-  align-items:center;
+  align-items:flex-start;
   gap:2px;
   line-height:1.05;
-  text-align:center;
 }
 
 .td-tower-name{
@@ -142,175 +140,82 @@
   vertical-align:-2px;
 }
 
-/* Hide the old inline hint pill (replaced by help icon + tooltip) */
-.td-hint{ display:none !important; }
 
-/* Overlay layout: left HUD + right help */
-.td-overlay{ justify-content: space-between; }
-.td-ol-left, .td-ol-right{ display:flex; align-items:center; gap:10px; }
-.td-ol-right{ justify-content:flex-end; }
-
-/* Help icon + tooltip */
-.td-help{ position:relative; pointer-events:auto; }
-.td-help-btn{
-  width:40px;
-  height:34px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-  background:#1f2a37;
-  color:#e6edf3;
-  border:1px solid #324155;
-  border-radius:10px;
-  cursor:pointer;
-
-  line-height: 0;}
-.td-help-tip{
-  position:absolute;
-  top:44px;
-  right:0;
-  min-width: 240px;
-  max-width: 320px;
-  padding:10px 12px;
-  border:1px solid #324155;
-  border-radius:12px;
-  background: rgba(18,27,42,0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 10px 28px rgba(0,0,0,.35);
-  color:#e6edf3;
-  opacity:0;
-  transform: translateY(-4px);
-  pointer-events:none;
-  transition: opacity .12s ease, transform .12s ease;
-}
-.td-help:hover .td-help-tip,
-.td-help:focus-within .td-help-tip{
-  opacity:1;
-  transform: translateY(0);
-}
-.td-help-title{
-  font-weight:800;
-  letter-spacing:.04em;
-  margin-bottom:6px;
-}
-.td-help-line{
-  opacity:.95;
-  margin:3px 0;
-  font-size:.92em;
+/* --- Stage: map + behind-drawer area --- */
+.td-stage{
+  order: 1 !important;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
 }
 
-/* Tower buttons: centered stack */
-.td-tower-btn{ align-items:center; text-align:center; }
-.td-tower-btn .td-tower-cost{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* Ensure map is on top and opaque so it "hides" the drawer behind */
+.td-stage .td-wrap{
+  position: relative;
+  z-index: 2;
+  background: #0f1623; /* covers drawer behind when hidden */
 }
 
-/* Fix: play/pause icon centered (no SVG margin) */
-.td-btn-icon .td-ico{ margin-right:0 !important; margin-left:0 !important; 
-  vertical-align: 0;
-  display: block;}
-
-.td-btn-icon svg{
-  display: block;
-  margin: 0;
-}
-
-.td-help-btn svg{
-  display: block;
-  margin: 0;
-}
-
-.td-help-btn .td-ico{
-  margin-right: 0;
-  margin-left: 0;
-  vertical-align: 0;
-  display: block;
-}
-
-/* Start button: icon-only centered (overrides any generic button stack styling) */
-#start.td-btn{
-  display:inline-flex !important;
-  flex-direction:row !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  line-height:0 !important;
-}
-#start.td-btn svg{ display:block; margin:0; }
-
-
-/* --- Right-side instructions drawer --- */
-.td-wrap{ position:relative; }
-
-/* Hide old inline hint pill if present in HTML */
-.td-hint{ display:none !important; }
-
-/* Drawer container sits on the right edge over the map */
+/* Drawer sits behind the map, aligned to the map's right edge */
 .td-drawer{
-  position:absolute;
-  top:12px;
-  right:12px;
-  height: calc(100% - 24px);
-  width: 320px;
-  z-index: 12;
-  pointer-events: none; /* only its buttons/panel should take clicks */
+  --panelW: 320px;
+  --handleW: 44px;
+  position: absolute;
+  top: 0;
+  left: calc(100% - var(--panelW)); /* panel starts behind map */
+  height: 100%;
+  width: var(--panelW);
+  z-index: 1; /* behind map */
+  pointer-events: none; /* only buttons/panel accept clicks */
 }
 
-/* Panel: slide in/out (closed: mostly off-screen, only handle visible) */
+/* Panel styling */
 .td-drawer-panel{
-  position:absolute;
-  top:0;
-  right:0;
-  height:100%;
-  width: 320px;
-  padding: 14px 14px 14px 14px;
+  height: 100%;
+  width: 100%;
   border-radius: 14px;
-  border:1px solid #223045;
+  border: 1px solid #223045;
   background: rgba(18,27,42,0.78);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 10px 28px rgba(0,0,0,.40);
-  transform: translateX(276px); /* 320 - handle(44) */
-  transition: transform .18s ease;
+  padding: 14px 14px 14px 14px;
   pointer-events: auto;
 }
 
-.td-drawer.open .td-drawer-panel{
+/* Slide OUT to the right into free space */
+.td-drawer{
   transform: translateX(0);
+  transition: transform .18s ease;
+}
+.td-drawer.open{
+  transform: translateX(calc(var(--panelW) - var(--handleW))); /* 276px */
 }
 
-/* Handle tab (always visible) */
+/* Handle is always clickable and stays on top of map edge */
 .td-drawer-handle{
-  position:absolute;
-  top:0;
-  right:0;
-  width:44px;
-  height:44px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  padding:0;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: var(--handleW);
+  height: var(--handleW);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border-radius: 14px;
-  background:#1f2a37;
-  color:#e6edf3;
-  border:1px solid #324155;
-  cursor:pointer;
-  line-height:0;
+  background: #1f2a37;
+  color: #e6edf3;
+  border: 1px solid #324155;
+  cursor: pointer;
+  line-height: 0;
   pointer-events: auto;
+  z-index: 3; /* above the map */
 }
-
 .td-drawer-handle svg{ display:block; margin:0; }
 .td-drawer-handle .td-ico{ margin:0 !important; vertical-align:0 !important; }
 
-
-/* Header */
+/* Drawer header */
 .td-drawer-head{
   display:flex;
   align-items:center;
@@ -318,12 +223,10 @@
   gap:10px;
   margin-bottom:10px;
 }
-
 .td-drawer-title{
   font-weight:800;
   letter-spacing:.04em;
 }
-
 .td-drawer-close{
   width:34px;
   height:34px;
@@ -337,8 +240,8 @@
   border:1px solid #324155;
   cursor:pointer;
   line-height:0;
+  pointer-events:auto;
 }
-
 .td-drawer-close svg{ display:block; margin:0; }
 .td-drawer-close .td-ico{ margin:0 !important; }
 
@@ -348,30 +251,5 @@
   font-size:.95em;
 }
 
-/* Make sure HUD overlay stays above but doesn't block drawer */
-.td-overlay{ z-index: 11; }
-
-/* --- Drawer positioning fix: keep handle on-screen, slide panel left over map --- */
-.td-drawer{
-  width:44px !important;
-}
-
-.td-drawer-panel{
-  right:0;
-  transform: translateX(0); /* default, then closed pushes it off */
-}
-
-/* Closed: hide panel to the right, only handle visible */
-.td-drawer:not(.open) .td-drawer-panel{
-  transform: translateX(276px);
-}
-
-/* Open: slide panel LEFT into view */
-.td-drawer.open .td-drawer-panel{
-  transform: translateX(-276px);
-}
-
-/* Handle: single chevron */
-.td-drawer-handle{
-  gap:0 !important;
-}
+/* Make sure the existing td-wrap order doesn't fight stage */
+.td-wrap{ order: unset !important; }
