@@ -383,3 +383,36 @@
   width: var(--wrapW) !important;
 }
 .td-drawer-close{ display:none !important; }
+
+
+/* =========================
+   V5: Floating handle above the map (fixes z-index/stacking)
+   ========================= */
+.td-wrap{ position:relative; }
+
+/* Drawer stays behind map; only moves right when open */
+.td-drawer{
+  z-index: 1 !important; /* behind map */
+}
+
+/* Floating handle attached to td-wrap so it always sits on the map edge */
+#td-drawer-handle.td-drawer-handle-float{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:44px;
+  height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:14px;
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
+  cursor:pointer;
+  line-height:0;
+  z-index: 50; /* above HUD + map */
+}
+#td-drawer-handle.td-drawer-handle-float svg{ display:block; margin:0; }
+#td-drawer-handle.td-drawer-handle-float .td-ico{ margin:0 !important; vertical-align:0 !important; }

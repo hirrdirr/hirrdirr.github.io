@@ -143,7 +143,7 @@
       <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
         <div class="td-drawer-head">
           <div class="td-drawer-title">Instruktioner</div>
-</div>
+        </div>
 
         <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
         <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
@@ -151,13 +151,22 @@
         <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
         <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
       </div>
-
-      <button type="button" class="td-drawer-handle" aria-label="Öppna instruktioner" title="Instruktioner">
-        ${LUCIDE.chevronRight(18)}
-      </button>
     `;
 
     stage.appendChild(drawer);
+
+    // Floating handle ABOVE the map (separate stacking context)
+    let handle = wrap.querySelector("#td-drawer-handle");
+    if (!handle) {
+      handle = document.createElement("button");
+      handle.id = "td-drawer-handle";
+      handle.className = "td-drawer-handle-float";
+      handle.type = "button";
+      handle.title = "Instruktioner";
+      handle.setAttribute("aria-label", "Öppna instruktioner");
+      wrap.appendChild(handle);
+    }
+
 
     const handle = drawer.querySelector(".td-drawer-handle");    function syncIcons() {
       const open = drawer.classList.contains("open");
@@ -170,8 +179,13 @@
       syncIcons();
     }
 
-    handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));    window.addEventListener("keydown", (ev) => {
+    handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
+
+    window.addEventListener("keydown", (ev) => {
       if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
+    });
+
+    setOpen(false);
     });
 
     setOpen(false);
