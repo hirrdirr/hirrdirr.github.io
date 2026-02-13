@@ -139,3 +139,34 @@
   margin-left: 6px;
   vertical-align: -2px;
 }
+
+/* --- Tower button typography --- */
+.td-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:2px;
+  line-height:1.05;
+}
+
+.td-tower-name{
+  font-weight: 800;
+  letter-spacing: .06em;
+  font-size: .88em;
+  opacity: .98;
+}
+
+.td-tower-cost{
+  font-weight: 700; /* label row weight; numbers overridden below */
+  opacity: .92;
+}
+
+.td-cost-num{
+  font-weight: 400; /* NOT bold on numbers */
+}
+
+.td-ico-after .td-ico{
+  margin-left: 6px;
+  margin-right: 0;
+  vertical-align: -2px;
+}
