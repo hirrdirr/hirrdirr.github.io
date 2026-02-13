@@ -56,24 +56,67 @@
   let hoveredTower = -1;
   let selectedTower = -1;
   let showAllRanges = false;
-  let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
+  
+  // --- Icons (inline Lucide SVG, no external deps) ---
+  const LUCIDE = {
+    circleDollarSign: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"></path>
+      <path d="M12 18V6"></path>
+    </svg>`,
+    heart: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path>
+    </svg>`,
+    play: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <polygon points="6 3 20 12 6 21 6 3"></polygon>
+    </svg>`,
+    pause: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+      <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+    </svg>`
+  };
+
+  // --- Pause state ---
+  let paused = false;
+
+  function setPaused(v) {
+    paused = v;
+    updatePlayPauseButton();
+  }
+let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
 
   // UI
   const btn1 = document.getElementById("t1");
   const btn2 = document.getElementById("t2");
   const btnStart = document.getElementById("start");
-  const stats = document.getElementById("stats");
+  
+  function updatePlayPauseButton() {
+    if (!btnStart) return;
 
-  // --- UI layout upgrade (no HTML changes needed) ---
-  // Move the stats pill into an overlay on top of the canvas.
-  const wrap = canvas.parentElement; // .td-wrap
-  if (wrap && stats) {
-    const overlay = document.createElement("div");
-    overlay.className = "td-overlay";
-    wrap.appendChild(overlay);
-    overlay.appendChild(stats);
+    const waveActive = enemies.length > 0; // includes delayed spawns
+    const showPlay = paused || !waveActive;
+
+    btnStart.innerHTML = showPlay ? LUCIDE.play(16) : LUCIDE.pause(16);
+    btnStart.title = showPlay ? (paused ? "Fortsätt" : "Starta våg") : "Pausa";
+    btnStart.setAttribute("aria-label", btnStart.title);
   }
 
+  // Start/Play/Pause button behavior
+  btnStart.onclick = () => {
+    const waveActive = enemies.length > 0;
+
+    if (paused) { setPaused(false); return; }
+    if (!waveActive) { startWave(); setPaused(false); return; }
+
+    setPaused(true);
+  };
+
+  updatePlayPauseButton();
+const stats = document.getElementById("stats");
 
   function setPlacing(t) {
     placing = t;
@@ -82,9 +125,7 @@
   }
   btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper");
   btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling");
-  btnStart.onclick = () => startWave();
-
-  function startWave() {
+function startWave() {
     wave++;
     const count = 8 + wave * 2;
     for (let i = 0; i < count; i++) enemies.push(makeEnemy(i * 0.7));
@@ -227,10 +268,10 @@
     const dt = Math.min(0.033, (now - last) / 1000);
     last = now;
 
-    update(dt);
+    if (!paused) update(dt);
     render();
-
-    requestAnimationFrame(tick);
+    updatePlayPauseButton();
+requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
@@ -316,10 +357,14 @@
       }
     }
 
-    stats.textContent =
-      `Guld: ${gold} | Liv: ${lives} | Våg: ${wave} | Fiender: ${enemies.filter(e=>e.t>=0).length}` +
-      (showAllRanges ? " | Ranges: ALLA (R)" : " | Ranges: VALD/HOVER (R)");
-  }
+        const aliveCount = enemies.filter(e => e.t >= 0).length;
+
+    stats.innerHTML =
+      `${LUCIDE.circleDollarSign(16)}<strong>${gold}</strong>` +
+      `&nbsp; | &nbsp; ${LUCIDE.heart(16)}<strong>${lives}</strong>` +
+      `&nbsp; | &nbsp; <span class="td-hud-label">Wave</span> <strong>${wave}</strong>` +
+      `&nbsp; | &nbsp; <span class="td-hud-label">Fiender</span> <strong>${aliveCount}</strong>`;
+}
 
   function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
