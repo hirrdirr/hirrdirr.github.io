@@ -107,6 +107,47 @@
       overlay.className = "td-overlay";
       wrap.appendChild(overlay);
     }
+
+    // Two zones: left HUD, right HUD
+    let left = overlay.querySelector(".td-ol-left");
+    let right = overlay.querySelector(".td-ol-right");
+    if (!left) {
+      left = document.createElement("div");
+      left.className = "td-ol-left";
+      overlay.appendChild(left);
+    }
+    if (!right) {
+      right = document.createElement("div");
+      right.className = "td-ol-right";
+      overlay.appendChild(right);
+    }
+
+    // Put stats + play/pause on the LEFT
+    if (stats && stats.parentElement !== left) left.appendChild(stats);
+    if (btnStart && btnStart.parentElement !== left) left.appendChild(btnStart);
+
+    // Put help icon on the RIGHT
+    if (!right.querySelector("#td-help")) {
+      const helpWrap = document.createElement("div");
+      helpWrap.id = "td-help";
+      helpWrap.className = "td-help";
+
+      helpWrap.innerHTML = `
+        <button type="button" class="td-help-btn" aria-label="Instruktioner" title="Instruktioner">
+          ${LUCIDE.circleQuestionMark(18)}
+        </button>
+        <div class="td-help-tip" role="tooltip">
+          <div class="td-help-title">Instruktioner</div>
+          <div class="td-help-line"><strong>Placera:</strong> vänsterklick</div>
+          <div class="td-help-line"><strong>Ta bort:</strong> högerklick</div>
+          <div class="td-help-line"><strong>Range (debug):</strong> R</div>
+          <div class="td-help-line"><strong>Avbryt placering:</strong> ESC</div>
+          <div class="td-help-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
+        </div>
+      `;
+      right.appendChild(helpWrap);
+    }
+  }
     if (stats) overlay.appendChild(stats);
     if (btnStart) overlay.appendChild(btnStart);
   }
@@ -511,16 +552,28 @@
 
     // Pause overlay
     if (paused) {
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#e6edf3";
-      ctx.font = "700 28px system-ui";
-      ctx.fillText("PAUSED", 24, 44);
-      ctx.font = "14px system-ui";
-      ctx.fillText("Tryck Space eller Play för att fortsätta", 24, 66);
-    }
 
-    // Game over
+      const title = "PAUSED";
+      const subtitle = "Tryck Space eller Play för att fortsätta";
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.fillStyle = "#e6edf3";
+      ctx.font = "800 44px system-ui";
+      ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 18);
+
+      ctx.globalAlpha = 0.92;
+      ctx.font = "16px system-ui";
+      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 22);
+      ctx.globalAlpha = 1;
+
+      ctx.textAlign = "start";
+      ctx.textBaseline = "alphabetic";
+    }
+// Game over
     if (lives <= 0) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
