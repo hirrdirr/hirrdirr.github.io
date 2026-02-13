@@ -116,3 +116,26 @@
 }
 
 .td-wrap{ position:relative; }
+
+/* --- FORCE layout: map first, controls below --- */
+.td-page{
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+.td-wrap{
+  order: 1 !important;
+}
+
+.td-ui{
+  order: 2 !important;
+  margin-top: 12px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Icon placed AFTER text (e.g., costs on tower buttons) */
+.td-ico-after .td-ico{
+  margin-right: 0;
+  margin-left: 6px;
+  vertical-align: -2px;
+}

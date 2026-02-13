@@ -94,8 +94,8 @@ let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
   const btn2 = document.getElementById("t2");
   
   function updateTowerButtonLabels() {
-    if (btn1) btn1.innerHTML = `Sniper <strong>${towerTypes.sniper.cost}</strong>${LUCIDE.circleDollarSign(16)}`;
-    if (btn2) btn2.innerHTML = `Gatling <strong>${towerTypes.gatling.cost}</strong>${LUCIDE.circleDollarSign(16)}`;
+    if (btn1) btn1.innerHTML = `Sniper <strong>${towerTypes.sniper.cost}</strong><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span>`;
+    if (btn2) btn2.innerHTML = `Gatling <strong>${towerTypes.gatling.cost}</strong><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span>`;
   }
 const btnStart = document.getElementById("start");
   
