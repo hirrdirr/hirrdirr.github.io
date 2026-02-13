@@ -148,9 +148,6 @@
       right.appendChild(helpWrap);
     }
   }
-    if (stats) overlay.appendChild(stats);
-    if (btnStart) overlay.appendChild(btnStart);
-  }
 
   function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
