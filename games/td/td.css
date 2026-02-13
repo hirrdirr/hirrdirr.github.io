@@ -144,19 +144,9 @@
 .td-hint{ display:none !important; }
 
 /* Overlay layout: left HUD + right help */
-.td-overlay{
-  justify-content: space-between;
-}
-
-.td-ol-left, .td-ol-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.td-ol-right{
-  justify-content:flex-end;
-}
+.td-overlay{ justify-content: space-between; }
+.td-ol-left, .td-ol-right{ display:flex; align-items:center; gap:10px; }
+.td-ol-right{ justify-content:flex-end; }
 
 /* Help icon + tooltip */
 .td-help{ position:relative; pointer-events:auto; }
@@ -209,10 +199,7 @@
 }
 
 /* Tower buttons: centered stack */
-.td-tower-btn{
-  align-items:center;
-  text-align:center;
-}
+.td-tower-btn{ align-items:center; text-align:center; }
 .td-tower-btn .td-tower-cost{
   width:100%;
   display:flex;
@@ -221,7 +208,4 @@
 }
 
 /* Fix: play/pause icon centered (no SVG margin) */
-.td-btn-icon .td-ico{
-  margin-right:0 !important;
-  margin-left:0 !important;
-}
+.td-btn-icon .td-ico{ margin-right:0 !important; margin-left:0 !important; }

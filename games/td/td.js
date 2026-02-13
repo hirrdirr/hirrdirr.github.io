@@ -50,14 +50,6 @@
   const towerTypes = {
     sniper:  { cost:50, range:150, fireRate:0.8, damage:18, bulletSpeed:420 },
     gatling: { cost:35, range: 95, fireRate:4.5, damage: 5, bulletSpeed:520 },
-
-    ,
-    circleQuestionMark: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
-      <path d="M12 17h.01"></path>
-    </svg>`
   };
 
   let hoveredTower = -1;
@@ -88,6 +80,14 @@
       <rect x="6" y="4" width="4" height="16" rx="1"></rect>
       <rect x="14" y="4" width="4" height="16" rx="1"></rect>
     </svg>`
+
+    ,
+    circleQuestionMark: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
+      <path d="M12 17h.01"></path>
+    </svg>`
   };
 
   // UI refs
@@ -107,45 +107,8 @@
       overlay.className = "td-overlay";
       wrap.appendChild(overlay);
     }
-
-    // Two zones: left HUD, right HUD
-    let left = overlay.querySelector(".td-ol-left");
-    let right = overlay.querySelector(".td-ol-right");
-    if (!left) {
-      left = document.createElement("div");
-      left.className = "td-ol-left";
-      overlay.appendChild(left);
-    }
-    if (!right) {
-      right = document.createElement("div");
-      right.className = "td-ol-right";
-      overlay.appendChild(right);
-    }
-
-    if (stats) left.appendChild(stats);
-    if (btnStart) left.appendChild(btnStart);
-
-    // Help icon + tooltip (top-right)
-    if (!right.querySelector("#td-help")) {
-      const helpWrap = document.createElement("div");
-      helpWrap.id = "td-help";
-      helpWrap.className = "td-help";
-
-      helpWrap.innerHTML = `
-        <button type="button" class="td-help-btn" aria-label="Instruktioner" title="Instruktioner">
-          ${LUCIDE.circleQuestionMark(18)}
-        </button>
-        <div class="td-help-tip" role="tooltip">
-          <div class="td-help-title">Instruktioner</div>
-          <div class="td-help-line"><strong>Placera:</strong> vänsterklick</div>
-          <div class="td-help-line"><strong>Ta bort:</strong> högerklick</div>
-          <div class="td-help-line"><strong>Range (debug):</strong> R</div>
-          <div class="td-help-line"><strong>Avbryt placering:</strong> ESC</div>
-          <div class="td-help-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
-        </div>
-      `;
-      right.appendChild(helpWrap);
-    }
+    if (stats) overlay.appendChild(stats);
+    if (btnStart) overlay.appendChild(btnStart);
   }
 
   function updateTowerButtonLabels() {
