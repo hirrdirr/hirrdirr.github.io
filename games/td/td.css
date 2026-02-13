@@ -242,3 +242,117 @@
   line-height:0 !important;
 }
 #start.td-btn svg{ display:block; margin:0; }
+
+
+/* --- Slide-out instructions panel --- */
+.td-stage{
+  order: 1 !important;
+  max-width: 1100px;
+  margin: 0 auto;
+  display:flex;
+  gap:14px;
+  align-items:stretch;
+}
+
+.td-stage .td-wrap{
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+/* Panel lives to the right of the map */
+.td-panel{
+  position:relative;
+  width: 44px; /* collapsed */
+  flex: 0 0 auto;
+  border-radius: 14px;
+  border:1px solid #223045;
+  background: rgba(18,27,42,0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 22px rgba(0,0,0,.35);
+  overflow:hidden;
+}
+
+/* Smooth expand */
+.td-panel{
+  transition: width .18s ease;
+}
+.td-panel.open{
+  width: 320px;
+}
+
+.td-panel-handle{
+  position:absolute;
+  top:10px;
+  left:10px;
+  width:28px;
+  height:28px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:10px;
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
+  cursor:pointer;
+  line-height:0;
+}
+.td-panel-handle svg{ display:block; margin:0; }
+
+/* Body slides in */
+.td-panel-body{
+  height:100%;
+  padding:12px 12px 14px;
+  padding-left: 52px; /* leave space for handle */
+  opacity:0;
+  transform: translateX(8px);
+  transition: opacity .16s ease, transform .16s ease;
+}
+.td-panel.open .td-panel-body{
+  opacity:1;
+  transform: translateX(0);
+}
+
+.td-panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.td-panel-title{
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+.td-panel-close{
+  width:28px;
+  height:28px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:10px;
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
+  cursor:pointer;
+  line-height:0;
+}
+.td-panel-close svg{ display:block; margin:0; }
+
+.td-panel-line{
+  opacity:.95;
+  margin:6px 0;
+  font-size:.92em;
+}
+
+/* Responsive: stack panel under map if screen is narrow */
+@media (max-width: 980px){
+  .td-stage{ flex-direction:column; }
+  .td-panel{ width:100%; }
+  .td-panel.open{ width:100%; }
+  .td-panel-body{ padding-left: 52px; }
+}

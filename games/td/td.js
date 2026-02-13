@@ -88,7 +88,15 @@
       <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
       <path d="M12 17h.01"></path>
     </svg>`
-  };
+,
+    chevronRight: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <path d="m9 18 6-6-6-6"></path>
+    </svg>`,
+    chevronLeft: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <path d="m15 18-6-6 6-6"></path>
+    </svg>`  };
 
   // UI refs
   const btn1 = document.getElementById("t1");
@@ -108,6 +116,73 @@
       wrap.appendChild(overlay);
     }
 
+  // --- Slide-out Instructions Panel (right side of the map) ---
+  function createSlidePanel() {
+    const page = document.querySelector(".td-page");
+    if (!page || !wrap) return;
+
+    // Build a stage container so the panel can sit beside the map without changing HTML.
+    let stage = page.querySelector(".td-stage");
+    if (!stage) {
+      stage = document.createElement("div");
+      stage.className = "td-stage";
+
+      // Insert stage right before the map wrapper, then move map wrapper into it.
+      page.insertBefore(stage, wrap);
+      stage.appendChild(wrap);
+    }
+
+    // Create panel once
+    if (stage.querySelector("#td-panel")) return;
+
+    const panel = document.createElement("aside");
+    panel.id = "td-panel";
+    panel.className = "td-panel";
+    panel.setAttribute("aria-label", "Instruktioner");
+
+    panel.innerHTML = `
+      <button type="button" class="td-panel-handle" aria-label="Öppna instruktioner" title="Instruktioner">
+        ${LUCIDE.chevronLeft(18)}
+      </button>
+
+      <div class="td-panel-body">
+        <div class="td-panel-header">
+          <div class="td-panel-title">Instruktioner</div>
+          <button type="button" class="td-panel-close" aria-label="Stäng instruktioner" title="Stäng">
+            ${LUCIDE.chevronRight(18)}
+          </button>
+        </div>
+
+        <div class="td-panel-line"><strong>Placera:</strong> vänsterklick</div>
+        <div class="td-panel-line"><strong>Ta bort:</strong> högerklick</div>
+        <div class="td-panel-line"><strong>Range:</strong> R</div>
+        <div class="td-panel-line"><strong>Avbryt placering:</strong> ESC</div>
+        <div class="td-panel-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
+      </div>
+    `;
+
+    stage.appendChild(panel);
+
+    const openBtn = panel.querySelector(".td-panel-handle");
+    const closeBtn = panel.querySelector(".td-panel-close");
+
+    function setOpen(v) {
+      panel.classList.toggle("open", v);
+      openBtn.setAttribute("aria-label", v ? "Stäng instruktioner" : "Öppna instruktioner");
+    }
+
+    // Handle button: closed -> open, open -> close (easy UX)
+    openBtn.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
+    closeBtn.addEventListener("click", () => setOpen(false));
+
+    // Close with Escape if panel is open and focus is within stage
+    stage.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && panel.classList.contains("open")) {
+        setOpen(false);
+      }
+    });
+  }
+
     // Two zones: left HUD, right HUD
     let left = overlay.querySelector(".td-ol-left");
     let right = overlay.querySelector(".td-ol-right");
@@ -125,31 +200,11 @@
     // Put stats + play/pause on the LEFT
     if (stats && stats.parentElement !== left) left.appendChild(stats);
     if (btnStart && btnStart.parentElement !== left) left.appendChild(btnStart);
+}
 
-    // Put help icon on the RIGHT
-    if (!right.querySelector("#td-help")) {
-      const helpWrap = document.createElement("div");
-      helpWrap.id = "td-help";
-      helpWrap.className = "td-help";
+    createSlidePanel();
 
-      helpWrap.innerHTML = `
-        <button type="button" class="td-help-btn" aria-label="Instruktioner" title="Instruktioner">
-          ${LUCIDE.circleQuestionMark(18)}
-        </button>
-        <div class="td-help-tip" role="tooltip">
-          <div class="td-help-title">Instruktioner</div>
-          <div class="td-help-line"><strong>Placera:</strong> vänsterklick</div>
-          <div class="td-help-line"><strong>Ta bort:</strong> högerklick</div>
-          <div class="td-help-line"><strong>Range:</strong> R</div>
-          <div class="td-help-line"><strong>Avbryt placering:</strong> ESC</div>
-          <div class="td-help-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
-        </div>
-      `;
-      right.appendChild(helpWrap);
-    }
-  }
-
-  function updateTowerButtonLabels() {
+function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
       <span class="td-tower-name">SNIPER</span>
       <span class="td-tower-cost"><span class="td-cost-num">${towerTypes.sniper.cost}</span><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span></span>
