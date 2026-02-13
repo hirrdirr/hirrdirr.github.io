@@ -100,7 +100,8 @@ let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
     const waveActive = enemies.length > 0; // includes delayed spawns
     const showPlay = paused || !waveActive;
 
-    btnStart.innerHTML = showPlay ? LUCIDE.play(16) : LUCIDE.pause(16);
+    btnStart.classList.add("td-btn-icon");
+    btnStart.innerHTML = showPlay ? LUCIDE.play(18) : LUCIDE.pause(18);
     btnStart.title = showPlay ? (paused ? "Fortsätt" : "Starta våg") : "Pausa";
     btnStart.setAttribute("aria-label", btnStart.title);
   }
@@ -118,7 +119,21 @@ let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
   updatePlayPauseButton();
 const stats = document.getElementById("stats");
 
-  function setPlacing(t) {
+  
+  // --- Move HUD into an overlay above the canvas ---
+  const wrap = canvas.parentElement; // .td-wrap
+  if (wrap) {
+    let overlay = wrap.querySelector(".td-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "td-overlay";
+      wrap.appendChild(overlay);
+    }
+    // Ensure HUD items are inside overlay (stats + play/pause button)
+    if (stats) overlay.appendChild(stats);
+    if (btnStart) overlay.appendChild(btnStart);
+  }
+function setPlacing(t) {
     placing = t;
     btn1.classList.toggle("active", t === "sniper");
     btn2.classList.toggle("active", t === "gatling");

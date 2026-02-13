@@ -74,3 +74,45 @@
   opacity: .9;
   font-weight: 600;
 }
+
+/* --- Overlay HUD fixes --- */
+.td-overlay{
+  position:absolute;
+  top:10px;
+  left:10px;
+  right:10px;
+  z-index:10;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  pointer-events:none; /* let canvas receive clicks */
+}
+
+.td-overlay > *{
+  pointer-events:none;
+}
+
+.td-overlay .td-pill{
+  pointer-events:none;
+}
+
+/* Make play/pause clickable even though overlay is pointer-events:none */
+.td-overlay #start{
+  pointer-events:auto;
+}
+
+.td-btn-icon{
+  width:40px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+
+/* If SVG steals clicks, disable pointer events on icons */
+.td-btn svg, .td-btn-icon svg, .td-ico{
+  pointer-events:none;
+}
+
+.td-wrap{ position:relative; }
