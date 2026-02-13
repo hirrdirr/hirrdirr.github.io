@@ -111,12 +111,13 @@
 }
 
 /* Tower button typography: stacked */
-.td-btn{
+.td-tower-btn{
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
+  align-items:center;
   gap:2px;
   line-height:1.05;
+  text-align:center;
 }
 
 .td-tower-name{
@@ -231,7 +232,13 @@
   display: block;
 }
 
-/* Optical centering for play icon (triangle looks left-heavy even when mathematically centered) */
-#start.td-btn-icon svg{
-  transform: translateX(1px);
+/* Start button: icon-only centered (overrides any generic button stack styling) */
+#start.td-btn{
+  display:inline-flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:0 !important;
 }
+#start.td-btn svg{ display:block; margin:0; }
