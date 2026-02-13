@@ -309,12 +309,6 @@
 .td-drawer-handle svg{ display:block; margin:0; }
 .td-drawer-handle .td-ico{ margin:0 !important; vertical-align:0 !important; }
 
-.td-drawer-chev{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  opacity:.9;
-}
 
 /* Header */
 .td-drawer-head{
@@ -356,3 +350,28 @@
 
 /* Make sure HUD overlay stays above but doesn't block drawer */
 .td-overlay{ z-index: 11; }
+
+/* --- Drawer positioning fix: keep handle on-screen, slide panel left over map --- */
+.td-drawer{
+  width:44px !important;
+}
+
+.td-drawer-panel{
+  right:0;
+  transform: translateX(0); /* default, then closed pushes it off */
+}
+
+/* Closed: hide panel to the right, only handle visible */
+.td-drawer:not(.open) .td-drawer-panel{
+  transform: translateX(276px);
+}
+
+/* Open: slide panel LEFT into view */
+.td-drawer.open .td-drawer-panel{
+  transform: translateX(-276px);
+}
+
+/* Handle: single chevron */
+.td-drawer-handle{
+  gap:0 !important;
+}
