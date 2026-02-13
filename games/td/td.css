@@ -230,3 +230,8 @@
   vertical-align: 0;
   display: block;
 }
+
+/* Optical centering for play icon (triangle looks left-heavy even when mathematically centered) */
+#start.td-btn-icon svg{
+  transform: translateX(1px);
+}
