@@ -80,29 +80,23 @@
       <rect x="6" y="4" width="4" height="16" rx="1"></rect>
       <rect x="14" y="4" width="4" height="16" rx="1"></rect>
     </svg>`
-
-    ,
-    circleQuestionMark: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
-      <path d="M12 17h.01"></path>
-    </svg>`
 ,
+    chevronLeft: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
+      <path d="m15 18-6-6 6-6"></path>
+    </svg>`,
     chevronRight: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
       <path d="m9 18 6-6-6-6"></path>
     </svg>`,
-    chevronLeft: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
+    circleQuestionMark: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <path d="m15 18-6-6 6-6"></path>
+      <circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path><path d="M12 17h.01"></path>
     </svg>`  };
 
   // UI refs
   const btn1 = document.getElementById("t1");
-  btn1?.classList.add("td-tower-btn");
   const btn2 = document.getElementById("t2");
-  btn2?.classList.add("td-tower-btn");
   const btnStart = document.getElementById("start");
   const stats = document.getElementById("stats");
 
@@ -115,96 +109,62 @@
       overlay.className = "td-overlay";
       wrap.appendChild(overlay);
     }
+    if (stats) overlay.appendChild(stats);
+    if (btnStart) overlay.appendChild(btnStart);
+  }
 
-  // --- Slide-out Instructions Panel (right side of the map) ---
-  function createSlidePanel() {
-    const page = document.querySelector(".td-page");
-    if (!page || !wrap) return;
+  // --- Right-side slide-out Instructions Drawer (like a hidden tab) ---
+  function createInstructionsDrawer() {
+    if (!wrap) return;
+    if (wrap.querySelector("#td-drawer")) return;
 
-    // Build a stage container so the panel can sit beside the map without changing HTML.
-    let stage = page.querySelector(".td-stage");
-    if (!stage) {
-      stage = document.createElement("div");
-      stage.className = "td-stage";
+    const drawer = document.createElement("aside");
+    drawer.id = "td-drawer";
+    drawer.className = "td-drawer";
 
-      // Insert stage right before the map wrapper, then move map wrapper into it.
-      page.insertBefore(stage, wrap);
-      stage.appendChild(wrap);
-    }
-
-    // Create panel once
-    if (stage.querySelector("#td-panel")) return;
-
-    const panel = document.createElement("aside");
-    panel.id = "td-panel";
-    panel.className = "td-panel";
-    panel.setAttribute("aria-label", "Instruktioner");
-
-    panel.innerHTML = `
-      <button type="button" class="td-panel-handle" aria-label="Öppna instruktioner" title="Instruktioner">
-        ${LUCIDE.chevronLeft(18)}
+    drawer.innerHTML = `
+      <button type="button" class="td-drawer-handle" aria-label="Öppna instruktioner" title="Instruktioner">
+        ${LUCIDE.circleQuestionMark(18)}
+        <span class="td-drawer-chev">${LUCIDE.chevronLeft(18)}</span>
       </button>
 
-      <div class="td-panel-body">
-        <div class="td-panel-header">
-          <div class="td-panel-title">Instruktioner</div>
-          <button type="button" class="td-panel-close" aria-label="Stäng instruktioner" title="Stäng">
+      <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
+        <div class="td-drawer-head">
+          <div class="td-drawer-title">Instruktioner</div>
+          <button type="button" class="td-drawer-close" aria-label="Stäng instruktioner" title="Stäng">
             ${LUCIDE.chevronRight(18)}
           </button>
         </div>
 
-        <div class="td-panel-line"><strong>Placera:</strong> vänsterklick</div>
-        <div class="td-panel-line"><strong>Ta bort:</strong> högerklick</div>
-        <div class="td-panel-line"><strong>Range:</strong> R</div>
-        <div class="td-panel-line"><strong>Avbryt placering:</strong> ESC</div>
-        <div class="td-panel-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
+        <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
+        <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
+        <div class="td-drawer-line"><strong>Range:</strong> R</div>
+        <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
+        <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
       </div>
     `;
 
-    stage.appendChild(panel);
+    wrap.appendChild(drawer);
 
-    const openBtn = panel.querySelector(".td-panel-handle");
-    const closeBtn = panel.querySelector(".td-panel-close");
+    const handle = drawer.querySelector(".td-drawer-handle");
+    const closeBtn = drawer.querySelector(".td-drawer-close");
 
     function setOpen(v) {
-      panel.classList.toggle("open", v);
-      openBtn.setAttribute("aria-label", v ? "Stäng instruktioner" : "Öppna instruktioner");
+      drawer.classList.toggle("open", v);
+      handle.setAttribute("aria-label", v ? "Stäng instruktioner" : "Öppna instruktioner");
     }
 
-    // Handle button: closed -> open, open -> close (easy UX)
-    openBtn.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
+    handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
     closeBtn.addEventListener("click", () => setOpen(false));
 
-    // Close with Escape if panel is open and focus is within stage
-    stage.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && panel.classList.contains("open")) {
-        setOpen(false);
-      }
+    window.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
     });
   }
 
-    // Two zones: left HUD, right HUD
-    let left = overlay.querySelector(".td-ol-left");
-    let right = overlay.querySelector(".td-ol-right");
-    if (!left) {
-      left = document.createElement("div");
-      left.className = "td-ol-left";
-      overlay.appendChild(left);
-    }
-    if (!right) {
-      right = document.createElement("div");
-      right.className = "td-ol-right";
-      overlay.appendChild(right);
-    }
+  createInstructionsDrawer();
 
-    // Put stats + play/pause on the LEFT
-    if (stats && stats.parentElement !== left) left.appendChild(stats);
-    if (btnStart && btnStart.parentElement !== left) left.appendChild(btnStart);
-}
-
-    createSlidePanel();
-
-function updateTowerButtonLabels() {
+  function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
       <span class="td-tower-name">SNIPER</span>
       <span class="td-tower-cost"><span class="td-cost-num">${towerTypes.sniper.cost}</span><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span></span>
@@ -604,28 +564,16 @@ function updateTowerButtonLabels() {
 
     // Pause overlay
     if (paused) {
-      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const title = "PAUSED";
-      const subtitle = "Tryck Space eller Play för att fortsätta";
-
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
       ctx.fillStyle = "#e6edf3";
-      ctx.font = "800 44px system-ui";
-      ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 18);
-
-      ctx.globalAlpha = 0.92;
-      ctx.font = "16px system-ui";
-      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 22);
-      ctx.globalAlpha = 1;
-
-      ctx.textAlign = "start";
-      ctx.textBaseline = "alphabetic";
+      ctx.font = "700 28px system-ui";
+      ctx.fillText("PAUSED", 24, 44);
+      ctx.font = "14px system-ui";
+      ctx.fillText("Tryck Space eller Play för att fortsätta", 24, 66);
     }
-// Game over
+
+    // Game over
     if (lives <= 0) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
