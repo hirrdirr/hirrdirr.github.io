@@ -92,7 +92,12 @@ let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
   // UI
   const btn1 = document.getElementById("t1");
   const btn2 = document.getElementById("t2");
-  const btnStart = document.getElementById("start");
+  
+  function updateTowerButtonLabels() {
+    if (btn1) btn1.innerHTML = `Sniper <strong>${towerTypes.sniper.cost}</strong>${LUCIDE.circleDollarSign(16)}`;
+    if (btn2) btn2.innerHTML = `Gatling <strong>${towerTypes.gatling.cost}</strong>${LUCIDE.circleDollarSign(16)}`;
+  }
+const btnStart = document.getElementById("start");
   
   function updatePlayPauseButton() {
     if (!btnStart) return;
@@ -140,6 +145,8 @@ function setPlacing(t) {
   }
   btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper");
   btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling");
+
+  updateTowerButtonLabels();
 function startWave() {
     wave++;
     const count = 8 + wave * 2;
