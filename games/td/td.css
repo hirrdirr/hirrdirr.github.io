@@ -92,7 +92,8 @@
   align-items:center;
   justify-content:center;
   padding:0;
-}
+
+  line-height: 0;}
 
 /* Icons: make them click-transparent and aligned */
 .td-btn svg, .td-btn-icon svg, .td-ico{
@@ -162,7 +163,8 @@
   border:1px solid #324155;
   border-radius:10px;
   cursor:pointer;
-}
+
+  line-height: 0;}
 .td-help-tip{
   position:absolute;
   top:44px;
@@ -208,4 +210,23 @@
 }
 
 /* Fix: play/pause icon centered (no SVG margin) */
-.td-btn-icon .td-ico{ margin-right:0 !important; margin-left:0 !important; }
+.td-btn-icon .td-ico{ margin-right:0 !important; margin-left:0 !important; 
+  vertical-align: 0;
+  display: block;}
+
+.td-btn-icon svg{
+  display: block;
+  margin: 0;
+}
+
+.td-help-btn svg{
+  display: block;
+  margin: 0;
+}
+
+.td-help-btn .td-ico{
+  margin-right: 0;
+  margin-left: 0;
+  vertical-align: 0;
+  display: block;
+}

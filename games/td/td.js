@@ -140,7 +140,7 @@
           <div class="td-help-title">Instruktioner</div>
           <div class="td-help-line"><strong>Placera:</strong> vänsterklick</div>
           <div class="td-help-line"><strong>Ta bort:</strong> högerklick</div>
-          <div class="td-help-line"><strong>Range (debug):</strong> R</div>
+          <div class="td-help-line"><strong>Range:</strong> R</div>
           <div class="td-help-line"><strong>Avbryt placering:</strong> ESC</div>
           <div class="td-help-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
         </div>
