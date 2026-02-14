@@ -7,7 +7,7 @@
   const cols = Math.floor(canvas.width / tile);
   const rows = Math.floor(canvas.height / tile);
 
-  // Waypoints
+  // Waypoints (bana). Enkelt och stabilt.
   const path = [
     {x: 0.5, y: 8.5},
     {x: 10.5, y: 8.5},
@@ -17,7 +17,7 @@
     {x: 30.5, y: 13.5},
   ].map(p => ({ x: p.x * tile, y: p.y * tile }));
 
-  // Road tiles
+  // Markera vilka rutor som är "väg"
   const isRoad = new Set();
   function markRoad() {
     for (let i = 0; i < path.length - 1; i++) {
@@ -37,11 +37,11 @@
   }
   markRoad();
 
-  // State
+  // Game state
   let gold = 120;
   let lives = 20;
   let wave = 0;
-  let placing = null;
+  let placing = null; // "sniper" | "gatling" | null
 
   const towers = [];
   const enemies = [];
@@ -52,144 +52,47 @@
     gatling: { cost:35, range: 95, fireRate:4.5, damage: 5, bulletSpeed:520 },
   };
 
+  // --- Tower button labels (stacked, centered) ---
+  function renderTowerButtons() {
+    const b1 = document.getElementById("t1");
+    const b2 = document.getElementById("t2");
+    if (b1) {
+      b1.classList.add("td-tower");
+      b1.innerHTML = `<span class="td-tname">SNIPER</span>
+                      <span class="td-tcost">50 ${LUCIDE.circleDollarSign(16)}</span>`;
+      if (!LUCIDE.circleDollarSign && LUCIDE.circleDollarSign === undefined && LUCIDE.circleDollarSign === null) {}
+    }
+    if (b2) {
+      b2.classList.add("td-tower");
+      b2.innerHTML = `<span class="td-tname">GATLING</span>
+                      <span class="td-tcost">35 ${LUCIDE.circleDollarSign(16)}</span>`;
+    }
+  }
+  // call once at start
+  window.addEventListener("DOMContentLoaded", renderTowerButtons, { once: true });
+
+
+
+  // Selection/hover + ghost preview + debug toggle for ranges
   let hoveredTower = -1;
   let selectedTower = -1;
   let showAllRanges = false;
-  let paused = false;
-
   let mouse = { mx: 0, my: 0, gx: 0, gy: 0, inside: false };
 
-  // --- Icons (inline Lucide SVG, no external deps) ---
-  const LUCIDE = {
-    circleDollarSign: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"></path>
-      <path d="M12 18V6"></path>
-    </svg>`,
-    heart: (s=16) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path>
-    </svg>`,
-    play: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <polygon points="6 3 20 12 6 21 6 3"></polygon>
-    </svg>`,
-    pause: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <rect x="6" y="4" width="4" height="16" rx="1"></rect>
-      <rect x="14" y="4" width="4" height="16" rx="1"></rect>
-    </svg>`
-,
-    chevronRight: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <path d="m9 18 6-6-6-6"></path>
-    </svg>`,
-    chevronLeft: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <path d="m15 18-6-6 6-6"></path>
-    </svg>`  };
-
-  // UI refs
+  // UI
   const btn1 = document.getElementById("t1");
   const btn2 = document.getElementById("t2");
   const btnStart = document.getElementById("start");
   const stats = document.getElementById("stats");
 
-  // --- Move HUD into overlay above the canvas ---
-  const wrap = canvas.parentElement; // .td-wrap
-  if (wrap) {
-    let overlay = wrap.querySelector(".td-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "td-overlay";
-      wrap.appendChild(overlay);
-    }
-    if (stats) overlay.appendChild(stats);
-    if (btnStart) overlay.appendChild(btnStart);
-  }
-
-  // --- Drawer that lives BEHIND the map and slides out to the right ---
-  function createBehindDrawer() {
-    // Drawer anchored to the MAP (.td-wrap) so it cannot drift to the far right.
-    if (!wrap) return;
-
-    // Create drawer once (as a child of td-wrap)
-    let drawer = wrap.querySelector("#td-drawer");
-    if (!drawer) {
-      drawer = document.createElement("aside");
-      drawer.id = "td-drawer";
-      drawer.className = "td-drawer";
-
-      drawer.innerHTML = `
-        <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
-          <div class="td-drawer-head">
-            <div class="td-drawer-title">Instruktioner</div>
-          </div>
-
-          <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
-          <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
-          <div class="td-drawer-line"><strong>Range:</strong> R</div>
-          <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
-          <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
-        </div>
-      `;
-      wrap.appendChild(drawer);
-    }
-
-    // Single toggle handle (floating on the map edge)
-    let handle = wrap.querySelector("#td-drawer-handle");
-    if (!handle) {
-      handle = document.createElement("button");
-      handle.id = "td-drawer-handle";
-      handle.className = "td-drawer-handle-float";
-      handle.type = "button";
-      handle.title = "Instruktioner";
-      wrap.appendChild(handle);
-    }
-
-    function syncIcon() {
-      const open = drawer.classList.contains("open");
-      handle.innerHTML = open ? LUCIDE.chevronLeft(18) : LUCIDE.chevronRight(18);
-      handle.setAttribute("aria-label", open ? "Stäng instruktioner" : "Öppna instruktioner");
-    }
-
-    function setOpen(v) {
-      drawer.classList.toggle("open", v);
-      syncIcon();
-    }
-
-    if (!handle.dataset.bound) {
-      handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
-      window.addEventListener("keydown", (ev) => {
-        if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
-      });
-      handle.dataset.bound = "1";
-    }
-
-    syncIcon();
-  }
-
-  createBehindDrawer();
-function updateTowerButtonLabels() {
-    if (btn1) btn1.innerHTML = `
-      <span class="td-tower-name">SNIPER</span>
-      <span class="td-tower-cost"><span class="td-cost-num">${towerTypes.sniper.cost}</span><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span></span>
-    `;
-    if (btn2) btn2.innerHTML = `
-      <span class="td-tower-name">GATLING</span>
-      <span class="td-tower-cost"><span class="td-cost-num">${towerTypes.gatling.cost}</span><span class="td-ico-after">${LUCIDE.circleDollarSign(16)}</span></span>
-    `;
-  }
-  updateTowerButtonLabels();
-
   function setPlacing(t) {
     placing = t;
-    btn1?.classList.toggle("active", t === "sniper");
-    btn2?.classList.toggle("active", t === "gatling");
+    btn1.classList.toggle("active", t === "sniper");
+    btn2.classList.toggle("active", t === "gatling");
   }
-  btn1 && (btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper"));
-  btn2 && (btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling"));
+  btn1.onclick = () => setPlacing(placing === "sniper" ? null : "sniper");
+  btn2.onclick = () => setPlacing(placing === "gatling" ? null : "gatling");
+  btnStart.onclick = () => startWave();
 
   function startWave() {
     wave++;
@@ -198,11 +101,10 @@ function updateTowerButtonLabels() {
   }
 
   function makeEnemy(delay) {
-    const hp = 30 + wave * 8;
     return {
       t: -delay,
-      hp,
-      maxHp: hp,
+      hp: 30 + wave * 8,
+      maxHp: 30 + wave * 8,
       speed: 55 + wave * 3,
       idx: 0,
       x: path[0].x,
@@ -212,34 +114,6 @@ function updateTowerButtonLabels() {
     };
   }
 
-  function setPaused(v) {
-    paused = v;
-    updatePlayPauseButton();
-  }
-
-  function updatePlayPauseButton() {
-    if (!btnStart) return;
-    btnStart.classList.add("td-btn-icon");
-
-    const waveActive = enemies.length > 0; // includes delayed spawns
-    const showPlay = paused || !waveActive;
-
-    btnStart.innerHTML = showPlay ? LUCIDE.play(18) : LUCIDE.pause(18);
-    btnStart.title = showPlay ? (paused ? "Fortsätt" : "Starta våg") : "Pausa";
-    btnStart.setAttribute("aria-label", btnStart.title);
-  }
-
-  btnStart && (btnStart.onclick = () => {
-    const waveActive = enemies.length > 0;
-
-    if (paused) { setPaused(false); return; }
-    if (!waveActive) { startWave(); setPaused(false); return; }
-
-    setPaused(true);
-  });
-  updatePlayPauseButton();
-
-  // Helpers
   const dist2 = (ax,ay,bx,by) => {
     const dx=ax-bx, dy=ay-by;
     return dx*dx+dy*dy;
@@ -261,6 +135,7 @@ function updateTowerButtonLabels() {
   canvas.addEventListener("mousemove", (ev) => {
     mouse = gridFromMouse(ev);
 
+    // Hover-detection
     hoveredTower = -1;
     let bestD2 = Infinity;
     for (let i = 0; i < towers.length; i++) {
@@ -280,8 +155,6 @@ function updateTowerButtonLabels() {
   });
 
   canvas.addEventListener("mousedown", (ev) => {
-    if (paused) return; // don't allow interactions while paused
-
     const {gx, gy} = gridFromMouse(ev);
     if (gx < 0 || gy < 0 || gx >= cols || gy >= rows) return;
 
@@ -297,7 +170,7 @@ function updateTowerButtonLabels() {
       return;
     }
 
-    // select when not placing
+    // Click-select när du INTE placerar
     if (!placing && ev.button === 0) {
       selectedTower = occupied ? occupiedIdx : -1;
       return;
@@ -305,8 +178,8 @@ function updateTowerButtonLabels() {
 
     if (!placing) return;
 
+    // Placing
     if (isRoad.has(key) || occupied) return;
-
     const type = towerTypes[placing];
     if (gold < type.cost) return;
 
@@ -323,10 +196,6 @@ function updateTowerButtonLabels() {
   window.addEventListener("keydown", (ev) => {
     if (ev.key.toLowerCase() === "r") showAllRanges = !showAllRanges;
     if (ev.key === "Escape") setPlacing(null);
-    if (ev.key === " "){ // space toggles pause
-      ev.preventDefault();
-      if (enemies.length > 0) setPaused(!paused);
-    }
   });
 
   // Drawing helpers
@@ -368,9 +237,8 @@ function updateTowerButtonLabels() {
     const dt = Math.min(0.033, (now - last) / 1000);
     last = now;
 
-    if (!paused) update(dt);
+    update(dt);
     render();
-    updatePlayPauseButton();
 
     requestAnimationFrame(tick);
   }
@@ -458,15 +326,9 @@ function updateTowerButtonLabels() {
       }
     }
 
-    // HUD (overlay)
-    const aliveCount = enemies.filter(e => e.t >= 0).length;
-    if (stats) {
-      stats.innerHTML =
-        `${LUCIDE.circleDollarSign(16)}<strong>${gold}</strong>` +
-        `&nbsp; | &nbsp; ${LUCIDE.heart(16)}<strong>${lives}</strong>` +
-        `&nbsp; | &nbsp; <span class="td-hud-label">Wave</span> <strong>${wave}</strong>` +
-        `&nbsp; | &nbsp; <span class="td-hud-label">Fiender</span> <strong>${aliveCount}</strong>`;
-    }
+    stats.textContent =
+      `Guld: ${gold} | Liv: ${lives} | Våg: ${wave} | Fiender: ${enemies.filter(e=>e.t>=0).length}` +
+      (showAllRanges ? " | Ranges: ALLA (R)" : " | Ranges: VALD/HOVER (R)");
   }
 
   function render() {
@@ -489,7 +351,7 @@ function updateTowerButtonLabels() {
     }
     ctx.globalAlpha = 1;
 
-    // Road
+    // Road tiles
     for (const key of isRoad) {
       const [gx, gy] = key.split(",").map(Number);
       ctx.fillStyle = "#172235";
@@ -521,14 +383,18 @@ function updateTowerButtonLabels() {
       }
     }
 
-    // Ranges
+    // Ranges: default = only selected/hover, debug = all
     if (showAllRanges) {
-      for (const t of towers) drawRangeRing(t.x, t.y, towerTypes[t.kind].range, false);
+      for (const t of towers) {
+        const tt = towerTypes[t.kind];
+        drawRangeRing(t.x, t.y, tt.range, false);
+      }
     } else {
       const showIdx = hoveredTower !== -1 ? hoveredTower : selectedTower;
       if (showIdx !== -1) {
         const t = towers[showIdx];
-        drawRangeRing(t.x, t.y, towerTypes[t.kind].range, true);
+        const tt = towerTypes[t.kind];
+        drawRangeRing(t.x, t.y, tt.range, true);
       }
     }
 
@@ -558,7 +424,7 @@ function updateTowerButtonLabels() {
     }
 
     // Ghost placement preview
-    if (placing && mouse.inside && !paused) {
+    if (placing && mouse.inside) {
       const gx = mouse.gx, gy = mouse.gy;
       if (gx >= 0 && gy >= 0 && gx < cols && gy < rows) {
         const key = `${gx},${gy}`;
@@ -569,17 +435,6 @@ function updateTowerButtonLabels() {
       }
     }
 
-    // Pause overlay
-    if (paused) {
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#e6edf3";
-      ctx.font = "700 28px system-ui";
-      ctx.fillText("PAUSED", 24, 44);
-      ctx.font = "14px system-ui";
-      ctx.fillText("Tryck Space eller Play för att fortsätta", 24, 66);
-    }
-
     // Game over
     if (lives <= 0) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -588,7 +443,7 @@ function updateTowerButtonLabels() {
       ctx.font = "bold 48px system-ui";
       ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2);
       ctx.font = "18px system-ui";
-      ctx.fillText("Refresh för att spela igen.", canvas.width/2 - 110, canvas.height/2 + 36);
+      ctx.fillText("Refresh för att spela igen (ja, brutalt. som livet).", canvas.width/2 - 190, canvas.height/2 + 36);
     }
   }
 })();
