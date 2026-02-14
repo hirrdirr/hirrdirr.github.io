@@ -190,8 +190,22 @@
   createDrawerAnchoredToWrap();
 
     }
-    if (stats) overlay.appendChild(stats);
-    if (btnStart) overlay.appendChild(btnStart);
+    // Group HUD + play/pause so the button sits next to the stats pill (not in the far-right corner)
+let olLeft = overlay.querySelector(".td-ol-left");
+let olRight = overlay.querySelector(".td-ol-right");
+if (!olLeft){
+  olLeft = document.createElement("div");
+  olLeft.className = "td-ol-left";
+  overlay.appendChild(olLeft);
+}
+if (!olRight){
+  olRight = document.createElement("div");
+  olRight.className = "td-ol-right";
+  overlay.appendChild(olRight);
+}
+
+if (stats) olLeft.appendChild(stats);
+if (btnStart) olLeft.appendChild(btnStart);
   }
 
   function updateTowerButtonLabels() {

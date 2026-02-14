@@ -143,10 +143,10 @@
 /* Hide the old inline hint pill (replaced by help icon + tooltip) */
 .td-hint{ display:none !important; }
 
-/* Overlay layout: left HUD + right help */
-.td-overlay{ justify-content: space-between; }
+/* Overlay layout: left HUD + play/pause (grouped) */
+.td-overlay{ justify-content: flex-start; }
 .td-ol-left, .td-ol-right{ display:flex; align-items:center; gap:10px; }
-.td-ol-right{ justify-content:flex-end; }
+.td-ol-right{ margin-left:auto; justify-content:flex-end; }
 
 /* Help icon + tooltip */
 .td-help{ position:relative; pointer-events:auto; }
@@ -317,3 +317,18 @@
 
 .td-drawer-title{ font-weight:800; letter-spacing:.04em; }
 .td-drawer-line{ opacity:.95; margin:7px 0; font-size:.95em; }
+
+
+/* Responsive: drawer overlays on small screens */
+@media (max-width: 980px){
+  #td-drawer.td-drawer{
+    --panelW: min(320px, 92vw);
+    z-index: 60 !important;            /* above canvas */
+    pointer-events: none !important;
+    transform: translateX(100%) !important; /* closed: off-canvas */
+  }
+  #td-drawer.td-drawer.open{
+    transform: translateX(0) !important; /* open: over the map */
+  }
+  #td-drawer .td-drawer-panel{ pointer-events: auto; }
+}
