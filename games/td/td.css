@@ -325,17 +325,10 @@
     --panelW: min(320px, 92vw);
     z-index: 60 !important;            /* above canvas */
     pointer-events: none !important;
-    transform: translateX(calc(100% + 16px)) !important; /* closed: fully off-canvas */
+    transform: translateX(100%) !important; /* closed: off-canvas */
   }
   #td-drawer.td-drawer.open{
     transform: translateX(0) !important; /* open: over the map */
   }
   #td-drawer .td-drawer-panel{ pointer-events: auto; }
-}
-
-@media (max-width: 980px){
-  #td-drawer-handle.td-drawer-handle-float{ z-index: 80 !important; }
-  #td-drawer.td-drawer.open ~ #td-drawer-handle.td-drawer-handle-float{
-    right: calc(var(--panelW) + 12px) !important;
-  }
 }
