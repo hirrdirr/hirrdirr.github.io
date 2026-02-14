@@ -42,6 +42,7 @@
   padding:10px 12px;
   border-radius:10px;
   cursor:pointer;
+  pointer-events:auto;
 }
 
 .td-btn.active{ outline:2px solid #7dd3fc; }
@@ -78,34 +79,23 @@
   display:flex;
   align-items:center;
   gap:10px;
-  pointer-events:none;
+  pointer-events:none; /* clicks pass through by default */
 }
 
 .td-overlay > *{ pointer-events:none; }
 .td-overlay #start{ pointer-events:auto; }
 
-/* Icon-only play/pause button – FIX: bättre centrering */
+/* Icon-only play/pause button */
 .td-btn-icon{
-  width:44px !important;
-  height:44px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:0 !important;
-  background:#1f2a37;
-  border:1px solid #324155;
-  border-radius:12px;
-  cursor:pointer;
+  width:40px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
 }
 
-.td-btn-icon svg,
-.td-btn-icon .td-ico{
-  margin:0 !important;
-  transform:none !important;
-  pointer-events:none;
-}
-
-/* Icons */
+/* Icons: make them click-transparent and aligned */
 .td-btn svg, .td-btn-icon svg, .td-ico{
   pointer-events:none;
 }
@@ -120,7 +110,7 @@
   font-weight:600;
 }
 
-/* Tower button typography */
+/* Tower button typography: stacked */
 .td-btn{
   display:flex;
   flex-direction:column;
@@ -142,7 +132,7 @@
 }
 
 .td-cost-num{
-  font-weight:400;
+  font-weight:400; /* NOT bold */
 }
 
 .td-ico-after .td-ico{
@@ -151,14 +141,15 @@
   vertical-align:-2px;
 }
 
+/* Hide the old inline hint pill (replaced by help icon + tooltip) */
 .td-hint{ display:none !important; }
 
-/* Overlay layout */
+/* Overlay layout: left HUD + play/pause (grouped) */
 .td-overlay{ justify-content: flex-start; }
 .td-ol-left, .td-ol-right{ display:flex; align-items:center; gap:10px; }
 .td-ol-right{ margin-left:auto; justify-content:flex-end; }
 
-/* Help tooltip */
+/* Help icon + tooltip */
 .td-help{ position:relative; pointer-events:auto; }
 .td-help-btn{
   width:40px;
@@ -172,6 +163,7 @@
   border:1px solid #324155;
   border-radius:10px;
   cursor:pointer;
+  pointer-events:auto;
 }
 .td-help-tip{
   position:absolute;
@@ -184,6 +176,7 @@
   border-radius:12px;
   background: rgba(18,27,42,0.92);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 10px 28px rgba(0,0,0,.35);
   color:#e6edf3;
   opacity:0;
@@ -196,8 +189,50 @@
   opacity:1;
   transform: translateY(0);
 }
+.td-help-title{
+  font-weight:800;
+  letter-spacing:.04em;
+  margin-bottom:6px;
+}
+.td-help-line{
+  opacity:.95;
+  margin:3px 0;
+  font-size:.92em;
+}
 
-/* Tower buttons */
+/* Tower buttons: centered stack */
+.td-tower-btn{ align-items:center; text-align:center; }
+.td-tower-btn .td-tower-cost{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Fix: play/pause icon centered (no SVG margin) */
+.td-btn-icon .td-ico{ margin-right:0 !important; margin-left:0 !important; }
+
+
+/* =========================
+   UI polish: play/pause + tower buttons
+   ========================= */
+
+/* Play/Pause icon button: center SVG */
+.td-btn-icon{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+}
+.td-btn-icon svg,
+.td-btn-icon .td-ico{
+  display:block !important;
+  margin:0 !important;
+}
+/* optical centering for play triangle */
+.td-btn-icon .td-ico{ transform: translateX(1px); }
+
+/* Tower buttons stacked and centered */
 .td-btn.td-tower{
   display:flex !important;
   flex-direction:column !important;
@@ -206,7 +241,10 @@
   gap:4px !important;
   text-align:center !important;
 }
-.td-tower .td-tname{ font-weight:800; letter-spacing:.06em; }
+.td-tower .td-tname{
+  font-weight:800;
+  letter-spacing:.06em;
+}
 .td-tower .td-tcost{
   display:inline-flex;
   align-items:center;
@@ -214,32 +252,35 @@
   gap:6px;
   opacity:.95;
 }
+.td-tower .td-tcost svg,
+.td-tower .td-tcost .td-ico{ display:block; margin:0 !important; }
 
 /* =========================
-   Drawer + toggle i overlay
+   Drawer anchored to map edge
    ========================= */
 
 .td-wrap{ overflow: visible !important; }
 #c{ position: relative; z-index: 2; }
 
 #td-drawer.td-drawer{
-  --panelW: 320px;
+  --panelW: var(--drawerW, 320px);
+  --handleW: 44px;
 
   position:absolute !important;
   top:0 !important;
   right:0 !important;
+  left:auto !important;
   height:100% !important;
   width: var(--panelW) !important;
 
-  z-index:1 !important;
+  z-index:1 !important;            /* behind canvas */
   pointer-events:none !important;
 
-  transform: translateX(0) !important;
-  transition: transform .22s ease !important;
+  transform: translateX(0) !important; /* closed: behind map */
+  transition: transform .18s ease !important;
 }
-
 #td-drawer.td-drawer.open{
-  transform: translateX(var(--panelW)) !important;
+  transform: translateX(var(--panelW)) !important; /* open: out to the right */
 }
 
 #td-drawer .td-drawer-panel{
@@ -247,94 +288,63 @@
   width:100%;
   border-radius:14px;
   border:1px solid #223045;
-  background: rgba(18,27,42,0.82);
+  background: rgba(18,27,42,0.78);
   backdrop-filter: blur(10px);
-  box-shadow: 0 10px 28px rgba(0,0,0,.45);
-  padding:16px;
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.40);
+  padding:14px;
   pointer-events:auto;
 }
 
-/* Gamla handtaget – vi använder inte längre */
-#td-drawer-handle.td-drawer-handle-float {
-  display: none !important;
+#td-drawer-handle.td-drawer-handle-float{
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  width:44px;
+  height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:14px;
+  background:#1f2a37;
+  color:#e6edf3;
+  border:1px solid #324155;
+  cursor:pointer;
+  pointer-events:auto;
+  line-height:0;
+  z-index:50 !important;
 }
+#td-drawer-handle.td-drawer-handle-float svg{ display:block; margin:0 !important; }
+#td-drawer-handle.td-drawer-handle-float .td-ico{ margin:0 !important; vertical-align:0 !important; }
 
-/* Toggle-knapp i overlay (uppe till höger) */
-.td-drawer-toggle {
-  width: 44px;
-  height: 44px;
-  background: #1f2a37;
-  border: 1px solid #324155;
-  border-radius: 12px;
-  color: #e6edf3;
-  cursor: pointer;
-  display: none;                   /* visas bara på små skärmar */
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  transition: all 0.15s ease;
-}
+.td-drawer-title{ font-weight:800; letter-spacing:.04em; }
+.td-drawer-line{ opacity:.95; margin:7px 0; font-size:.95em; }
 
-.td-drawer-toggle:hover {
-  background: #2a3745;
-}
 
-/* PAUSED overlay */
-.paused-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #e6edf3;
-  pointer-events: none;
-  z-index: 15;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.paused-overlay.visible {
-  opacity: 1;
-}
-
-.paused-overlay h2 {
-  font-size: clamp(3.5rem, 12vw, 6rem);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  margin: 0 0 1rem 0;
-  text-shadow: 0 4px 12px rgba(0,0,0,0.7);
-  color: #7dd3fc;
-}
-
-.paused-overlay p {
-  font-size: clamp(1.2rem, 5vw, 1.8rem);
-  font-weight: 500;
-  opacity: 0.9;
-  margin: 0;
-}
-
-/* Responsive */
+/* Responsive: drawer overlays on small screens */
 @media (max-width: 980px){
-  #td-drawer.td-drawer {
-    --panelW: min(320px, 90vw);
-    right: 0;
-    width: var(--panelW);
-    z-index: 65 !important;
-    transform: translateX(100%) !important;  /* helt dold */
-    transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+  #td-drawer.td-drawer{
+    --panelW: min(var(--drawerW, 320px), 92vw);
+    z-index: 90 !important;            /* above canvas */
+    pointer-events: none !important;
+    transform: translateX(100%) !important; /* closed: fully off-screen */
   }
-
-  #td-drawer.td-drawer.open {
-    transform: translateX(0) !important;
+  #td-drawer.td-drawer.open{
+    transform: translateX(0) !important; /* open: over the map */
   }
+  #td-drawer .td-drawer-panel{ pointer-events: auto; }
+}
 
-  #td-drawer .td-drawer-panel {
-    box-shadow: -8px 0 24px rgba(0,0,0,0.5);
-  }
 
-  .td-drawer-toggle {
-    display: flex;
+@media (max-width: 980px){
+  #td-drawer-handle.td-drawer-handle-float{ z-index: 120 !important; }
+  .td-wrap.td-drawer-open #td-drawer-handle.td-drawer-handle-float{
+    right: calc(var(--panelW) + 12px) !important;
   }
 }
+
+
+
+/* Allow clicking buttons inside overlay */
+.td-overlay .td-btn{ pointer-events:auto; }
