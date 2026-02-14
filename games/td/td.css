@@ -436,3 +436,26 @@
 }
 #td-drawer-handle.td-drawer-handle-float svg{ display:block; margin:0 !important; }
 #td-drawer-handle.td-drawer-handle-float .td-ico{ margin:0 !important; vertical-align:0 !important; }
+
+
+/* =========================
+   Drawer anchored-to-map — V2 behavior fix
+   - CLOSED: drawer sits behind the map (invisible)
+   - OPEN: drawer slides fully OUT to the right (text visible)
+   ========================= */
+
+#td-drawer.td-drawer{
+  transform: translateX(0) !important; /* closed: behind the map */
+}
+
+#td-drawer.td-drawer.open{
+  transform: translateX(var(--panelW)) !important; /* open: fully outside map */
+}
+
+/* Make sure handle keeps the game theme (avoid white default button look) */
+#td-drawer-handle.td-drawer-handle-float{
+  background:#1f2a37 !important;
+  color:#e6edf3 !important;
+  border:1px solid #324155 !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35) !important;
+}
