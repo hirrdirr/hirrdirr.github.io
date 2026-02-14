@@ -134,6 +134,18 @@
 
   // --- Instructions drawer (hover on desktop, toggle on touch) ---
 function ensureDrawer() {
+  // Toggle button (used for touch / small screens and as hover-handle on desktop)
+  let toggle = wrap.querySelector("#td-drawer-toggle");
+  if (!toggle) {
+    toggle = document.createElement("button");
+    toggle.id = "td-drawer-toggle";
+    toggle.className = "td-drawer-toggle";
+    toggle.type = "button";
+    toggle.title = "Instruktioner";
+    // put toggle early so CSS sibling selector works: toggle ~ drawer
+    wrap.appendChild(toggle);
+  }
+
   // Drawer panel
   let drawer = wrap.querySelector("#td-drawer");
   if (!drawer) {
@@ -154,15 +166,9 @@ function ensureDrawer() {
     wrap.appendChild(drawer);
   }
 
-  // Toggle button (needed for touch / small screens)
-  let toggle = wrap.querySelector("#td-drawer-toggle");
-  if (!toggle) {
-    toggle = document.createElement("button");
-    toggle.id = "td-drawer-toggle";
-    toggle.className = "td-drawer-toggle";
-    toggle.type = "button";
-    toggle.title = "Instruktioner";
-    wrap.appendChild(toggle);
+  // Ensure order: toggle must be before drawer (for `toggle:hover ~ drawer`)
+  if (toggle.nextElementSibling !== drawer) {
+    wrap.insertBefore(toggle, drawer);
   }
 
   function sync() {
@@ -173,7 +179,14 @@ function ensureDrawer() {
 
   if (!toggle.dataset.bound) {
     toggle.addEventListener("click", (e) => {
+      // On desktop (real hover), clicking should NOT "lock" the panel open.
+      const isDesktopHover = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
+      if (isDesktopHover) return;
+
       e.preventDefault();
+      wrap.classList.toggle("drawer-open");
+      sync();
+    });
       wrap.classList.toggle("drawer-open");
       sync();
     });
