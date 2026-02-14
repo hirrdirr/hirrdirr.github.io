@@ -106,6 +106,44 @@
   const btnStart = document.getElementById("start");
   const stats = document.getElementById("stats");
 
+  // Start/Pause button + Space key
+  function handleStartPause() {
+    const waveActive = enemies.length > 0; // includes delayed spawns
+    if (paused) {
+      setPaused(false);
+      return;
+    }
+    if (waveActive) {
+      setPaused(true);
+      return;
+    }
+    // Start a new wave
+    startWave();
+    setPaused(false);
+  }
+
+  if (btnStart && !btnStart.dataset.bound) {
+    btnStart.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      handleStartPause();
+    });
+    btnStart.dataset.bound = "1";
+  }
+
+  // Space toggles the same behavior as the button
+  if (!window.__tdSpaceBound) {
+    window.addEventListener("keydown", (ev) => {
+      if (ev.code !== "Space") return;
+      // Don't steal Space from inputs
+      const tag = (ev.target && ev.target.tagName) ? ev.target.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || (ev.target && ev.target.isContentEditable)) return;
+      ev.preventDefault();
+      handleStartPause();
+    }, { passive: false });
+    window.__tdSpaceBound = true;
+  }
+
+
   function renderTowerButtons() {
     const b1 = document.getElementById("t1");
     const b2 = document.getElementById("t2");
@@ -619,7 +657,7 @@ if (btnStart) olLeft.appendChild(btnStart);
       ctx.fillText("Tryck Space eller Play för att fortsätta", W * 0.5, H * 0.5 + 22);
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
-}
+    }
 
     // Game over
     if (lives <= 0) {
