@@ -235,13 +235,11 @@
   pointer-events:auto;
 }
 
-.td-wrap.drawer-open #td-drawer.td-drawer{ transform: translateX(0); pointer-events:auto; }
+.td-wrap.drawer-open #td-drawer.td-drawer{ transform: translateX(0); }
 
 /* Desktop: hover opens (no click required) */
 @media (hover:hover) and (pointer:fine){
-  /* Open ONLY when hovering the arrow button (or the panel itself) */
-  .td-wrap #td-drawer-toggle:hover ~ #td-drawer.td-drawer,
-  .td-wrap #td-drawer.td-drawer:hover{ transform: translateX(0); pointer-events:auto; }
+  .td-wrap:hover #td-drawer.td-drawer{ transform: translateX(0); }
 }
 
 /* Toggle button (needed on touch + also handy on desktop) */
