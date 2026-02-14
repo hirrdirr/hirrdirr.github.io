@@ -80,14 +80,6 @@
       <rect x="6" y="4" width="4" height="16" rx="1"></rect>
       <rect x="14" y="4" width="4" height="16" rx="1"></rect>
     </svg>`
-
-    ,
-    circleQuestionMark: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4"></path>
-      <path d="M12 17h.01"></path>
-    </svg>`
 ,
     chevronRight: (s=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="td-ico">
@@ -100,9 +92,7 @@
 
   // UI refs
   const btn1 = document.getElementById("t1");
-  btn1?.classList.add("td-tower-btn");
   const btn2 = document.getElementById("t2");
-  btn2?.classList.add("td-tower-btn");
   const btnStart = document.getElementById("start");
   const stats = document.getElementById("stats");
 
@@ -115,85 +105,72 @@
       overlay.className = "td-overlay";
       wrap.appendChild(overlay);
     }
-
-    // Two zones: left HUD, right HUD
-    let left = overlay.querySelector(".td-ol-left");
-    let right = overlay.querySelector(".td-ol-right");
-    if (!left) {
-      left = document.createElement("div");
-      left.className = "td-ol-left";
-      overlay.appendChild(left);
-    }
-    if (!right) {
-      right = document.createElement("div");
-      right.className = "td-ol-right";
-      overlay.appendChild(right);
-    }
-
-    // Put stats + play/pause on the LEFT
-    if (stats && stats.parentElement !== left) left.appendChild(stats);
-    if (btnStart && btnStart.parentElement !== left) left.appendChild(btnStart);
+    if (stats) overlay.appendChild(stats);
+    if (btnStart) overlay.appendChild(btnStart);
   }
-  // --- Instructions drawer: sits to the RIGHT of the map, hidden behind the edge ---
-  function createInstructionsDrawer() {
+
+  // --- Drawer that lives BEHIND the map and slides out to the right ---
+  function createBehindDrawer() {
+    // Drawer anchored to the MAP (.td-wrap) so it cannot drift to the far right.
     if (!wrap) return;
 
-    // Create a stage wrapper (doesn't change sizes; just gives us a positioning context)
-    const page = document.querySelector(".td-page");
-    if (!page) return;
+    // Create drawer once (as a child of td-wrap)
+    let drawer = wrap.querySelector("#td-drawer");
+    if (!drawer) {
+      drawer = document.createElement("aside");
+      drawer.id = "td-drawer";
+      drawer.className = "td-drawer";
 
-    let stage = page.querySelector(".td-stage");
-    if (!stage) {
-      stage = document.createElement("div");
-      stage.className = "td-stage";
-      page.insertBefore(stage, wrap);
-      stage.appendChild(wrap);
+      drawer.innerHTML = `
+        <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
+          <div class="td-drawer-head">
+            <div class="td-drawer-title">Instruktioner</div>
+          </div>
+
+          <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
+          <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
+          <div class="td-drawer-line"><strong>Range:</strong> R</div>
+          <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
+          <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
+        </div>
+      `;
+      wrap.appendChild(drawer);
     }
 
-    if (stage.querySelector("#td-drawer")) return;
+    // Single toggle handle (floating on the map edge)
+    let handle = wrap.querySelector("#td-drawer-handle");
+    if (!handle) {
+      handle = document.createElement("button");
+      handle.id = "td-drawer-handle";
+      handle.className = "td-drawer-handle-float";
+      handle.type = "button";
+      handle.title = "Instruktioner";
+      wrap.appendChild(handle);
+    }
 
-    const drawer = document.createElement("aside");
-    drawer.id = "td-drawer";
-    drawer.className = "td-drawer";
-
-    drawer.innerHTML = `
-      <button type="button" class="td-drawer-handle" aria-label="Öppna instruktioner" title="Instruktioner"></button>
-
-      <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
-        <div class="td-drawer-title">Instruktioner</div>
-        <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
-        <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
-        <div class="td-drawer-line"><strong>Range:</strong> R</div>
-        <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
-        <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
-      </div>
-    `;
-    stage.appendChild(drawer);
-
-    const handle = drawer.querySelector(".td-drawer-handle");
-
-    function sync() {
+    function syncIcon() {
       const open = drawer.classList.contains("open");
       handle.innerHTML = open ? LUCIDE.chevronLeft(18) : LUCIDE.chevronRight(18);
       handle.setAttribute("aria-label", open ? "Stäng instruktioner" : "Öppna instruktioner");
     }
 
-    function toggle() {
-      drawer.classList.toggle("open");
-      sync();
+    function setOpen(v) {
+      drawer.classList.toggle("open", v);
+      syncIcon();
     }
 
-    handle.addEventListener("click", toggle);
-    window.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && drawer.classList.contains("open")) {
-        drawer.classList.remove("open");
-        sync();
-      }
-    });
+    if (!handle.dataset.bound) {
+      handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
+      window.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
+      });
+      handle.dataset.bound = "1";
+    }
 
-    sync();
+    syncIcon();
   }
 
+  createBehindDrawer();
 function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
       <span class="td-tower-name">SNIPER</span>
@@ -205,7 +182,6 @@ function updateTowerButtonLabels() {
     `;
   }
   updateTowerButtonLabels();
-  createInstructionsDrawer();
 
   function setPlacing(t) {
     placing = t;
@@ -595,28 +571,16 @@ function updateTowerButtonLabels() {
 
     // Pause overlay
     if (paused) {
-      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const title = "PAUSED";
-      const subtitle = "Tryck Space eller Play för att fortsätta";
-
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
       ctx.fillStyle = "#e6edf3";
-      ctx.font = "800 44px system-ui";
-      ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 18);
-
-      ctx.globalAlpha = 0.92;
-      ctx.font = "16px system-ui";
-      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 22);
-      ctx.globalAlpha = 1;
-
-      ctx.textAlign = "start";
-      ctx.textBaseline = "alphabetic";
+      ctx.font = "700 28px system-ui";
+      ctx.fillText("PAUSED", 24, 44);
+      ctx.font = "14px system-ui";
+      ctx.fillText("Tryck Space eller Play för att fortsätta", 24, 66);
     }
-// Game over
+
+    // Game over
     if (lives <= 0) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
