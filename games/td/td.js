@@ -106,44 +106,6 @@
   const btnStart = document.getElementById("start");
   const stats = document.getElementById("stats");
 
-  // Start/Pause button + Space key
-  function handleStartPause() {
-    const waveActive = enemies.length > 0; // includes delayed spawns
-    if (paused) {
-      setPaused(false);
-      return;
-    }
-    if (waveActive) {
-      setPaused(true);
-      return;
-    }
-    // Start a new wave
-    startWave();
-    setPaused(false);
-  }
-
-  if (btnStart && !btnStart.dataset.bound) {
-    btnStart.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      handleStartPause();
-    });
-    btnStart.dataset.bound = "1";
-  }
-
-  // Space toggles the same behavior as the button
-  if (!window.__tdSpaceBound) {
-    window.addEventListener("keydown", (ev) => {
-      if (ev.code !== "Space") return;
-      // Don't steal Space from inputs
-      const tag = (ev.target && ev.target.tagName) ? ev.target.tagName.toLowerCase() : "";
-      if (tag === "input" || tag === "textarea" || (ev.target && ev.target.isContentEditable)) return;
-      ev.preventDefault();
-      handleStartPause();
-    }, { passive: false });
-    window.__tdSpaceBound = true;
-  }
-
-
   function renderTowerButtons() {
     const b1 = document.getElementById("t1");
     const b2 = document.getElementById("t2");
@@ -170,84 +132,88 @@
       overlay.className = "td-overlay";
       wrap.appendChild(overlay);
 
-  // --- Instructions drawer (anchored to the map edge) ---
-  function createDrawerAnchoredToWrap() {
-    // Drawer element (behind map)
-    let drawer = wrap.querySelector("#td-drawer");
-    if (!drawer) {
-      drawer = document.createElement("aside");
-      drawer.id = "td-drawer";
-      drawer.className = "td-drawer";
-      drawer.innerHTML = `
-        <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
-          <div class="td-drawer-head">
-            <div class="td-drawer-title">Instruktioner</div>
-          </div>
-          <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
-          <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
-          <div class="td-drawer-line"><strong>Range:</strong> R</div>
-          <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
-          <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
-        </div>`;
-      wrap.appendChild(drawer);
-    }
-
-    // Single toggle handle (always visible)
-    let handle = wrap.querySelector("#td-drawer-handle");
-    if (!handle) {
-      handle = document.createElement("button");
-      handle.id = "td-drawer-handle";
-      handle.className = "td-drawer-handle-float";
-      handle.type = "button";
-      handle.title = "Instruktioner";
-      wrap.appendChild(handle);
-      // expose drawer width to CSS so handle can shift reliably
-      wrap.style.setProperty('--drawerW', '320px');
-    }
-
-    function syncIcon() {
-      const open = drawer.classList.contains("open");
-      handle.innerHTML = open ? LUCIDE.chevronLeft(18) : LUCIDE.chevronRight(18);
-      handle.setAttribute("aria-label", open ? "Stäng instruktioner" : "Öppna instruktioner");
-    }
-
-    function setOpen(v) {
-      drawer.classList.toggle("open", v);
-      wrap.classList.toggle("td-drawer-open", v);
-      syncIcon();
-    }
-
-    if (!handle.dataset.bound) {
-      handle.addEventListener("click", () => setOpen(!drawer.classList.contains("open")));
-      window.addEventListener("keydown", (ev) => {
-        if (ev.key === "Escape" && drawer.classList.contains("open")) setOpen(false);
-      });
-      handle.dataset.bound = "1";
-    }
-
-    syncIcon();
+  // --- Instructions drawer (hover on desktop, toggle on touch) ---
+function ensureDrawer() {
+  // Drawer panel
+  let drawer = wrap.querySelector("#td-drawer");
+  if (!drawer) {
+    drawer = document.createElement("aside");
+    drawer.id = "td-drawer";
+    drawer.className = "td-drawer";
+    drawer.innerHTML = `
+      <div class="td-drawer-panel" role="region" aria-label="Instruktioner">
+        <div class="td-drawer-head">
+          <div class="td-drawer-title">Instruktioner</div>
+        </div>
+        <div class="td-drawer-line"><strong>Placera:</strong> vänsterklick</div>
+        <div class="td-drawer-line"><strong>Ta bort:</strong> högerklick</div>
+        <div class="td-drawer-line"><strong>Range:</strong> R</div>
+        <div class="td-drawer-line"><strong>Avbryt placering:</strong> ESC</div>
+        <div class="td-drawer-line"><strong>Pausa:</strong> Play/Pause (eller Space)</div>
+      </div>`;
+    wrap.appendChild(drawer);
   }
 
-  createDrawerAnchoredToWrap();
+  // Toggle button (needed for touch / small screens)
+  let toggle = wrap.querySelector("#td-drawer-toggle");
+  if (!toggle) {
+    toggle = document.createElement("button");
+    toggle.id = "td-drawer-toggle";
+    toggle.className = "td-drawer-toggle";
+    toggle.type = "button";
+    toggle.title = "Instruktioner";
+    wrap.appendChild(toggle);
+  }
+
+  function sync() {
+    const open = wrap.classList.contains("drawer-open");
+    toggle.innerHTML = open ? LUCIDE.chevronRight(18) : LUCIDE.chevronLeft(18);
+    toggle.setAttribute("aria-label", open ? "Stäng instruktioner" : "Öppna instruktioner");
+  }
+
+  if (!toggle.dataset.bound) {
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      wrap.classList.toggle("drawer-open");
+      sync();
+    });
+    window.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") {
+        // ESC should also close the drawer if open
+        if (wrap.classList.contains("drawer-open")) {
+          wrap.classList.remove("drawer-open");
+          sync();
+        }
+      }
+    });
+    toggle.dataset.bound = "1";
+  }
+
+  sync();
+}
+
+ensureDrawer();
 
     }
-    // Group HUD + play/pause so the button sits next to the stats pill (not in the far-right corner)
-let olLeft = overlay.querySelector(".td-ol-left");
-let olRight = overlay.querySelector(".td-ol-right");
-if (!olLeft){
-  olLeft = document.createElement("div");
-  olLeft.className = "td-ol-left";
-  overlay.appendChild(olLeft);
-}
-if (!olRight){
-  olRight = document.createElement("div");
-  olRight.className = "td-ol-right";
-  overlay.appendChild(olRight);
-}
 
-if (stats) olLeft.appendChild(stats);
-if (btnStart) olLeft.appendChild(btnStart);
+  // Build overlay groups once (keeps layout predictable)
+  let left = overlay.querySelector(".td-ol-left");
+  let right = overlay.querySelector(".td-ol-right");
+  if (!left) {
+    left = document.createElement("div");
+    left.className = "td-ol-left";
+    overlay.appendChild(left);
   }
+  if (!right) {
+    right = document.createElement("div");
+    right.className = "td-ol-right";
+    overlay.appendChild(right);
+  }
+
+  // Keep stats + play/pause together (left side)
+  if (stats && stats.parentElement !== left) left.appendChild(stats);
+  if (btnStart && btnStart.parentElement !== left) left.appendChild(btnStart);
+}
 
   function updateTowerButtonLabels() {
     if (btn1) btn1.innerHTML = `
@@ -306,6 +272,15 @@ if (btnStart) olLeft.appendChild(btnStart);
     btnStart.title = showPlay ? (paused ? "Fortsätt" : "Starta våg") : "Pausa";
     btnStart.setAttribute("aria-label", btnStart.title);
   }
+
+  btnStart && (btnStart.onclick = () => {
+    const waveActive = enemies.length > 0;
+
+    if (paused) { setPaused(false); return; }
+    if (!waveActive) { startWave(); setPaused(false); return; }
+
+    setPaused(true);
+  });
   updatePlayPauseButton();
 
   // Helpers
@@ -651,7 +626,7 @@ if (btnStart) olLeft.appendChild(btnStart);
       ctx.fillText("Tryck Space eller Play för att fortsätta", canvas.width * 0.5, canvas.height * 0.5 + 22);
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
-    }
+}
 
     // Game over
     if (lives <= 0) {

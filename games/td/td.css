@@ -42,7 +42,6 @@
   padding:10px 12px;
   border-radius:10px;
   cursor:pointer;
-  pointer-events:auto;
 }
 
 .td-btn.active{ outline:2px solid #7dd3fc; }
@@ -144,61 +143,10 @@
 /* Hide the old inline hint pill (replaced by help icon + tooltip) */
 .td-hint{ display:none !important; }
 
-/* Overlay layout: left HUD + play/pause (grouped) */
-.td-overlay{ justify-content: flex-start; }
+/* Overlay layout: keep stats + play together */
+.td-overlay{ justify-content:flex-start; }
 .td-ol-left, .td-ol-right{ display:flex; align-items:center; gap:10px; }
 .td-ol-right{ margin-left:auto; justify-content:flex-end; }
-
-/* Help icon + tooltip */
-.td-help{ position:relative; pointer-events:auto; }
-.td-help-btn{
-  width:40px;
-  height:34px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-  background:#1f2a37;
-  color:#e6edf3;
-  border:1px solid #324155;
-  border-radius:10px;
-  cursor:pointer;
-  pointer-events:auto;
-}
-.td-help-tip{
-  position:absolute;
-  top:44px;
-  right:0;
-  min-width: 240px;
-  max-width: 320px;
-  padding:10px 12px;
-  border:1px solid #324155;
-  border-radius:12px;
-  background: rgba(18,27,42,0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 10px 28px rgba(0,0,0,.35);
-  color:#e6edf3;
-  opacity:0;
-  transform: translateY(-4px);
-  pointer-events:none;
-  transition: opacity .12s ease, transform .12s ease;
-}
-.td-help:hover .td-help-tip,
-.td-help:focus-within .td-help-tip{
-  opacity:1;
-  transform: translateY(0);
-}
-.td-help-title{
-  font-weight:800;
-  letter-spacing:.04em;
-  margin-bottom:6px;
-}
-.td-help-line{
-  opacity:.95;
-  margin:3px 0;
-  font-size:.92em;
-}
 
 /* Tower buttons: centered stack */
 .td-tower-btn{ align-items:center; text-align:center; }
@@ -255,32 +203,23 @@
 .td-tower .td-tcost svg,
 .td-tower .td-tcost .td-ico{ display:block; margin:0 !important; }
 
+
+
 /* =========================
-   Drawer anchored to map edge
+   Drawer: hover on desktop, toggle on touch
    ========================= */
 
-.td-wrap{ overflow: visible !important; }
-#c{ position: relative; z-index: 2; }
-
 #td-drawer.td-drawer{
-  --panelW: var(--drawerW, 320px);
-  --handleW: 44px;
-
-  position:absolute !important;
-  top:0 !important;
-  right:0 !important;
-  left:auto !important;
-  height:100% !important;
-  width: var(--panelW) !important;
-
-  z-index:1 !important;            /* behind canvas */
-  pointer-events:none !important;
-
-  transform: translateX(0) !important; /* closed: behind map */
-  transition: transform .18s ease !important;
-}
-#td-drawer.td-drawer.open{
-  transform: translateX(var(--panelW)) !important; /* open: out to the right */
+  --panelW: 320px;
+  position:absolute;
+  top:10px;
+  right:10px;
+  height: calc(100% - 20px);
+  width: var(--panelW);
+  z-index: 20;
+  transform: translateX(calc(100% + 12px)); /* fully hidden */
+  transition: transform .18s ease;
+  pointer-events:none; /* panel controls this */
 }
 
 #td-drawer .td-drawer-panel{
@@ -296,10 +235,18 @@
   pointer-events:auto;
 }
 
-#td-drawer-handle.td-drawer-handle-float{
-  position:absolute !important;
-  top:12px !important;
-  right:12px !important;
+.td-wrap.drawer-open #td-drawer.td-drawer{ transform: translateX(0); }
+
+/* Desktop: hover opens (no click required) */
+@media (hover:hover) and (pointer:fine){
+  .td-wrap:hover #td-drawer.td-drawer{ transform: translateX(0); }
+}
+
+/* Toggle button (needed on touch + also handy on desktop) */
+#td-drawer-toggle.td-drawer-toggle{
+  position:absolute;
+  top:12px;
+  right:12px;
   width:44px;
   height:44px;
   display:inline-flex;
@@ -311,40 +258,15 @@
   color:#e6edf3;
   border:1px solid #324155;
   cursor:pointer;
-  pointer-events:auto;
   line-height:0;
-  z-index:50 !important;
+  z-index: 30; /* always above the drawer panel */
+  pointer-events:auto;
 }
-#td-drawer-handle.td-drawer-handle-float svg{ display:block; margin:0 !important; }
-#td-drawer-handle.td-drawer-handle-float .td-ico{ margin:0 !important; vertical-align:0 !important; }
+#td-drawer-toggle.td-drawer-toggle svg{ display:block; margin:0 !important; }
+#td-drawer-toggle.td-drawer-toggle .td-ico{ margin:0 !important; vertical-align:0 !important; }
 
 .td-drawer-title{ font-weight:800; letter-spacing:.04em; }
 .td-drawer-line{ opacity:.95; margin:7px 0; font-size:.95em; }
 
-
-/* Responsive: drawer overlays on small screens */
-@media (max-width: 980px){
-  #td-drawer.td-drawer{
-    --panelW: min(var(--drawerW, 320px), 92vw);
-    z-index: 90 !important;            /* above canvas */
-    pointer-events: none !important;
-    transform: translateX(100%) !important; /* closed: fully off-screen */
-  }
-  #td-drawer.td-drawer.open{
-    transform: translateX(0) !important; /* open: over the map */
-  }
-  #td-drawer .td-drawer-panel{ pointer-events: auto; }
-}
-
-
-@media (max-width: 980px){
-  #td-drawer-handle.td-drawer-handle-float{ z-index: 120 !important; }
-  .td-wrap.td-drawer-open #td-drawer-handle.td-drawer-handle-float{
-    right: calc(var(--panelW) + 12px) !important;
-  }
-}
-
-
-
-/* Allow clicking buttons inside overlay */
-.td-overlay .td-btn{ pointer-events:auto; }
+/* Overlay should not block clicks on buttons */
+.td-overlay .td-btn-icon{ pointer-events:auto; }
