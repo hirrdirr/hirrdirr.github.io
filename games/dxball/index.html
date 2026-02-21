@@ -7,7 +7,7 @@ permalink: /games/dxball/
 <link rel="stylesheet" href="/games/dxball/dxball.css">
 
 <div class="dxball-wrap">
-  <canvas id="game" aria-label="DX-Ball spelcanvas"></canvas>
+  <canvas id="game" tabindex="0" aria-label="DX-Ball spelcanvas"></canvas>
 
   <div id="hud" class="dxhud">
     <div class="dxhud-top">
@@ -17,7 +17,6 @@ permalink: /games/dxball/
       <div class="dxstat dxpower"><span class="dxlabel">Powerups</span> <span id="uiPowers">—</span></div>
     </div>
 
-    <!-- Start / info / gameover / mellanbanor -->
     <div id="overlayCenter" class="dxhud-center">
       <div class="dxpanel">
         <h2 id="overlayTitle">DX-Ball</h2>
@@ -41,7 +40,6 @@ permalink: /games/dxball/
       </div>
     </div>
 
-    <!-- Pause overlay (endast under pågående spel) -->
     <div id="overlayPause" class="dxhud-pause hidden">
       <div class="dxpanel">
         <h2>Pausat</h2>
@@ -53,7 +51,6 @@ permalink: /games/dxball/
       </div>
     </div>
 
-    <!-- Mobil rotate hint -->
     <div id="overlayRotate" class="dxhud-rotate hidden">
       <div class="dxpanel">
         <h2>Vrid telefonen</h2>
