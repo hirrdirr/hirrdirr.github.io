@@ -26,8 +26,15 @@
 
   // --- Config ---
   // Powerup drop chance per DESTROYED brick (global, from any brick)
-  const POWERUP_DROP_CHANCE = 0.18; // 18% (tweak: 0.12–0.25 känns bra)
+  const POWERUP_DROP_CHANCE = 0.18; // 18%
   const MAX_DROPS_ON_SCREEN = 4;
+
+  // Stor boll = heavy hit. När aktiv: 2 skada per träff.
+  const BIGBALL_DAMAGE = 2;
+
+  // O-FÖRSTÖRBARA (indestructible) bricks
+  const INDESTRUCTIBLE_LEVEL_CHANCE = 0.55; // "några banor"
+  const INDESTRUCTIBLE_MAX_PER_LEVEL = 10;
 
   // Lås scroll på sidan (viktigt på mobil)
   document.body.classList.add("dxball-noscr");
@@ -106,26 +113,19 @@
   updateRotateOverlay();
 
   // --- Pointer Lock (musen låses när du klickar i spelet) ---
-  function isPointerLocked() {
-    return document.pointerLockElement === canvas;
-  }
+  function isPointerLocked() { return document.pointerLockElement === canvas; }
 
   function requestPointerLockSafe() {
-    // Bara om det finns stöd och vi inte är pausade / i overlay
     if (!canvas.requestPointerLock) return;
     if (paused || modalOpen || gameOver) return;
-    // Kräver user gesture (mousedown), så vi kallar denna där.
     canvas.requestPointerLock();
   }
 
   function exitPointerLockSafe() {
-    if (document.exitPointerLock) {
-      if (document.pointerLockElement) document.exitPointerLock();
-    }
+    if (document.exitPointerLock && document.pointerLockElement) document.exitPointerLock();
   }
 
   document.addEventListener("pointerlockchange", () => {
-    // När pointer lock släpper: visa cursor igen
     if (!isPointerLocked()) document.documentElement.classList.remove("dx-cursor-hidden");
   });
 
@@ -140,7 +140,8 @@
     brick1: "#d7e3ff",
     brick2: "#ffd166",
     brick3: "#ff6b6b",
-    brickPower: "#b28dff"
+    brickPower: "#b28dff",
+    brickInd: "#8f98a6" // indestructible
   };
 
   // --- State ---
@@ -209,7 +210,6 @@
     overlayCenter.classList.remove("hidden");
     overlayPause.classList.add("hidden");
     document.documentElement.classList.remove("dx-cursor-hidden");
-    // När overlay visas: släpp mus-lås så man kan klicka UI normalt
     exitPointerLockSafe();
   }
 
@@ -228,7 +228,6 @@
       document.documentElement.classList.remove("dx-cursor-hidden");
       exitPointerLockSafe();
     } else {
-      // pointer lock begär vi bara på user gesture (mousedown), så här gör vi inget.
       if (usingMouse && isPointerLocked()) document.documentElement.classList.add("dx-cursor-hidden");
     }
   }
@@ -329,6 +328,10 @@
     const brickW = (W - marginX*2 - gap*(cols-1)) / cols;
     const brickH = clamp((H*0.26) / rows, 18, 26);
 
+    // Ska denna bana ha indestructibles?
+    const enableInd = (Math.random() < INDESTRUCTIBLE_LEVEL_CHANCE);
+    let indCount = 0;
+
     bricks = [];
     for (let y=0;y<rows;y++){
       for (let x=0;x<cols;x++){
@@ -339,18 +342,33 @@
         if (idx >= 3 && Math.random() < 0.18) hp = clamp(hp + 1, 1, 3);
         if (idx >= 6 && Math.random() < 0.12) hp = 3;
 
+        // Indestructible placeras mest nära botten (sista 2 raderna),
+        // och bara ett begränsat antal.
+        let indestructible = false;
+        if (enableInd && indCount < INDESTRUCTIBLE_MAX_PER_LEVEL) {
+          const nearBottom = (y >= rows - 2);
+          const chance = nearBottom ? 0.22 : 0.03; // “oftast lagret ner mot brädan”
+          if (Math.random() < chance) {
+            indestructible = true;
+            indCount++;
+          }
+        }
+
         bricks.push({
           x: marginX + x*(brickW+gap),
           y: topY + y*(brickH+gap),
           w: brickW, h: brickH,
-          hp, maxHp: hp
+          hp,
+          maxHp: hp,
+          indestructible
         });
       }
     }
   }
 
   function remainingBricks() {
-    return bricks.reduce((n,b)=> n + (b.hp>0 ? 1 : 0), 0);
+    // indestructible räknas inte som “måste bort”
+    return bricks.reduce((n,b)=> n + (!b.indestructible && b.hp>0 ? 1 : 0), 0);
   }
 
   // --- Reset & serve ---
@@ -460,9 +478,7 @@
   // --- Input helpers ---
   function startRunIfNeeded() {
     if (!running) return;
-
     if (!hasStarted) hasStarted = true;
-
     if (modalOpen) hideStartOverlay();
     if (paused) setPaused(false);
   }
@@ -475,7 +491,6 @@
   // --- Keyboard ---
   window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
-
     if (["arrowleft","arrowright"," "].includes(k)) e.preventDefault();
 
     if (["arrowleft","arrowright","a","d"].includes(k)) {
@@ -490,7 +505,6 @@
     }
 
     keys.add(k);
-
     if (k === " ") primaryAction();
   }, { passive: false, capture: true });
 
@@ -503,16 +517,14 @@
     paddle.targetX = x - paddle.w/2;
   }
 
-  // When pointer is locked, we use movementX instead (mouse doesn't “move” on screen)
   function handleMouseMove(e) {
     usingMouse = true;
 
     if (isPointerLocked()) {
-      // move paddle by relative mouse movement
       const prev = paddle.x;
       paddle.x = clamp(paddle.x + e.movementX, 10, W - paddle.w - 10);
       paddle.vx = (paddle.x - prev) / (1/60);
-      paddle.targetX = null; // ignore absolute target while locked
+      paddle.targetX = null;
       return;
     }
 
@@ -529,14 +541,10 @@
     usingMouse = true;
     canvas.focus({ preventScroll: true });
 
-    // Start/unpause or launch ball
     primaryAction();
 
-    // lock mouse to canvas (cursor disappears, can't escape screen)
     requestPointerLockSafe();
     if (!paused) document.documentElement.classList.add("dx-cursor-hidden");
-
-    // If not locked (browser blocked), fallback to normal absolute target:
     if (!isPointerLocked()) setPointerTarget(e.clientX);
   });
 
@@ -681,9 +689,22 @@
         const hit = collideBallAABB(b, b.r, br);
         if (!hit.hit) continue;
 
-        if (!b.pierce) reflectBall(b, hit.nx, hit.ny);
+        // O-förstörbar brick: alltid studsa, aldrig skada, aldrig pierce igenom.
+        if (br.indestructible) {
+          reflectBall(b, hit.nx, hit.ny);
+          speedUp(b, 6); // liten “thunk”-känsla
+          break;
+        }
 
-        br.hp -= 1;
+        // Normal brick:
+        // Stor boll gör extra skada (2) när power är aktiv.
+        const dmg = (powers.bigball > 0) ? BIGBALL_DAMAGE : 1;
+
+        if (!b.pierce) {
+          reflectBall(b, hit.nx, hit.ny);
+        }
+
+        br.hp -= dmg;
         score += 10;
 
         speedUp(b, 10 + (Math.abs(hit.nx) ? 4 : 0));
@@ -691,7 +712,7 @@
         if (br.hp <= 0) {
           score += 30;
 
-          // GLOBAL random drop from ANY brick
+          // Global random drop from ANY destroyed brick
           if (Math.random() < POWERUP_DROP_CHANCE) {
             dropPower(br.x + br.w/2, br.y + br.h/2);
           }
@@ -731,7 +752,7 @@
       );
     }
 
-    // Level clear
+    // Level clear (indestructibles räknas inte)
     if (remainingBricks() === 0) {
       levelIndex += 1;
       updateUI();
@@ -763,6 +784,12 @@
     updateUI();
   }
 
+  function dropPower(x, y) {
+    if (drops.length >= MAX_DROPS_ON_SCREEN) return;
+    const def = POWER_DEFS[randi(0, POWER_DEFS.length - 1)];
+    drops.push({ id:def.id, label:def.label, x, y, vy: rand(160,240), r:10, color:def.color });
+  }
+
   function updatePaddle(dt) {
     let dir = 0;
     const left = keys.has("arrowleft") || keys.has("a");
@@ -770,8 +797,6 @@
     if (left) dir -= 1;
     if (right) dir += 1;
 
-    // If pointer locked: paddle already updated via mouse movement (relative)
-    // Otherwise: mouse/touch absolute target or keyboard
     if (!isPointerLocked() && paddle.targetX !== null && (usingMouse || touchActive)) {
       const prevX = paddle.x;
       paddle.x = clamp(paddle.targetX, 10, W - paddle.w - 10);
@@ -782,7 +807,6 @@
       paddle.x += vx * dt;
       paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
     } else {
-      // pointer lock: keyboard still can add a bit if wanted
       const vx = dir * (paddle.speed * 0.7);
       paddle.x = clamp(paddle.x + vx * dt, 10, W - paddle.w - 10);
     }
@@ -800,6 +824,22 @@
 
     for (const b of bricks) {
       if (b.hp <= 0) continue;
+
+      // Indestructible: egen look
+      if (b.indestructible) {
+        ctx.fillStyle = COLORS.brickInd;
+        roundRect(ctx, b.x, b.y, b.w, b.h, 8);
+        ctx.fill();
+
+        // lite “metal-stripes”
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        for (let s = 0; s < 3; s++) {
+          const yy = b.y + 4 + s * (b.h / 3);
+          ctx.fillRect(b.x + 6, yy, b.w - 12, 2);
+        }
+        continue;
+      }
+
       let col = COLORS.brick1;
       if (b.hp >= 3) col = COLORS.brick3;
       else if (b.hp === 2) col = COLORS.brick2;
