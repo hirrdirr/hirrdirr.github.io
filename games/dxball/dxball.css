@@ -3,8 +3,9 @@
 .dxball-wrap{
   position: relative;
   width: 100%;
-  height: calc(100vh - 0px);
-  min-height: 520px;
+  /* höjd sätts av JS så vi får "viewport minus topbar" */
+  height: 70vh;
+  min-height: 320px;
   background: #0b0f14;
   overflow: hidden;
 }
@@ -14,7 +15,7 @@
   height: 100%;
   display: block;
   background: radial-gradient(1200px 700px at 50% 20%, #131a23 0%, #0b0f14 55%, #070a0f 100%);
-  touch-action: none;            /* viktig: stoppa scroll/zoom gestures */
+  touch-action: none;
   -ms-touch-action: none;
 }
 
@@ -51,10 +52,7 @@
   align-items: baseline;
 }
 
-.dxlabel{
-  opacity: .7;
-  font-size: 12px;
-}
+.dxlabel{ opacity: .7; font-size: 12px; }
 
 .dxpower{
   max-width: 45vw;
@@ -86,22 +84,11 @@
   box-shadow: 0 18px 60px rgba(0,0,0,.5);
 }
 
-.dxpanel h2{
-  margin: 0 0 8px 0;
-  font-size: 22px;
-}
+.dxpanel h2{ margin: 0 0 8px 0; font-size: 22px; }
 
-.dxpanel p{
-  margin: 0 0 14px 0;
-  opacity: .9;
-  line-height: 1.35;
-}
+.dxpanel p{ margin: 0 0 14px 0; opacity: .9; line-height: 1.35; }
 
-.dxbuttons{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+.dxbuttons{ display: flex; gap: 10px; flex-wrap: wrap; }
 
 .dxbtn{
   appearance: none;
@@ -118,10 +105,7 @@
 .dxbtn:hover{ background: rgba(255,255,255,.14); }
 .dxbtn:active{ transform: translateY(1px); }
 
-.dxbtn-secondary{
-  background: rgba(255,255,255,.06);
-  opacity: .95;
-}
+.dxbtn-secondary{ background: rgba(255,255,255,.06); opacity: .95; }
 
 .dxlegend{
   margin-top: 14px;
@@ -183,8 +167,14 @@
 
 .dx-cursor-hidden #game{ cursor: none; }
 
-/* Mobil: bättre höjd och mindre text */
+/* Stoppa scroll på just denna sida (JS sätter classen) */
+html, body { height: 100%; }
+body.dxball-noscr {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 @media (max-width: 640px){
-  .dxball-wrap{ min-height: 100svh; height: 100svh; }
   .dxpanel h2{ font-size: 20px; }
 }
