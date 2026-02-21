@@ -1,0 +1,65 @@
+---
+layout: default
+title: DX-Ball
+permalink: /games/dxball/
+---
+
+<link rel="stylesheet" href="/assets/games/dxball.css">
+
+<div class="dxball-wrap">
+  <canvas id="game" aria-label="DX-Ball spelcanvas"></canvas>
+
+  <!-- HUD / overlays -->
+  <div id="hud" class="dxhud">
+    <div class="dxhud-top">
+      <div class="dxstat"><span class="dxlabel">Bana</span> <span id="uiLevel">1</span>/<span id="uiLevelMax">8</span></div>
+      <div class="dxstat"><span class="dxlabel">Liv</span> <span id="uiLives">3</span></div>
+      <div class="dxstat"><span class="dxlabel">Poäng</span> <span id="uiScore">0</span></div>
+      <div class="dxstat dxpower"><span class="dxlabel">Powerups</span> <span id="uiPowers">—</span></div>
+    </div>
+
+    <div id="overlayCenter" class="dxhud-center">
+      <div class="dxpanel">
+        <h2 id="overlayTitle">DX-Ball</h2>
+        <p id="overlayText">
+          Klicka/tappa för att starta. <br>
+          Styr med <b>WASD</b>, <b>piltangenter</b>, <b>mus</b> eller <b>touch</b>. <br>
+          Pausa med <b>ESC</b> eller <b>P</b>.
+        </p>
+
+        <div class="dxbuttons">
+          <button id="btnPlay" class="dxbtn">Spela</button>
+          <button id="btnRestart" class="dxbtn dxbtn-secondary">Börja om</button>
+        </div>
+
+        <div class="dxlegend">
+          <div class="dxtag"><span class="dot dot-w"></span> 1 träff</div>
+          <div class="dxtag"><span class="dot dot-y"></span> 2 träffar</div>
+          <div class="dxtag"><span class="dot dot-r"></span> 3 träffar</div>
+          <div class="dxtag"><span class="dot dot-p"></span> Powerup drop</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="overlayPause" class="dxhud-pause hidden">
+      <div class="dxpanel">
+        <h2>Pausat</h2>
+        <p>Tryck <b>ESC</b> eller <b>P</b> för att fortsätta.</p>
+        <div class="dxbuttons">
+          <button id="btnResume" class="dxbtn">Fortsätt</button>
+          <button id="btnRestart2" class="dxbtn dxbtn-secondary">Börja om</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="overlayRotate" class="dxhud-rotate hidden">
+      <div class="dxpanel">
+        <h2>Vrid telefonen</h2>
+        <p>Spelet funkar bäst i liggande läge (landscape).</p>
+        <div class="dxrotate-icon" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/games/dxball.js" defer></script>
