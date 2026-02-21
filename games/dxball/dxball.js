@@ -38,10 +38,42 @@
 
   let W = 800, H = 600, DPR = 1;
 
+  function getTopbarOffsetPx() {
+    // Försök hitta en fast/sticky header/topbar (Jekyll theme varierar)
+    const candidates = [
+      "header.site-header",
+      "header",
+      ".topbar",
+      ".navbar",
+      ".site-nav",
+      ".site-header",
+      "#topbar",
+      "#navbar"
+    ];
+
+    for (const sel of candidates) {
+      const el = document.querySelector(sel);
+      if (!el) continue;
+
+      const cs = getComputedStyle(el);
+      const pos = cs.position;
+      const rect = el.getBoundingClientRect();
+
+      // Om den ligger fast/sticky och sitter uppe vid top
+      if ((pos === "fixed" || pos === "sticky") && rect.height > 0 && rect.top <= 0.5) {
+        return Math.round(rect.height);
+      }
+    }
+    return 0;
+  }
+
   function resize() {
-    // Fit-to-screen under topbar: viewport height minus wrap's top offset
-    const top = wrap.getBoundingClientRect().top;
-    const availableH = Math.max(320, Math.floor(window.innerHeight - top));
+    // Gör så spelet hamnar UNDER topbaren (om den är fixed/sticky)
+    const headerH = getTopbarOffsetPx();
+    wrap.style.marginTop = headerH ? `${headerH}px` : "0px";
+
+    // Height = viewport minus topbar
+    const availableH = Math.max(320, Math.floor(window.innerHeight - headerH));
     wrap.style.height = availableH + "px";
 
     const rect = wrap.getBoundingClientRect();
@@ -58,6 +90,7 @@
 
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
+
   window.addEventListener("resize", resize);
   resize();
 
@@ -99,7 +132,6 @@
   // Input
   const keys = new Set();
   let usingMouse = false;
-  let mouseX = 0;
   let touchActive = false;
 
   // Paddle
@@ -107,7 +139,7 @@
     x: 0, y: 0,
     w: 120, h: 16,
     vx: 0,
-    speed: 680,
+    speed: 980,     // snabbare för keyboard
     targetX: null
   };
 
@@ -166,7 +198,6 @@
   function setPaused(p) {
     paused = p;
 
-    // Pause-overlay bara när man pausat mitt under spel
     const shouldShowPause = paused && running && hasStarted && !modalOpen && !gameOver;
     overlayPause.classList.toggle("hidden", !shouldShowPause);
 
@@ -398,10 +429,19 @@
     b.sticky = powers.sticky > 0;
   }
 
-  // --- Input ---
-  window.addEventListener("keydown", (e) => {
+  // --- Input (robust: capture + focus) ---
+  function onKeyDown(e) {
     const k = e.key.toLowerCase();
+
+    // Stoppa scroll
     if (["arrowleft","arrowright"," "].includes(k)) e.preventDefault();
+
+    // Om user kör keyboard: släpp mus-target så paddeln inte "drar iväg"
+    if (["arrowleft","arrowright","a","d"].includes(k)) {
+      usingMouse = false;
+      touchActive = false;
+      paddle.targetX = null;
+    }
 
     if (k === "escape" || k === "p") {
       if (!running) return;
@@ -413,40 +453,54 @@
     keys.add(k);
 
     if (!paused && k === " ") launchStuckBalls();
-  }, { passive: false });
+  }
 
-  window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+  function onKeyUp(e) {
+    keys.delete(e.key.toLowerCase());
+  }
+
+  window.addEventListener("keydown", onKeyDown, { passive: false, capture: true });
+  window.addEventListener("keyup", onKeyUp, { capture: true });
+
+  function setPointerTarget(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    paddle.targetX = x - paddle.w/2;
+  }
 
   canvas.addEventListener("mousemove", (e) => {
     usingMouse = true;
-    const rect = canvas.getBoundingClientRect();
-    mouseX = (e.clientX - rect.left);
-    paddle.targetX = mouseX - paddle.w/2;
+    setPointerTarget(e.clientX);
   });
 
-  canvas.addEventListener("mousedown", () => {
-    usingMouse = true;
-    if (!running) return;
+  canvas.addEventListener("mouseleave", () => {
+    // VIKTIGT: annars kan target ligga kvar och paddeln vill “till hörnet”
+    if (usingMouse) paddle.targetX = null;
+  });
 
+  canvas.addEventListener("mousedown", (e) => {
+    usingMouse = true;
+    canvas.focus({ preventScroll: true });
+
+    if (!running) return;
     hasStarted = true;
     hideStartOverlay();
     if (paused) setPaused(false);
     launchStuckBalls();
 
     document.documentElement.classList.add("dx-cursor-hidden");
+    setPointerTarget(e.clientX);
   });
 
   canvas.addEventListener("touchstart", (e) => {
     touchActive = true;
     usingMouse = false;
+    canvas.focus({ preventScroll: true });
 
-    const rect = canvas.getBoundingClientRect();
     const t = e.changedTouches[0];
-    const x = (t.clientX - rect.left);
-    paddle.targetX = x - paddle.w/2;
+    setPointerTarget(t.clientX);
 
     if (!running) return;
-
     hasStarted = true;
     hideStartOverlay();
     if (paused) setPaused(false);
@@ -454,10 +508,8 @@
   }, { passive: false });
 
   canvas.addEventListener("touchmove", (e) => {
-    const rect = canvas.getBoundingClientRect();
     const t = e.changedTouches[0];
-    const x = (t.clientX - rect.left);
-    paddle.targetX = x - paddle.w/2;
+    setPointerTarget(t.clientX);
   }, { passive: false });
 
   canvas.addEventListener("touchend", () => { touchActive = false; });
@@ -467,10 +519,11 @@
     hideStartOverlay();
     setPaused(false);
     launchStuckBalls();
+    canvas.focus({ preventScroll: true });
   });
 
   btnRestart.addEventListener("click", () => resetGame());
-  btnResume.addEventListener("click", () => { hideStartOverlay(); setPaused(false); });
+  btnResume.addEventListener("click", () => { hideStartOverlay(); setPaused(false); canvas.focus({ preventScroll: true }); });
   btnRestart2.addEventListener("click", () => resetGame());
 
   // --- Physics ---
@@ -566,7 +619,7 @@
 
         const baseSpeed = clamp(len(b.vx, b.vy), 420, 780);
         const angle = (-Math.PI/2) + relC * (Math.PI * 0.40);
-        const spin = clamp(paddle.vx / 700, -0.35, 0.35);
+        const spin = clamp(paddle.vx / 900, -0.35, 0.35);
 
         b.vx = Math.cos(angle) * baseSpeed + spin * 260;
         b.vy = Math.sin(angle) * baseSpeed;
@@ -593,7 +646,6 @@
           score += 30;
           if (Math.random() < br.dropChance) dropPower(br.x + br.w/2, br.y + br.h/2);
         }
-
         break;
       }
 
@@ -657,25 +709,26 @@
   }
 
   function updatePaddle(dt) {
+    // Tangentbord
     let dir = 0;
     const left = keys.has("arrowleft") || keys.has("a");
     const right = keys.has("arrowright") || keys.has("d");
     if (left) dir -= 1;
     if (right) dir += 1;
 
+    // Mus/touch = DIREKT (ingen “max speed” lagg)
     if (paddle.targetX !== null && (usingMouse || touchActive)) {
-      const dx = paddle.targetX - paddle.x;
-      const maxMove = paddle.speed * dt;
-      const mv = clamp(dx, -maxMove, maxMove);
-      paddle.vx = mv / dt;
-      paddle.x += mv;
+      const prevX = paddle.x;
+      paddle.x = clamp(paddle.targetX, 10, W - paddle.w - 10);
+      paddle.vx = (paddle.x - prevX) / Math.max(dt, 0.0001);
     } else {
+      // Keyboard
       const vx = dir * paddle.speed;
       paddle.vx = vx;
       paddle.x += vx * dt;
+      paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
     }
 
-    paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
     paddle.y = H - 54;
   }
 
