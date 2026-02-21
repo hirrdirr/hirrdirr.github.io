@@ -24,6 +24,11 @@
   const btnResume = document.getElementById("btnResume");
   const btnRestart2 = document.getElementById("btnRestart2");
 
+  // --- Config ---
+  // Powerup drop chance per DESTROYED brick (global, from any brick)
+  const POWERUP_DROP_CHANCE = 0.18; // 18% (tweak: 0.12–0.25 känns bra)
+  const MAX_DROPS_ON_SCREEN = 4;
+
   // Lås scroll på sidan (viktigt på mobil)
   document.body.classList.add("dxball-noscr");
 
@@ -39,7 +44,6 @@
   let W = 800, H = 600, DPR = 1;
 
   function getTopbarOffsetPx() {
-    // Kandidater för vanliga Jekyll-topbars
     const candidates = [
       "header.site-header",
       "header",
@@ -50,16 +54,12 @@
       "#topbar",
       "#navbar"
     ];
-
     for (const sel of candidates) {
       const el = document.querySelector(sel);
       if (!el) continue;
-
       const cs = getComputedStyle(el);
       const pos = cs.position;
       const rect = el.getBoundingClientRect();
-
-      // Bara om den faktiskt "ligger ovanpå" (fixed/sticky uppe vid top)
       if ((pos === "fixed" || pos === "sticky") && rect.height > 0 && rect.top <= 0.5) {
         return Math.round(rect.height);
       }
@@ -69,16 +69,11 @@
 
   function resize() {
     const headerH = getTopbarOffsetPx();
-
-    // Hur mycket topbaren faktiskt overlappar wrap just nu?
-    // (om din layout redan har padding-top så blir overlap = 0)
     const rectBefore = wrap.getBoundingClientRect();
     const overlap = headerH > 0 && rectBefore.top < headerH ? (headerH - rectBefore.top) : 0;
 
-    // Flytta bara ner om den blir överlappad, annars lämna i fred
     wrap.style.marginTop = overlap > 0 ? `${Math.round(overlap)}px` : "0px";
 
-    // Nu när margin ev. ändrats: räkna om top & höjd korrekt
     const rectAfter = wrap.getBoundingClientRect();
     const availableH = Math.max(320, Math.floor(window.innerHeight - rectAfter.top));
     wrap.style.height = availableH + "px";
@@ -110,6 +105,30 @@
   window.addEventListener("resize", updateRotateOverlay);
   updateRotateOverlay();
 
+  // --- Pointer Lock (musen låses när du klickar i spelet) ---
+  function isPointerLocked() {
+    return document.pointerLockElement === canvas;
+  }
+
+  function requestPointerLockSafe() {
+    // Bara om det finns stöd och vi inte är pausade / i overlay
+    if (!canvas.requestPointerLock) return;
+    if (paused || modalOpen || gameOver) return;
+    // Kräver user gesture (mousedown), så vi kallar denna där.
+    canvas.requestPointerLock();
+  }
+
+  function exitPointerLockSafe() {
+    if (document.exitPointerLock) {
+      if (document.pointerLockElement) document.exitPointerLock();
+    }
+  }
+
+  document.addEventListener("pointerlockchange", () => {
+    // När pointer lock släpper: visa cursor igen
+    if (!isPointerLocked()) document.documentElement.classList.remove("dx-cursor-hidden");
+  });
+
   // --- Game constants ---
   const LEVEL_COUNT = 8;
   uiLevelMax.textContent = String(LEVEL_COUNT);
@@ -129,8 +148,8 @@
   let paused = true;
   let gameOver = false;
 
-  let hasStarted = false;   // runnen har startat (för pause-overlay regler)
-  let modalOpen = false;    // center-overlay öppet
+  let hasStarted = false;
+  let modalOpen = false;
 
   let levelIndex = 0;
   let lives = 3;
@@ -172,9 +191,7 @@
     { id:"sticky", label:"Klister", color:"#ff6b6b" },
   ];
 
-  function anyBallStuck() {
-    return balls.some(b => b.stuck);
-  }
+  function anyBallStuck() { return balls.some(b => b.stuck); }
 
   function powersLabel() {
     const active = [];
@@ -192,6 +209,8 @@
     overlayCenter.classList.remove("hidden");
     overlayPause.classList.add("hidden");
     document.documentElement.classList.remove("dx-cursor-hidden");
+    // När overlay visas: släpp mus-lås så man kan klicka UI normalt
+    exitPointerLockSafe();
   }
 
   function hideStartOverlay() {
@@ -201,11 +220,17 @@
 
   function setPaused(p) {
     paused = p;
+
     const shouldShowPause = paused && running && hasStarted && !modalOpen && !gameOver;
     overlayPause.classList.toggle("hidden", !shouldShowPause);
 
-    if (paused) document.documentElement.classList.remove("dx-cursor-hidden");
-    else if (usingMouse) document.documentElement.classList.add("dx-cursor-hidden");
+    if (paused) {
+      document.documentElement.classList.remove("dx-cursor-hidden");
+      exitPointerLockSafe();
+    } else {
+      // pointer lock begär vi bara på user gesture (mousedown), så här gör vi inget.
+      if (usingMouse && isPointerLocked()) document.documentElement.classList.add("dx-cursor-hidden");
+    }
   }
 
   function updateUI() {
@@ -318,8 +343,7 @@
           x: marginX + x*(brickW+gap),
           y: topY + y*(brickH+gap),
           w: brickW, h: brickH,
-          hp, maxHp: hp,
-          dropChance: 0.12 + idx*0.02
+          hp, maxHp: hp
         });
       }
     }
@@ -334,7 +358,7 @@
     balls.length = 0;
     const b = makeBall(W/2, paddle.y - 14, 0, 0, 8);
     b.sticky = powers.sticky > 0;
-    b.stuck = true; // sitter på brädan tills launch
+    b.stuck = true;
     balls.push(b);
   }
 
@@ -381,13 +405,13 @@
       "DX-Ball",
       `Tryck <b>Spela</b> för att starta runnen.<br>
        <b>Klicka/tappa</b> (eller <b>SPACE</b>) för att släppa kulan.<br>
-       Styr med <b>WASD</b>, <b>piltangenter</b>, <b>mus</b> eller <b>touch</b>.<br>
        Pausa med <b>ESC</b> eller <b>P</b>.`
     );
   }
 
-  // --- Powerups ---
+  // --- Powerups (global drop from any destroyed brick) ---
   function dropPower(x, y) {
+    if (drops.length >= MAX_DROPS_ON_SCREEN) return;
     const def = POWER_DEFS[randi(0, POWER_DEFS.length - 1)];
     drops.push({ id:def.id, label:def.label, x, y, vy: rand(160,240), r:10, color:def.color });
   }
@@ -433,78 +457,87 @@
     b.sticky = powers.sticky > 0;
   }
 
-  // --- Input ---
+  // --- Input helpers ---
   function startRunIfNeeded() {
     if (!running) return;
 
-    if (!hasStarted) {
-      hasStarted = true;
-    }
+    if (!hasStarted) hasStarted = true;
 
     if (modalOpen) hideStartOverlay();
     if (paused) setPaused(false);
   }
 
   function primaryAction() {
-    // 1) Starta/unpausa om behövs
     startRunIfNeeded();
-
-    // 2) Om bollen sitter fast -> släpp den
-    if (!paused && anyBallStuck()) {
-      launchStuckBalls();
-    }
+    if (!paused && anyBallStuck()) launchStuckBalls();
   }
 
+  // --- Keyboard ---
   window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
 
     if (["arrowleft","arrowright"," "].includes(k)) e.preventDefault();
 
     if (["arrowleft","arrowright","a","d"].includes(k)) {
-      paddle.targetX = null; // keyboard vinner
+      paddle.targetX = null;
     }
 
     if (k === "escape" || k === "p") {
       if (!running) return;
       if (!paused) setPaused(true);
-      else { startRunIfNeeded(); } // unpause
+      else startRunIfNeeded();
       return;
     }
 
     keys.add(k);
 
-    // SPACE ska släppa bollen (eller starta + släppa om redan i run)
-    if (k === " ") {
-      primaryAction();
-    }
+    if (k === " ") primaryAction();
   }, { passive: false, capture: true });
 
   window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()), { capture: true });
 
+  // --- Mouse / Touch ---
   function setPointerTarget(clientX) {
     const rect = canvas.getBoundingClientRect();
     const x = clientX - rect.left;
     paddle.targetX = x - paddle.w/2;
   }
 
-  canvas.addEventListener("mousemove", (e) => {
+  // When pointer is locked, we use movementX instead (mouse doesn't “move” on screen)
+  function handleMouseMove(e) {
     usingMouse = true;
+
+    if (isPointerLocked()) {
+      // move paddle by relative mouse movement
+      const prev = paddle.x;
+      paddle.x = clamp(paddle.x + e.movementX, 10, W - paddle.w - 10);
+      paddle.vx = (paddle.x - prev) / (1/60);
+      paddle.targetX = null; // ignore absolute target while locked
+      return;
+    }
+
     setPointerTarget(e.clientX);
-  });
+  }
+
+  canvas.addEventListener("mousemove", handleMouseMove);
 
   canvas.addEventListener("mouseleave", () => {
-    if (usingMouse) paddle.targetX = null;
+    if (usingMouse && !isPointerLocked()) paddle.targetX = null;
   });
 
   canvas.addEventListener("mousedown", (e) => {
     usingMouse = true;
     canvas.focus({ preventScroll: true });
-    setPointerTarget(e.clientX);
 
-    // Klick i spelet: start/unpause eller släpp boll om den sitter fast
+    // Start/unpause or launch ball
     primaryAction();
 
+    // lock mouse to canvas (cursor disappears, can't escape screen)
+    requestPointerLockSafe();
     if (!paused) document.documentElement.classList.add("dx-cursor-hidden");
+
+    // If not locked (browser blocked), fallback to normal absolute target:
+    if (!isPointerLocked()) setPointerTarget(e.clientX);
   });
 
   canvas.addEventListener("touchstart", (e) => {
@@ -527,8 +560,7 @@
 
   // Buttons
   btnPlay.addEventListener("click", () => {
-    // Starta runnen men SLÄPP INTE kulan här
-    startRunIfNeeded();
+    startRunIfNeeded(); // släpper inte kulan
     canvas.focus({ preventScroll: true });
   });
 
@@ -536,7 +568,7 @@
   btnResume.addEventListener("click", () => { startRunIfNeeded(); canvas.focus({ preventScroll: true }); });
   btnRestart2.addEventListener("click", () => resetGame());
 
-  // --- Physics ---
+  // --- Physics helpers ---
   function reflectBall(b, nx, ny) {
     const dot = b.vx*nx + b.vy*ny;
     b.vx -= 2*dot*nx;
@@ -587,6 +619,7 @@
     updatePaddle(dt);
     updatePaddleFromPowers(dt);
 
+    // Drops
     for (let i=drops.length-1;i>=0;i--){
       const d = drops[i];
       d.y += d.vy * dt;
@@ -615,11 +648,13 @@
       b.x += b.vx * dt * slowFactor;
       b.y += b.vy * dt * slowFactor;
 
+      // Walls
       const left = 10, right = W - 10, top = 10;
       if (b.x - b.r < left) { b.x = left + b.r; b.vx = Math.abs(b.vx); speedUp(b, 8); }
       if (b.x + b.r > right) { b.x = right - b.r; b.vx = -Math.abs(b.vx); speedUp(b, 8); }
       if (b.y - b.r < top) { b.y = top + b.r; b.vy = Math.abs(b.vy); speedUp(b, 10); }
 
+      // Paddle
       const hitP = collideBallAABB(b, b.r, paddle);
       if (hitP.hit && b.vy > 0) {
         b.y = paddle.y - b.r - 0.5;
@@ -638,6 +673,7 @@
         else speedUp(b, 12);
       }
 
+      // Bricks
       for (let i=0;i<bricks.length;i++){
         const br = bricks[i];
         if (br.hp <= 0) continue;
@@ -654,14 +690,21 @@
 
         if (br.hp <= 0) {
           score += 30;
-          if (Math.random() < br.dropChance) dropPower(br.x + br.w/2, br.y + br.h/2);
+
+          // GLOBAL random drop from ANY brick
+          if (Math.random() < POWERUP_DROP_CHANCE) {
+            dropPower(br.x + br.w/2, br.y + br.h/2);
+          }
         }
+
         break;
       }
 
+      // Fell out
       if (b.y - b.r > H + 40) balls.splice(bi, 1);
     }
 
+    // Lost all balls
     if (balls.length === 0) {
       lives -= 1;
       updateUI();
@@ -688,6 +731,7 @@
       );
     }
 
+    // Level clear
     if (remainingBricks() === 0) {
       levelIndex += 1;
       updateUI();
@@ -726,16 +770,21 @@
     if (left) dir -= 1;
     if (right) dir += 1;
 
-    // Mus/touch direkt
-    if (paddle.targetX !== null && (usingMouse || touchActive)) {
+    // If pointer locked: paddle already updated via mouse movement (relative)
+    // Otherwise: mouse/touch absolute target or keyboard
+    if (!isPointerLocked() && paddle.targetX !== null && (usingMouse || touchActive)) {
       const prevX = paddle.x;
       paddle.x = clamp(paddle.targetX, 10, W - paddle.w - 10);
       paddle.vx = (paddle.x - prevX) / Math.max(dt, 0.0001);
-    } else {
+    } else if (!isPointerLocked()) {
       const vx = dir * paddle.speed;
       paddle.vx = vx;
       paddle.x += vx * dt;
       paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
+    } else {
+      // pointer lock: keyboard still can add a bit if wanted
+      const vx = dir * (paddle.speed * 0.7);
+      paddle.x = clamp(paddle.x + vx * dt, 10, W - paddle.w - 10);
     }
 
     paddle.y = H - 54;
@@ -807,7 +856,7 @@
     c.closePath();
   }
 
-  // Boot
+  // --- Boot ---
   resetGame();
   requestAnimationFrame(tick);
 
