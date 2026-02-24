@@ -1,0 +1,4 @@
+(repo-root)
+  .github/
+    workflows/
+      daily-news.yml
