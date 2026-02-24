@@ -1,6 +1,7 @@
 ---
 layout: default
-title: News
+title: hirrdirr • news
+navlabel: news
 permalink: /news/
 ---
 
