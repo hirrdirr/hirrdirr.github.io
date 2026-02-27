@@ -1,0 +1,24 @@
+name: Supabase keepalive
+
+on:
+  schedule:
+    # 2 gånger i veckan räcker fint (Supabase free “paus” brukar vara ~7 dagar utan aktivitet)
+    - cron: "0 3 * * 1,5"   # Mån & Fre 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase (read-only)
+        env:
+          SUPABASE_URL: ${{ https://fmpkucepmfgfyihfsoqc.supabase.co }}
+          SUPABASE_ANON_KEY: ${{ sb_publishable_gI2NXReXI2EA3HjSmKCP7A_mONU6zZb }}
+        run: |
+          set -e
+          # Pingar din toppliste-vy (du har nämnt public.top10_scores tidigare)
+          curl -fsS "$SUPABASE_URL/rest/v1/top10_scores?select=score&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Accept: application/json" > /dev/null
+          echo "Keepalive OK"
