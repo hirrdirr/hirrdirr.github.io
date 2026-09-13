@@ -1,0 +1,34 @@
+name: Core Defense checks
+on:
+  pull_request:
+    paths:
+      [
+        "games/td/**",
+        "package.json",
+        "package-lock.json",
+        ".github/workflows/td-tests.yml",
+      ]
+  push:
+    branches: [main, feat/td-core-defense-v2]
+    paths:
+      [
+        "games/td/**",
+        "package.json",
+        "package-lock.json",
+        ".github/workflows/td-tests.yml",
+      ]
+permissions:
+  contents: read
+jobs:
+  game-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm test
+      - name: Check browser module syntax
+        run: |
+          node --check games/td/td.js
+          for file in games/td/js/*.js; do node --check "$file"; done

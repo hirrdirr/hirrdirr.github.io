@@ -1,1 +1,10 @@
 title: hirrdirr
+
+# Development tools and tests are not part of the published game.
+exclude:
+  - node_modules
+  - package.json
+  - package-lock.json
+  - games/td/tests
+  - games/td/vite.config.js
+  - games/td/README.md
