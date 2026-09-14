@@ -1,23 +1,196 @@
 ---
 layout: default
-title: Tower Defense
+title: Core Defense · Tower Defense
+navlabel: games / core defense
 permalink: /games/td/
 ---
 
-<link rel="stylesheet" href="td.css?v=ui2">
-
-<div class="td-page">
-  <div class="td-ui" id="td-ui">
-    <span class="td-pill" id="stats"></span>
-    <button class="td-btn" id="t1">Torn: Sniper (50)</button>
-    <button class="td-btn" id="t2">Torn: Gatling (35)</button>
-    <button class="td-btn" id="start">Starta våg</button>
-    <span class="td-pill td-hint">Placera: klick · Ta bort: högerklick · Tower Range: <kbd>R</kbd> · Avbryt: <kbd>ESC</kbd></span>
+<link rel="stylesheet" href="./td.css" />
+<div class="td-app" id="td-app">
+  <header class="td-heading">
+    <div class="td-brand">
+      <span class="td-emblem" aria-hidden="true">⌁</span>
+      <div>
+        <span class="td-eyebrow">HIRRDIRR / TOWER DEFENSE</span>
+        <h1>CORE <span>DEFENSE</span></h1>
+      </div>
+    </div>
+    <div class="td-heading-actions">
+      <span class="td-sector">SEKTOR 01 · RELÄSTATIONEN</span
+      ><button id="help" class="td-button td-quiet" aria-label="Visa spelhjälp">
+        ? Hjälp
+      </button>
+    </div>
+  </header>
+  <div class="td-hud" aria-label="Spelstatus">
+    <div class="td-resource">
+      <span class="td-label">KREDITER</span
+      ><strong class="td-gold" id="gold">240</strong>
+    </div>
+    <div class="td-resource">
+      <span class="td-label">KÄRNANS INTEGRITET</span
+      ><strong id="lives">30 <small>/ 30</small></strong>
+      <div class="td-integrity"><i id="integrity-bar"></i></div>
+    </div>
+    <div class="td-resource">
+      <span class="td-label">VÅG</span
+      ><strong id="wave">0 <small>/ 30</small></strong>
+    </div>
+    <div class="td-resource td-threat">
+      <span class="td-label">FIENDER KVAR</span
+      ><strong id="remaining">0</strong>
+    </div>
+    <div class="td-time-controls">
+      <div class="td-speeds" role="group" aria-label="Spelhastighet">
+        <button data-speed="1" aria-pressed="true">1×</button
+        ><button data-speed="2" aria-pressed="false">2×</button
+        ><button data-speed="3" aria-pressed="false">3×</button>
+      </div>
+      <button
+        id="pause"
+        class="td-button"
+        aria-label="Pausa spelet"
+        aria-pressed="false"
+      >
+        Ⅱ Pausa
+      </button>
+    </div>
   </div>
-
-  <div class="td-wrap">
-    <canvas id="c" width="960" height="540"></canvas>
+  <div class="td-workspace">
+    <section class="td-battlefield" aria-label="Spelplan">
+      <div class="td-map-top">
+        <span
+          ><i class="td-status-dot"></i
+          ><span id="phase">FÖRBERED FÖRSVARET</span></span
+        ><button id="ranges" class="td-map-toggle" aria-pressed="false">
+          Räckvidder <kbd>R</kbd>
+        </button>
+      </div>
+      <div class="td-canvas-wrap" id="canvas-wrap">
+        <canvas
+          id="c"
+          width="960"
+          height="600"
+          tabindex="0"
+          aria-label="Spelplan. Välj ett torn och klicka för att placera. Piltangenter flyttar markören, Enter bekräftar, Escape avbryter."
+          >Din webbläsare behöver stöd för Canvas för att spela.</canvas
+        >
+        <div class="td-boss" id="boss" hidden>
+          <div><strong id="boss-name"></strong><span id="boss-hp"></span></div>
+          <div class="td-boss-track"><i id="boss-bar"></i></div>
+        </div>
+        <div class="td-wave-banner" id="wave-banner" aria-live="polite"></div>
+        <div class="td-pause-overlay" id="pause-overlay" hidden>
+          <strong>PAUSAT</strong
+          ><span>Planera, bygg och uppgradera i lugn och ro.</span>
+        </div>
+        <div class="td-end-overlay" id="end-overlay" hidden>
+          <span class="td-eyebrow" id="end-kicker"></span>
+          <h2 id="end-title"></h2>
+          <p id="end-summary"></p>
+          <button class="td-button td-primary" id="restart">Spela igen</button>
+        </div>
+      </div>
+      <div class="td-placement-bar">
+        <span id="placement-message" role="status"
+          >Välj ett torn i arsenalen för att bygga ditt försvar.</span
+        >
+        <div class="td-placement-actions">
+          <button id="place-confirm" class="td-button td-primary" hidden>
+            Bygg här</button
+          ><button id="cancel" class="td-button td-quiet" hidden>Avbryt</button>
+        </div>
+      </div>
+      <div class="td-wave-controls">
+        <div class="td-next">
+          <span class="td-label" id="next-label">NÄSTA VÅG</span
+          ><strong id="next-name"></strong>
+          <div id="next-enemies" class="td-enemy-preview"></div>
+        </div>
+        <button id="start" class="td-button td-primary td-launch">
+          Starta våg 1 <span>▶</span>
+        </button>
+      </div>
+    </section>
+    <aside class="td-sidebar" aria-label="Torn och uppgraderingar">
+      <div class="td-panel-heading">
+        <h2 id="sidebar-title">ARSENAL</h2>
+        <span id="arsenal-count">7 torn · 14 specialiseringar</span
+        ><button id="shop-toggle" class="td-text-button" hidden>
+          ← Arsenal
+        </button>
+      </div>
+      <div id="tower-shop" class="td-tower-shop"></div>
+      <section
+        id="tower-panel"
+        class="td-tower-panel"
+        aria-label="Torninformation"
+      ></section>
+    </aside>
   </div>
+  <footer class="td-footer">
+    <span
+      ><kbd>1–7</kbd> Torn <kbd>Space</kbd> Paus <kbd>R</kbd> Räckvidd
+      <kbd>Esc</kbd> Avbryt</span
+    ><button id="new-game" class="td-text-button">Ny omgång</button>
+  </footer>
+  <div id="toast" class="td-toast" role="status" aria-live="polite"></div>
+  <dialog id="help-dialog" class="td-dialog">
+    <form method="dialog">
+      <div class="td-dialog-head">
+        <h2>Försvara kärnan</h2>
+        <button class="td-button" aria-label="Stäng hjälpen">✕</button>
+      </div>
+      <p>
+        Överlev 30 vågor. Fiender följer den upplysta vägen mot energikärnan.
+        Tunga fiender skadar kärnan mer.
+      </p>
+      <ol>
+        <li>
+          Välj ett torn och placera på en ledig ruta nära vägen. På touch: välj
+          ruta och tryck <strong>Bygg här</strong>.
+        </li>
+        <li>
+          Klicka på ett byggt torn för statistik, målläge, uppgraderingar och
+          försäljning.
+        </li>
+        <li>
+          Varje torn har två vägar med tre nivåer. Nivå 1 kan köpas i båda. Nivå
+          2 väljer specialisering och låser den andra vägens fortsättning.
+        </li>
+        <li>
+          Använd pansarbrytning mot pansar, bromsning mot snabba fiender och
+          ytskada mot grupper. Stödtornens bonusar staplas inte; starkaste
+          bonusen gäller.
+        </li>
+        <li>
+          När alla fiender har skickats ut kan nästa våg startas tidigt. Du får
+          en liten bonus, men möter båda samtidigt.
+        </li>
+      </ol>
+      <p>
+        <strong>Mållägen:</strong> First / Last följer position längs vägen.
+        Strong / Weak väljer högst / lägst aktuell HP. Closest väljer närmast
+        tornet.
+      </p>
+      <p>
+        <strong>Tangentbord:</strong> 1–7 väljer torn. Fokusera spelplanen,
+        använd pilar och Enter för att bygga eller välja. Escape avbryter. Space
+        pausar. R visar räckvidder. Högerklick avbryter byggläge.
+      </p>
+      <button class="td-button td-primary">Tillbaka till spelet</button>
+    </form>
+  </dialog>
+  <dialog id="restart-dialog" class="td-dialog">
+    <h2>Börja om?</h2>
+    <p>Ditt nuvarande försvar och alla framsteg i omgången försvinner.</p>
+    <div class="td-dialog-actions">
+      <button id="keep-playing" class="td-button">Fortsätt spela</button
+      ><button id="confirm-restart" class="td-button td-danger">
+        Starta ny omgång
+      </button>
+    </div>
+  </dialog>
+  <noscript><p>Aktivera JavaScript för att spela Core Defense.</p></noscript>
 </div>
-
-<script defer src="td.js?v=ui2"></script>
+<script type="module" src="./td.js"></script>
