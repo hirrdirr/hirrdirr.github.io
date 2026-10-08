@@ -60,3 +60,25 @@ Small screens crop the outer scenery while keeping the central controls visible.
 Keep this coordinate system when replacing the image or adding menu actions.
 The map and difficulty labels baked into the artwork are a visual preview;
 the current game map and rules still apply.
+
+## Enemy walk sprites
+
+The repository owner's supplied sheets are used unchanged:
+
+| File | Existing enemy kind | Frame layout | Draw size |
+| --- | --- | --- | --- |
+| `enemies/goblin_walk_4f.png` | `normal` (basic) | Four 192 × 192 frames in one 768 × 192 row | 36 × 36 world pixels |
+| `enemies/ogre_walk_4f.png` | `tank` (brute) | Four 256 × 256 frames in one 1024 × 256 row | 52 × 52 world pixels |
+
+`../js/enemy-sprites.js` owns asset paths, frame geometry, draw sizes and stride.
+Frames advance every 8 world pixels for the goblin and 7 for the ogre: roughly
+7 and 5 frames per second at their base speeds. Movement-driven cycles respond
+automatically to pause, speed controls and slow effects. Sprites remain upright,
+flip horizontally when moving left, and keep their facing on vertical segments.
+Canvas smoothing is disabled only for the sprite draw; source PNGs and gameplay
+hitboxes are unchanged. Other enemy kinds retain their existing Canvas art.
+
+To add another compatible horizontal sheet, add an entry keyed by the existing
+enemy kind in `ENEMY_SPRITES`. Images load once, validate their dimensions and
+fall back to procedural art if loading fails. No third-party art was downloaded
+for this integration.

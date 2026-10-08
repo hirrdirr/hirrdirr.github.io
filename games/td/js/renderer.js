@@ -1,5 +1,6 @@
 import { WORLD, TOWERS, ENEMIES, towerStats } from "./data.js";
 import { PATH, SEGMENTS, ROAD, BLOCKED, distanceSquared } from "./map.js";
+import { EnemySprites } from "./enemy-sprites.js";
 const TAU = Math.PI * 2;
 function polygon(c, x, y, r, sides = 6, angle = 0) {
   c.beginPath();
@@ -177,6 +178,7 @@ export class Renderer {
     this.ctx = canvas.getContext("2d");
     this.background = document.createElement("canvas");
     this.effects = [];
+    this.enemySprites = new EnemySprites();
     this.visualTime = 0;
     this.dpr = 0;
     this.reduced = window.matchMedia(
@@ -402,6 +404,7 @@ export class Renderer {
   }
   clear() {
     this.effects = [];
+    this.enemySprites.clear();
   }
   range(c, t, s, strong = false) {
     c.save();
@@ -572,18 +575,28 @@ export class Renderer {
   }
   drawEnemy(c, e, game) {
     const def = ENEMIES[e.kind],
-      r = e.radius;
+      r = e.radius,
+      sprite = this.enemySprites.get(e.kind),
+      visualRadius = sprite ? sprite.size / 2 : r;
     c.save();
     c.translate(e.x, e.y);
     c.fillStyle = "#04121666";
     c.beginPath();
-    c.ellipse(2, r * 0.5, r, r * 0.6, 0, 0, TAU);
+    c.ellipse(
+      2,
+      sprite ? visualRadius * 0.8 : r * 0.5,
+      sprite ? visualRadius * 0.7 : r,
+      sprite ? visualRadius * 0.25 : r * 0.6,
+      0,
+      0,
+      TAU,
+    );
     c.fill();
     if (e.slowUntil > game.time) {
       c.strokeStyle = "#80d9f0";
       c.lineWidth = 2;
       c.beginPath();
-      c.arc(0, 0, r + 4, 0, TAU);
+      c.arc(0, 0, visualRadius + 4, 0, TAU);
       c.stroke();
     }
     if (e.vulnerableUntil > game.time) {
@@ -591,53 +604,66 @@ export class Renderer {
       c.lineWidth = 1;
       c.setLineDash([3, 3]);
       c.beginPath();
-      c.arc(0, 0, r + 7, 0, TAU);
+      c.arc(0, 0, visualRadius + 7, 0, TAU);
       c.stroke();
       c.setLineDash([]);
     }
-    c.rotate(e.angle);
-    c.fillStyle = e.hitFlash > 0 ? "#ffffff" : def.color;
-    c.strokeStyle = "#1a2028";
-    c.lineWidth = 2;
-    if (e.kind === "fast" || e.kind === "swift") {
-      polygon(c, 0, 0, r, 3, 0);
-      c.fill();
-      c.stroke();
-      line(c, -r + 2, -3, 1, -3, "#785c38", 1);
-    } else if (e.kind === "tank" || e.kind === "boss") {
-      c.fillStyle = "#283e46";
-      c.fillRect(-r, -r, r * 2, r * 0.35);
-      c.fillRect(-r, r * 0.65, r * 2, r * 0.35);
-      c.fillStyle = e.hitFlash > 0 ? "#fff" : def.color;
-      polygon(c, 0, 0, r * 0.96, 6, Math.PI / 6);
-      c.fill();
-      c.stroke();
-      c.fillStyle = "#24333d";
-      polygon(c, 0, 0, r * 0.5, 6, Math.PI / 6);
-      c.fill();
-      c.fillStyle = def.color;
-      c.fillRect(1, -3, r, 6);
+    if (sprite) {
+      this.enemySprites.draw(c, e, sprite);
+      if (e.hitFlash > 0) {
+        c.strokeStyle = "#ffffff";
+        c.lineWidth = 2;
+        c.beginPath();
+        c.arc(0, 0, visualRadius, 0, TAU);
+        c.stroke();
+      }
+      c.rotate(e.angle); // Armor direction only; the sprite itself stays upright.
     } else {
-      polygon(
-        c,
-        0,
-        0,
-        r,
-        e.kind === "elite" ? 5 : 6,
-        e.kind === "elite" ? 0 : Math.PI / 6,
-      );
-      c.fill();
-      c.stroke();
-      c.fillStyle = "#22343b";
-      polygon(c, 0, 0, r * 0.48, e.kind === "elite" ? 5 : 4);
-      c.fill();
+      // Keep the existing art for other kinds and while a sheet is loading/unavailable.
+      c.rotate(e.angle);
+      c.fillStyle = e.hitFlash > 0 ? "#ffffff" : def.color;
+      c.strokeStyle = "#1a2028";
+      c.lineWidth = 2;
+      if (e.kind === "fast" || e.kind === "swift") {
+        polygon(c, 0, 0, r, 3, 0);
+        c.fill();
+        c.stroke();
+        line(c, -r + 2, -3, 1, -3, "#785c38", 1);
+      } else if (e.kind === "tank" || e.kind === "boss") {
+        c.fillStyle = "#283e46";
+        c.fillRect(-r, -r, r * 2, r * 0.35);
+        c.fillRect(-r, r * 0.65, r * 2, r * 0.35);
+        c.fillStyle = e.hitFlash > 0 ? "#fff" : def.color;
+        polygon(c, 0, 0, r * 0.96, 6, Math.PI / 6);
+        c.fill();
+        c.stroke();
+        c.fillStyle = "#24333d";
+        polygon(c, 0, 0, r * 0.5, 6, Math.PI / 6);
+        c.fill();
+        c.fillStyle = def.color;
+        c.fillRect(1, -3, r, 6);
+      } else {
+        polygon(
+          c,
+          0,
+          0,
+          r,
+          e.kind === "elite" ? 5 : 6,
+          e.kind === "elite" ? 0 : Math.PI / 6,
+        );
+        c.fill();
+        c.stroke();
+        c.fillStyle = "#22343b";
+        polygon(c, 0, 0, r * 0.48, e.kind === "elite" ? 5 : 4);
+        c.fill();
+      }
     }
     if (game.armorFor(e) > 0.2) {
       c.strokeStyle =
         e.kind === "boss" && e.age % 10 < 3 ? "#d1ecff" : "#adbdcb";
       c.lineWidth = 2.5;
       c.beginPath();
-      c.arc(0, 0, r + 2, -Math.PI * 0.55, Math.PI * 0.55);
+      c.arc(0, 0, visualRadius + 2, -Math.PI * 0.55, Math.PI * 0.55);
       c.stroke();
     }
     c.restore();
@@ -648,15 +674,15 @@ export class Renderer {
     }
     if (e.burnUntil > game.time) {
       c.fillStyle = "#f2b179";
-      polygon(c, e.x - 4, e.y - r, 4, 3, -Math.PI / 2);
+      polygon(c, e.x - 4, e.y - visualRadius, 4, 3, -Math.PI / 2);
       c.fill();
     }
     if (e.hp < e.maxHp || e.kind === "boss" || e.kind === "elite") {
-      const w = Math.max(24, r * 2);
+      const w = Math.max(24, visualRadius * 2);
       c.fillStyle = "#07171d";
-      c.fillRect(e.x - w / 2, e.y - r - 10, w, 4);
+      c.fillRect(e.x - w / 2, e.y - visualRadius - 10, w, 4);
       c.fillStyle = e.kind === "boss" ? "#f58c9e" : "#c6d9b2";
-      c.fillRect(e.x - w / 2, e.y - r - 10, (w * e.hp) / e.maxHp, 4);
+      c.fillRect(e.x - w / 2, e.y - visualRadius - 10, (w * e.hp) / e.maxHp, 4);
     }
   }
 }

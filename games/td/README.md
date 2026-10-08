@@ -43,6 +43,7 @@ An early wave can start once the previous wave has sent all enemies, with at mos
 - `js/waves.js`: authored wave schedule, previews and scaling.
 - `js/engine.js`: DOM-independent simulation, validated game commands and events. Stable IDs identify towers/enemies; selection never relies on array indices.
 - `js/renderer.js`: Canvas art, cached terrain, indicators and bounded visual effects.
+- `js/enemy-sprites.js`: presentation-only walk sheets for basic/tank enemies, frame selection, pixel-sharp scaling and horizontal facing.
 - `js/ui.js`: HUD, shop, inspector, dialogs and accessible feedback. The inspector replaces the shop while inspecting a tower.
 - `td.css`: scoped responsive styling with reduced-motion support.
 
@@ -63,7 +64,7 @@ npm run test:balance
 
 The development preview wraps the game with the repository's existing Jekyll layout. It is a preview adapter, not a complete Jekyll build. `/__td-qa` provides 320/390/768/1024px iframe widths for layout inspection. Development tools and tests are excluded from Jekyll output. CI runs the dependency-free tests and syntax checks on TD pull requests.
 
-23 automated tests cover placement validation, money, upgrades and path locks, all 42 upgrade tiers, five targeting modes, minimum range, armor/status/support rules, regen and bosses, escaped targets, exact kill rewards, stable selection, path movement, pause, restart, loss/victory, waves, early-start limits, firing cadence, speed equivalence across 20/60/120 FPS, production imports and static UI bindings.
+27 automated tests cover placement validation, money, upgrades and path locks, all 42 upgrade tiers, five targeting modes, minimum range, armor/status/support rules, regen and bosses, escaped targets, exact kill rewards, stable selection, path movement, pause, restart, loss/victory, waves, early-start limits, firing cadence, speed equivalence across 20/60/120 FPS, production imports and static UI bindings. Sprite checks cover the supplied PNG dimensions/paths, four-frame crops, movement-driven cycles through pause/speed/slow, upright horizontal facing, local smoothing state and unavailable-asset fallback.
 
 Browser checks performed: startup with the shared site layout, placement, selection, targeting, upgrade, sale while paused, wave start, speed controls, pause overlay and restart. Layout inspected at desktop and at 320/390/768px iframe widths; no horizontal page overflow at those narrow widths. No game JavaScript errors observed. Physical-device touch behavior and sustained mobile rendering performance still need device testing. The full Jekyll/GitHub Pages build remains a deployment-side check.
 
@@ -72,6 +73,16 @@ and 320/390/768/1024px widths, no horizontal overflow, placeholder clicks, click
 and Enter launch, and menu return after page reload. Gameplay was checked after
 launch for placement, targeting, upgrades, enemy movement/combat, wave start,
 1×/2×/3×, pause, sale and restart. No site JavaScript errors were observed.
+
+Enemy sprite checks (2026-10-08): original goblins in wave 1 and ogres in wave 4,
+all four frames drawn from both supplied sheets, nearest-neighbor sampling,
+pause/resume, left-facing mirroring and upright vertical travel. The existing
+game was checked for menu launch, placement, targeting, upgrades, combat, wave
+progression, speed controls, sale and restart. Layout was inspected at desktop
+and 320/390/768px iframe widths without horizontal overflow. No game JavaScript
+errors or sprite-loading warnings were observed; both PNGs remain byte-for-byte
+identical to the repository owner's uploads. Device testing and the production
+GitHub Pages build remain deployment/device checks.
 
 Deterministic baseline bots use 12 fixed positions and simple spending rules:
 
@@ -86,6 +97,6 @@ These are regression baselines, not optimal strategies or proof of complete bala
 
 ## Art and next steps
 
-In-game art is original procedural Canvas/CSS: mechanical towers and attackers, industrial terrain, energy core, muzzle flashes, arcing artillery, hit/death particles, floating rewards and animated range overlays. The start menu uses the owner-provided Core Defense artwork documented in `assets/README.md`. No external game assets, copied sprites or external fonts were added. The website's existing shared icon integration is unchanged. Future external assets must record source URL, creator, license, attribution requirements and access date before inclusion.
+In-game art combines procedural Canvas/CSS with the owner's supplied animated goblin and ogre sheets for basic/tank enemies. Mechanical towers and other attackers, industrial terrain, energy core, muzzle flashes, arcing artillery, hit/death particles, floating rewards and range overlays retain their existing art. The enemy sheets and start menu artwork are documented in `assets/README.md`. No third-party game assets or external fonts were added. The website's existing shared icon integration is unchanged. Future external assets must record source URL, creator, license, attribution requirements and access date before inclusion.
 
 Next useful work: human balance sessions across all specializations, physical mobile testing, more maps, authored sound with a mute setting, save/resume, difficulty options and additional accessibility beyond the current keyboard controls and DOM feedback.
