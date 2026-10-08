@@ -65,20 +65,37 @@ the current game map and rules still apply.
 
 The repository owner's supplied sheets are used unchanged:
 
-| File | Existing enemy kind | Frame layout | Draw size |
-| --- | --- | --- | --- |
-| `enemies/goblin_walk_4f.png` | `normal` (basic) | Four 192 × 192 frames in one 768 × 192 row | 36 × 36 world pixels |
-| `enemies/ogre_walk_4f.png` | `tank` (brute) | Four 256 × 256 frames in one 1024 × 256 row | 52 × 52 world pixels |
+| File | Existing enemy kind | Frame size (four in one row) | Draw size, world pixels | Stride, pixels/frame |
+| --- | --- | --- | --- | --- |
+| `enemies/goblin_walk_4f.png` | `normal` (basic) | 192 × 192 | 36 × 36 | 8 |
+| `enemies/fast_goblin_runner_4f.png` | `fast` | 543 × 724 | ≈47 × 34 | 10 |
+| `enemies/swift_goblin_scout_4f.png` | `swift` | 543 × 724 | ≈40 × 30 | 12 |
+| `enemies/ogre_walk_4f.png` | `tank` (brute) | 256 × 256 | 52 × 52 | 7 |
+| `enemies/armored_orc_4f.png` | `armored` | 543 × 724 | ≈50 × 44 | 9 |
+| `enemies/regen_goblin_shaman_4f.png` | `regen` | 543 × 724 | ≈46 × 38 | 9 |
+| `enemies/elite_orc_brute_4f.png` | `elite` | 543 × 724 | ≈54 × 58 | 9 |
+| `enemies/boss_ogre_warlord_4f.png` | `boss` | 543 × 724 | ≈71 × 78 | 7 |
 
 `../js/enemy-sprites.js` owns asset paths, frame geometry, draw sizes and stride.
-Frames advance every 8 world pixels for the goblin and 7 for the ogre: roughly
-7 and 5 frames per second at their base speeds. Movement-driven cycles respond
+The six newer sheets are each 2172 × 724 pixels. Their per-kind `crop` removes
+excess transparent padding while keeping a fixed source rectangle across all
+four frames: fast y=192/h=392, swift y=184/h=408, armored y=144/h=480,
+regen y=144/h=448, elite y=96/h=584 and boss y=72/h=600. All use the full
+543-pixel frame width. Cropping and scaling happen only in Canvas; PNGs are
+not edited. `size` is the cropped frame's draw height; width preserves its
+aspect ratio. The original square goblin/ogre draws remain unchanged.
+
+At base speeds, normal/fast/swift/tank/armored/regen/elite/boss animate at about
+7.3/9.6/12.3/5.3/6.0/7.2/5.8/4.0 frames per second. Movement-driven cycles respond
 automatically to pause, speed controls and slow effects. Sprites remain upright,
 flip horizontally when moving left, and keep their facing on vertical segments.
 Canvas smoothing is disabled only for the sprite draw; source PNGs and gameplay
-hitboxes are unchanged. Other enemy kinds retain their existing Canvas art.
+hitboxes are unchanged. Health, armor and status indicators remain in the
+existing renderer and surround the scaled sprites.
 
 To add another compatible horizontal sheet, add an entry keyed by the existing
-enemy kind in `ENEMY_SPRITES`. Images load once, validate their dimensions and
+enemy kind in `ENEMY_SPRITES`; optionally supply a `crop` with x/y/width/height
+to trim frame padding without changing the image. Omitted crop fields use the
+full frame. Images load once, validate their dimensions and
 fall back to procedural art if loading fails. No third-party art was downloaded
 for this integration.

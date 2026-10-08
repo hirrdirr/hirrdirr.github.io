@@ -43,7 +43,7 @@ An early wave can start once the previous wave has sent all enemies, with at mos
 - `js/waves.js`: authored wave schedule, previews and scaling.
 - `js/engine.js`: DOM-independent simulation, validated game commands and events. Stable IDs identify towers/enemies; selection never relies on array indices.
 - `js/renderer.js`: Canvas art, cached terrain, indicators and bounded visual effects.
-- `js/enemy-sprites.js`: presentation-only walk sheets for basic/tank enemies, frame selection, pixel-sharp scaling and horizontal facing.
+- `js/enemy-sprites.js`: presentation-only walk sheets for all eight enemy kinds, fixed frame crops, aspect-preserving pixel-sharp scaling and horizontal facing.
 - `js/ui.js`: HUD, shop, inspector, dialogs and accessible feedback. The inspector replaces the shop while inspecting a tower.
 - `td.css`: scoped responsive styling with reduced-motion support.
 
@@ -84,6 +84,19 @@ errors or sprite-loading warnings were observed; both PNGs remain byte-for-byte
 identical to the repository owner's uploads. Device testing and the production
 GitHub Pages build remain deployment/device checks.
 
+Remaining enemy sprite checks (2026-10-08): all eight original sheets loaded
+and all four frames drawn through the current renderer, with nearest-neighbor
+sampling and aspect-preserving crops. Checked pause/resume, speed controls,
+slow effects, horizontal mirroring, upright vertical travel, health/armor/status
+overlays and hit feedback. The existing game was checked for menu launch,
+placement, targeting, upgrading, mixed-wave combat, selling while paused and
+restart. Layout checked at 320/390/768/1024px iframe widths without horizontal
+overflow. No game JavaScript errors or sheet-loading warnings were observed.
+All eight enemy PNGs match their existing repository bytes; gameplay modules
+and hitboxes are unchanged. The comparison fixture is local QA only and is
+not part of the shipped game. Physical-device performance and the production
+GitHub Pages build still need deployment/device verification.
+
 Deterministic baseline bots use 12 fixed positions and simple spending rules:
 
 | Strategy      | Result           | Core left |
@@ -97,6 +110,6 @@ These are regression baselines, not optimal strategies or proof of complete bala
 
 ## Art and next steps
 
-In-game art combines procedural Canvas/CSS with the owner's supplied animated goblin and ogre sheets for basic/tank enemies. Mechanical towers and other attackers, industrial terrain, energy core, muzzle flashes, arcing artillery, hit/death particles, floating rewards and range overlays retain their existing art. The enemy sheets and start menu artwork are documented in `assets/README.md`. No third-party game assets or external fonts were added. The website's existing shared icon integration is unchanged. Future external assets must record source URL, creator, license, attribution requirements and access date before inclusion.
+In-game art combines procedural Canvas/CSS with the owner's supplied animated sheets for all eight enemy kinds. Mechanical towers, industrial terrain, energy core, muzzle flashes, arcing artillery, hit/death particles, floating rewards and range overlays retain their existing art. The enemy sheets and start menu artwork are documented in `assets/README.md`. No third-party game assets or external fonts were added. The website's existing shared icon integration is unchanged. Future external assets must record source URL, creator, license, attribution requirements and access date before inclusion.
 
 Next useful work: human balance sessions across all specializations, physical mobile testing, more maps, authored sound with a mute setting, save/resume, difficulty options and additional accessibility beyond the current keyboard controls and DOM feedback.
