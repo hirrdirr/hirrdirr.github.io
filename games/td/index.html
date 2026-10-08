@@ -6,7 +6,69 @@ permalink: /games/td/
 ---
 
 <link rel="stylesheet" href="./td.css" />
-<div class="td-app" id="td-app">
+<link rel="stylesheet" href="./menu.css" />
+<section class="td-menu" id="td-menu" lang="en" aria-labelledby="menu-title">
+  <h1 class="td-menu-sr" id="menu-title">Core Defense</h1>
+  <p class="td-menu-sr" id="menu-options-note">
+    Map selection, difficulty options, settings and Back to Site are coming soon.
+    Start Game uses the current map and game rules.
+  </p>
+  <div class="td-menu-artwork">
+    <img
+      src="./assets/ui/core_defense_menu_01.png"
+      width="1672"
+      height="941"
+      alt=""
+      draggable="false"
+      fetchpriority="high"
+    />
+    <nav aria-label="Main menu">
+      <button
+        type="button"
+        class="td-menu-button"
+        id="menu-start"
+        data-menu-action="start"
+        aria-label="Start Game"
+        aria-controls="td-app"
+      ></button>
+      <button
+        type="button"
+        class="td-menu-button"
+        data-menu-action="map"
+        aria-label="Map Select"
+        aria-describedby="menu-options-note"
+        title="Coming soon"
+      ></button>
+      <button
+        type="button"
+        class="td-menu-button"
+        data-menu-action="difficulty"
+        aria-label="Difficulty"
+        aria-describedby="menu-options-note"
+        title="Coming soon"
+      ></button>
+      <button
+        type="button"
+        class="td-menu-button"
+        data-menu-action="settings"
+        aria-label="Settings"
+        aria-describedby="menu-options-note"
+        title="Coming soon"
+      ></button>
+      <button
+        type="button"
+        class="td-menu-button"
+        data-menu-action="back"
+        aria-label="Back to Site"
+        aria-describedby="menu-options-note"
+        title="Coming soon"
+      ></button>
+    </nav>
+  </div>
+  <p class="td-menu-message" id="menu-message" role="alert"></p>
+  <noscript><p>Aktivera JavaScript för att spela Core Defense.</p></noscript>
+</section>
+<div class="td-app" id="td-app" hidden>
   <header class="td-heading">
     <div class="td-brand">
       <span class="td-emblem" aria-hidden="true">⌁</span>
@@ -191,6 +253,5 @@ permalink: /games/td/
       </button>
     </div>
   </dialog>
-  <noscript><p>Aktivera JavaScript för att spela Core Defense.</p></noscript>
 </div>
-<script type="module" src="./td.js"></script>
+<script type="module" src="./menu.js"></script>

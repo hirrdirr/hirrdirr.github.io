@@ -47,3 +47,16 @@ Avoid filenames such as `final.png`, `new2.png` or `bush-final-final.png`.
 When changing the game's visuals, treat this folder as the default asset library. New bushes, lights, animated props, towers, enemies, map decorations and UI graphics should be added here and referenced from the renderer/game code as needed.
 
 The folder structure itself does not change current game behavior; it is intentionally safe to introduce before new graphical assets are added.
+
+## Start menu artwork
+
+`ui/core_defense_menu_01.png` is the original 1672 × 941 Core Defense menu artwork
+provided by the repository owner on 2026-10-08 as `Core Defense_ Meadow Path.png`.
+The supplied PNG is used unchanged; no third-party assets were fetched for this menu.
+
+The five clickable areas are real HTML buttons positioned in `../menu.css` as
+percentages of the artwork. Both the image and buttons share the same container.
+Small screens crop the outer scenery while keeping the central controls visible.
+Keep this coordinate system when replacing the image or adding menu actions.
+The map and difficulty labels baked into the artwork are a visual preview;
+the current game map and rules still apply.
