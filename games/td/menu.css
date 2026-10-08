@@ -1,0 +1,70 @@
+/* Hotspots use percentages of the original 1672 × 941 artwork. */
+.td-menu {
+  max-width: 1450px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #101820;
+  color: #e0e9e5;
+}
+.td-menu[hidden],
+.td-app[hidden] {
+  display: none !important;
+}
+.td-menu-artwork {
+  position: relative;
+  /* Crop only the outer scenery on small screens; keep the buttons usable. */
+  width: max(100%, 1000px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.td-menu-artwork img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.td-menu-button {
+  position: absolute;
+  left: 39.4%;
+  width: 21.2%;
+  height: 6.375%;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+.td-menu-button[data-menu-action="start"] { top: 35.813%; }
+.td-menu-button[data-menu-action="map"] { top: 43.252%; }
+.td-menu-button[data-menu-action="difficulty"] { top: 50.691%; }
+.td-menu-button[data-menu-action="settings"] { top: 58.13%; }
+.td-menu-button[data-menu-action="back"] { top: 65.675%; }
+.td-menu-button:hover {
+  background: #f6db9b18;
+}
+.td-menu-button:focus-visible {
+  outline: 2px solid #f0d496;
+  outline-offset: -3px;
+}
+.td-menu-button:disabled {
+  cursor: wait;
+}
+.td-menu-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.td-menu-message,
+.td-menu noscript p {
+  padding: 16px;
+  margin: 0;
+  font: 16px/1.5 system-ui, sans-serif;
+}
+.td-menu-message:empty {
+  display: none;
+}

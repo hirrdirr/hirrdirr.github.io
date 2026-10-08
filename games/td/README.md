@@ -4,6 +4,11 @@ A 30-wave tower defense campaign at `/games/td/`, built with native JavaScript m
 
 ## Play
 
+Click **Start Game** on the artwork menu to open the existing game. Map Select,
+Difficulty, Settings and Back to Site are clickable placeholders for future work.
+The map/difficulty labels in the artwork are decorative and do not select new rules.
+Reloading the page returns to the menu; restarting an ongoing game works as before.
+
 Build beside the road, protect the core and survive wave 30. Select a placed tower to inspect, upgrade, change targeting or sell it. Mouse placement is immediate; touch placement uses a separate **Bygg här** confirmation. Keyboard: 1–7 selects a tower, arrows on the focused board move the cursor, Enter builds/selects, Escape cancels, Space pauses, R toggles ranges. Shift allows repeated placement.
 
 Pause freezes combat but permits planning and purchases. Opening help/restart pauses and closing restores the previous pause state. Hiding the tab pauses the game. Speed controls affect simulation time, not damage rules. Restart clears the entire session; there is no saved campaign yet.
@@ -30,7 +35,9 @@ An early wave can start once the previous wave has sent all enemies, with at mos
 
 ## Structure
 
-- `td.js`: browser entry point, pointer/keyboard input, resize/visibility handling and animation scheduling.
+- `menu.js` / `menu.css`: responsive artwork menu and percentage-based button overlays. Start Game reveals the game, then imports `td.js` once; no game loop or game controls run before that click.
+- `assets/ui/core_defense_menu_01.png`: owner-provided start menu artwork; see `assets/README.md` for conventions.
+- `td.js`: game entry point, pointer/keyboard input, resize/visibility handling and animation scheduling.
 - `js/data.js`: tower/enemy definitions, upgrade prices and stat calculation.
 - `js/map.js`: grid, blocked cells and distance-based path geometry.
 - `js/waves.js`: authored wave schedule, previews and scaling.
@@ -60,6 +67,12 @@ The development preview wraps the game with the repository's existing Jekyll lay
 
 Browser checks performed: startup with the shared site layout, placement, selection, targeting, upgrade, sale while paused, wave start, speed controls, pause overlay and restart. Layout inspected at desktop and at 320/390/768px iframe widths; no horizontal page overflow at those narrow widths. No game JavaScript errors observed. Physical-device touch behavior and sustained mobile rendering performance still need device testing. The full Jekyll/GitHub Pages build remains a deployment-side check.
 
+Start menu checks (2026-10-08): artwork and all five aligned buttons at desktop
+and 320/390/768/1024px widths, no horizontal overflow, placeholder clicks, click
+and Enter launch, and menu return after page reload. Gameplay was checked after
+launch for placement, targeting, upgrades, enemy movement/combat, wave start,
+1×/2×/3×, pause, sale and restart. No site JavaScript errors were observed.
+
 Deterministic baseline bots use 12 fixed positions and simple spending rules:
 
 | Strategy      | Result           | Core left |
@@ -73,6 +86,6 @@ These are regression baselines, not optimal strategies or proof of complete bala
 
 ## Art and next steps
 
-All new game art is original procedural Canvas/CSS: mechanical towers and attackers, industrial terrain, energy core, muzzle flashes, arcing artillery, hit/death particles, floating rewards and animated range overlays. No external game assets, copied sprites or external fonts were added. The website's existing shared icon integration is unchanged. Future external assets must record source URL, creator, license, attribution requirements and access date before inclusion.
+In-game art is original procedural Canvas/CSS: mechanical towers and attackers, industrial terrain, energy core, muzzle flashes, arcing artillery, hit/death particles, floating rewards and animated range overlays. The start menu uses the owner-provided Core Defense artwork documented in `assets/README.md`. No external game assets, copied sprites or external fonts were added. The website's existing shared icon integration is unchanged. Future external assets must record source URL, creator, license, attribution requirements and access date before inclusion.
 
 Next useful work: human balance sessions across all specializations, physical mobile testing, more maps, authored sound with a mute setting, save/resume, difficulty options and additional accessibility beyond the current keyboard controls and DOM feedback.
