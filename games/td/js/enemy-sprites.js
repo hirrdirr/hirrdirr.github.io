@@ -1,4 +1,6 @@
 // Presentation only: source frames and draw sizes never change enemy hitboxes.
+const PORTRAIT_WALK_SHEET = { frameWidth: 543, frameHeight: 724, frames: 4 };
+
 export const ENEMY_SPRITES = {
   normal: {
     src: new URL("../assets/enemies/goblin_walk_4f.png", import.meta.url).href,
@@ -8,6 +10,20 @@ export const ENEMY_SPRITES = {
     size: 36,
     distancePerFrame: 8, // About 7 frames/second at the basic enemy's base speed.
   },
+  fast: {
+    ...PORTRAIT_WALK_SHEET,
+    src: new URL("../assets/enemies/fast_goblin_runner_4f.png", import.meta.url).href,
+    crop: { y: 192, height: 392 },
+    size: 34,
+    distancePerFrame: 10, // About 10 frames/second at base speed.
+  },
+  swift: {
+    ...PORTRAIT_WALK_SHEET,
+    src: new URL("../assets/enemies/swift_goblin_scout_4f.png", import.meta.url).href,
+    crop: { y: 184, height: 408 },
+    size: 30,
+    distancePerFrame: 12, // About 12 frames/second at base speed.
+  },
   tank: {
     src: new URL("../assets/enemies/ogre_walk_4f.png", import.meta.url).href,
     frameWidth: 256,
@@ -15,6 +31,34 @@ export const ENEMY_SPRITES = {
     frames: 4,
     size: 52,
     distancePerFrame: 7, // About 5 frames/second at the tank's base speed.
+  },
+  armored: {
+    ...PORTRAIT_WALK_SHEET,
+    src: new URL("../assets/enemies/armored_orc_4f.png", import.meta.url).href,
+    crop: { y: 144, height: 480 },
+    size: 44,
+    distancePerFrame: 9, // About 6 frames/second at base speed.
+  },
+  regen: {
+    ...PORTRAIT_WALK_SHEET,
+    src: new URL("../assets/enemies/regen_goblin_shaman_4f.png", import.meta.url).href,
+    crop: { y: 144, height: 448 },
+    size: 38,
+    distancePerFrame: 9, // About 7 frames/second at base speed.
+  },
+  elite: {
+    ...PORTRAIT_WALK_SHEET,
+    src: new URL("../assets/enemies/elite_orc_brute_4f.png", import.meta.url).href,
+    crop: { y: 96, height: 584 },
+    size: 58,
+    distancePerFrame: 9, // About 6 frames/second at base speed.
+  },
+  boss: {
+    ...PORTRAIT_WALK_SHEET,
+    src: new URL("../assets/enemies/boss_ogre_warlord_4f.png", import.meta.url).href,
+    crop: { y: 72, height: 600 },
+    size: 78,
+    distancePerFrame: 7, // About 4 frames/second at base speed.
   },
 };
 
@@ -71,18 +115,27 @@ export class EnemySprites {
     if (!sprite) return false;
     const facing = horizontalFacing(enemy.angle, this.facing.get(enemy) ?? 1);
     this.facing.set(enemy, facing);
+    // Trim transparent frame padding in code, using one stable crop for the cycle.
+    // Keep the original aspect ratio; size is the cropped frame's drawn height.
+    const {
+      x = 0,
+      y = 0,
+      width = sprite.frameWidth,
+      height = sprite.frameHeight,
+    } = sprite.crop ?? {};
+    const drawWidth = (sprite.size * width) / height;
     c.save();
     c.imageSmoothingEnabled = false;
     c.scale(facing, 1);
     c.drawImage(
       sprite.image,
-      walkFrame(sprite, enemy.distance) * sprite.frameWidth,
-      0,
-      sprite.frameWidth,
-      sprite.frameHeight,
+      walkFrame(sprite, enemy.distance) * sprite.frameWidth + x,
+      y,
+      width,
+      height,
+      -drawWidth / 2,
       -sprite.size / 2,
-      -sprite.size / 2,
-      sprite.size,
+      drawWidth,
       sprite.size,
     );
     c.restore();

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { Game, GameClock } from "../js/engine.js";
+import { ENEMIES } from "../js/data.js";
 import { ENEMY_SPRITES, EnemySprites, walkFrame } from "../js/enemy-sprites.js";
 
 class LoadedImage {
@@ -14,12 +15,29 @@ class LoadedImage {
 }
 
 test("supplied PNG paths and horizontal frame layouts match the renderer", () => {
-  assert.deepEqual(Object.keys(ENEMY_SPRITES), ["normal", "tank"]);
-  for (const sprite of Object.values(ENEMY_SPRITES)) {
+  const files = {
+    normal: "goblin_walk_4f.png",
+    fast: "fast_goblin_runner_4f.png",
+    swift: "swift_goblin_scout_4f.png",
+    tank: "ogre_walk_4f.png",
+    armored: "armored_orc_4f.png",
+    regen: "regen_goblin_shaman_4f.png",
+    elite: "elite_orc_brute_4f.png",
+    boss: "boss_ogre_warlord_4f.png",
+  };
+  assert.deepEqual(Object.keys(ENEMY_SPRITES).sort(), Object.keys(ENEMIES).sort());
+  for (const [kind, sprite] of Object.entries(ENEMY_SPRITES)) {
+    assert.equal(new URL(sprite.src).pathname.split("/").at(-1), files[kind]);
     const png = readFileSync(new URL(sprite.src));
     assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
     assert.equal(png.readUInt32BE(16), sprite.frameWidth * sprite.frames);
     assert.equal(png.readUInt32BE(20), sprite.frameHeight);
+    const {
+      x = 0, y = 0,
+      width = sprite.frameWidth, height = sprite.frameHeight,
+    } = sprite.crop ?? {};
+    assert.ok(x >= 0 && y >= 0 && width > 0 && height > 0);
+    assert.ok(x + width <= sprite.frameWidth && y + height <= sprite.frameHeight);
     const frames = Array.from({ length: 9 }, (_, i) =>
       walkFrame(sprite, i * sprite.distancePerFrame),
     );
@@ -31,20 +49,24 @@ function movingGame(speed = 1) {
   const game = new Game();
   game.wave = 1;
   game.status = "wave";
-  game.encounters.set(1, { pending: 0, alive: 2 });
-  const enemies = [game.spawn("normal", 1), game.spawn("tank", 1)];
+  const kinds = Object.keys(ENEMIES);
+  game.encounters.set(1, { pending: 0, alive: kinds.length });
+  const enemies = kinds.map((kind) => game.spawn(kind, 1));
   game.setSpeed(speed);
   return { game, enemies, clock: new GameClock() };
 }
 
 test("walk frames follow actual simulation movement through pause, speed and slow", () => {
   const normal = movingGame();
+  const double = movingGame(2);
   const faster = movingGame(3);
   for (let i = 0; i < 3; i++) {
     normal.clock.advance(normal.game, 0.1);
+    double.clock.advance(double.game, 0.1);
     faster.clock.advance(faster.game, 0.1);
   }
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < normal.enemies.length; i++) {
+    assert.ok(Math.abs(double.enemies[i].distance - normal.enemies[i].distance * 2) < 1e-8);
     assert.ok(Math.abs(faster.enemies[i].distance - normal.enemies[i].distance * 3) < 1e-8);
   }
   const frames = normal.enemies.map((e) => walkFrame(ENEMY_SPRITES[e.kind], e.distance));
@@ -60,11 +82,21 @@ test("walk frames follow actual simulation movement through pause, speed and slo
     e.slowUntil = 10;
   }
   for (let i = 0; i < 3; i++) slowed.clock.advance(slowed.game, 0.1);
-  for (let i = 0; i < 2; i++) {
+  const expectedFrames = {
+    normal: 2, fast: 2, swift: 3, tank: 1,
+    armored: 1, regen: 2, elite: 1, boss: 1,
+  };
+  const expectedSlowFrames = {
+    normal: 1, fast: 1, swift: 1, tank: 0,
+    armored: 0, regen: 1, elite: 1, boss: 0,
+  };
+  for (let i = 0; i < normal.enemies.length; i++) {
+    const kind = slowed.enemies[i].kind;
     const sprite = ENEMY_SPRITES[slowed.enemies[i].kind];
-    assert.ok(Math.abs(slowed.enemies[i].distance - normal.enemies[i].distance / 2) < 1e-8);
-    assert.equal(walkFrame(sprite, slowed.enemies[i].distance), [1, 0][i]);
-    assert.equal(walkFrame(sprite, normal.enemies[i].distance), [2, 1][i]);
+    const factor = 1 - 0.5 * (1 - slowed.enemies[i].slowResist);
+    assert.ok(Math.abs(slowed.enemies[i].distance - normal.enemies[i].distance * factor) < 1e-8);
+    assert.equal(walkFrame(sprite, slowed.enemies[i].distance), expectedSlowFrames[kind]);
+    assert.equal(walkFrame(sprite, normal.enemies[i].distance), expectedFrames[kind]);
   }
 });
 
@@ -87,10 +119,15 @@ test("sprite drawing crops one frame, disables smoothing locally, and keeps side
     const enemy = { kind, distance: sprite.distancePerFrame * 3, angle: Math.PI };
     const snapshot = { ...enemy };
     assert.equal(sprites.draw(context, enemy), true);
+    const {
+      x = 0, y = 0,
+      width = sprite.frameWidth, height = sprite.frameHeight,
+    } = sprite.crop ?? {};
+    const drawWidth = sprite.size * width / height;
     assert.deepEqual(calls.at(-2), ["scale", -1, 1]);
     assert.deepEqual(calls.at(-1), [
-      "image", sprite.frameWidth * 3, 0, sprite.frameWidth, sprite.frameHeight,
-      -sprite.size / 2, -sprite.size / 2, sprite.size, sprite.size,
+      "image", sprite.frameWidth * 3 + x, y, width, height,
+      -drawWidth / 2, -sprite.size / 2, drawWidth, sprite.size,
     ]);
     assert.equal(context.imageSmoothingEnabled, true);
     assert.deepEqual(enemy, snapshot, "Rendering must not mutate simulation fields");
@@ -107,7 +144,7 @@ test("sprite drawing crops one frame, disables smoothing locally, and keeps side
     sprites.draw(context, enemy);
     assert.deepEqual(calls.at(-2), ["scale", 1, 1]);
   }
-  assert.equal(sprites.draw(context, { kind: "boss" }), false);
+  assert.equal(sprites.draw(context, { kind: "unknown" }), false);
 });
 
 test("unavailable or invalid sheets preserve a usable procedural fallback", async (t) => {
@@ -126,8 +163,9 @@ test("unavailable or invalid sheets preserve a usable procedural fallback", asyn
   }
   const sprites = new EnemySprites(UnavailableImage);
   assert.equal(await sprites.ready, false);
-  assert.equal(sprites.get("normal"), undefined);
-  assert.equal(sprites.get("tank"), undefined);
-  assert.equal(sprites.draw({}, { kind: "normal" }), false);
-  assert.equal(warnings.mock.calls.length, 2);
+  for (const kind of Object.keys(ENEMIES)) {
+    assert.equal(sprites.get(kind), undefined);
+    assert.equal(sprites.draw({}, { kind }), false);
+  }
+  assert.equal(warnings.mock.calls.length, Object.keys(ENEMIES).length);
 });
