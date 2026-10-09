@@ -181,15 +181,23 @@ function drawBrandedCore() {
   );
   c.restore();
 
-  // The restored background also covers enemies at the very end of the road,
-  // so redraw absorbing enemies here before placing the crystal over them.
+  // Restoring the background covers the final stretch of the road, so redraw
+  // every enemy that overlaps the core area. Absorbing enemies additionally
+  // shrink and fade while travelling into the crystal.
   c.save();
   c.setTransform(scaleX, 0, 0, scaleY, 0, 0);
   for (const enemy of game.enemies) {
-    if (enemy.status !== "absorbing") continue;
-    const progress = enemy.absorbProgress ?? 0,
-      scale = Math.max(0.12, 1 - progress * 0.88),
-      alpha = Math.max(0.08, 1 - progress * 0.9);
+    const inCoreArea =
+      enemy.x >= clearX - 40 &&
+      enemy.x <= clearX + clearW + 40 &&
+      enemy.y >= clearY - 40 &&
+      enemy.y <= clearY + clearH + 40;
+    if (!inCoreArea) continue;
+
+    const absorbing = enemy.status === "absorbing",
+      progress = absorbing ? enemy.absorbProgress ?? 0 : 0,
+      scale = absorbing ? Math.max(0.12, 1 - progress * 0.88) : 1,
+      alpha = absorbing ? Math.max(0.08, 1 - progress * 0.9) : 1;
     c.save();
     c.globalAlpha = alpha;
     c.translate(enemy.x, enemy.y);
