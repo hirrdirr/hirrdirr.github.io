@@ -1,137 +1,439 @@
-/* Core Defense responsive scaling overrides.
-   Keeps the 960x600 logical game world unchanged while allowing the UI to
-   make better use of the available browser viewport. */
+/* Responsive layout lives here; td.css defines components and theme.css colors.
+   CSS pixels scale the presentation only. The game world remains 960 x 600. */
+body:has(.td-app:not([hidden])) main {
+  padding: clamp(8px, 0.6vw, 16px) clamp(10px, 1vw, 24px) 16px;
+}
 
 .td-app {
-  --td-sidebar-width: clamp(285px, 20vw, 360px);
-  width: min(100%, 1760px);
-  max-width: 1760px;
-  padding: clamp(10px, 1vw, 18px);
+  --td-sidebar-width: clamp(270px, 15vw, 360px);
+  --td-space: clamp(8px, 0.65vw, 16px);
+  --td-vertical-space: clamp(380px, 16.4vw, 420px);
+  width: 100%;
+  max-width: 2400px;
+  padding: var(--td-space);
 }
 
 .td-heading {
-  gap: clamp(10px, 1.25vw, 20px);
-  margin-bottom: clamp(10px, 1vw, 16px);
+  padding: 0;
+  gap: clamp(10px, 1vw, 20px);
+  margin-bottom: clamp(8px, 0.4vw, 10px);
+}
+
+.td-brand h1 {
+  font-size: clamp(26px, 1.5vw, 34px);
+}
+.td-eyebrow {
+  line-height: 1.2;
+}
+.td-emblem {
+  width: clamp(38px, 2.4vw, 46px);
+  height: clamp(38px, 2.4vw, 46px);
 }
 
 .td-hud {
-  gap: clamp(16px, 1.8vw, 30px);
-  padding: clamp(12px, 1vw, 17px) clamp(14px, 1.3vw, 22px);
+  gap: clamp(14px, 1.5vw, 30px);
+  padding: clamp(8px, 0.4vw, 10px) clamp(12px, 1vw, 20px);
+}
+.td-resource > strong {
+  font-size: clamp(22px, 1.25vw, 27px);
+  line-height: 1.05;
 }
 
-.td-resource > strong {
-  font-size: clamp(22px, 1.45vw, 27px);
+/* Scale the desktop shell as a unit, rather than narrowing only the canvas.
+   Reserve space for the HUD and controls, and keep short windows playable by letting
+   the page scroll instead of reducing the battlefield below its native size.
+   The min(100%, ...) still allows smaller widths on narrow desktop windows. */
+@media (min-width: 851px) {
+  .td-app {
+    width: min(100%, calc(max(960px, (100dvh - var(--td-vertical-space)) * 1.6) + var(--td-sidebar-width) + var(--td-space) * 2 + 4px));
+  }
 }
 
 .td-workspace {
   grid-template-columns: minmax(0, 1fr) var(--td-sidebar-width);
+  container-type: inline-size;
 }
-
 .td-canvas-wrap {
   width: 100%;
-  margin: 0;
 }
-
 .td-map-top {
-  padding: clamp(9px, 0.7vw, 12px) clamp(12px, 1vw, 18px);
+  padding: clamp(5px, 0.3vw, 8px) clamp(10px, 0.8vw, 18px);
+  line-height: 1.2;
 }
-
+.td-map-toggle {
+  line-height: 1.2;
+}
 .td-placement-bar {
-  padding-inline: clamp(12px, 1vw, 18px);
+  min-height: 44px;
+  padding: 8px clamp(10px, 0.8vw, 18px);
 }
-
 .td-wave-controls {
-  gap: clamp(12px, 1vw, 18px);
-  padding: clamp(14px, 1vw, 20px) clamp(12px, 1vw, 18px);
-  min-height: clamp(92px, 7vw, 110px);
+  gap: clamp(10px, 1vw, 18px);
+  padding: clamp(8px, 0.5vw, 12px) clamp(10px, 0.8vw, 18px);
+  min-height: 80px;
+}
+.td-next > strong {
+  margin: 3px 0 5px;
+  line-height: 1.2;
 }
 
+/* The sidebar may scroll, but cannot force a taller page than the battlefield.
+   Its container is the workspace: canvas height is (workspace - sidebar) * 5/8. */
 .td-sidebar {
-  min-width: 0;
+  align-self: stretch;
+  min-height: 0;
+  max-height: calc((100cqw - var(--td-sidebar-width)) * 5 / 8 + 160px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--td-line) var(--td-panel);
 }
-
-.td-panel-heading,
+.td-panel-heading {
+  padding: 12px var(--td-space) 10px;
+}
 .td-tower-panel {
-  padding-left: clamp(12px, 1vw, 18px);
-  padding-right: clamp(12px, 1vw, 18px);
+  padding: var(--td-space);
+  container: td-inspector / inline-size;
 }
-
 .td-tower-shop {
-  padding-left: clamp(10px, 0.8vw, 14px);
-  padding-right: clamp(10px, 0.8vw, 14px);
+  padding: 0 var(--td-space) 12px;
+  gap: 5px;
 }
-
-/* Wide desktop: use the extra horizontal room instead of stopping at 1450px. */
-@media (min-width: 1500px) {
-  .td-app {
-    --td-sidebar-width: clamp(330px, 19vw, 380px);
-  }
-
-  .td-brand h1 {
-    font-size: clamp(30px, 1.7vw, 34px);
-  }
+.td-tower-card {
+  min-height: clamp(54px, 3vw, 62px);
 }
-
-/* Only height-limit the battlefield on genuinely short desktop viewports.
-   The old rule also constrained 1080p displays and made the game look small. */
-@media (min-width: 851px) and (max-height: 820px) {
-  .td-canvas-wrap {
-    width: min(100%, calc((100dvh - 315px) * 1.6));
-    margin: 0 auto;
-  }
-
-  .td-hud {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  .td-wave-controls {
-    min-height: 82px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  .td-map-top {
-    padding-top: 7px;
-    padding-bottom: 7px;
-  }
+.td-card-info strong {
+  font-size: clamp(14px, 0.65vw, 16px);
+}
+.td-card-info > span {
+  font-size: clamp(12px, 0.55vw, 13px);
+}
+.td-card-cost {
+  font-size: clamp(14px, 0.65vw, 16px);
+}
+.td-footer {
+  margin-top: 8px;
+}
+.td-footer .td-text-button {
+  padding-block: 4px;
 }
 
 @media (max-width: 1100px) {
-  .td-app {
-    --td-sidebar-width: clamp(270px, 28vw, 300px);
-  }
-
-  .td-hud {
-    gap: clamp(12px, 2vw, 22px);
-  }
+  .td-sector {
+  display: none;
+}
+  .td-wave-controls {
+  flex-wrap: wrap;
+}
+  .td-launch {
+  margin-left: auto;
+}
+  .td-panel-heading {
+  flex-wrap: wrap;
+}
+  .td-boss {
+  left: 12%;
+  right: 12%;
+}
 }
 
-/* Tablet: sidebar moves below the battlefield exactly as before. */
 @media (max-width: 850px) {
-  .td-app {
-    width: 100%;
-  }
-
   .td-workspace {
     grid-template-columns: 1fr;
   }
-
-  .td-canvas-wrap {
-    width: 100%;
+  .td-sidebar {
+    border-left: 0;
+    border-top: 1px solid var(--td-line);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .td-panel-heading {
+    grid-column: 1;
+    padding: 16px 14px 10px;
+  }
+  .td-tower-shop {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .td-tower-panel {
+    grid-column: 2;
+    grid-row: 1/3;
+    border-top: 0;
+    border-left: 1px solid var(--td-line);
+    height: 100%;
+  }
+  .td-hud {
+    flex-wrap: wrap;
+  }
+  .td-time-controls {
+    gap: 8px;
+  }
+  .td-resource > strong {
+    font-size: 23px;
+  }
+  .td-wave-controls {
+    flex-wrap: nowrap;
+  }
+  .td-launch {
+    min-width: 150px;
+  }
+  .td-canvas-wrap canvas {
+    min-height: 0;
+  }
+  .td-footer > span {
+    line-height: 2;
   }
 }
 
-/* Phone layout keeps the existing edge-to-edge treatment. */
 @media (max-width: 560px) {
-  .td-app {
-    width: auto;
-    max-width: none;
-    padding: 10px 0 0;
-    margin: 0 -16px;
+  body:has(.td-app:not([hidden])) main {
+    padding-inline: 0;
+  }
+  .td-brand {
+    gap: 9px;
+  }
+  .td-emblem {
+    width: 35px;
+    height: 35px;
+    font-size: 30px;
+  }
+  .td-brand h1 {
+    font-size: 23px;
+  }
+  .td-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+  .td-heading-actions .td-button {
+    padding: 8px 10px;
+  }
+  .td-hud {
+    gap: 12px 24px;
+    padding: 13px 14px;
+  }
+  .td-resource {
+    min-width: 55px;
+  }
+  .td-resource:nth-child(2) {
+    flex: 1;
+  }
+  .td-resource .td-label {
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .td-integrity {
+    width: 100%;
+    max-width: 130px;
+  }
+  .td-threat {
+    display: none;
+  }
+  .td-time-controls {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    border-top-width: 1px;
+    border-top-style: solid;
+    padding-top: 10px;
+  }
+  .td-speeds button {
+    min-width: 45px;
+    min-height: 34px;
+  }
+  .td-map-top {
+    padding: 8px 10px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .td-map-toggle kbd {
+    display: none;
+  }
+  .td-placement-bar {
+    padding: 10px;
+    font-size: 12px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .td-placement-actions {
+    margin-left: auto;
+  }
+  .td-wave-controls {
+    padding: 14px 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .td-next {
+    width: 100%;
+  }
+  .td-next > strong {
+    font-size: 17px;
+  }
+  .td-launch {
+    width: 100%;
+    min-height: 44px;
+  }
+  .td-sidebar {
+    display: block;
+  }
+  .td-panel-heading {
+    padding: 16px 12px 10px;
+  }
+  .td-tower-shop {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 0 10px 12px;
+  }
+  .td-tower-card {
+    position: relative;
+    padding: 7px;
+    gap: 4px;
+    min-height: 70px;
+    align-items: center;
+  }
+  .td-tower-card canvas {
+    width: 32px;
+    height: 32px;
+  }
+  .td-card-info {
+    flex: 1;
+  }
+  .td-card-info strong {
+    font-size: 14px;
+  }
+  .td-card-info > span {
+    font-size: 12px;
+    line-height: 1.15;
+    max-width: 100px;
+  }
+  .td-card-cost {
+    font-size: 12px;
+    align-self: flex-start;
+    padding-top: 2px;
+  }
+  .td-card-cost small {
+    display: none;
+  }
+  .td-tower-panel {
+    border-left: 0;
+    border-top: 1px solid var(--td-line);
+    padding: 16px;
+  }
+  .td-panel-empty {
+    min-height: 140px;
+  }
+  .td-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .td-footer > span {
+    display: none;
+  }
+  .td-footer {
+    justify-content: flex-end;
+  }
+  .td-boss {
+    top: 6px;
+    left: 12%;
+    right: 12%;
+    padding: 6px 8px;
+  }
+  .td-boss > div:first-child {
+    font-size: 12px;
+  }
+  .td-boss strong {
+    max-width: 65%;
+    font-size: 12px;
+    line-height: 1.15;
+  }
+  .td-boss-track {
+    margin-top: 4px;
+  }
+  .td-wave-banner {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+  .td-pause-overlay {
+    bottom: 8px;
+    padding: 6px 12px;
+  }
+  .td-pause-overlay span {
+    display: none;
+  }
+  .td-end-overlay {
+    gap: 10px;
+    padding: 15px;
+  }
+  .td-end-overlay p {
+    font-size: 12px;
+  }
+  .td-end-overlay h2 {
+    font-size: 26px;
+  }
+  .td-end-overlay .td-eyebrow {
+    font-size: 12px;
+  }
+  .td-dialog {
+    padding: 18px;
+  }
+  .td-dialog h2 {
+    font-size: 22px;
   }
 
-  .td-resource > strong {
-    font-size: 23px;
+  .td-app {
+    width: 100%;
+    margin: 0;
+    padding: 10px 0 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .td-heading {
+    padding: 0 10px;
+  }
+  .td-footer {
+    padding-right: 10px;
+  }
+  .td-boss {
+    left: 7%;
+    right: 7%;
+  }
+
+  body:has(.td-app) .gh-topbar {
+    gap: 6px;
+    padding: 10px 12px;
+  }
+  body:has(.td-app) .gh-iconrow {
+    gap: 5px;
+  }
+  body:has(.td-app) .gh-topbar .iconbtn {
+    width: 32px;
+    height: 34px;
+  }
+  body:has(.td-app) .gh-brand {
+    padding: 6px 4px;
+    gap: 7px;
+  }
+}
+
+@media (max-width: 760px) {
+  body:has(.td-app) .gh-crumbs {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .td-tower-shop {
+    grid-template-columns: 1fr;
+  }
+  .td-heading-actions .td-button {
+    white-space: nowrap;
+  }
+}
+
+/* Follow the actual panel width, including the two-column tablet layout. */
+@container td-inspector (max-width: 310px) {
+  .td-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
