@@ -148,6 +148,65 @@ document.addEventListener("visibilitychange", () => {
 });
 const observer = new ResizeObserver(() => renderer.resize());
 observer.observe(canvas.parentElement);
+function drawBrandedCore() {
+  const c = renderer.ctx,
+    critical = game.lives <= 10,
+    glow = critical ? "#db6a4b" : "#d9a33e",
+    bright = critical ? "#f08a63" : "#ffd36a",
+    pulse = renderer.reduced ? 0 : Math.sin(renderer.visualTime * 2.4) * 1.2;
+
+  c.save();
+  c.setTransform(
+    canvas.width / WORLD.width,
+    0,
+    0,
+    canvas.height / WORLD.height,
+    0,
+    0,
+  );
+  c.translate(933, 300);
+
+  // Dark backing plate fully covers the former teal hex core.
+  c.fillStyle = "#17160f";
+  c.strokeStyle = critical ? "#8f4938" : "#6f5730";
+  c.lineWidth = 2;
+  c.beginPath();
+  c.moveTo(0, -32);
+  c.lineTo(38, 0);
+  c.lineTo(0, 32);
+  c.lineTo(-38, 0);
+  c.closePath();
+  c.fill();
+  c.stroke();
+
+  // Branded amber crystal inspired by the diamond in the CORE logo.
+  c.shadowColor = glow;
+  c.shadowBlur = 12;
+  c.fillStyle = glow;
+  c.strokeStyle = bright;
+  c.lineWidth = 2;
+  c.beginPath();
+  c.moveTo(0, -15 - pulse);
+  c.lineTo(14 + pulse * 0.35, 0);
+  c.lineTo(0, 15 + pulse);
+  c.lineTo(-14 - pulse * 0.35, 0);
+  c.closePath();
+  c.fill();
+  c.stroke();
+
+  c.shadowBlur = 0;
+  c.fillStyle = bright;
+  c.globalAlpha = 0.72;
+  c.beginPath();
+  c.moveTo(0, -11 - pulse * 0.5);
+  c.lineTo(5, 0);
+  c.lineTo(0, 5);
+  c.lineTo(-3, 0);
+  c.closePath();
+  c.fill();
+  c.globalAlpha = 1;
+  c.restore();
+}
 function frame(now) {
   const elapsed = Math.max(0, (now - previous) / 1000);
   previous = now;
@@ -156,6 +215,7 @@ function frame(now) {
   renderer.accept(events);
   ui.events(events);
   renderer.render(game, input, elapsed);
+  drawBrandedCore();
   hudTime += elapsed;
   if (
     hudTime >= 0.1 ||
