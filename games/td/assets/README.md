@@ -54,12 +54,21 @@ The folder structure itself does not change current game behavior; it is intenti
 provided by the repository owner on 2026-10-08 as `Core Defense_ Meadow Path.png`.
 The supplied PNG is used unchanged; no third-party assets were fetched for this menu.
 
-The five clickable areas are real HTML buttons positioned in `../menu.css` as
-percentages of the artwork. Both the image and buttons share the same container.
-Small screens crop the outer scenery while keeping the central controls visible.
-Keep this coordinate system when replacing the image or adding menu actions.
-The map and difficulty labels baked into the artwork are a visual preview;
-the current game map and rules still apply.
+`ui/MainMenu.png` is the repository owner's replacement 1672 × 941 menu artwork.
+It is used unchanged, with its exact filename and case preserved. The earlier
+`core_defense_menu_01.png` is retained but no longer used by the menu.
+
+The title and lower decorative frame belong to the image. Start Game, Options,
+Back to Site, and the labeled Map/Difficulty dropdowns are real HTML controls.
+`../menu.css` positions them in percentages of the artwork, with container units
+for sizing. Small screens crop the outer scenery while keeping the central logo
+and controls visible. All menu styles are scoped to `.td-menu`.
+
+`../menu.js` lists playable maps in `MAPS` and reads difficulty choices directly
+from `../js/difficulty.js`. Difficulty is saved in the existing `tdDifficulty`
+session setting used by game startup. Options shares the same selection and
+explains its starting resources. The game still initializes only on Start Game.
+No third-party assets were downloaded for the replacement menu.
 
 ## Enemy walk sprites
 

@@ -13,64 +13,65 @@ permalink: /games/td/
 </style>
 <section class="td-menu" id="td-menu" lang="en" aria-labelledby="menu-title">
   <h1 class="td-menu-sr" id="menu-title">Core Defense</h1>
-  <p class="td-menu-sr" id="menu-options-note">
-    Map selection, difficulty options, settings and Back to Site are coming soon.
-    Start Game uses the current map and game rules.
-  </p>
   <div class="td-menu-artwork">
     <img
-      src="./assets/ui/core_defense_menu_01.png"
+      src="./assets/ui/MainMenu.png"
       width="1672"
       height="941"
       alt=""
       draggable="false"
       fetchpriority="high"
     />
-    <nav aria-label="Main menu">
+    <nav class="td-menu-actions" aria-label="Main menu">
       <button
         type="button"
         class="td-menu-button"
         id="menu-start"
         data-menu-action="start"
-        aria-label="Start Game"
         aria-controls="td-app"
-      ></button>
+      >Start Game</button>
       <button
         type="button"
         class="td-menu-button"
-        data-menu-action="map"
-        aria-label="Map Select"
-        aria-describedby="menu-options-note"
-        title="Coming soon"
-      ></button>
-      <button
-        type="button"
-        class="td-menu-button"
-        data-menu-action="difficulty"
-        aria-label="Difficulty"
-        aria-describedby="menu-options-note"
-        title="Coming soon"
-      ></button>
-      <button
-        type="button"
-        class="td-menu-button"
-        data-menu-action="settings"
-        aria-label="Settings"
-        aria-describedby="menu-options-note"
-        title="Coming soon"
-      ></button>
-      <button
-        type="button"
-        class="td-menu-button"
-        data-menu-action="back"
-        aria-label="Back to Site"
-        aria-describedby="menu-options-note"
-        title="Coming soon"
-      ></button>
+        id="menu-options"
+        aria-haspopup="dialog"
+        aria-controls="menu-options-dialog"
+      >Options</button>
+      <a class="td-menu-button" href="/">Back to Site</a>
     </nav>
+    <div class="td-menu-setup" role="group" aria-label="Game setup">
+      <div class="td-menu-field">
+        <label for="menu-map">Map</label>
+        <span class="td-menu-select">
+          <select id="menu-map" name="map"></select>
+        </span>
+      </div>
+      <div class="td-menu-field">
+        <label for="menu-difficulty">Difficulty</label>
+        <span class="td-menu-select">
+          <select id="menu-difficulty" name="difficulty"></select>
+        </span>
+      </div>
+    </div>
   </div>
   <p class="td-menu-message" id="menu-message" role="alert"></p>
   <noscript><p>Aktivera JavaScript för att spela Core Defense.</p></noscript>
+  <dialog class="td-menu-options" id="menu-options-dialog" aria-labelledby="menu-options-title">
+    <form method="dialog">
+      <h2 id="menu-options-title">Options</h2>
+      <p>Choose your difficulty before starting. Speed, pause and range indicators are available during the game.</p>
+      <div class="td-menu-field">
+        <label for="menu-options-difficulty">Difficulty</label>
+        <span class="td-menu-select">
+          <select id="menu-options-difficulty" name="difficulty"></select>
+        </span>
+      </div>
+      <p class="td-menu-options-description" id="menu-difficulty-description"></p>
+      <p class="td-menu-options-summary" id="menu-difficulty-summary"></p>
+      <p><strong>Keyboard:</strong> 1–3 for game speed, Space to pause, R for ranges, and Escape to cancel placement.</p>
+      <button type="submit" class="td-menu-button">Done</button>
+    </form>
+  </dialog>
 </section>
 <div class="td-app" id="td-app" hidden>
   <header class="td-heading">
