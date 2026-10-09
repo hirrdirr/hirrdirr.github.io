@@ -1,0 +1,137 @@
+/* Core Defense responsive scaling overrides.
+   Keeps the 960x600 logical game world unchanged while allowing the UI to
+   make better use of the available browser viewport. */
+
+.td-app {
+  --td-sidebar-width: clamp(285px, 20vw, 360px);
+  width: min(100%, 1760px);
+  max-width: 1760px;
+  padding: clamp(10px, 1vw, 18px);
+}
+
+.td-heading {
+  gap: clamp(10px, 1.25vw, 20px);
+  margin-bottom: clamp(10px, 1vw, 16px);
+}
+
+.td-hud {
+  gap: clamp(16px, 1.8vw, 30px);
+  padding: clamp(12px, 1vw, 17px) clamp(14px, 1.3vw, 22px);
+}
+
+.td-resource > strong {
+  font-size: clamp(22px, 1.45vw, 27px);
+}
+
+.td-workspace {
+  grid-template-columns: minmax(0, 1fr) var(--td-sidebar-width);
+}
+
+.td-canvas-wrap {
+  width: 100%;
+  margin: 0;
+}
+
+.td-map-top {
+  padding: clamp(9px, 0.7vw, 12px) clamp(12px, 1vw, 18px);
+}
+
+.td-placement-bar {
+  padding-inline: clamp(12px, 1vw, 18px);
+}
+
+.td-wave-controls {
+  gap: clamp(12px, 1vw, 18px);
+  padding: clamp(14px, 1vw, 20px) clamp(12px, 1vw, 18px);
+  min-height: clamp(92px, 7vw, 110px);
+}
+
+.td-sidebar {
+  min-width: 0;
+}
+
+.td-panel-heading,
+.td-tower-panel {
+  padding-left: clamp(12px, 1vw, 18px);
+  padding-right: clamp(12px, 1vw, 18px);
+}
+
+.td-tower-shop {
+  padding-left: clamp(10px, 0.8vw, 14px);
+  padding-right: clamp(10px, 0.8vw, 14px);
+}
+
+/* Wide desktop: use the extra horizontal room instead of stopping at 1450px. */
+@media (min-width: 1500px) {
+  .td-app {
+    --td-sidebar-width: clamp(330px, 19vw, 380px);
+  }
+
+  .td-brand h1 {
+    font-size: clamp(30px, 1.7vw, 34px);
+  }
+}
+
+/* Only height-limit the battlefield on genuinely short desktop viewports.
+   The old rule also constrained 1080p displays and made the game look small. */
+@media (min-width: 851px) and (max-height: 820px) {
+  .td-canvas-wrap {
+    width: min(100%, calc((100dvh - 315px) * 1.6));
+    margin: 0 auto;
+  }
+
+  .td-hud {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .td-wave-controls {
+    min-height: 82px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .td-map-top {
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .td-app {
+    --td-sidebar-width: clamp(270px, 28vw, 300px);
+  }
+
+  .td-hud {
+    gap: clamp(12px, 2vw, 22px);
+  }
+}
+
+/* Tablet: sidebar moves below the battlefield exactly as before. */
+@media (max-width: 850px) {
+  .td-app {
+    width: 100%;
+  }
+
+  .td-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .td-canvas-wrap {
+    width: 100%;
+  }
+}
+
+/* Phone layout keeps the existing edge-to-edge treatment. */
+@media (max-width: 560px) {
+  .td-app {
+    width: auto;
+    max-width: none;
+    padding: 10px 0 0;
+    margin: 0 -16px;
+  }
+
+  .td-resource > strong {
+    font-size: 23px;
+  }
+}
