@@ -148,6 +148,67 @@ document.addEventListener("visibilitychange", () => {
 });
 const observer = new ResizeObserver(() => renderer.resize());
 observer.observe(canvas.parentElement);
+function drawAbsorbFx() {
+  const absorbing = game.enemies.filter((e) => e.status === "absorbing");
+  if (!absorbing.length) return;
+  const c = renderer.ctx,
+    scaleX = canvas.width / WORLD.width,
+    scaleY = canvas.height / WORLD.height,
+    coreX = 933,
+    coreY = 300;
+  c.save();
+  c.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+  for (const enemy of absorbing) {
+    const progress = enemy.absorbProgress ?? 0,
+      fadeProgress = Math.max(0, (progress - 0.55) / 0.45),
+      scaleProgress = Math.max(0, (progress - 0.35) / 0.65),
+      enemyScale = Math.max(0.2, 1 - scaleProgress * 0.8),
+      enemyAlpha = Math.max(0.24, 1 - fadeProgress * 0.76),
+      glowAlpha = Math.max(0.18, 0.7 * (1 - progress));
+
+    c.save();
+    c.globalAlpha = glowAlpha;
+    c.strokeStyle = "#f0a84b";
+    c.lineWidth = 2.4;
+    c.shadowColor = "#ffb454";
+    c.shadowBlur = 10;
+    c.beginPath();
+    c.moveTo(enemy.x, enemy.y);
+    c.lineTo(coreX, coreY);
+    c.stroke();
+    c.shadowBlur = 0;
+
+    c.globalAlpha = 0.55 * (1 - progress * 0.65);
+    c.strokeStyle = "#ffd36a";
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.arc(enemy.x, enemy.y, 9 + (1 - progress) * 7, 0, Math.PI * 2);
+    c.stroke();
+
+    for (let i = 1; i <= 3; i++) {
+      const travel = (i / 4 + renderer.visualTime * 1.8) % 1,
+        x = enemy.x + (coreX - enemy.x) * travel,
+        y = enemy.y + (coreY - enemy.y) * travel;
+      c.globalAlpha = 0.25 + 0.45 * (1 - progress);
+      c.fillStyle = "#ffd36a";
+      c.beginPath();
+      c.arc(x, y, 1.6 + (1 - travel) * 1.2, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.restore();
+
+    c.save();
+    c.globalAlpha = enemyAlpha;
+    c.shadowColor = "#ffb454";
+    c.shadowBlur = 8 + (1 - progress) * 6;
+    c.translate(enemy.x, enemy.y);
+    c.scale(enemyScale, enemyScale);
+    c.translate(-enemy.x, -enemy.y);
+    renderer.drawEnemy(c, enemy, game);
+    c.restore();
+  }
+  c.restore();
+}
 function frame(now) {
   const elapsed = Math.max(0, (now - previous) / 1000);
   previous = now;
@@ -156,6 +217,7 @@ function frame(now) {
   renderer.accept(events);
   ui.events(events);
   renderer.render(game, input, elapsed);
+  drawAbsorbFx();
   hudTime += elapsed;
   if (
     hudTime >= 0.1 ||
