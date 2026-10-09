@@ -180,6 +180,7 @@ export class Renderer {
     this.effects = [];
     this.enemySprites = new EnemySprites();
     this.visualTime = 0;
+    this.coreImpact = 0;
     this.dpr = 0;
     this.reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -339,6 +340,7 @@ export class Renderer {
   }
   accept(events) {
     for (const e of events) {
+      if (e.type === "leak") this.coreImpact = 1;
       if (["build", "upgrade", "impact", "death", "leak"].includes(e.type)) {
         const color = e.color || (e.type === "leak" ? "#ff7b85" : "#b9ede0");
         const radius = e.radius || 25;
@@ -404,6 +406,7 @@ export class Renderer {
   }
   clear() {
     this.effects = [];
+    this.coreImpact = 0;
     this.enemySprites.clear();
   }
   range(c, t, s, strong = false) {
@@ -426,9 +429,45 @@ export class Renderer {
     }
     c.restore();
   }
+  drawCore(c, game) {
+    const critical = game.lives <= 10,
+      impact = this.coreImpact,
+      glow = critical ? "#db6a4b" : "#d9a33e",
+      bright = critical ? "#f08a63" : "#ffd36a",
+      pulse =
+        (this.reduced ? 0 : Math.sin(this.visualTime * 2.4) * 1.2) +
+        impact * 3.5;
+    c.save();
+    c.translate(933, 300);
+    c.shadowColor = impact > 0.05 ? "#ff9a45" : glow;
+    c.shadowBlur = 14 + impact * 18;
+    c.fillStyle = impact > 0.05 ? "#e5a843" : glow;
+    c.strokeStyle = bright;
+    c.lineWidth = 2 + impact;
+    c.beginPath();
+    c.moveTo(0, -17 - pulse);
+    c.lineTo(15 + pulse * 0.4, 0);
+    c.lineTo(0, 17 + pulse);
+    c.lineTo(-15 - pulse * 0.4, 0);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.shadowBlur = 0;
+    c.fillStyle = bright;
+    c.globalAlpha = 0.75 + impact * 0.2;
+    c.beginPath();
+    c.moveTo(0, -12 - pulse * 0.5);
+    c.lineTo(5 + impact * 2, 0);
+    c.lineTo(0, 6 + impact * 2);
+    c.lineTo(-3 - impact, 0);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
   render(game, input, elapsed) {
     const c = this.ctx;
     this.visualTime += Math.min(elapsed, 0.05);
+    this.coreImpact = Math.max(0, this.coreImpact - elapsed * 4.5);
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
     c.drawImage(this.background, 0, 0);
@@ -440,19 +479,6 @@ export class Renderer {
       0,
       0,
     );
-    // The core remains recognizable even without particles.
-    c.save();
-    c.translate(933, 300);
-    c.fillStyle = "#0c1e25";
-    c.strokeStyle = game.lives > 10 ? "#7cd9c3" : "#ee8792";
-    c.lineWidth = 2;
-    polygon(c, 0, 0, 25, 6, Math.PI / 6);
-    c.fill();
-    c.stroke();
-    c.fillStyle = game.lives > 10 ? "#83ddc5" : "#ee8792";
-    polygon(c, 0, 0, 12 + Math.sin(this.visualTime * 2) * 1.2, 6, Math.PI / 6);
-    c.fill();
-    c.restore();
     const selected = game.selected,
       hovered = game.towers.find((t) => t.id === input.hoverId);
     if (input.allRanges)
@@ -481,7 +507,24 @@ export class Renderer {
         c.strokeRect(t.x - 22, t.y - 22, 44, 44);
       }
     }
-    for (const e of game.enemies) this.drawEnemy(c, e, game);
+    for (const e of game.enemies) {
+      const absorbing = e.status === "absorbing";
+      if (!absorbing) {
+        this.drawEnemy(c, e, game);
+        continue;
+      }
+      const progress = e.absorbProgress ?? 0,
+        scale = Math.max(0.12, 1 - progress * 0.88),
+        alpha = Math.max(0.08, 1 - progress * 0.9);
+      c.save();
+      c.globalAlpha = alpha;
+      c.translate(e.x, e.y);
+      c.scale(scale, scale);
+      c.translate(-e.x, -e.y);
+      this.drawEnemy(c, e, game);
+      c.restore();
+    }
+    this.drawCore(c, game);
     for (const p of game.projectiles) {
       const color = TOWERS[p.kind].color;
       c.save();
