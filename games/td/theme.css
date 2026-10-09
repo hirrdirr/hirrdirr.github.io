@@ -40,6 +40,23 @@
   border-color: #83734d;
 }
 
+#help {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0 !important;
+}
+
+#help::before {
+  content: "?";
+  font-size: 20px;
+  font-weight: 750;
+  line-height: 1;
+}
+
 .td-primary {
   color: #f5ecd8;
 }
