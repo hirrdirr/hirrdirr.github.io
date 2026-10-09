@@ -1,10 +1,17 @@
-/* Hotspots use percentages of the original 1672 × 941 artwork. */
+/* Artwork and controls share one 1672 × 941 coordinate system. */
 .td-menu {
   max-width: 1450px;
   margin: 0 auto;
   overflow: hidden;
   background: #101820;
-  color: #e0e9e5;
+  color: #eee5ce;
+  font-family: system-ui, sans-serif;
+  color-scheme: dark;
+}
+.td-menu *,
+.td-menu *::before,
+.td-menu *::after {
+  box-sizing: border-box;
 }
 .td-menu[hidden],
 .td-app[hidden] {
@@ -12,42 +19,234 @@
 }
 .td-menu-artwork {
   position: relative;
-  /* Crop only the outer scenery on small screens; keep the buttons usable. */
+  /* Crop only outer scenery on phones; the logo and controls stay readable. */
   width: max(100%, 1000px);
   left: 50%;
   transform: translateX(-50%);
+  container-type: inline-size;
 }
-.td-menu-artwork img {
+.td-menu-artwork > img {
   display: block;
   width: 100%;
   height: auto;
 }
-.td-menu-button {
+.td-menu-actions {
   position: absolute;
-  left: 39.4%;
-  width: 21.2%;
-  height: 6.375%;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
+  top: 36%;
+  left: 39.3%;
+  width: 21.4%;
+  display: grid;
+  gap: 0.9cqw;
+}
+.td-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  height: 3.9cqw;
+  padding: 8px 16px;
+  border: 2px solid #82785c;
+  border-radius: 3px;
+  background: linear-gradient(#34414a, #202c35);
+  box-shadow: inset 0 1px 0 #b3ae8455, inset 0 -3px 0 #10182088, 0 4px 0 #080e14b3;
+  color: #eee5ce;
+  font: 750 clamp(16px, 1.45cqw, 22px)/1.1 system-ui, sans-serif;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 2px 0 #111923;
   cursor: pointer;
   appearance: none;
 }
-.td-menu-button[data-menu-action="start"] { top: 35.813%; }
-.td-menu-button[data-menu-action="map"] { top: 43.252%; }
-.td-menu-button[data-menu-action="difficulty"] { top: 50.691%; }
-.td-menu-button[data-menu-action="settings"] { top: 58.13%; }
-.td-menu-button[data-menu-action="back"] { top: 65.675%; }
-.td-menu-button:hover {
-  background: #f6db9b18;
+.td-menu-button[data-menu-action="start"] {
+  border-color: #f2ce7d;
+  background: linear-gradient(#efc16a, #bc843b);
+  box-shadow: inset 0 1px 0 #ffe8af, inset 0 -3px 0 #875726, 0 4px 0 #080e14b3;
+  color: #291e12;
+  text-shadow: 0 1px 0 #f8d88d;
 }
-.td-menu-button:focus-visible {
-  outline: 2px solid #f0d496;
-  outline-offset: -3px;
+.td-menu-button:hover:not(:disabled) {
+  border-color: #e6cb89;
+  background: linear-gradient(#43515a, #2b3942);
+}
+.td-menu-button[data-menu-action="start"]:hover:not(:disabled) {
+  border-color: #ffe6a8;
+  background: linear-gradient(#ffd483, #d29b4f);
+}
+.td-menu-button:focus-visible,
+.td-menu select:focus-visible {
+  outline: 2px solid #ffe4a3;
+  outline-offset: 3px;
 }
 .td-menu-button:disabled {
+  opacity: 0.75;
   cursor: wait;
+}
+.td-menu-setup {
+  position: absolute;
+  left: 39%;
+  top: 77.2%;
+  width: 22.1%;
+  height: 15.6%;
+  display: grid;
+  grid-template-columns: 34% minmax(0, 1fr);
+  align-items: start;
+  column-gap: 6.5%;
+  padding: 0.45cqw;
+  /* Keep the illustrated outer frame; cover its empty preview placeholders. */
+  background: #101820f2;
+}
+.td-menu-map-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 0.65cqw;
+  border: 1px solid #53605e;
+  image-rendering: pixelated;
+}
+.td-menu-setup-fields {
+  min-width: 0;
+}
+.td-menu-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.td-menu-setup .td-menu-field {
+  display: block;
+}
+.td-menu-setup .td-menu-field + .td-menu-field {
+  margin-top: 0.3cqw;
+  padding-top: 0.3cqw;
+  border-top: 1px solid #344149;
+}
+.td-menu-setup .td-menu-field label {
+  display: block;
+  color: #a2a9af;
+  font: 500 clamp(11px, 0.9cqw, 14px)/1.1 system-ui, sans-serif;
+}
+.td-menu-field label {
+  color: #c7b78b;
+  font-size: clamp(13px, 1.05cqw, 17px);
+  font-weight: 650;
+}
+.td-menu-select {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+.td-menu-select::after {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #d8b66b;
+  border-bottom: 2px solid #d8b66b;
+  transform: translateY(-70%) rotate(45deg);
+  content: "";
+  pointer-events: none;
+}
+.td-menu select {
+  width: 100%;
+  min-height: 32px;
+  height: 2.8cqw;
+  padding: 4px 28px 4px 10px;
+  border: 1px solid #776a49;
+  border-radius: 2px;
+  background: #182630;
+  color: #f4e8c9;
+  font: 600 clamp(13px, 1.1cqw, 18px)/1.25 system-ui, sans-serif;
+  appearance: none;
+  cursor: pointer;
+}
+.td-menu select:hover {
+  border-color: #d8b66b;
+  background: #20313d;
+}
+.td-menu-setup select {
+  min-height: 24px;
+  height: 2.05cqw;
+  padding: 0 20px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #e8b965;
+  font-size: clamp(13px, 1.17cqw, 19px);
+  font-weight: 700;
+}
+.td-menu-setup select:hover {
+  background: transparent;
+  color: #ffdb95;
+}
+.td-menu-setup select option {
+  background: #14212b;
+  color: #eee5ce;
+}
+.td-menu-setup .td-menu-select::after {
+  right: 4px;
+  border-color: #aeb8c0;
+}
+.td-menu-setup .td-menu-select:hover::after {
+  border-color: #eee5ce;
+}
+.td-menu-difficulty {
+  color: #a3b66b;
+}
+.td-menu-setup .td-menu-difficulty select {
+  padding-left: 21px;
+  color: inherit;
+}
+.td-menu-difficulty-icon {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: clamp(14px, 1.25cqw, 20px);
+  height: clamp(14px, 1.25cqw, 20px);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.td-menu-options {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  margin: auto;
+  padding: 24px;
+  border: 2px solid #8d794c;
+  border-radius: 5px;
+  background: #15212b;
+  color: #eee5ce;
+  font: 15px/1.6 system-ui, sans-serif;
+}
+.td-menu-options::backdrop {
+  background: #060d15d9;
+}
+.td-menu-options h2 {
+  margin: 0 0 12px;
+  color: #ebc277;
+  font-size: 24px;
+}
+.td-menu-options p {
+  margin: 0 0 18px;
+}
+.td-menu-options .td-menu-field {
+  margin-bottom: 12px;
+}
+.td-menu-options label,
+.td-menu-options select {
+  font-size: 15px;
+}
+.td-menu-options select {
+  height: 40px;
+}
+.td-menu-options-description,
+.td-menu-options-summary {
+  color: #c5c7b9;
+}
+.td-menu-options .td-menu-button {
+  height: 44px;
+  font-size: 16px;
 }
 .td-menu-sr {
   position: absolute;
