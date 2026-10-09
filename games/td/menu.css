@@ -86,15 +86,27 @@
 .td-menu-setup {
   position: absolute;
   left: 39%;
-  top: 77.6%;
+  top: 77.2%;
   width: 22.1%;
-  height: 14.9%;
+  height: 15.6%;
   display: grid;
-  align-content: center;
-  gap: 0.7cqw;
+  grid-template-columns: 34% minmax(0, 1fr);
+  align-items: start;
+  column-gap: 6.5%;
   padding: 0.45cqw;
   /* Keep the illustrated outer frame; cover its empty preview placeholders. */
   background: #101820f2;
+}
+.td-menu-map-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 0.65cqw;
+  border: 1px solid #53605e;
+  image-rendering: pixelated;
+}
+.td-menu-setup-fields {
+  min-width: 0;
 }
 .td-menu-field {
   display: grid;
@@ -103,8 +115,17 @@
   gap: 10px;
 }
 .td-menu-setup .td-menu-field {
-  grid-template-columns: clamp(64px, 5.4cqw, 88px) minmax(0, 1fr);
-  gap: 0.7cqw;
+  display: block;
+}
+.td-menu-setup .td-menu-field + .td-menu-field {
+  margin-top: 0.3cqw;
+  padding-top: 0.3cqw;
+  border-top: 1px solid #344149;
+}
+.td-menu-setup .td-menu-field label {
+  display: block;
+  color: #a2a9af;
+  font: 500 clamp(11px, 0.9cqw, 14px)/1.1 system-ui, sans-serif;
 }
 .td-menu-field label {
   color: #c7b78b;
@@ -144,6 +165,48 @@
 .td-menu select:hover {
   border-color: #d8b66b;
   background: #20313d;
+}
+.td-menu-setup select {
+  min-height: 24px;
+  height: 2.05cqw;
+  padding: 0 20px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #e8b965;
+  font-size: clamp(13px, 1.17cqw, 19px);
+  font-weight: 700;
+}
+.td-menu-setup select:hover {
+  background: transparent;
+  color: #ffdb95;
+}
+.td-menu-setup select option {
+  background: #14212b;
+  color: #eee5ce;
+}
+.td-menu-setup .td-menu-select::after {
+  right: 4px;
+  border-color: #aeb8c0;
+}
+.td-menu-setup .td-menu-select:hover::after {
+  border-color: #eee5ce;
+}
+.td-menu-difficulty {
+  color: #a3b66b;
+}
+.td-menu-setup .td-menu-difficulty select {
+  padding-left: 21px;
+  color: inherit;
+}
+.td-menu-difficulty-icon {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: clamp(14px, 1.25cqw, 20px);
+  height: clamp(14px, 1.25cqw, 20px);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 .td-menu-options {
   width: min(440px, calc(100% - 32px));

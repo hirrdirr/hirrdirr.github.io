@@ -70,6 +70,12 @@ session setting used by game startup. Options shares the same selection and
 explains its starting resources. The game still initializes only on Start Game.
 No third-party assets were downloaded for the replacement menu.
 
+`ui/relay_station_preview.svg` is original project artwork: a small overhead
+preview of the existing Relay Station route and core, drawn in SVG. Each `MAPS`
+entry supplies its preview path. The lower frame pairs that thumbnail with
+stacked labels, gold map text and green difficulty text with an original inline
+SVG skull; the controls remain native HTML dropdowns.
+
 ## Enemy walk sprites
 
 The repository owner's supplied sheets are used unchanged:

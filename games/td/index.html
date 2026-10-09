@@ -40,17 +40,31 @@ permalink: /games/td/
       <a class="td-menu-button" href="/">Back to Site</a>
     </nav>
     <div class="td-menu-setup" role="group" aria-label="Game setup">
-      <div class="td-menu-field">
-        <label for="menu-map">Map</label>
-        <span class="td-menu-select">
-          <select id="menu-map" name="map"></select>
-        </span>
-      </div>
-      <div class="td-menu-field">
-        <label for="menu-difficulty">Difficulty</label>
-        <span class="td-menu-select">
-          <select id="menu-difficulty" name="difficulty"></select>
-        </span>
+      <img
+        class="td-menu-map-preview"
+        id="menu-map-preview"
+        src="./assets/ui/relay_station_preview.svg"
+        width="160"
+        height="100"
+        alt="Relay Station map preview"
+      />
+      <div class="td-menu-setup-fields">
+        <div class="td-menu-field">
+          <label for="menu-map">Selected Map:</label>
+          <span class="td-menu-select">
+            <select id="menu-map" name="map"></select>
+          </span>
+        </div>
+        <div class="td-menu-field">
+          <label for="menu-difficulty">Difficulty:</label>
+          <span class="td-menu-select td-menu-difficulty">
+            <svg class="td-menu-difficulty-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path fill="currentColor" d="M4 1h8v1h2v2h1v6h-3v4h-2v-2H9v2H7v-2H6v2H4v-4H1V4h1V2h2Z" />
+              <path fill="#101820" d="M3 5h3v3H3Zm7 0h3v3h-3ZM7 8h2v2H7Z" />
+            </svg>
+            <select id="menu-difficulty" name="difficulty"></select>
+          </span>
+        </div>
       </div>
     </div>
   </div>

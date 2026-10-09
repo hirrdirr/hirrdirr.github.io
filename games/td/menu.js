@@ -1,11 +1,16 @@
 import { DIFFICULTIES, resolveDifficulty } from "./js/difficulty.js";
 
 // Only the existing map is selectable. Add future map entries here when playable.
-const MAPS = [{ key: "relay-station", name: "Relay Station" }];
+const MAPS = [{
+  key: "relay-station",
+  name: "Relay Station",
+  preview: "./assets/ui/relay_station_preview.svg",
+}];
 const menu = document.getElementById("td-menu");
 const app = document.getElementById("td-app");
 const start = document.getElementById("menu-start");
 const mapSelect = document.getElementById("menu-map");
+const mapPreview = document.getElementById("menu-map-preview");
 const difficultySelect = document.getElementById("menu-difficulty");
 const optionsButton = document.getElementById("menu-options");
 const optionsDialog = document.getElementById("menu-options-dialog");
@@ -21,6 +26,13 @@ function populateSelect(select, entries) {
 }
 
 populateSelect(mapSelect, MAPS);
+function refreshMapPreview() {
+  const map = MAPS.find(({ key }) => key === mapSelect.value) || MAPS[0];
+  mapPreview.src = map.preview;
+  mapPreview.alt = `${map.name} map preview`;
+}
+refreshMapPreview();
+mapSelect.addEventListener("change", refreshMapPreview);
 for (const select of [difficultySelect, optionsDifficulty]) {
   populateSelect(select, Object.values(DIFFICULTIES));
   select.addEventListener("change", () => {
