@@ -41,25 +41,26 @@
 }
 
 #help {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  min-height: 42px;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   padding: 0;
   border-radius: 50%;
   font-size: 0 !important;
-  line-height: 1;
+  line-height: 0;
 }
 
 #help::before {
   content: "?";
-  display: block;
-  font-size: 20px;
-  font-weight: 750;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 17px;
+  font-weight: 700;
   line-height: 1;
-  transform: translateY(-1px);
 }
 
 .td-primary {
