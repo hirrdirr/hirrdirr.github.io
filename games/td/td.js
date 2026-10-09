@@ -137,7 +137,8 @@ window.addEventListener("keydown", (ev) => {
   }
 });
 let previous = performance.now(),
-  hudTime = 0;
+  hudTime = 0,
+  coreImpact = 0;
 document.addEventListener("visibilitychange", () => {
   previous = performance.now();
   clock.reset();
@@ -151,9 +152,12 @@ observer.observe(canvas.parentElement);
 function drawBrandedCore() {
   const c = renderer.ctx,
     critical = game.lives <= 10,
+    impact = coreImpact,
     glow = critical ? "#db6a4b" : "#d9a33e",
     bright = critical ? "#f08a63" : "#ffd36a",
-    pulse = renderer.reduced ? 0 : Math.sin(renderer.visualTime * 2.4) * 1.2,
+    pulse =
+      (renderer.reduced ? 0 : Math.sin(renderer.visualTime * 2.4) * 1.2) +
+      impact * 3.5,
     scaleX = canvas.width / WORLD.width,
     scaleY = canvas.height / WORLD.height,
     clearX = 900,
@@ -182,11 +186,11 @@ function drawBrandedCore() {
   c.translate(933, 300);
 
   // Branded amber crystal inspired by the diamond in the CORE logo.
-  c.shadowColor = glow;
-  c.shadowBlur = 14;
-  c.fillStyle = glow;
+  c.shadowColor = impact > 0.05 ? "#ff9a45" : glow;
+  c.shadowBlur = 14 + impact * 18;
+  c.fillStyle = impact > 0.05 ? "#e5a843" : glow;
   c.strokeStyle = bright;
-  c.lineWidth = 2;
+  c.lineWidth = 2 + impact;
   c.beginPath();
   c.moveTo(0, -17 - pulse);
   c.lineTo(15 + pulse * 0.4, 0);
@@ -198,12 +202,12 @@ function drawBrandedCore() {
 
   c.shadowBlur = 0;
   c.fillStyle = bright;
-  c.globalAlpha = 0.75;
+  c.globalAlpha = 0.75 + impact * 0.2;
   c.beginPath();
   c.moveTo(0, -12 - pulse * 0.5);
-  c.lineTo(5, 0);
-  c.lineTo(0, 6);
-  c.lineTo(-3, 0);
+  c.lineTo(5 + impact * 2, 0);
+  c.lineTo(0, 6 + impact * 2);
+  c.lineTo(-3 - impact, 0);
   c.closePath();
   c.fill();
   c.globalAlpha = 1;
@@ -214,6 +218,8 @@ function frame(now) {
   previous = now;
   clock.advance(game, elapsed);
   const events = game.drainEvents();
+  if (events.some((e) => e.type === "leak")) coreImpact = 1;
+  else coreImpact = Math.max(0, coreImpact - elapsed * 4.5);
   renderer.accept(events);
   ui.events(events);
   renderer.render(game, input, elapsed);
