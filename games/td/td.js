@@ -1,5 +1,5 @@
 import { Game, GameClock } from "./js/engine.js";
-import { WORLD, TOWERS } from "./js/data.js";
+import { WORLD } from "./js/data.js";
 import { Renderer } from "./js/renderer.js";
 import { UI } from "./js/ui.js";
 const canvas = document.getElementById("c"),
@@ -106,10 +106,9 @@ window.addEventListener("keydown", (ev) => {
     ui.refresh();
     return;
   }
-  const index = Number(ev.key) - 1;
-  if (ev.key.length === 1 && index >= 0 && index < 7) {
-    ui.choose(Object.keys(TOWERS)[index]);
-    canvas.focus();
+  if (["1", "2", "3"].includes(ev.key)) {
+    game.setSpeed(Number(ev.key));
+    ui.refresh();
     return;
   }
   if (active !== canvas || game.terminal) return;
