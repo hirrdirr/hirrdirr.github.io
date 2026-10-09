@@ -41,12 +41,13 @@
 }
 
 .td-primary {
-  color: #251e10;
+  color: #f5ecd8;
 }
 
 .td-primary:hover:not(:disabled) {
   background: #d6b56d;
   border-color: #d6b56d;
+  color: #fff8e8;
 }
 
 .td-danger {
