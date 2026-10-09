@@ -15,6 +15,9 @@ import {
 } from "./map.js";
 import { WAVES, waveScale, waveSpawns, completionReward } from "./waves.js";
 export const STEP = 1 / 60;
+const CORE_X = 933,
+  CORE_Y = 300,
+  CORE_ABSORB_TIME = 0.32;
 export class GameClock {
   constructor() {
     this.accumulator = 0;
@@ -262,6 +265,10 @@ export class Game {
       burn: 0,
       burnUntil: 0,
       burnSource: null,
+      absorbTime: 0,
+      absorbProgress: 0,
+      absorbStartX: 0,
+      absorbStartY: 0,
     };
     this.enemies.push(e);
     return e;
@@ -386,6 +393,28 @@ export class Game {
       w.alive++;
     }
     for (const e of this.enemies) {
+      if (e.status === "absorbing") {
+        e.absorbTime += dt;
+        const progress = Math.min(1, e.absorbTime / CORE_ABSORB_TIME),
+          eased = 1 - (1 - progress) ** 2;
+        e.absorbProgress = progress;
+        e.x = e.absorbStartX + (CORE_X - e.absorbStartX) * eased;
+        e.y = e.absorbStartY + (CORE_Y - e.absorbStartY) * eased;
+        if (progress >= 1) {
+          e.status = "escaped";
+          this.lives = Math.max(0, this.lives - e.leak);
+          this.leaked++;
+          const encounter = this.encounters.get(e.wave);
+          if (encounter) encounter.alive--;
+          this.touch();
+          this.emit("leak", { x: CORE_X, y: CORE_Y, amount: e.leak });
+          if (this.lives === 0) {
+            this.finish("lost");
+            return;
+          }
+        }
+        continue;
+      }
       if (e.status !== "active") continue;
       e.age += dt;
       e.hitFlash = Math.max(0, e.hitFlash - dt);
@@ -397,19 +426,16 @@ export class Game {
       e.distance += e.speed * (1 - slow) * dt;
       Object.assign(e, pointOnPath(e.distance));
       if (e.distance >= PATH_LENGTH) {
-        e.status = "escaped";
-        this.lives = Math.max(0, this.lives - e.leak);
-        this.leaked++;
-        this.encounters.get(e.wave).alive--;
-        this.touch();
-        this.emit("leak", { x: e.x, y: e.y, amount: e.leak });
-        if (this.lives === 0) {
-          this.finish("lost");
-          return;
-        }
+        e.status = "absorbing";
+        e.absorbTime = 0;
+        e.absorbProgress = 0;
+        e.absorbStartX = e.x;
+        e.absorbStartY = e.y;
       }
     }
-    this.enemies = this.enemies.filter((e) => e.status === "active");
+    this.enemies = this.enemies.filter(
+      (e) => e.status === "active" || e.status === "absorbing",
+    );
     for (const t of this.towers) {
       t.recoil = Math.max(0, t.recoil - dt * 6);
       if (t.kind === "relay") continue;
@@ -501,7 +527,9 @@ export class Game {
       }
     }
     this.projectiles = this.projectiles.filter((p) => p.life > 0);
-    this.enemies = this.enemies.filter((e) => e.status === "active");
+    this.enemies = this.enemies.filter(
+      (e) => e.status === "active" || e.status === "absorbing",
+    );
     for (const [number, w] of this.encounters) {
       if (w.pending === 0 && w.alive === 0) {
         this.encounters.delete(number);
