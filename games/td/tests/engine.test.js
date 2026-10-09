@@ -115,7 +115,7 @@ test("artillery respects its minimum range", () => {
   e.x += 100;
   assert.equal(g.chooseTarget(t, g.effectiveStats(t)), e);
 });
-test("escaped targets never grant rewards or absorb additional hits", () => {
+test("core absorption blocks rewards and additional hits before escape", () => {
   const {
     g,
     enemies: [e, other],
@@ -136,11 +136,15 @@ test("escaped targets never grant rewards or absorb additional hits", () => {
     life: 1,
   });
   g.update(STEP);
-  assert.equal(e.status, "escaped");
-  assert.equal(g.lives, 29);
+  assert.equal(e.status, "absorbing");
+  assert.equal(g.lives, 30);
   assert.equal(g.gold, gold);
   assert.equal(g.damage(e, 999, 1, t.id), 0);
   assert.equal(g.kills, 0);
+  run(g, 0.35);
+  assert.equal(e.status, "escaped");
+  assert.equal(g.lives, 29);
+  assert.equal(g.gold, gold);
   assert.ok(other.status === "active");
 });
 test("kill reward and actual damage are counted once, including overkill", () => {
@@ -303,7 +307,7 @@ test("early starts require completed spawning, cap concurrency and award only on
   assert.equal(g.startWave().ok, false);
   assert.equal(g.encounters.size, 2);
 });
-test("loss stops rules, new waves and projectiles; restart clears all state", () => {
+test("loss waits for core absorption, then stops rules; restart clears all state", () => {
   const {
     g,
     enemies: [e],
@@ -311,6 +315,10 @@ test("loss stops rules, new waves and projectiles; restart clears all state", ()
   g.lives = 1;
   e.distance = PATH_LENGTH - 0.01;
   g.update(STEP);
+  assert.equal(e.status, "absorbing");
+  assert.equal(g.status, "wave");
+  assert.equal(g.lives, 1);
+  run(g, 0.35);
   assert.equal(g.status, "lost");
   assert.equal(g.lives, 0);
   const time = g.time;
