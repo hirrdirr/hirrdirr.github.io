@@ -166,41 +166,28 @@ function drawBrandedCore() {
   );
   c.translate(933, 300);
 
-  // Dark backing plate fully covers the former teal hex core.
-  c.fillStyle = "#17160f";
-  c.strokeStyle = critical ? "#8f4938" : "#6f5730";
-  c.lineWidth = 2;
-  c.beginPath();
-  c.moveTo(0, -32);
-  c.lineTo(38, 0);
-  c.lineTo(0, 32);
-  c.lineTo(-38, 0);
-  c.closePath();
-  c.fill();
-  c.stroke();
-
   // Branded amber crystal inspired by the diamond in the CORE logo.
   c.shadowColor = glow;
-  c.shadowBlur = 12;
+  c.shadowBlur = 14;
   c.fillStyle = glow;
   c.strokeStyle = bright;
   c.lineWidth = 2;
   c.beginPath();
-  c.moveTo(0, -15 - pulse);
-  c.lineTo(14 + pulse * 0.35, 0);
-  c.lineTo(0, 15 + pulse);
-  c.lineTo(-14 - pulse * 0.35, 0);
+  c.moveTo(0, -17 - pulse);
+  c.lineTo(15 + pulse * 0.4, 0);
+  c.lineTo(0, 17 + pulse);
+  c.lineTo(-15 - pulse * 0.4, 0);
   c.closePath();
   c.fill();
   c.stroke();
 
   c.shadowBlur = 0;
   c.fillStyle = bright;
-  c.globalAlpha = 0.72;
+  c.globalAlpha = 0.75;
   c.beginPath();
-  c.moveTo(0, -11 - pulse * 0.5);
+  c.moveTo(0, -12 - pulse * 0.5);
   c.lineTo(5, 0);
-  c.lineTo(0, 5);
+  c.lineTo(0, 6);
   c.lineTo(-3, 0);
   c.closePath();
   c.fill();
