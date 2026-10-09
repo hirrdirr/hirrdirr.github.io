@@ -1,9 +1,12 @@
 import { Game, GameClock } from "./js/engine.js";
 import { WORLD } from "./js/data.js";
+import { applyDifficulty } from "./js/difficulty.js";
 import { Renderer } from "./js/renderer.js";
 import { UI } from "./js/ui.js";
 const canvas = document.getElementById("c"),
   app = document.getElementById("td-app");
+const difficulty = applyDifficulty(sessionStorage.getItem("tdDifficulty"));
+app.dataset.difficulty = difficulty.key;
 const game = new Game(),
   clock = new GameClock(),
   renderer = new Renderer(canvas);

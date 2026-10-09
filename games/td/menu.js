@@ -1,14 +1,37 @@
 const menu = document.getElementById("td-menu");
 const app = document.getElementById("td-app");
 const start = document.getElementById("menu-start");
+const difficultyButton = document.querySelector('[data-menu-action="difficulty"]');
 const message = document.getElementById("menu-message");
 let starting = false;
+let difficulty = sessionStorage.getItem("tdDifficulty") === "easy" ? "easy" : "normal";
+
+function refreshDifficultyButton(announce = false) {
+  const easy = difficulty === "easy";
+  difficultyButton.removeAttribute("aria-describedby");
+  difficultyButton.setAttribute("aria-label", `Difficulty: ${easy ? "Easy" : "Normal"}`);
+  difficultyButton.title = `Difficulty: ${easy ? "Easy" : "Normal"}`;
+  if (announce) {
+    message.textContent = easy
+      ? "Difficulty: Easy — more starting credits, more core integrity and gentler enemies."
+      : "Difficulty: Normal — original Core Defense balance.";
+  }
+}
+
+refreshDifficultyButton();
+
+difficultyButton.addEventListener("click", () => {
+  difficulty = difficulty === "normal" ? "easy" : "normal";
+  sessionStorage.setItem("tdDifficulty", difficulty);
+  refreshDifficultyButton(true);
+});
 
 start.addEventListener("click", async () => {
   if (starting) return;
   starting = true;
   start.disabled = true;
   message.textContent = "";
+  sessionStorage.setItem("tdDifficulty", difficulty);
 
   // The existing renderer measures the visible canvas during initialization.
   app.hidden = false;
@@ -26,4 +49,4 @@ start.addEventListener("click", async () => {
   }
 });
 
-// Other data-menu-action buttons intentionally have no behavior yet.
+// Map, settings and Back to Site intentionally have no behavior yet.
