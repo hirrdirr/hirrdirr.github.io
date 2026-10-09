@@ -165,7 +165,7 @@ function drawBrandedCore() {
     clearW = 60,
     clearH = 66;
 
-  // Restore the untouched map pixels over the old teal hexagon before drawing the branded core.
+  // Restore only the map pixels needed to erase the legacy teal core.
   c.save();
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.drawImage(
@@ -179,6 +179,25 @@ function drawBrandedCore() {
     clearW * scaleX,
     clearH * scaleY,
   );
+  c.restore();
+
+  // The restored background also covers enemies at the very end of the road,
+  // so redraw absorbing enemies here before placing the crystal over them.
+  c.save();
+  c.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+  for (const enemy of game.enemies) {
+    if (enemy.status !== "absorbing") continue;
+    const progress = enemy.absorbProgress ?? 0,
+      scale = Math.max(0.12, 1 - progress * 0.88),
+      alpha = Math.max(0.08, 1 - progress * 0.9);
+    c.save();
+    c.globalAlpha = alpha;
+    c.translate(enemy.x, enemy.y);
+    c.scale(scale, scale);
+    c.translate(-enemy.x, -enemy.y);
+    renderer.drawEnemy(c, enemy, game);
+    c.restore();
+  }
   c.restore();
 
   c.save();
