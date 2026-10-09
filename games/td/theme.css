@@ -1,0 +1,305 @@
+/* Core Defense warm theme pass 1: color-only overrides. */
+.td-app {
+  --td-bg: #171812;
+  --td-panel: #20221a;
+  --td-line: #3b3d2d;
+  --td-text: #ebe8dc;
+  --td-muted: #aaa995;
+  --td-accent: #c6a15b;
+  --td-gold: #d9b76b;
+  background: #171812;
+  border-color: #3b3d2d;
+}
+
+.td-app :focus-visible {
+  outline-color: #d8b86f;
+}
+
+.td-app kbd {
+  border-color: #4a4937;
+  color: #c2beaa;
+  background: #26261d;
+}
+
+.td-emblem {
+  border-color: #786a45;
+  background: #c6a15b0d;
+}
+
+.td-brand h1 span {
+  color: #c9c4b2;
+}
+
+.td-button {
+  border-color: #514f39;
+  background: #2a2b20;
+}
+
+.td-button:hover:not(:disabled) {
+  background: #38382a;
+  border-color: #83734d;
+}
+
+.td-primary {
+  color: #251e10;
+}
+
+.td-primary:hover:not(:disabled) {
+  background: #d6b56d;
+  border-color: #d6b56d;
+}
+
+.td-danger {
+  background: #653c31;
+  border-color: #9d6655;
+}
+
+.td-hud,
+.td-sidebar {
+  background: #202119;
+}
+
+.td-resource small {
+  color: #918f7d;
+}
+
+.td-integrity {
+  background: #383a28;
+}
+
+.td-integrity i {
+  background: #829663;
+}
+
+.td-integrity i.critical {
+  background: #c86f5b;
+}
+
+.td-speeds {
+  border-color: #4b4c35;
+  background: #15160f;
+}
+
+.td-speeds button[aria-pressed="true"] {
+  color: #f1dfb7;
+  background: #54482d;
+}
+
+.td-map-top {
+  background: #1b1d16;
+  border-bottom-color: #353727;
+  color: #c3c0ad;
+}
+
+.td-status-dot {
+  background: #c6a15b;
+}
+
+.td-map-toggle {
+  color: #aaa995;
+}
+
+.td-map-toggle[aria-pressed="true"] {
+  color: #e2c781;
+}
+
+.td-canvas-wrap {
+  background: #1a1d15;
+}
+
+.td-wave-banner {
+  background: #28271deb;
+  color: #f1e5c7;
+  border-color: #796d4e;
+}
+
+.td-pause-overlay {
+  background: #18180fdf;
+  border-color: #766e50;
+}
+
+.td-pause-overlay strong {
+  color: #eee2c4;
+}
+
+.td-pause-overlay span {
+  color: #c9c3ad;
+}
+
+.td-end-overlay {
+  background: #11120cec;
+}
+
+.td-placement-bar {
+  border-top-color: #41422f;
+  border-bottom-color: #393a2a;
+  color: #c0bdab;
+}
+
+.td-placement-bar .invalid {
+  color: #d49a70;
+}
+
+.td-wave-controls {
+  background: #202119;
+}
+
+.td-enemy-preview {
+  color: #c2bead;
+}
+
+.td-panel-heading > span {
+  color: #94927f;
+}
+
+.td-tower-card {
+  border-color: #3e3f2e;
+  background: #25261d;
+  color: #e5e1d3;
+}
+
+.td-tower-card:hover:not(:disabled) {
+  background: #303125;
+}
+
+.td-tower-card[aria-pressed="true"] {
+  background: #373326;
+}
+
+.td-tower-card.unaffordable {
+  background: #1d1e17;
+}
+
+.td-tower-card.unaffordable .td-card-cost {
+  color: #8f8b79;
+}
+
+.td-card-info > span {
+  color: #aaa692;
+}
+
+.td-card-cost {
+  color: var(--td-gold);
+}
+
+.td-tower-panel {
+  background: #1a1b14;
+}
+
+.td-tier-badge {
+  color: #c0b998;
+  border-color: #5a563c;
+}
+
+.td-description,
+.td-stat-grid dt,
+.td-upgrades-title > span,
+.td-panel-empty p,
+.td-sell-note {
+  color: #aaa795;
+}
+
+.td-stat-grid {
+  border-top-color: #393a2a;
+  border-bottom-color: #393a2a;
+}
+
+.td-effects-info,
+.td-path-label,
+.td-tip {
+  color: #bebaa4;
+}
+
+.td-target-row label {
+  color: #d0ccbc;
+}
+
+.td-target-row select {
+  background: #292a20;
+  border-color: #52513c;
+  color: #e5e1d5;
+}
+
+.td-level-dots i {
+  background: #44442f;
+}
+
+.td-level-dots i.filled {
+  background: #b79955;
+}
+
+.td-upgrade-button {
+  border-color: #625b3d;
+  background: #302d20;
+  color: #ebe3cf;
+}
+
+.td-upgrade-button:hover:not(:disabled) {
+  background: #403a27;
+  border-color: #9b8553;
+}
+
+.td-upgrade-button:disabled {
+  background: #22231b;
+  border-color: #393a2d;
+  color: #918f80;
+}
+
+.td-upgrade-button small {
+  color: #b0aa97;
+}
+
+.td-upgrade-button > b,
+.td-sell strong {
+  color: var(--td-gold);
+}
+
+.td-preview-cost {
+  background: #302d20;
+  border-color: #514c34;
+}
+
+.td-preview-cost span {
+  color: #aaa691;
+}
+
+.td-empty-reticle {
+  color: #b79a5a;
+}
+
+.td-tip {
+  border-top-color: #3c3d2d;
+}
+
+.td-footer {
+  color: #989583;
+}
+
+.td-toast {
+  background: #302b1ff5;
+  color: #eee3c7;
+  border-color: #806f49;
+}
+
+.td-dialog {
+  border-color: #5d5940;
+  background: #22231b;
+  color: #e7e2d5;
+}
+
+.td-dialog::backdrop {
+  background: #0c0d08cc;
+}
+
+.td-panel-heading .td-text-button {
+  color: var(--td-accent);
+}
+
+@media (max-width: 560px) {
+  .td-heading-actions .td-button {
+    background: #25261c;
+  }
+  .td-time-controls {
+    border-top-color: #3c3d2d;
+  }
+}
