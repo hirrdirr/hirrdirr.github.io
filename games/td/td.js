@@ -153,17 +153,32 @@ function drawBrandedCore() {
     critical = game.lives <= 10,
     glow = critical ? "#db6a4b" : "#d9a33e",
     bright = critical ? "#f08a63" : "#ffd36a",
-    pulse = renderer.reduced ? 0 : Math.sin(renderer.visualTime * 2.4) * 1.2;
+    pulse = renderer.reduced ? 0 : Math.sin(renderer.visualTime * 2.4) * 1.2,
+    scaleX = canvas.width / WORLD.width,
+    scaleY = canvas.height / WORLD.height,
+    clearX = 900,
+    clearY = 267,
+    clearW = 60,
+    clearH = 66;
+
+  // Restore the untouched map pixels over the old teal hexagon before drawing the branded core.
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.drawImage(
+    renderer.background,
+    clearX * scaleX,
+    clearY * scaleY,
+    clearW * scaleX,
+    clearH * scaleY,
+    clearX * scaleX,
+    clearY * scaleY,
+    clearW * scaleX,
+    clearH * scaleY,
+  );
+  c.restore();
 
   c.save();
-  c.setTransform(
-    canvas.width / WORLD.width,
-    0,
-    0,
-    canvas.height / WORLD.height,
-    0,
-    0,
-  );
+  c.setTransform(scaleX, 0, 0, scaleY, 0, 0);
   c.translate(933, 300);
 
   // Branded amber crystal inspired by the diamond in the CORE logo.
