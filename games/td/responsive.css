@@ -7,10 +7,10 @@ body:has(.td-app:not([hidden])) main {
 .td-app {
   --td-sidebar-width: clamp(270px, 15vw, 360px);
   --td-space: clamp(8px, 0.65vw, 16px);
-  --td-vertical-space: clamp(380px, 16.4vw, 420px);
   width: 100%;
   max-width: 2400px;
   padding: var(--td-space);
+  container: td-game / inline-size;
 }
 
 .td-heading {
@@ -31,6 +31,7 @@ body:has(.td-app:not([hidden])) main {
 }
 
 .td-hud {
+  flex-wrap: wrap;
   gap: clamp(14px, 1.5vw, 30px);
   padding: clamp(8px, 0.4vw, 10px) clamp(12px, 1vw, 20px);
 }
@@ -39,19 +40,18 @@ body:has(.td-app:not([hidden])) main {
   line-height: 1.05;
 }
 
-/* Scale the desktop shell as a unit, rather than narrowing only the canvas.
-   Reserve space for the HUD and controls, and keep short windows playable by letting
-   the page scroll instead of reducing the battlefield below its native size.
-   The min(100%, ...) still allows smaller widths on narrow desktop windows. */
+/* Fit the whole desktop shell, not just the canvas. layout.js measures the space
+   used by the site header, HUD, placement/wave controls and footer at their actual
+   rendered sizes. Start at full width so the first measurement uses an unwrapped
+   HUD; an undersized initial estimate could unnecessarily trap it in two rows. */
 @media (min-width: 851px) {
   .td-app {
-    width: min(100%, calc(max(960px, (100dvh - var(--td-vertical-space)) * 1.6) + var(--td-sidebar-width) + var(--td-space) * 2 + 4px));
+    width: min(100%, calc(var(--td-canvas-fit-width, 100vw) + var(--td-sidebar-width) + var(--td-space) * 2 + 4px));
   }
 }
 
 .td-workspace {
   grid-template-columns: minmax(0, 1fr) var(--td-sidebar-width);
-  container-type: inline-size;
 }
 .td-canvas-wrap {
   width: 100%;
@@ -77,12 +77,12 @@ body:has(.td-app:not([hidden])) main {
   line-height: 1.2;
 }
 
-/* The sidebar may scroll, but cannot force a taller page than the battlefield.
-   Its container is the workspace: canvas height is (workspace - sidebar) * 5/8. */
+/* The battlefield sets the grid row height; a long inspector scrolls inside it.
+   Size containment avoids a guessed sidebar height adding empty space below it. */
 .td-sidebar {
   align-self: stretch;
   min-height: 0;
-  max-height: calc((100cqw - var(--td-sidebar-width)) * 5 / 8 + 160px);
+  contain: size;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--td-line) var(--td-panel);
@@ -117,6 +117,65 @@ body:has(.td-app:not([hidden])) main {
   padding-block: 4px;
 }
 
+/* Short desktop windows need less interface chrome, not browser zoom. */
+@media (min-width: 851px) and (max-height: 1000px) {
+  body:has(.td-app:not([hidden])) main {
+    padding-block: 6px 8px;
+  }
+  .td-app {
+    --td-space: 8px;
+  }
+  .td-emblem {
+    width: 34px;
+    height: 34px;
+  }
+  .td-brand h1 {
+    font-size: 24px;
+  }
+  .td-eyebrow {
+    font-size: 11px;
+  }
+  .td-hud {
+    padding-block: 6px;
+    gap: 10px 16px;
+  }
+  .td-resource .td-label {
+    font-size: 11px;
+  }
+  .td-resource {
+    min-width: 0;
+  }
+  .td-resource > strong {
+    font-size: 21px;
+  }
+  .td-map-top {
+    padding-block: 3px;
+  }
+  .td-placement-bar {
+    min-height: 36px;
+    padding-block: 4px;
+  }
+  .td-wave-controls {
+    min-height: 70px;
+    padding-block: 6px;
+    gap: 8px;
+  }
+  .td-next > strong {
+    font-size: 16px;
+    margin: 2px 0 3px;
+  }
+  .td-footer {
+    margin-block: 4px;
+  }
+}
+
+/* A wide but short browser can have a narrow fitted game shell. */
+@container td-game (max-width: 900px) {
+  .td-sector {
+    display: none;
+  }
+}
+
 @media (max-width: 1100px) {
   .td-sector {
   display: none;
@@ -141,6 +200,7 @@ body:has(.td-app:not([hidden])) main {
     grid-template-columns: 1fr;
   }
   .td-sidebar {
+    contain: none;
     border-left: 0;
     border-top: 1px solid var(--td-line);
     display: grid;
