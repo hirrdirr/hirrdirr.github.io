@@ -76,6 +76,40 @@ entry supplies its preview path. The lower frame pairs that thumbnail with
 stacked labels, gold map text and green difficulty text with an original inline
 SVG skull; the controls remain native HTML dropdowns.
 
+## Tower sprites
+
+The repository owner's seven uploaded PNGs are used unchanged. Runtime paths
+match each existing tower display name, preserving filename case and accents:
+
+| File | Existing tower kind | Draw size, world pixels |
+| --- | --- | --- |
+| `towers/Repeater_4f.png` | `repeater` | 34.5 × 46 |
+| `towers/Långskott_4f.png` | `sniper` | 36 × 48 |
+| `towers/Bastion_4f.png` | `cannon` | 37.5 × 50 |
+| `towers/Nova_4f.png` | `mortar` | 36 × 48 |
+| `towers/Frostlänk_4f.png` | `cryo` | 36 × 48 |
+| `towers/Gatling_4f.png` | `gatling` | 36 × 48 |
+| `towers/Relä_4f.png` | `relay` | 36 × 48 |
+
+Each sheet is 2172 × 724, containing four 543 × 724 frames in one row.
+`../js/tower-sprites.js` maps names to files, validates dimensions and controls
+presentation. Scaling is uniform and nearest-neighbor, centered on the existing
+placement position. Combat and placement geometry are unchanged.
+
+The idle frame is 0. Existing recoil selects firing frame 2, recovery frame 3,
+then frame 1 before returning to idle; pause and speed need no new animation clock.
+Shop and inspector icons use the intact idle frame and repaint after loading.
+Placement previews share the battlefield renderer. Loaded sprites completely
+bypass the original procedural tower art; loading failures retain that fallback.
+
+The stone bases remain upright. `AIM_PARTS` defines source regions and pivots for
+the moving weapon or crystal, and a source-facing angle to align with the existing
+engine aim. Repeater and Långskott face left, Bastion up-left, Gatling right, and
+the Nova/Frostlänk crystals up. Only these source pixels rotate and recoil;
+Relä remains stationary. The source image is never edited. Upgrade statistics,
+selection outlines and range overlays still use the existing game systems.
+No third-party assets were downloaded for this integration.
+
 ## Enemy walk sprites
 
 The repository owner's supplied sheets are used unchanged:
