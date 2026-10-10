@@ -1,4 +1,5 @@
 import { DIFFICULTIES, resolveDifficulty } from "./js/difficulty.js";
+import { fitGameToViewport } from "./js/layout.js";
 
 // Only the existing map is selectable. Add future map entries here when playable.
 const MAPS = [{
@@ -66,6 +67,7 @@ start.addEventListener("click", async () => {
   menu.hidden = true;
   try {
     await import("./td.js");
+    fitGameToViewport(app);
     menu.remove();
     document.getElementById("c").focus({ preventScroll: true });
   } catch (error) {
