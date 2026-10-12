@@ -55,6 +55,26 @@ Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input
     );
   }
 
+  // Hover uses the same silhouette treatment, but only as a faint glint. It is
+  // intentionally much thinner and dimmer than the explicit selected state.
+  if (!input.placing && originalHoverId && originalHoverId !== game.selectedId) {
+    const hovered = game.towers.find((tower) => tower.id === originalHoverId);
+    if (hovered) {
+      sprites.outline(
+        c,
+        hovered.kind,
+        hovered.x,
+        hovered.y,
+        hovered.angle,
+        hovered.recoil,
+        1,
+        true,
+        "#d3a65766",
+        0.35,
+      );
+    }
+  }
+
   if (input.placing && input.cursor) {
     const check = game.placement(input.placing, input.cursor.gx, input.cursor.gy),
       x = (input.cursor.gx + 0.5) * WORLD.tile,
