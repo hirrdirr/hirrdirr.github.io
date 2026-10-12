@@ -29,7 +29,8 @@ function makeMotes(count, seed = 4242) {
       phase: random() * TAU,
       speed: 0.28 + random() * 0.42,
       drift: 5 + random() * 10,
-      rise: 2 + random() * 5,
+      rise: 4 + random() * 9,
+      sway: 2 + random() * 5,
       size: 0.9 + random() * 1.4,
       glow: random() > 0.58,
     });
@@ -95,8 +96,8 @@ Renderer.prototype.render = function renderWithMapAmbience(game, input, elapsed)
     this.mapAmbienceMotes ??= makeMotes(18);
     for (const mote of this.mapAmbienceMotes) {
       const t = time * mote.speed + mote.phase,
-        x = mote.x + Math.sin(t * 1.3) * mote.drift,
-        y = mote.y - ((time * mote.rise + mote.phase * 7) % 28) + 14,
+        x = mote.x + Math.sin(t * 1.3) * mote.drift + Math.sin(t * 0.47 + mote.phase) * mote.sway,
+        y = mote.y + Math.sin(t * 0.9 + mote.phase * 0.6) * mote.rise + Math.sin(t * 1.8 + 1.4) * 1.8,
         alpha = 0.16 + (Math.sin(t * 2.4) * 0.5 + 0.5) * 0.2;
       c.globalAlpha = alpha;
       c.fillStyle = mote.glow ? "#f2c66f" : "#c2c88a";
