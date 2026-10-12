@@ -1,36 +1,6 @@
 import { Renderer } from "./renderer.js";
 import { WORLD } from "./data.js";
-
-const TAU = Math.PI * 2;
-
-function drawTowerOutline(c, x, y, color, strong = true) {
-  const radius = strong ? 23 : 22;
-  c.save();
-  c.translate(x, y);
-
-  // Soft continuous halo keeps the tower readable without looking like a UI box.
-  c.globalAlpha = strong ? 0.34 : 0.26;
-  c.strokeStyle = color;
-  c.lineWidth = strong ? 3.2 : 2.6;
-  c.shadowColor = color;
-  c.shadowBlur = strong ? 8 : 6;
-  c.beginPath();
-  c.arc(0, 0, radius, 0, TAU);
-  c.stroke();
-
-  // Four brighter arc segments give the marker a subtle reticle character.
-  c.globalAlpha = strong ? 0.92 : 0.76;
-  c.lineWidth = strong ? 1.7 : 1.4;
-  c.shadowBlur = 3;
-  for (let i = 0; i < 4; i++) {
-    const start = -Math.PI / 2 + i * (Math.PI / 2) - 0.24;
-    c.beginPath();
-    c.arc(0, 0, radius, start, start + 0.48);
-    c.stroke();
-  }
-
-  c.restore();
-}
+import { getTowerSprites } from "./tower-sprites.js";
 
 const originalRender = Renderer.prototype.render;
 Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input, elapsed) {
@@ -60,15 +30,41 @@ Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input
     0,
   );
 
+  const sprites = getTowerSprites();
+
+  // True sprite-contour outline: no ground ring or reticle. The mask is built
+  // from the current rendered tower frame, so future upgrade sprites inherit it.
   if (game.selected) {
-    drawTowerOutline(c, game.selected.x, game.selected.y, "#d3a657", true);
+    sprites.outline(
+      c,
+      game.selected.kind,
+      game.selected.x,
+      game.selected.y,
+      game.selected.angle,
+      game.selected.recoil,
+      1,
+      true,
+      "#d3a657",
+      2.2,
+    );
   }
 
   if (input.placing && input.cursor) {
     const check = game.placement(input.placing, input.cursor.gx, input.cursor.gy),
       x = (input.cursor.gx + 0.5) * WORLD.tile,
       y = (input.cursor.gy + 0.5) * WORLD.tile;
-    drawTowerOutline(c, x, y, check.ok ? "#d3a657" : "#cf6657", false);
+    sprites.outline(
+      c,
+      input.placing,
+      x,
+      y,
+      -Math.PI / 2,
+      0,
+      1,
+      false,
+      check.ok ? "#d3a657" : "#cf6657",
+      2,
+    );
   }
 
   c.restore();
