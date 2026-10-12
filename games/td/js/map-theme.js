@@ -96,6 +96,28 @@ function lantern(c, x, y) {
   c.restore();
 }
 
+function entranceArrow(c) {
+  const x = 24,
+    y = PATH[0].y;
+  c.save();
+  c.translate(x, y);
+  c.fillStyle = "rgba(237,196,103,.72)";
+  c.strokeStyle = "rgba(83,58,27,.45)";
+  c.lineWidth = 1.2;
+  c.beginPath();
+  c.moveTo(-13, -6);
+  c.lineTo(2, -6);
+  c.lineTo(2, -12);
+  c.lineTo(16, 0);
+  c.lineTo(2, 12);
+  c.lineTo(2, 6);
+  c.lineTo(-13, 6);
+  c.closePath();
+  c.fill();
+  c.stroke();
+  c.restore();
+}
+
 function drawFantasyMap(c) {
   const ground = c.createLinearGradient(0, 0, WORLD.width, WORLD.height);
   ground.addColorStop(0, "#25352a");
@@ -216,11 +238,8 @@ function drawFantasyMap(c) {
     }
   }
 
-  // Entrance/core approach accents.
-  c.fillStyle = "rgba(225,188,103,.55)";
-  c.font = "600 9px system-ui";
-  c.fillText("INFART", 12, 268);
-  c.fillText("KÄRNA", 901, 263);
+  // A single directional marker shows where enemies enter the route.
+  entranceArrow(c);
 
   const coreGlow = c.createRadialGradient(933, 300, 4, 933, 300, 62);
   coreGlow.addColorStop(0, "rgba(234,174,66,.16)");
