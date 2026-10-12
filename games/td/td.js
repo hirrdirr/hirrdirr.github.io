@@ -3,6 +3,10 @@ import { WORLD } from "./js/data.js";
 import { applyDifficulty } from "./js/difficulty.js";
 import { Renderer } from "./js/renderer.js";
 import { UI } from "./js/ui.js";
+import { enableFreePlacement } from "./js/free-placement.js";
+
+enableFreePlacement(Game);
+
 const canvas = document.getElementById("c"),
   app = document.getElementById("td-app");
 const difficulty = applyDifficulty(sessionStorage.getItem("tdDifficulty"));
@@ -27,14 +31,23 @@ const cursorFrom = (event) => {
   const r = canvas.getBoundingClientRect();
   const x = ((event.clientX - r.left) * WORLD.width) / r.width,
     y = ((event.clientY - r.top) * WORLD.height) / r.height;
-  return { gx: Math.floor(x / WORLD.tile), gy: Math.floor(y / WORLD.tile) };
+  return { gx: x / WORLD.tile - 0.5, gy: y / WORLD.tile - 0.5 };
 };
-const atCursor = () =>
-  input.cursor
-    ? game.towers.find(
-        (t) => t.gx === input.cursor.gx && t.gy === input.cursor.gy,
-      )
-    : null;
+const atCursor = () => {
+  if (!input.cursor) return null;
+  const x = (input.cursor.gx + 0.5) * WORLD.tile,
+    y = (input.cursor.gy + 0.5) * WORLD.tile;
+  let closest = null,
+    closestDistance = 22 ** 2;
+  for (const tower of game.towers) {
+    const distance = (tower.x - x) ** 2 + (tower.y - y) ** 2;
+    if (distance <= closestDistance) {
+      closest = tower;
+      closestDistance = distance;
+    }
+  }
+  return closest;
+};
 canvas.addEventListener("pointermove", (ev) => {
   if (ev.pointerType === "touch") return;
   input.cursor = cursorFrom(ev);
@@ -66,15 +79,16 @@ canvas.addEventListener("pointerup", (ev) => {
   input.cursor = cursorFrom(ev);
   input.hoverId = null;
   if (game.terminal) return;
+  if (input.placing) {
+    if (input.touch) ui.refreshPlacement();
+    else ui.place(ev.shiftKey);
+    return;
+  }
   const t = atCursor();
   if (t) {
-    input.placing = null;
     game.select(t.id);
     input.shopOpen = false;
     ui.refresh(true);
-  } else if (input.placing) {
-    if (input.touch) ui.refreshPlacement();
-    else ui.place(ev.shiftKey);
   } else {
     game.select(null);
     ui.refresh(true);
@@ -120,10 +134,11 @@ window.addEventListener("keydown", (ev) => {
     input.keyboard = true;
     input.touch = false;
     input.cursor ??= { gx: 5, gy: 6 };
-    const dx = ev.key === "ArrowLeft" ? -1 : ev.key === "ArrowRight" ? 1 : 0,
-      dy = ev.key === "ArrowUp" ? -1 : ev.key === "ArrowDown" ? 1 : 0;
+    const dx = ev.key === "ArrowLeft" ? -0.5 : ev.key === "ArrowRight" ? 0.5 : 0,
+      dy = ev.key === "ArrowUp" ? -0.5 : ev.key === "ArrowDown" ? 0.5 : 0;
     input.cursor.gx = Math.max(0, Math.min(23, input.cursor.gx + dx));
     input.cursor.gy = Math.max(0, Math.min(14, input.cursor.gy + dy));
+    input.hoverId = atCursor()?.id ?? null;
     ui.refreshPlacement();
   }
   if (ev.key === "Enter") {
