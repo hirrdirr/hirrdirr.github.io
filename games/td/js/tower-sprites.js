@@ -34,6 +34,10 @@ export class TowerSprites {
   constructor(ImageClass = Image) {
     this.loaded = new Map();
     this.failed = new Set();
+    this.outlineCanvas = document.createElement("canvas");
+    this.outlineCanvas.width = 112;
+    this.outlineCanvas.height = 112;
+    this.outlineCtx = this.outlineCanvas.getContext("2d");
     this.ready = Promise.all(
       Object.entries(TOWER_SPRITES).map(([kind, sprite]) =>
         new Promise((resolve) => {
@@ -113,6 +117,43 @@ export class TowerSprites {
       );
       c.rotate(angle - facing);
       part(sx, sy, sw, sh, sx - pivotX, sy - pivotY);
+    }
+    c.restore();
+    return true;
+  }
+
+  outline(c, kind, x, y, angle = -Math.PI / 2, recoil = 0, scale = 1, aim = true, color = "#d3a657", width = 2) {
+    if (!this.loaded.has(kind)) return false;
+
+    const oc = this.outlineCanvas;
+    const o = this.outlineCtx;
+    const cx = oc.width / 2;
+    const cy = oc.height / 2;
+    o.setTransform(1, 0, 0, 1, 0, 0);
+    o.clearRect(0, 0, oc.width, oc.height);
+    o.globalCompositeOperation = "source-over";
+    o.globalAlpha = 1;
+    o.filter = "none";
+    o.shadowBlur = 0;
+
+    // Render the current tower frame to an offscreen alpha mask. This keeps the
+    // outline attached to the actual PNG silhouette, including rotating parts.
+    this.draw(o, kind, cx, cy, angle, recoil, scale, aim);
+    o.globalCompositeOperation = "source-in";
+    o.fillStyle = color;
+    o.fillRect(0, 0, oc.width, oc.height);
+    o.globalCompositeOperation = "source-over";
+
+    c.save();
+    c.globalAlpha = 0.92;
+    c.shadowColor = color;
+    c.shadowBlur = 3;
+    const steps = 12;
+    for (let i = 0; i < steps; i++) {
+      const a = (i * Math.PI * 2) / steps;
+      const dx = Math.cos(a) * width;
+      const dy = Math.sin(a) * width;
+      c.drawImage(oc, x - cx + dx, y - cy + dy);
     }
     c.restore();
     return true;
