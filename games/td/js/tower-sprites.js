@@ -188,9 +188,9 @@ export class TowerSprites {
     o.globalCompositeOperation = "source-over";
 
     c.save();
-    c.globalAlpha = 0.96;
+    c.globalAlpha = 0.9;
     c.shadowColor = color;
-    c.shadowBlur = 2.5;
+    c.shadowBlur = 0.9;
     c.drawImage(oc, x - cx, y - cy);
     c.restore();
     return true;
