@@ -4,6 +4,7 @@ import "./js/game-feel.js";
 import "./js/placement-visuals.js";
 import "./js/map-ambience.js";
 import "./js/core-visuals.js";
+import "./js/spawn-entrance.js";
 import "./js/tower-selection-visuals.js";
 
 // Only the existing map is selectable. Add future map entries here when playable.
