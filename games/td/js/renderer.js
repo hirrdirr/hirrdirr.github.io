@@ -1,6 +1,7 @@
 import { WORLD, TOWERS, ENEMIES, towerStats } from "./data.js";
 import { PATH, SEGMENTS, ROAD, BLOCKED, distanceSquared } from "./map.js";
 import { EnemySprites } from "./enemy-sprites.js";
+import { getTowerSprites } from "./tower-sprites.js";
 const TAU = Math.PI * 2;
 function polygon(c, x, y, r, sides = 6, angle = 0) {
   c.beginPath();
@@ -27,7 +28,10 @@ export function drawTower(
   levels = [0, 0],
   recoil = 0,
   scale = 1,
+  aim = true,
 ) {
+  if (getTowerSprites().draw(c, kind, x, y, angle, recoil, scale, aim)) return;
+  // Retain the original drawing solely as an asset-loading/failure fallback.
   const color = TOWERS[kind].color,
     level = levels[0] + levels[1];
   c.save();
@@ -157,20 +161,28 @@ export function drawTower(
   c.restore();
 }
 export function paintIcons(root) {
-  for (const canvas of root.querySelectorAll("canvas[data-tower-icon]")) {
-    const c = canvas.getContext("2d");
-    c.clearRect(0, 0, canvas.width, canvas.height);
-    drawTower(
-      c,
-      canvas.dataset.towerIcon,
-      canvas.width / 2,
-      canvas.height / 2,
-      -Math.PI / 4,
-      [0, 0],
-      0,
-      canvas.width / 50,
-    );
-  }
+  const paint = () => {
+    for (const canvas of root.querySelectorAll("canvas[data-tower-icon]")) {
+      const c = canvas.getContext("2d");
+      c.clearRect(0, 0, canvas.width, canvas.height);
+      drawTower(
+        c,
+        canvas.dataset.towerIcon,
+        canvas.width / 2,
+        canvas.height / 2,
+        -Math.PI / 4,
+        [0, 0],
+        0,
+        canvas.width / 50,
+        false,
+      );
+    }
+  };
+  paint();
+  // Startup is not blocked on PNG downloads. Repaint the current UI once ready.
+  getTowerSprites().ready.then(() => {
+    if (root.isConnected) paint();
+  });
 }
 export class Renderer {
   constructor(canvas) {
