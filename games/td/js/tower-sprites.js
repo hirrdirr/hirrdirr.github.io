@@ -34,10 +34,8 @@ export class TowerSprites {
   constructor(ImageClass = Image) {
     this.loaded = new Map();
     this.failed = new Set();
-    this.outlineCanvas = document.createElement("canvas");
-    this.outlineCanvas.width = 112;
-    this.outlineCanvas.height = 112;
-    this.outlineCtx = this.outlineCanvas.getContext("2d");
+    this.outlineCanvas = null;
+    this.outlineCtx = null;
     this.ready = Promise.all(
       Object.entries(TOWER_SPRITES).map(([kind, sprite]) =>
         new Promise((resolve) => {
@@ -122,8 +120,19 @@ export class TowerSprites {
     return true;
   }
 
+  ensureOutlineCanvas() {
+    if (this.outlineCanvas && this.outlineCtx) return true;
+    if (typeof document === "undefined") return false;
+
+    this.outlineCanvas = document.createElement("canvas");
+    this.outlineCanvas.width = 112;
+    this.outlineCanvas.height = 112;
+    this.outlineCtx = this.outlineCanvas.getContext("2d");
+    return !!this.outlineCtx;
+  }
+
   outline(c, kind, x, y, angle = -Math.PI / 2, recoil = 0, scale = 1, aim = true, color = "#d3a657", width = 2) {
-    if (!this.loaded.has(kind)) return false;
+    if (!this.loaded.has(kind) || !this.ensureOutlineCanvas()) return false;
 
     const oc = this.outlineCanvas;
     const o = this.outlineCtx;
