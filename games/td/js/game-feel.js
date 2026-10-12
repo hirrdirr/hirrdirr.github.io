@@ -70,6 +70,86 @@ style.textContent = `
 `;
 document.head.append(style);
 
+function pushRing(renderer, { x, y, color, radius, life }) {
+  if (renderer.effects.length >= 420) return;
+  renderer.effects.push({
+    type: "ring",
+    x,
+    y,
+    color,
+    radius,
+    life,
+    max: life,
+  });
+}
+
+function pushSpark(renderer, { x, y, color, speedMin, speedMax, lifeMin, lifeMax, sizeMin, sizeMax, angle }) {
+  if (renderer.effects.length >= 420) return;
+  const a = angle ?? Math.random() * TAU,
+    speed = speedMin + Math.random() * (speedMax - speedMin),
+    life = lifeMin + Math.random() * (lifeMax - lifeMin);
+  renderer.effects.push({
+    type: "spark",
+    x,
+    y,
+    vx: Math.cos(a) * speed,
+    vy: Math.sin(a) * speed,
+    color,
+    life,
+    max: life,
+    size: sizeMin + Math.random() * (sizeMax - sizeMin),
+  });
+}
+
+function towerDeployFx(renderer, event) {
+  const color = event.color || "#d3a657";
+  pushRing(renderer, { x: event.x, y: event.y, color: "#f2cf83", radius: 28, life: 0.34 });
+  pushRing(renderer, { x: event.x, y: event.y, color, radius: 19, life: 0.24 });
+
+  if (renderer.reduced) return;
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * TAU + Math.random() * 0.15;
+    pushSpark(renderer, {
+      x: event.x + Math.cos(a) * 18,
+      y: event.y + Math.sin(a) * 18,
+      color: i % 3 === 0 ? "#ffe4a3" : color,
+      speedMin: 24,
+      speedMax: 52,
+      lifeMin: 0.22,
+      lifeMax: 0.42,
+      sizeMin: 1,
+      sizeMax: 2.2,
+      angle: a + Math.PI,
+    });
+  }
+}
+
+function towerUpgradeFx(renderer, event) {
+  const color = event.color || "#d9a33e";
+  pushRing(renderer, { x: event.x, y: event.y, color: "#ffe3a0", radius: 34, life: 0.52 });
+  pushRing(renderer, { x: event.x, y: event.y, color, radius: 24, life: 0.38 });
+  pushRing(renderer, { x: event.x, y: event.y, color: "#fff0c2", radius: 14, life: 0.24 });
+
+  if (renderer.reduced) return;
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * TAU + Math.random() * 0.12;
+    const inward = i % 2 === 0;
+    const distance = inward ? 28 : 9;
+    pushSpark(renderer, {
+      x: event.x + Math.cos(a) * distance,
+      y: event.y + Math.sin(a) * distance,
+      color: i % 4 === 0 ? "#fff2c5" : color,
+      speedMin: inward ? 32 : 48,
+      speedMax: inward ? 64 : 92,
+      lifeMin: 0.28,
+      lifeMax: 0.58,
+      sizeMin: 1.2,
+      sizeMax: 2.8,
+      angle: inward ? a + Math.PI : a,
+    });
+  }
+}
+
 // Layer richer feedback on top of the existing effect system without changing
 // simulation, damage, timing, targeting or wave composition.
 const originalAccept = Renderer.prototype.accept;
@@ -77,6 +157,9 @@ Renderer.prototype.accept = function acceptWithGameFeel(events) {
   originalAccept.call(this, events);
 
   for (const event of events) {
+    if (event.type === "build") towerDeployFx(this, event);
+    if (event.type === "upgrade") towerUpgradeFx(this, event);
+
     if (event.type === "impact" && !this.reduced) {
       const radius = Math.max(7, Math.min(22, (event.radius || 8) * 0.7));
       this.effects.push({
