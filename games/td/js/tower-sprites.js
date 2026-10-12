@@ -36,6 +36,8 @@ export class TowerSprites {
     this.failed = new Set();
     this.outlineCanvas = null;
     this.outlineCtx = null;
+    this.outlineMaskCanvas = null;
+    this.outlineMaskCtx = null;
     this.ready = Promise.all(
       Object.entries(TOWER_SPRITES).map(([kind, sprite]) =>
         new Promise((resolve) => {
@@ -121,14 +123,25 @@ export class TowerSprites {
   }
 
   ensureOutlineCanvas() {
-    if (this.outlineCanvas && this.outlineCtx) return true;
+    if (
+      this.outlineCanvas &&
+      this.outlineCtx &&
+      this.outlineMaskCanvas &&
+      this.outlineMaskCtx
+    ) return true;
     if (typeof document === "undefined") return false;
 
     this.outlineCanvas = document.createElement("canvas");
     this.outlineCanvas.width = 112;
     this.outlineCanvas.height = 112;
     this.outlineCtx = this.outlineCanvas.getContext("2d");
-    return !!this.outlineCtx;
+
+    this.outlineMaskCanvas = document.createElement("canvas");
+    this.outlineMaskCanvas.width = 112;
+    this.outlineMaskCanvas.height = 112;
+    this.outlineMaskCtx = this.outlineMaskCanvas.getContext("2d");
+
+    return !!(this.outlineCtx && this.outlineMaskCtx);
   }
 
   outline(c, kind, x, y, angle = -Math.PI / 2, recoil = 0, scale = 1, aim = true, color = "#d3a657", width = 2) {
@@ -136,8 +149,22 @@ export class TowerSprites {
 
     const oc = this.outlineCanvas;
     const o = this.outlineCtx;
+    const mask = this.outlineMaskCanvas;
+    const m = this.outlineMaskCtx;
     const cx = oc.width / 2;
     const cy = oc.height / 2;
+
+    // Render the current tower frame to a dedicated alpha mask first.
+    m.setTransform(1, 0, 0, 1, 0, 0);
+    m.clearRect(0, 0, mask.width, mask.height);
+    m.globalCompositeOperation = "source-over";
+    m.globalAlpha = 1;
+    m.filter = "none";
+    m.shadowBlur = 0;
+    this.draw(m, kind, cx, cy, angle, recoil, scale, aim);
+
+    // Build an expanded silhouette from multiple offset copies of that mask.
+    // Then punch the original alpha out of the middle so only the contour remains.
     o.setTransform(1, 0, 0, 1, 0, 0);
     o.clearRect(0, 0, oc.width, oc.height);
     o.globalCompositeOperation = "source-over";
@@ -145,25 +172,26 @@ export class TowerSprites {
     o.filter = "none";
     o.shadowBlur = 0;
 
-    // Render the current tower frame to an offscreen alpha mask. This keeps the
-    // outline attached to the actual PNG silhouette, including rotating parts.
-    this.draw(o, kind, cx, cy, angle, recoil, scale, aim);
+    const steps = 16;
+    for (let i = 0; i < steps; i++) {
+      const a = (i * Math.PI * 2) / steps;
+      const dx = Math.cos(a) * width;
+      const dy = Math.sin(a) * width;
+      o.drawImage(mask, dx, dy);
+    }
+
+    o.globalCompositeOperation = "destination-out";
+    o.drawImage(mask, 0, 0);
     o.globalCompositeOperation = "source-in";
     o.fillStyle = color;
     o.fillRect(0, 0, oc.width, oc.height);
     o.globalCompositeOperation = "source-over";
 
     c.save();
-    c.globalAlpha = 0.92;
+    c.globalAlpha = 0.96;
     c.shadowColor = color;
-    c.shadowBlur = 3;
-    const steps = 12;
-    for (let i = 0; i < steps; i++) {
-      const a = (i * Math.PI * 2) / steps;
-      const dx = Math.cos(a) * width;
-      const dy = Math.sin(a) * width;
-      c.drawImage(oc, x - cx + dx, y - cy + dy);
-    }
+    c.shadowBlur = 2.5;
+    c.drawImage(oc, x - cx, y - cy);
     c.restore();
     return true;
   }
