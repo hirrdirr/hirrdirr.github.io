@@ -99,14 +99,16 @@ function lantern(c, x, y) {
 function riverEdgeX(y) {
   const points = [
     [0, 74],
-    [70, 86],
-    [145, 70],
-    [225, 82],
-    [300, 92],
-    [375, 76],
-    [455, 96],
-    [530, 84],
-    [600, 91],
+    [55, 91],
+    [115, 69],
+    [175, 82],
+    [235, 79],
+    [300, 78],
+    [365, 79],
+    [425, 80],
+    [485, 68],
+    [545, 94],
+    [600, 78],
   ];
   for (let i = 1; i < points.length; i++) {
     const [y1, x1] = points[i - 1],
@@ -126,17 +128,19 @@ function isRiverReserved(x, y, padding = 8) {
 function drawRiver(c) {
   c.save();
 
-  // A narrow creek hugs the left edge and meanders just enough to make the
-  // entrance bridge feel connected to the landscape without stealing map space.
+  // S-curves at the map edges, with a calmer, nearly straight channel through
+  // the entrance bridge so the crossing reads cleanly at a glance.
   c.beginPath();
   c.moveTo(0, 0);
   c.lineTo(74, 0);
-  c.bezierCurveTo(82, 45, 91, 78, 84, 112);
-  c.bezierCurveTo(78, 150, 66, 181, 73, 219);
-  c.bezierCurveTo(79, 252, 95, 279, 92, 310);
-  c.bezierCurveTo(89, 348, 72, 374, 77, 411);
-  c.bezierCurveTo(83, 453, 101, 477, 96, 516);
-  c.bezierCurveTo(92, 550, 83, 577, 91, 600);
+  c.bezierCurveTo(91, 28, 96, 58, 86, 88);
+  c.bezierCurveTo(76, 118, 65, 142, 78, 174);
+  c.bezierCurveTo(82, 196, 80, 222, 79, 246);
+  c.bezierCurveTo(78, 270, 78, 292, 78, 316);
+  c.bezierCurveTo(78, 340, 79, 365, 79, 390);
+  c.bezierCurveTo(79, 414, 81, 434, 78, 454);
+  c.bezierCurveTo(70, 482, 65, 510, 79, 533);
+  c.bezierCurveTo(96, 558, 92, 579, 78, 600);
   c.lineTo(0, 600);
   c.closePath();
 
@@ -147,7 +151,6 @@ function drawRiver(c) {
   c.fillStyle = water;
   c.fill();
 
-  // Dark bank shadow and a thin mossy lip keep the creek readable against grass.
   c.strokeStyle = "rgba(7,12,10,.55)";
   c.lineWidth = 8;
   c.stroke();
@@ -155,7 +158,6 @@ function drawRiver(c) {
   c.lineWidth = 2.2;
   c.stroke();
 
-  // Sparse reflections/ripples, strongest around the crossing.
   c.lineCap = "round";
   for (const [x, y, w, a] of [
     [18, 72, 28, .11], [34, 162, 31, .08], [21, 245, 24, .10],
@@ -177,8 +179,6 @@ function drawEntranceBridge(c) {
   const y = PATH[0].y;
   c.save();
 
-  // A darker cut in the terrain makes the spawn read as a real crossing rather
-  // than a road that simply starts at the edge of the canvas.
   const ravine = c.createLinearGradient(0, y - 36, 0, y + 36);
   ravine.addColorStop(0, "rgba(12,18,15,0)");
   ravine.addColorStop(0.25, "rgba(8,12,10,.72)");
@@ -188,7 +188,6 @@ function drawEntranceBridge(c) {
   c.fillStyle = ravine;
   c.fillRect(0, y - 42, 58, 84);
 
-  // Stone abutments anchor the bridge into the bank.
   c.fillStyle = "#44473b";
   c.strokeStyle = "#696958";
   c.lineWidth = 1.2;
@@ -199,7 +198,6 @@ function drawEntranceBridge(c) {
     c.stroke();
   }
 
-  // Short timber bridge. It keeps the same traversable centreline as the road.
   c.fillStyle = "#3a2e22";
   c.fillRect(0, y - 24, 58, 48);
   c.fillStyle = "#675039";
@@ -210,7 +208,6 @@ function drawEntranceBridge(c) {
     c.fillStyle = "#675039";
   }
 
-  // Warm metal/rope edge details tie the bridge into the amber map language.
   c.strokeStyle = "rgba(211,166,87,.48)";
   c.lineWidth = 1.2;
   c.beginPath();
@@ -245,7 +242,6 @@ function drawFantasyMap(c) {
     return seed / 4294967296;
   };
 
-  // Broad moss/soil patches give the ground depth without looking tiled.
   for (let i = 0; i < 42; i++) {
     const x = random() * WORLD.width,
       y = random() * WORLD.height,
@@ -257,7 +253,6 @@ function drawFantasyMap(c) {
     c.fill();
   }
 
-  // Fine deterministic grass and soil texture. Placement is intentionally grid-free.
   for (let i = 0; i < 1350; i++) {
     const x = random() * WORLD.width,
       y = random() * WORLD.height,
@@ -271,20 +266,16 @@ function drawFantasyMap(c) {
     c.stroke();
   }
 
-  // Water is part of the terrain layer. The route and bridge are drawn above it.
   drawRiver(c);
 
-  // Raised earth/path edge, warm compacted dirt, then a worn centre.
   pathStroke(c, 58, "rgba(8,12,10,.48)");
   pathStroke(c, 52, "#5a5038");
   pathStroke(c, 45, "#756345");
   pathStroke(c, 35, "#65553c");
   pathStroke(c, 4, "rgba(214,184,111,.13)");
 
-  // The bridge visually replaces the otherwise abrupt start of the path.
   drawEntranceBridge(c);
 
-  // Embedded stones along the route, deterministic and purely decorative.
   for (const { a, b, length } of SEGMENTS) {
     const angle = Math.atan2(b.y - a.y, b.x - a.x);
     for (let d = 30; d < length - 12; d += 34 + random() * 22) {
@@ -297,7 +288,6 @@ function drawFantasyMap(c) {
     }
   }
 
-  // Existing blocked zones become deliberate scenery clusters.
   const clusters = new Map();
   for (const key of BLOCKED) {
     const [gx, gy] = key.split(",").map(Number),
@@ -326,13 +316,11 @@ function drawFantasyMap(c) {
     clusterIndex++;
   }
 
-  // Warm guide lights stay clearly outside the enemy route.
   for (const [x, y] of [
     [205, 360], [320, 195], [510, 85], [690, 210],
     [700, 400], [790, 530], [920, 410], [920, 240],
   ]) lantern(c, x, y);
 
-  // Sparse loose rocks/foliage outside the route and creek.
   for (let i = 0; i < 42; i++) {
     const gx = Math.floor(random() * 24),
       gy = Math.floor(random() * 15),
@@ -363,7 +351,6 @@ function drawFantasyMap(c) {
   c.fill();
 }
 
-// Keep gameplay/path logic in the original renderer; only replace its cached map artwork.
 Renderer.prototype.drawMap = function drawMap(c) {
   drawFantasyMap(c);
 };
