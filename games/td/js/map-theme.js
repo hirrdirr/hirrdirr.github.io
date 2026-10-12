@@ -144,7 +144,7 @@ function drawFantasyMap(c) {
     c.fill();
   }
 
-  // Fine deterministic grass and soil texture.
+  // Fine deterministic grass and soil texture. Placement is intentionally grid-free.
   for (let i = 0; i < 1350; i++) {
     const x = random() * WORLD.width,
       y = random() * WORLD.height,
@@ -155,16 +155,6 @@ function drawFantasyMap(c) {
     c.moveTo(x, y);
     c.lineTo(x + (random() - 0.5) * 5, y - 1 - random() * 4);
     c.stroke();
-  }
-
-  // Very subtle build grid: useful mechanically, but no longer dominates the art.
-  for (let y = 0; y < 15; y++) {
-    for (let x = 0; x < 24; x++) {
-      if (ROAD.has(`${x},${y}`)) continue;
-      c.strokeStyle = "rgba(174,171,122,.035)";
-      c.lineWidth = 0.55;
-      c.strokeRect(x * 40 + 0.5, y * 40 + 0.5, 39, 39);
-    }
   }
 
   // Raised earth/path edge, warm compacted dirt, then a worn centre.
