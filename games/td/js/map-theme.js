@@ -48,34 +48,33 @@ function bush(c, x, y, scale = 1) {
   c.restore();
 }
 
-function runeStone(c, x, y, scale = 1) {
+function rock(c, x, y, scale = 1) {
   c.save();
   c.translate(x, y);
   c.scale(scale, scale);
-  c.fillStyle = "rgba(0,0,0,.32)";
+  c.fillStyle = "rgba(0,0,0,.30)";
   c.beginPath();
-  c.ellipse(4, 13, 18, 7, 0, 0, TAU);
+  c.ellipse(4, 11, 19, 7, 0.08, 0, TAU);
   c.fill();
-  c.fillStyle = "#4c5143";
-  c.strokeStyle = "#77755c";
-  c.lineWidth = 1.5;
+
+  c.fillStyle = "#4b5045";
+  c.strokeStyle = "#676b5b";
+  c.lineWidth = 1.3;
   c.beginPath();
-  c.moveTo(-10, 10);
-  c.lineTo(-8, -13);
-  c.lineTo(2, -21);
-  c.lineTo(11, -11);
-  c.lineTo(9, 11);
+  c.moveTo(-15, 8);
+  c.quadraticCurveTo(-17, -1, -9, -9);
+  c.quadraticCurveTo(-3, -16, 6, -13);
+  c.quadraticCurveTo(15, -10, 16, 0);
+  c.quadraticCurveTo(17, 8, 8, 11);
+  c.lineTo(-7, 12);
   c.closePath();
   c.fill();
   c.stroke();
-  c.strokeStyle = "rgba(231,181,86,.55)";
-  c.lineWidth = 1.4;
+
+  c.fillStyle = "rgba(151,151,124,.18)";
   c.beginPath();
-  c.moveTo(-2, -12);
-  c.lineTo(3, -5);
-  c.lineTo(-2, 1);
-  c.lineTo(4, 8);
-  c.stroke();
+  c.ellipse(-4, -7, 7, 3.2, -0.25, 0, TAU);
+  c.fill();
   c.restore();
 }
 
@@ -184,16 +183,16 @@ function drawFantasyMap(c) {
       bush(c, x + 15, y - 8, 0.78);
       pebble(c, x + 22, y + 18, 8, "#4d5145");
     } else {
-      runeStone(c, x - 8, y - 2, 1.05);
+      rock(c, x - 8, y - 2, 1.05);
       bush(c, x + 19, y + 12, 0.72);
     }
     clusterIndex++;
   }
 
-  // Warm guide lights echo the amber core/tower palette.
+  // Warm guide lights stay clearly outside the enemy route.
   for (const [x, y] of [
-    [235, 326], [286, 178], [510, 118], [650, 206],
-    [666, 420], [790, 500], [866, 390], [900, 325],
+    [205, 360], [320, 195], [510, 85], [690, 210],
+    [700, 400], [790, 530], [920, 410], [920, 240],
   ]) lantern(c, x, y);
 
   // Sparse loose rocks/foliage outside the route.
