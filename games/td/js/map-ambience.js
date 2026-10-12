@@ -53,19 +53,42 @@ Renderer.prototype.render = function renderWithMapAmbience(game, input, elapsed)
     0,
   );
 
-  // Lantern glow breathes very gently; the static lamp art still lives in map-theme.js.
+  // Keep the existing lantern footprint, but make the light itself feel more alive.
   for (let i = 0; i < LANTERNS.length; i++) {
     const [x, y] = LANTERNS[i],
-      pulse = this.reduced ? 0.82 : 0.72 + Math.sin(time * 2.15 + i * 1.7) * 0.1,
-      radius = 18 + pulse * 8;
+      slow = Math.sin(time * 2.1 + i * 1.7),
+      flicker = Math.sin(time * 6.8 + i * 2.37) * 0.55 + Math.sin(time * 11.3 + i) * 0.2,
+      energy = this.reduced ? 0.82 : 0.78 + slow * 0.11 + flicker * 0.045,
+      radius = 24 + slow * 1.3;
+
     const glow = c.createRadialGradient(x, y, 1, x, y, radius);
-    glow.addColorStop(0, `rgba(255,214,120,${0.16 + pulse * 0.08})`);
-    glow.addColorStop(0.42, `rgba(241,168,72,${0.08 + pulse * 0.04})`);
-    glow.addColorStop(1, "rgba(241,168,72,0)");
+    glow.addColorStop(0, `rgba(255,224,145,${0.28 + energy * 0.18})`);
+    glow.addColorStop(0.34, `rgba(247,180,83,${0.14 + energy * 0.10})`);
+    glow.addColorStop(0.72, `rgba(224,133,54,${0.055 + energy * 0.035})`);
+    glow.addColorStop(1, "rgba(224,133,54,0)");
     c.fillStyle = glow;
     c.beginPath();
     c.arc(x, y, radius, 0, TAU);
     c.fill();
+
+    // Small hot core so the light reads as a flame rather than a static halo.
+    c.save();
+    c.globalAlpha = this.reduced ? 0.72 : 0.68 + energy * 0.22;
+    c.fillStyle = "#ffd887";
+    c.shadowColor = "#ffb44f";
+    c.shadowBlur = 7 + energy * 3;
+    c.beginPath();
+    c.ellipse(
+      x + (this.reduced ? 0 : Math.sin(time * 7.4 + i) * 0.55),
+      y - 0.4,
+      2.4,
+      3.2 + (this.reduced ? 0 : Math.max(0, flicker) * 0.55),
+      0,
+      0,
+      TAU,
+    );
+    c.fill();
+    c.restore();
   }
 
   if (!this.reduced) {
