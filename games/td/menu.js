@@ -1,5 +1,6 @@
 import { DIFFICULTIES, resolveDifficulty } from "./js/difficulty.js";
 import { fitGameToViewport } from "./js/layout.js";
+import "./js/game-feel.js";
 
 // Only the existing map is selectable. Add future map entries here when playable.
 const MAPS = [{
