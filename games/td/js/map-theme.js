@@ -96,6 +96,83 @@ function lantern(c, x, y) {
   c.restore();
 }
 
+function riverEdgeX(y) {
+  const points = [
+    [0, 74],
+    [70, 86],
+    [145, 70],
+    [225, 82],
+    [300, 92],
+    [375, 76],
+    [455, 96],
+    [530, 84],
+    [600, 91],
+  ];
+  for (let i = 1; i < points.length; i++) {
+    const [y1, x1] = points[i - 1],
+      [y2, x2] = points[i];
+    if (y <= y2) {
+      const t = (y - y1) / (y2 - y1);
+      return x1 + (x2 - x1) * t;
+    }
+  }
+  return points.at(-1)[1];
+}
+
+function isRiverReserved(x, y, padding = 8) {
+  return x < riverEdgeX(y) + padding;
+}
+
+function drawRiver(c) {
+  c.save();
+
+  // A narrow creek hugs the left edge and meanders just enough to make the
+  // entrance bridge feel connected to the landscape without stealing map space.
+  c.beginPath();
+  c.moveTo(0, 0);
+  c.lineTo(74, 0);
+  c.bezierCurveTo(82, 45, 91, 78, 84, 112);
+  c.bezierCurveTo(78, 150, 66, 181, 73, 219);
+  c.bezierCurveTo(79, 252, 95, 279, 92, 310);
+  c.bezierCurveTo(89, 348, 72, 374, 77, 411);
+  c.bezierCurveTo(83, 453, 101, 477, 96, 516);
+  c.bezierCurveTo(92, 550, 83, 577, 91, 600);
+  c.lineTo(0, 600);
+  c.closePath();
+
+  const water = c.createLinearGradient(0, 0, 110, 0);
+  water.addColorStop(0, "#101f22");
+  water.addColorStop(0.55, "#183238");
+  water.addColorStop(1, "#214149");
+  c.fillStyle = water;
+  c.fill();
+
+  // Dark bank shadow and a thin mossy lip keep the creek readable against grass.
+  c.strokeStyle = "rgba(7,12,10,.55)";
+  c.lineWidth = 8;
+  c.stroke();
+  c.strokeStyle = "rgba(94,112,72,.48)";
+  c.lineWidth = 2.2;
+  c.stroke();
+
+  // Sparse reflections/ripples, strongest around the crossing.
+  c.lineCap = "round";
+  for (const [x, y, w, a] of [
+    [18, 72, 28, .11], [34, 162, 31, .08], [21, 245, 24, .10],
+    [30, 286, 34, .14], [17, 319, 26, .12], [39, 405, 30, .08],
+    [24, 492, 35, .10], [32, 560, 27, .07],
+  ]) {
+    c.strokeStyle = `rgba(139,184,183,${a})`;
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.moveTo(x, y);
+    c.quadraticCurveTo(x + w * .45, y - 2, x + w, y);
+    c.stroke();
+  }
+
+  c.restore();
+}
+
 function drawEntranceBridge(c) {
   const y = PATH[0].y;
   c.save();
@@ -185,6 +262,7 @@ function drawFantasyMap(c) {
     const x = random() * WORLD.width,
       y = random() * WORLD.height,
       light = random() > 0.56;
+    if (isRiverReserved(x, y, 3)) continue;
     c.strokeStyle = light ? "rgba(139,154,92,.10)" : "rgba(7,14,10,.16)";
     c.lineWidth = 0.7;
     c.beginPath();
@@ -192,6 +270,9 @@ function drawFantasyMap(c) {
     c.lineTo(x + (random() - 0.5) * 5, y - 1 - random() * 4);
     c.stroke();
   }
+
+  // Water is part of the terrain layer. The route and bridge are drawn above it.
+  drawRiver(c);
 
   // Raised earth/path edge, warm compacted dirt, then a worn centre.
   pathStroke(c, 58, "rgba(8,12,10,.48)");
@@ -211,6 +292,7 @@ function drawFantasyMap(c) {
         offset = side * (14 + random() * 6),
         px = a.x + ((b.x - a.x) * d) / length - Math.sin(angle) * offset,
         py = a.y + ((b.y - a.y) * d) / length + Math.cos(angle) * offset;
+      if (isRiverReserved(px, py, 1) && px < 58) continue;
       pebble(c, px, py, 1.6 + random() * 2.7, random() > 0.5 ? "#95805a" : "#4e4937");
     }
   }
@@ -229,6 +311,10 @@ function drawFantasyMap(c) {
   for (const cells of clusters.values()) {
     const x = cells.reduce((sum, p) => sum + (p.gx + 0.5) * 40, 0) / cells.length,
       y = cells.reduce((sum, p) => sum + (p.gy + 0.5) * 40, 0) / cells.length;
+    if (isRiverReserved(x, y, 20)) {
+      clusterIndex++;
+      continue;
+    }
     if (clusterIndex % 2 === 0) {
       bush(c, x - 14, y + 5, 1.05);
       bush(c, x + 15, y - 8, 0.78);
@@ -246,7 +332,7 @@ function drawFantasyMap(c) {
     [700, 400], [790, 530], [920, 410], [920, 240],
   ]) lantern(c, x, y);
 
-  // Sparse loose rocks/foliage outside the route.
+  // Sparse loose rocks/foliage outside the route and creek.
   for (let i = 0; i < 42; i++) {
     const gx = Math.floor(random() * 24),
       gy = Math.floor(random() * 15),
@@ -254,6 +340,7 @@ function drawFantasyMap(c) {
     if (ROAD.has(key) || BLOCKED.has(key)) continue;
     const x = gx * 40 + 6 + random() * 28,
       y = gy * 40 + 7 + random() * 26;
+    if (isRiverReserved(x, y, 10)) continue;
     if (random() > 0.55) pebble(c, x, y, 2 + random() * 4, "rgba(91,91,69,.55)");
     else {
       c.strokeStyle = "rgba(116,140,79,.28)";
