@@ -45,7 +45,7 @@ Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input
       1,
       true,
       "#d3a657",
-      2.2,
+      1.45,
     );
   }
 
@@ -63,7 +63,7 @@ Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input
       1,
       false,
       check.ok ? "#d3a657" : "#cf6657",
-      2,
+      1.35,
     );
   }
 
