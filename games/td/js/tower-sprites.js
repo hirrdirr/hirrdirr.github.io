@@ -33,26 +33,41 @@ export function firingFrame(recoil) {
 export class TowerSprites {
   constructor(ImageClass = Image) {
     this.loaded = new Map();
+    this.failed = new Set();
     this.ready = Promise.all(
       Object.entries(TOWER_SPRITES).map(([kind, sprite]) =>
         new Promise((resolve) => {
+          let retries = 0;
           const image = new ImageClass();
+
           image.onload = () => {
             if (
               image.naturalWidth !== sprite.frameWidth * sprite.frames ||
               image.naturalHeight !== sprite.frameHeight
             ) {
               console.warn(`Unexpected tower spritesheet dimensions: ${sprite.src}`);
+              this.failed.add(kind);
               resolve(false);
               return;
             }
             this.loaded.set(kind, { ...sprite, image });
+            this.failed.delete(kind);
             resolve(true);
           };
+
           image.onerror = () => {
+            if (retries < 1) {
+              retries++;
+              // A hard refresh can briefly race static asset delivery. Retry once
+              // before treating the sprite as genuinely unavailable.
+              image.src = `${sprite.src}${sprite.src.includes("?") ? "&" : "?"}retry=1`;
+              return;
+            }
             console.warn(`Could not load tower spritesheet: ${sprite.src}`);
+            this.failed.add(kind);
             resolve(false);
           };
+
           image.src = sprite.src;
         }),
       ),
@@ -61,7 +76,13 @@ export class TowerSprites {
 
   draw(c, kind, x, y, angle = -Math.PI / 2, recoil = 0, scale = 1, aim = true) {
     const sprite = this.loaded.get(kind);
-    if (!sprite) return false;
+
+    // All current tower kinds have sprite assets. While an image is still
+    // loading, claim the draw so the legacy procedural art never flashes in.
+    // Return false only after a real load failure, allowing the old renderer to
+    // remain as an emergency fallback.
+    if (!sprite) return !this.failed.has(kind) && kind in TOWER_SPRITES;
+
     const { frameWidth: w, frameHeight: h, size, aimPart } = sprite;
     const frame = aim ? firingFrame(recoil) : 0;
     const factor = size / h;
