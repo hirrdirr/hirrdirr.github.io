@@ -46,14 +46,14 @@ Renderer.prototype.render = function renderWithCleanPlacement(game, input, elaps
     return originalStrokeRect.call(this, x, y, w, h);
   };
 
-  // Sprite previews are drawn at globalAlpha .65. Tint only that image red when
-  // placement is invalid; valid placement keeps the supplied tower artwork.
+  // Keep the tower's own colours/details and blend a warm red warning over the
+  // invalid preview instead of replacing the sprite with a flat red silhouette.
   if (!check.ok) {
     c.drawImage = function invalidPlacementSprite(...args) {
       if (this.globalAlpha > 0.64 && this.globalAlpha < 0.66) {
         const previousFilter = this.filter;
         this.filter =
-          "brightness(0) saturate(100%) invert(39%) sepia(72%) saturate(1930%) hue-rotate(326deg) brightness(103%) contrast(101%)";
+          "sepia(28%) saturate(185%) hue-rotate(318deg) brightness(92%) contrast(108%)";
         try {
           return originalDrawImage.apply(this, args);
         } finally {
