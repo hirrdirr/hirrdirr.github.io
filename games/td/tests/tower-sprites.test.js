@@ -7,7 +7,7 @@ import { drawTower, paintIcons } from "../js/renderer.js";
 
 class LoadedImage {
   set src(value) {
-    const sprite = Object.values(TOWER_SPRITES).find((s) => s.src === value);
+    const sprite = Object.values(TOWER_SPRITES).find((s) => value.startsWith(s.src));
     this.naturalWidth = sprite.frameWidth * sprite.frames;
     this.naturalHeight = sprite.frameHeight;
     queueMicrotask(() => this.onload());
@@ -55,7 +55,7 @@ test("firing artwork follows the existing recoil from flash to recovery to idle"
 
 test("idle previews keep the full sprite centered, undistorted and free of muzzle flashes", async () => {
   const sprites = new TowerSprites(LoadedImage);
-  assert.equal(sprites.draw({}, "repeater", 20, 20, 0), false, "Loading permits fallback");
+  assert.equal(sprites.draw({}, "repeater", 20, 20, 0), true, "Loading suppresses procedural fallback");
   assert.equal(await sprites.ready, true);
   for (const [kind, sprite] of Object.entries(TOWER_SPRITES)) {
     const c = recordingContext();
