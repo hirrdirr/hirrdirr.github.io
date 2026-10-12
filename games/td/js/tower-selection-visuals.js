@@ -6,6 +6,7 @@ const originalRender = Renderer.prototype.render;
 Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input, elapsed) {
   const c = this.ctx;
   const originalStrokeRect = c.strokeRect;
+  const originalHoverId = input.hoverId;
 
   // Suppress the legacy 44x44 square around the selected tower only.
   c.strokeRect = function suppressLegacySelection(x, y, w, h) {
@@ -13,10 +14,15 @@ Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input
     return originalStrokeRect.call(this, x, y, w, h);
   };
 
+  // Renderer hover ranges are purely visual. Temporarily hide hoverId while the
+  // base renderer draws so range circles only appear for explicitly selected towers.
+  input.hoverId = null;
+
   let result;
   try {
     result = originalRender.call(this, game, input, elapsed);
   } finally {
+    input.hoverId = originalHoverId;
     c.strokeRect = originalStrokeRect;
   }
 
