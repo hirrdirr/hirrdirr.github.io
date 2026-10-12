@@ -7,6 +7,14 @@ const LANTERNS = [
   [205, 360], [320, 195], [510, 85], [690, 210],
   [700, 400], [790, 530], [920, 410], [920, 240],
 ];
+const GRASS_PATCHES = [
+  [132, 92, 1.0, 0.2],
+  [262, 510, 1.15, 1.1],
+  [405, 112, 0.9, 2.0],
+  [565, 515, 1.05, 2.8],
+  [752, 102, 1.1, 3.6],
+  [845, 455, 0.95, 4.3],
+];
 
 function makeMotes(count, seed = 4242) {
   let state = seed >>> 0;
@@ -36,6 +44,31 @@ function makeMotes(count, seed = 4242) {
     });
   }
   return motes;
+}
+
+function drawGrassPatch(c, x, y, scale, phase, time, reduced) {
+  c.save();
+  c.translate(x, y);
+  c.scale(scale, scale);
+  c.lineCap = "round";
+  const sway = reduced ? 0 : Math.sin(time * 1.25 + phase) * 2.4;
+  const blades = [
+    [-8, 0, -10, -11],
+    [-4, 1, -3, -15],
+    [0, 1, 1, -18],
+    [4, 1, 7, -14],
+    [8, 0, 11, -10],
+  ];
+  for (let i = 0; i < blades.length; i++) {
+    const [x1, y1, x2, y2] = blades[i];
+    c.strokeStyle = i % 2 ? "rgba(137,150,88,.28)" : "rgba(95,126,73,.34)";
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.moveTo(x1, y1);
+    c.quadraticCurveTo((x1 + x2) / 2 + sway * (0.45 + i * 0.08), y2 * 0.55, x2 + sway, y2);
+    c.stroke();
+  }
+  c.restore();
 }
 
 const originalRender = Renderer.prototype.render;
@@ -90,6 +123,27 @@ Renderer.prototype.render = function renderWithMapAmbience(game, input, elapsed)
     );
     c.fill();
     c.restore();
+
+    // Only every second lantern throws a tiny spark now and then, avoiding noise.
+    if (!this.reduced && i % 2 === 0) {
+      const cycle = (time * 0.62 + i * 0.19) % 1,
+        sparkAlpha = Math.max(0, 1 - cycle * 1.35);
+      if (sparkAlpha > 0) {
+        c.save();
+        c.globalAlpha = sparkAlpha * 0.38;
+        c.fillStyle = "#f6ca74";
+        c.shadowColor = "#f0a84b";
+        c.shadowBlur = 4;
+        c.beginPath();
+        c.arc(x + Math.sin(i + cycle * 7) * 2.6, y - 5 - cycle * 10, 0.9, 0, TAU);
+        c.fill();
+        c.restore();
+      }
+    }
+  }
+
+  for (const [x, y, scale, phase] of GRASS_PATCHES) {
+    drawGrassPatch(c, x, y, scale, phase, time, this.reduced);
   }
 
   if (!this.reduced) {
