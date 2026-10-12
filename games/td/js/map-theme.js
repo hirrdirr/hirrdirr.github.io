@@ -96,25 +96,61 @@ function lantern(c, x, y) {
   c.restore();
 }
 
-function entranceArrow(c) {
-  const x = 24,
-    y = PATH[0].y;
+function drawEntranceBridge(c) {
+  const y = PATH[0].y;
   c.save();
-  c.translate(x, y);
-  c.fillStyle = "rgba(237,196,103,.72)";
-  c.strokeStyle = "rgba(83,58,27,.45)";
+
+  // A darker cut in the terrain makes the spawn read as a real crossing rather
+  // than a road that simply starts at the edge of the canvas.
+  const ravine = c.createLinearGradient(0, y - 36, 0, y + 36);
+  ravine.addColorStop(0, "rgba(12,18,15,0)");
+  ravine.addColorStop(0.25, "rgba(8,12,10,.72)");
+  ravine.addColorStop(0.5, "rgba(4,8,7,.92)");
+  ravine.addColorStop(0.75, "rgba(8,12,10,.72)");
+  ravine.addColorStop(1, "rgba(12,18,15,0)");
+  c.fillStyle = ravine;
+  c.fillRect(0, y - 42, 58, 84);
+
+  // Stone abutments anchor the bridge into the bank.
+  c.fillStyle = "#44473b";
+  c.strokeStyle = "#696958";
+  c.lineWidth = 1.2;
+  for (const py of [y - 31, y + 18]) {
+    c.beginPath();
+    c.roundRect(8, py, 25, 13, 3);
+    c.fill();
+    c.stroke();
+  }
+
+  // Short timber bridge. It keeps the same traversable centreline as the road.
+  c.fillStyle = "#3a2e22";
+  c.fillRect(0, y - 24, 58, 48);
+  c.fillStyle = "#675039";
+  for (let x = -2; x < 60; x += 10) {
+    c.fillRect(x, y - 21, 8, 42);
+    c.fillStyle = "rgba(221,181,108,.09)";
+    c.fillRect(x + 1, y - 18, 1, 35);
+    c.fillStyle = "#675039";
+  }
+
+  // Warm metal/rope edge details tie the bridge into the amber map language.
+  c.strokeStyle = "rgba(211,166,87,.48)";
   c.lineWidth = 1.2;
   c.beginPath();
-  c.moveTo(-13, -6);
-  c.lineTo(2, -6);
-  c.lineTo(2, -12);
-  c.lineTo(16, 0);
-  c.lineTo(2, 12);
-  c.lineTo(2, 6);
-  c.lineTo(-13, 6);
-  c.closePath();
-  c.fill();
+  c.moveTo(1, y - 24);
+  c.lineTo(58, y - 24);
+  c.moveTo(1, y + 24);
+  c.lineTo(58, y + 24);
   c.stroke();
+
+  c.fillStyle = "rgba(222,183,100,.72)";
+  for (const x of [10, 28, 46]) {
+    c.beginPath();
+    c.arc(x, y - 24, 1.5, 0, TAU);
+    c.arc(x, y + 24, 1.5, 0, TAU);
+    c.fill();
+  }
+
   c.restore();
 }
 
@@ -163,6 +199,9 @@ function drawFantasyMap(c) {
   pathStroke(c, 45, "#756345");
   pathStroke(c, 35, "#65553c");
   pathStroke(c, 4, "rgba(214,184,111,.13)");
+
+  // The bridge visually replaces the otherwise abrupt start of the path.
+  drawEntranceBridge(c);
 
   // Embedded stones along the route, deterministic and purely decorative.
   for (const { a, b, length } of SEGMENTS) {
@@ -227,9 +266,6 @@ function drawFantasyMap(c) {
       c.stroke();
     }
   }
-
-  // A single directional marker shows where enemies enter the route.
-  entranceArrow(c);
 
   const coreGlow = c.createRadialGradient(933, 300, 4, 933, 300, 62);
   coreGlow.addColorStop(0, "rgba(234,174,66,.16)");
