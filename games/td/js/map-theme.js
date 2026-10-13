@@ -109,15 +109,15 @@ function interpolateEdge(points, y) {
 }
 
 const RIVER_OUTER = [
-  [0, 7], [55, 18], [110, 5], [165, 14], [220, 4],
-  [265, 3], [300, 2], [340, 3], [390, 5], [440, 15],
-  [490, 5], [545, 23], [600, 8],
+  [0, 8], [60, 15], [120, 7], [180, 13], [235, 6],
+  [260, 4], [285, 3], [315, 3], [340, 4], [390, 8],
+  [445, 15], [495, 8], [545, 19], [600, 10],
 ];
 
 const RIVER_INNER = [
-  [0, 72], [55, 95], [110, 65], [165, 82], [220, 69],
-  [265, 60], [300, 58], [340, 59], [390, 64], [440, 82],
-  [490, 70], [545, 101], [600, 83],
+  [0, 74], [60, 89], [120, 70], [180, 80], [235, 68],
+  [260, 61], [285, 59], [315, 59], [340, 61], [390, 68],
+  [445, 81], [495, 72], [545, 94], [600, 84],
 ];
 
 function riverOuterEdgeX(y) {
@@ -132,33 +132,38 @@ function isRiverReserved(x, y, padding = 8) {
   return x > riverOuterEdgeX(y) - padding && x < riverEdgeX(y) + padding;
 }
 
+function traceSmoothEdge(c, points) {
+  if (points.length < 2) return;
+  c.moveTo(points[0][1], points[0][0]);
+  for (let i = 1; i < points.length - 1; i++) {
+    const [y, x] = points[i];
+    const [nextY, nextX] = points[i + 1];
+    c.quadraticCurveTo(x, y, (x + nextX) / 2, (y + nextY) / 2);
+  }
+  const [lastY, lastX] = points.at(-1);
+  c.quadraticCurveTo(lastX, lastY, lastX, lastY);
+}
+
 function drawRiver(c) {
   c.save();
 
-  // Two distinct banks: a slim strip of terrain remains along the map edge,
-  // while the channel meanders between it and the main playfield. Around the
-  // entrance bridge both banks calm down so the crossing stays almost straight.
+  // Build both river banks from smooth guide points instead of joining
+  // individual hard bends. This keeps the channel organic while leaving a
+  // narrow strip of terrain along the far-left map edge. The guide points are
+  // intentionally calmer around the entrance bridge so the crossing reads
+  // naturally without turning the river into a straight canal.
   c.beginPath();
-  c.moveTo(7, 0);
-  c.bezierCurveTo(18, 30, 22, 62, 9, 92);
-  c.bezierCurveTo(0, 123, 3, 145, 14, 168);
-  c.bezierCurveTo(8, 195, 3, 225, 3, 263);
-  c.bezierCurveTo(2, 278, 2, 288, 2, 300);
-  c.bezierCurveTo(2, 315, 3, 330, 3, 344);
-  c.bezierCurveTo(4, 382, 7, 412, 15, 440);
-  c.bezierCurveTo(7, 468, 2, 493, 9, 515);
-  c.bezierCurveTo(25, 545, 20, 572, 8, 600);
+  traceSmoothEdge(c, RIVER_OUTER);
 
-  c.lineTo(83, 600);
-  c.bezierCurveTo(100, 574, 108, 548, 91, 521);
-  c.bezierCurveTo(75, 496, 67, 475, 82, 445);
-  c.bezierCurveTo(72, 414, 64, 382, 60, 345);
-  c.bezierCurveTo(59, 330, 58, 315, 58, 300);
-  c.bezierCurveTo(58, 286, 59, 274, 60, 262);
-  c.bezierCurveTo(64, 226, 75, 198, 82, 170);
-  c.bezierCurveTo(70, 145, 62, 126, 65, 108);
-  c.bezierCurveTo(69, 83, 97, 61, 95, 39);
-  c.bezierCurveTo(91, 23, 80, 10, 72, 0);
+  const reversedInner = [...RIVER_INNER].reverse();
+  c.lineTo(reversedInner[0][1], reversedInner[0][0]);
+  for (let i = 1; i < reversedInner.length - 1; i++) {
+    const [y, x] = reversedInner[i];
+    const [nextY, nextX] = reversedInner[i + 1];
+    c.quadraticCurveTo(x, y, (x + nextX) / 2, (y + nextY) / 2);
+  }
+  const [innerLastY, innerLastX] = reversedInner.at(-1);
+  c.quadraticCurveTo(innerLastX, innerLastY, innerLastX, innerLastY);
   c.closePath();
 
   const water = c.createLinearGradient(4, 0, 105, 0);
@@ -168,8 +173,10 @@ function drawRiver(c) {
   c.fillStyle = water;
   c.fill();
 
-  // Both banks get a soft dark cut and a mossy lip so the channel reads as
-  // carved into the terrain instead of painted over it.
+  // Keep the shore soft and subdued: a dark cut for depth and a thin mossy
+  // lip on top. Rounded joins/caps prevent little spikes at tight meanders.
+  c.lineJoin = "round";
+  c.lineCap = "round";
   c.strokeStyle = "rgba(7,12,10,.58)";
   c.lineWidth = 7;
   c.stroke();
@@ -177,7 +184,6 @@ function drawRiver(c) {
   c.lineWidth = 2;
   c.stroke();
 
-  c.lineCap = "round";
   for (const [x, y, w, a] of [
     [30, 68, 28, .10], [22, 150, 31, .08], [27, 235, 25, .09],
     [22, 286, 28, .13], [24, 320, 27, .11], [31, 414, 31, .08],
