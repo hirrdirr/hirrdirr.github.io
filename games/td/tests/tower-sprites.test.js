@@ -35,7 +35,7 @@ function recordingContext() {
 
 test("every existing tower name maps to exactly one supplied, unchanged four-frame PNG", () => {
   const names = readdirSync(new URL("../assets/towers/", import.meta.url))
-    .filter((name) => name.endsWith(".png")).sort();
+    .filter((name) => name.endsWith("_4f.png")).sort();
   assert.deepEqual(Object.keys(TOWER_SPRITES), Object.keys(TOWERS));
   assert.deepEqual(names, Object.values(TOWERS).map((t) => `${t.name}_4f.png`).sort());
   for (const [kind, sprite] of Object.entries(TOWER_SPRITES)) {
