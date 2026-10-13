@@ -152,13 +152,53 @@ function strokeRiverEdge(c, points, width, color) {
   c.stroke();
 }
 
+function riverRock(c, x, y, scale = 1) {
+  c.save();
+  c.translate(x, y);
+  c.scale(scale, scale);
+  c.fillStyle = "rgba(0,0,0,.30)";
+  c.beginPath();
+  c.ellipse(1, 4, 8, 4, -0.15, 0, TAU);
+  c.fill();
+  c.fillStyle = "#555a4d";
+  c.strokeStyle = "rgba(118,124,101,.60)";
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(-7, 3);
+  c.quadraticCurveTo(-7, -4, -2, -7);
+  c.quadraticCurveTo(5, -8, 8, -2);
+  c.quadraticCurveTo(9, 4, 3, 6);
+  c.quadraticCurveTo(-3, 7, -7, 3);
+  c.fill();
+  c.stroke();
+  c.fillStyle = "rgba(180,181,145,.13)";
+  c.beginPath();
+  c.ellipse(-1, -4, 3.8, 1.5, -0.15, 0, TAU);
+  c.fill();
+  c.restore();
+}
+
+function shorelineGrass(c, x, y, flip = 1, scale = 1) {
+  c.save();
+  c.translate(x, y);
+  c.scale(flip * scale, scale);
+  c.lineCap = "round";
+  for (const [dx, h, bend] of [[-5, 10, -3], [-1, 14, -1], [3, 12, 2], [7, 8, 3]]) {
+    c.strokeStyle = "rgba(99,124,67,.58)";
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.moveTo(dx, 4);
+    c.quadraticCurveTo(dx + bend, -h * .45, dx + bend * .7, -h);
+    c.stroke();
+  }
+  c.restore();
+}
+
 function drawRiver(c) {
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
 
-  // Build one continuous water shape, extending beyond the visible map so the
-  // river never looks capped at the top or bottom edge.
   c.beginPath();
   traceSmoothEdge(c, RIVER_OUTER);
   const reversedInner = [...RIVER_INNER].reverse();
@@ -172,66 +212,85 @@ function drawRiver(c) {
   c.quadraticCurveTo(innerLastX, innerLastY, innerLastX, innerLastY);
   c.closePath();
 
-  // Layered water gives the narrow channel more depth than a flat fill.
-  const water = c.createLinearGradient(0, 0, 104, 0);
-  water.addColorStop(0, "#0d2025");
-  water.addColorStop(0.28, "#12313a");
-  water.addColorStop(0.62, "#173b45");
-  water.addColorStop(1, "#10282f");
+  const water = c.createLinearGradient(0, 0, 110, 0);
+  water.addColorStop(0, "#08191f");
+  water.addColorStop(0.28, "#0d2c35");
+  water.addColorStop(0.58, "#17424c");
+  water.addColorStop(0.80, "#11343e");
+  water.addColorStop(1, "#081c22");
   c.fillStyle = water;
   c.fill();
 
-  const depth = c.createLinearGradient(4, 0, 96, 0);
-  depth.addColorStop(0, "rgba(0,7,10,.30)");
-  depth.addColorStop(0.3, "rgba(0,7,10,.03)");
-  depth.addColorStop(0.68, "rgba(103,166,169,.07)");
-  depth.addColorStop(1, "rgba(0,8,10,.22)");
-  c.fillStyle = depth;
+  const sheen = c.createLinearGradient(4, 0, 98, 0);
+  sheen.addColorStop(0, "rgba(0,4,6,.38)");
+  sheen.addColorStop(0.30, "rgba(62,137,145,.04)");
+  sheen.addColorStop(0.56, "rgba(111,184,185,.10)");
+  sheen.addColorStop(0.76, "rgba(42,105,115,.04)");
+  sheen.addColorStop(1, "rgba(0,5,7,.32)");
+  c.fillStyle = sheen;
   c.fill();
 
-  // Draw only the two banks, never the hidden top/bottom closing segments.
-  // Multiple narrow layers mimic soil, damp earth and a mossy grass lip.
-  strokeRiverEdge(c, RIVER_OUTER, 11, "rgba(5,10,8,.55)");
-  strokeRiverEdge(c, RIVER_INNER, 11, "rgba(5,10,8,.55)");
-  strokeRiverEdge(c, RIVER_OUTER, 6, "rgba(69,61,42,.78)");
-  strokeRiverEdge(c, RIVER_INNER, 6, "rgba(69,61,42,.78)");
-  strokeRiverEdge(c, RIVER_OUTER, 3, "rgba(92,105,61,.72)");
-  strokeRiverEdge(c, RIVER_INNER, 3, "rgba(92,105,61,.72)");
-  strokeRiverEdge(c, RIVER_OUTER, 1.2, "rgba(137,153,91,.32)");
-  strokeRiverEdge(c, RIVER_INNER, 1.2, "rgba(137,153,91,.32)");
+  // Stronger layered banks: shadowed cut -> damp soil -> moss -> grass rim.
+  for (const edge of [RIVER_OUTER, RIVER_INNER]) {
+    strokeRiverEdge(c, edge, 15, "rgba(4,9,7,.60)");
+    strokeRiverEdge(c, edge, 10, "rgba(61,51,34,.95)");
+    strokeRiverEdge(c, edge, 7, "rgba(90,74,44,.88)");
+    strokeRiverEdge(c, edge, 4.2, "rgba(66,88,48,.92)");
+    strokeRiverEdge(c, edge, 2, "rgba(112,132,70,.72)");
+  }
 
-  // Thin wet highlights hug the water side of the banks.
-  strokeRiverEdge(c, RIVER_OUTER.map(([y, x]) => [y, x + 2.2]), 1, "rgba(126,181,182,.13)");
-  strokeRiverEdge(c, RIVER_INNER.map(([y, x]) => [y, x - 2.2]), 1, "rgba(126,181,182,.15)");
+  strokeRiverEdge(c, RIVER_OUTER.map(([y, x]) => [y, x + 4]), 1.2, "rgba(137,203,204,.18)");
+  strokeRiverEdge(c, RIVER_INNER.map(([y, x]) => [y, x - 4]), 1.2, "rgba(137,203,204,.20)");
 
-  // Small, irregular current lines. They remain intentionally sparse so they
-  // read as reflections rather than horizontal stripes across the river.
+  // Soft reflected bands in the water create the painted game-art look.
   for (const [y, t, width, alpha, bend] of [
-    [44, .46, 22, .13, -2], [93, .58, 17, .08, 1], [151, .42, 25, .11, -2],
-    [208, .63, 19, .07, 2], [248, .40, 14, .10, -1], [351, .56, 22, .09, 2],
-    [405, .44, 18, .08, -2], [469, .60, 27, .11, 2], [530, .43, 20, .09, -1],
-    [577, .57, 16, .08, 1],
+    [28, .48, 24, .17, -2], [70, .62, 15, .10, 1], [112, .38, 27, .16, -2],
+    [154, .58, 18, .11, 2], [202, .46, 23, .14, -2], [248, .62, 14, .10, 1],
+    [352, .42, 23, .15, -2], [398, .61, 19, .10, 2], [447, .48, 28, .15, -2],
+    [500, .60, 17, .11, 1], [552, .42, 24, .14, -1], [590, .58, 15, .10, 1],
   ]) {
-    const left = riverOuterEdgeX(y) + 9;
-    const right = riverEdgeX(y) - 9;
+    const left = riverOuterEdgeX(y) + 11;
+    const right = riverEdgeX(y) - 11;
     const center = left + (right - left) * t;
-    c.strokeStyle = `rgba(151,203,204,${alpha})`;
-    c.lineWidth = 1.1;
+    c.strokeStyle = `rgba(164,217,218,${alpha})`;
+    c.lineWidth = 1.3;
     c.beginPath();
     c.moveTo(center - width * .5, y);
     c.quadraticCurveTo(center, y + bend, center + width * .5, y);
     c.stroke();
   }
 
-  // A handful of tiny shoreline stones break up the bank without cluttering
-  // the narrow entrance area or competing with the existing map decorations.
-  for (const [y, side, r] of [
-    [78, 1, 2.1], [132, 1, 1.6], [188, 0, 1.7], [225, 1, 2.0],
-    [376, 1, 1.8], [430, 0, 1.5], [510, 1, 2.2], [566, 0, 1.7],
+  // Tiny foam/ripple hooks near bends.
+  for (const [x, y, flip] of [[46, 96, 1], [41, 178, -1], [43, 371, 1], [54, 463, -1], [58, 548, 1]]) {
+    c.strokeStyle = "rgba(174,222,221,.20)";
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.arc(x, y, 8, flip > 0 ? 2.8 : 0.2, flip > 0 ? 4.4 : 1.8, flip < 0);
+    c.stroke();
+  }
+
+  // Richer shoreline dressing similar to the illustrated reference.
+  for (const [y, side, scale] of [
+    [49, 1, .70], [89, 1, .85], [135, 0, .65], [171, 1, .78],
+    [214, 1, .62], [365, 1, .82], [414, 0, .68], [474, 1, .88],
+    [524, 1, .72], [571, 0, .68],
   ]) {
     const edge = side ? riverEdgeX(y) : riverOuterEdgeX(y);
-    const x = edge + (side ? 5 : -4);
-    pebble(c, x, y, r, side ? "rgba(82,84,67,.62)" : "rgba(70,75,61,.52)");
+    shorelineGrass(c, edge + (side ? 10 : -8), y + 4, side ? -1 : 1, scale);
+  }
+
+  for (const [y, side, scale] of [
+    [68, 1, .55], [122, 1, .42], [193, 0, .46], [229, 1, .52],
+    [386, 1, .50], [438, 0, .42], [509, 1, .57], [559, 0, .46],
+  ]) {
+    const edge = side ? riverEdgeX(y) : riverOuterEdgeX(y);
+    riverRock(c, edge + (side ? 8 : -7), y, scale);
+  }
+
+  // Small moss clumps, kept away from the bridge crossing.
+  for (const [y, side, scale] of [[38, 1, .28], [102, 1, .22], [157, 0, .20], [395, 1, .24], [487, 1, .26], [575, 1, .22]]) {
+    const edge = side ? riverEdgeX(y) : riverOuterEdgeX(y);
+    bush(c, edge + (side ? 14 : -12), y, scale);
   }
 
   c.restore();
