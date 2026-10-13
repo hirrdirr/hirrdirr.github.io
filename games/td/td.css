@@ -64,6 +64,10 @@
   align-items: center;
   gap: 14px;
 }
+.td-brand > div {
+  display: flex;
+  align-items: center;
+}
 .td-emblem {
   width: 46px;
   height: 46px;
@@ -84,10 +88,10 @@
 }
 .td-brand h1 {
   font-size: 30px;
-  line-height: 1.05;
+  line-height: 1;
   letter-spacing: 0.025em;
   font-weight: 850;
-  margin-top: 4px;
+  margin: 0;
 }
 .td-brand h1 span {
   font-weight: 400;
