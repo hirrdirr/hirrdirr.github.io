@@ -109,15 +109,15 @@ function interpolateEdge(points, y) {
 }
 
 const RIVER_OUTER = [
-  [0, 8], [60, 15], [120, 7], [180, 13], [235, 6],
+  [-40, 8], [0, 8], [60, 15], [120, 7], [180, 13], [235, 6],
   [260, 4], [285, 3], [315, 3], [340, 4], [390, 8],
-  [445, 15], [495, 8], [545, 19], [600, 10],
+  [445, 15], [495, 8], [545, 19], [600, 10], [640, 10],
 ];
 
 const RIVER_INNER = [
-  [0, 74], [60, 89], [120, 70], [180, 80], [235, 68],
+  [-40, 74], [0, 74], [60, 89], [120, 70], [180, 80], [235, 68],
   [260, 61], [285, 59], [315, 59], [340, 61], [390, 68],
-  [445, 81], [495, 72], [545, 94], [600, 84],
+  [445, 81], [495, 72], [545, 94], [600, 84], [640, 84],
 ];
 
 function riverOuterEdgeX(y) {
@@ -147,11 +147,8 @@ function traceSmoothEdge(c, points) {
 function drawRiver(c) {
   c.save();
 
-  // Build both river banks from smooth guide points instead of joining
-  // individual hard bends. This keeps the channel organic while leaving a
-  // narrow strip of terrain along the far-left map edge. The guide points are
-  // intentionally calmer around the entrance bridge so the crossing reads
-  // naturally without turning the river into a straight canal.
+  // Extend both river banks beyond the visible canvas so the channel reads as
+  // flowing in from above and out below instead of ending at the map border.
   c.beginPath();
   traceSmoothEdge(c, RIVER_OUTER);
 
@@ -173,8 +170,6 @@ function drawRiver(c) {
   c.fillStyle = water;
   c.fill();
 
-  // Keep the shore soft and subdued: a dark cut for depth and a thin mossy
-  // lip on top. Rounded joins/caps prevent little spikes at tight meanders.
   c.lineJoin = "round";
   c.lineCap = "round";
   c.strokeStyle = "rgba(7,12,10,.58)";
