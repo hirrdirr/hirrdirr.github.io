@@ -96,73 +96,92 @@ function lantern(c, x, y) {
   c.restore();
 }
 
-function riverEdgeX(y) {
-  const points = [
-    [0, 74],
-    [55, 91],
-    [115, 69],
-    [175, 82],
-    [235, 79],
-    [300, 78],
-    [365, 79],
-    [425, 80],
-    [485, 68],
-    [545, 94],
-    [600, 78],
-  ];
+function interpolateEdge(points, y) {
   for (let i = 1; i < points.length; i++) {
     const [y1, x1] = points[i - 1],
       [y2, x2] = points[i];
     if (y <= y2) {
-      const t = (y - y1) / (y2 - y1);
+      const t = Math.max(0, Math.min(1, (y - y1) / (y2 - y1)));
       return x1 + (x2 - x1) * t;
     }
   }
   return points.at(-1)[1];
 }
 
+const RIVER_OUTER = [
+  [0, 7], [55, 18], [110, 5], [165, 14], [220, 4],
+  [265, 3], [300, 2], [340, 3], [390, 5], [440, 15],
+  [490, 5], [545, 23], [600, 8],
+];
+
+const RIVER_INNER = [
+  [0, 72], [55, 95], [110, 65], [165, 82], [220, 69],
+  [265, 60], [300, 58], [340, 59], [390, 64], [440, 82],
+  [490, 70], [545, 101], [600, 83],
+];
+
+function riverOuterEdgeX(y) {
+  return interpolateEdge(RIVER_OUTER, y);
+}
+
+function riverEdgeX(y) {
+  return interpolateEdge(RIVER_INNER, y);
+}
+
 function isRiverReserved(x, y, padding = 8) {
-  return x < riverEdgeX(y) + padding;
+  return x > riverOuterEdgeX(y) - padding && x < riverEdgeX(y) + padding;
 }
 
 function drawRiver(c) {
   c.save();
 
-  // S-curves at the map edges, with a calmer, nearly straight channel through
-  // the entrance bridge so the crossing reads cleanly at a glance.
+  // Two distinct banks: a slim strip of terrain remains along the map edge,
+  // while the channel meanders between it and the main playfield. Around the
+  // entrance bridge both banks calm down so the crossing stays almost straight.
   c.beginPath();
-  c.moveTo(0, 0);
-  c.lineTo(74, 0);
-  c.bezierCurveTo(91, 28, 96, 58, 86, 88);
-  c.bezierCurveTo(76, 118, 65, 142, 78, 174);
-  c.bezierCurveTo(82, 196, 80, 222, 79, 246);
-  c.bezierCurveTo(78, 270, 78, 292, 78, 316);
-  c.bezierCurveTo(78, 340, 79, 365, 79, 390);
-  c.bezierCurveTo(79, 414, 81, 434, 78, 454);
-  c.bezierCurveTo(70, 482, 65, 510, 79, 533);
-  c.bezierCurveTo(96, 558, 92, 579, 78, 600);
-  c.lineTo(0, 600);
+  c.moveTo(7, 0);
+  c.bezierCurveTo(18, 30, 22, 62, 9, 92);
+  c.bezierCurveTo(0, 123, 3, 145, 14, 168);
+  c.bezierCurveTo(8, 195, 3, 225, 3, 263);
+  c.bezierCurveTo(2, 278, 2, 288, 2, 300);
+  c.bezierCurveTo(2, 315, 3, 330, 3, 344);
+  c.bezierCurveTo(4, 382, 7, 412, 15, 440);
+  c.bezierCurveTo(7, 468, 2, 493, 9, 515);
+  c.bezierCurveTo(25, 545, 20, 572, 8, 600);
+
+  c.lineTo(83, 600);
+  c.bezierCurveTo(100, 574, 108, 548, 91, 521);
+  c.bezierCurveTo(75, 496, 67, 475, 82, 445);
+  c.bezierCurveTo(72, 414, 64, 382, 60, 345);
+  c.bezierCurveTo(59, 330, 58, 315, 58, 300);
+  c.bezierCurveTo(58, 286, 59, 274, 60, 262);
+  c.bezierCurveTo(64, 226, 75, 198, 82, 170);
+  c.bezierCurveTo(70, 145, 62, 126, 65, 108);
+  c.bezierCurveTo(69, 83, 97, 61, 95, 39);
+  c.bezierCurveTo(91, 23, 80, 10, 72, 0);
   c.closePath();
 
-  const water = c.createLinearGradient(0, 0, 110, 0);
+  const water = c.createLinearGradient(4, 0, 105, 0);
   water.addColorStop(0, "#101f22");
-  water.addColorStop(0.55, "#183238");
+  water.addColorStop(0.52, "#183238");
   water.addColorStop(1, "#214149");
   c.fillStyle = water;
   c.fill();
 
-  c.strokeStyle = "rgba(7,12,10,.55)";
-  c.lineWidth = 8;
+  // Both banks get a soft dark cut and a mossy lip so the channel reads as
+  // carved into the terrain instead of painted over it.
+  c.strokeStyle = "rgba(7,12,10,.58)";
+  c.lineWidth = 7;
   c.stroke();
-  c.strokeStyle = "rgba(94,112,72,.48)";
-  c.lineWidth = 2.2;
+  c.strokeStyle = "rgba(94,112,72,.50)";
+  c.lineWidth = 2;
   c.stroke();
 
   c.lineCap = "round";
   for (const [x, y, w, a] of [
-    [18, 72, 28, .11], [34, 162, 31, .08], [21, 245, 24, .10],
-    [30, 286, 34, .14], [17, 319, 26, .12], [39, 405, 30, .08],
-    [24, 492, 35, .10], [32, 560, 27, .07],
+    [30, 68, 28, .10], [22, 150, 31, .08], [27, 235, 25, .09],
+    [22, 286, 28, .13], [24, 320, 27, .11], [31, 414, 31, .08],
+    [25, 486, 34, .10], [37, 557, 29, .07],
   ]) {
     c.strokeStyle = `rgba(139,184,183,${a})`;
     c.lineWidth = 1.2;
