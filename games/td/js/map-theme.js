@@ -257,15 +257,15 @@ function drawRiver(c) {
   c.fill();
 
   for (const edge of [RIVER_OUTER, RIVER_INNER]) {
-    strokeRiverEdge(c, edge, 15, "rgba(4,9,7,.60)");
-    strokeRiverEdge(c, edge, 10, "rgba(61,51,34,.95)");
-    strokeRiverEdge(c, edge, 7, "rgba(90,74,44,.88)");
-    strokeRiverEdge(c, edge, 4.2, "rgba(66,88,48,.92)");
-    strokeRiverEdge(c, edge, 2, "rgba(112,132,70,.72)");
+    strokeRiverEdge(c, edge, 9, "rgba(4,9,7,.52)");
+    strokeRiverEdge(c, edge, 6, "rgba(61,51,34,.90)");
+    strokeRiverEdge(c, edge, 4.2, "rgba(90,74,44,.82)");
+    strokeRiverEdge(c, edge, 2.6, "rgba(66,88,48,.88)");
+    strokeRiverEdge(c, edge, 1.2, "rgba(112,132,70,.62)");
   }
 
-  strokeRiverEdge(c, RIVER_OUTER.map(([y, x]) => [y, x + 4]), 1.2, "rgba(137,203,204,.18)");
-  strokeRiverEdge(c, RIVER_INNER.map(([y, x]) => [y, x - 4]), 1.2, "rgba(137,203,204,.20)");
+  strokeRiverEdge(c, RIVER_OUTER.map(([y, x]) => [y, x + 2.5]), .9, "rgba(137,203,204,.16)");
+  strokeRiverEdge(c, RIVER_INNER.map(([y, x]) => [y, x - 2.5]), .9, "rgba(137,203,204,.18)");
 
   for (const [y, t, width, alpha, bend] of [
     [28,.48,24,.17,-2],[70,.62,15,.10,1],[112,.38,27,.16,-2],[154,.58,18,.11,2],
