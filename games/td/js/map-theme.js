@@ -22,28 +22,48 @@ function pebble(c, x, y, r, color) {
   c.fill();
 }
 
+function grassTuft(c, x, y, scale = 1, alpha = .38) {
+  c.save();
+  c.translate(x, y);
+  c.scale(scale, scale);
+  c.lineCap = "round";
+  c.strokeStyle = `rgba(126,151,86,${alpha})`;
+  c.lineWidth = 1.2;
+  for (const [dx, h, bend] of [[-5, 8, -2], [-2, 12, -1], [2, 10, 1], [5, 7, 2]]) {
+    c.beginPath();
+    c.moveTo(dx, 3);
+    c.quadraticCurveTo(dx + bend, -h * .45, dx + bend * .7, -h);
+    c.stroke();
+  }
+  c.restore();
+}
+
 function bush(c, x, y, scale = 1) {
   c.save();
   c.translate(x, y);
   c.scale(scale, scale);
-  c.fillStyle = "rgba(8,14,10,.35)";
+
+  c.fillStyle = "rgba(4,9,7,.44)";
   c.beginPath();
-  c.ellipse(3, 8, 24, 10, 0, 0, TAU);
+  c.ellipse(3, 9, 25, 10, 0, 0, TAU);
   c.fill();
+
   for (const [bx, by, r, color] of [
-    [-13, 1, 12, "#263b2a"],
-    [0, -7, 15, "#314a31"],
-    [14, 1, 11, "#28402c"],
-    [-2, 7, 13, "#213727"],
+    [-14, 2, 12, "#203526"],
+    [-3, -8, 15, "#2d4930"],
+    [12, -2, 13, "#29432d"],
+    [4, 8, 14, "#1d3224"],
   ]) {
     c.fillStyle = color;
     c.beginPath();
     c.arc(bx, by, r, 0, TAU);
     c.fill();
   }
-  c.fillStyle = "rgba(126,143,82,.28)";
+
+  c.fillStyle = "rgba(146,166,95,.22)";
   c.beginPath();
-  c.arc(-5, -11, 5, 0, TAU);
+  c.arc(-7, -11, 5, 0, TAU);
+  c.arc(7, -7, 3.5, 0, TAU);
   c.fill();
   c.restore();
 }
@@ -52,14 +72,19 @@ function rock(c, x, y, scale = 1) {
   c.save();
   c.translate(x, y);
   c.scale(scale, scale);
-  c.fillStyle = "rgba(0,0,0,.30)";
+
+  c.fillStyle = "rgba(0,0,0,.34)";
   c.beginPath();
-  c.ellipse(4, 11, 19, 7, 0.08, 0, TAU);
+  c.ellipse(4, 11, 19, 7, .08, 0, TAU);
   c.fill();
 
-  c.fillStyle = "#4b5045";
-  c.strokeStyle = "#676b5b";
-  c.lineWidth = 1.3;
+  const stone = c.createLinearGradient(-10, -12, 10, 12);
+  stone.addColorStop(0, "#676b5d");
+  stone.addColorStop(.45, "#50564b");
+  stone.addColorStop(1, "#393f38");
+  c.fillStyle = stone;
+  c.strokeStyle = "rgba(133,139,113,.46)";
+  c.lineWidth = 1.2;
   c.beginPath();
   c.moveTo(-15, 8);
   c.quadraticCurveTo(-17, -1, -9, -9);
@@ -71,35 +96,46 @@ function rock(c, x, y, scale = 1) {
   c.fill();
   c.stroke();
 
-  c.fillStyle = "rgba(151,151,124,.18)";
+  c.fillStyle = "rgba(201,198,157,.15)";
   c.beginPath();
-  c.ellipse(-4, -7, 7, 3.2, -0.25, 0, TAU);
+  c.ellipse(-4, -7, 7, 3, -.25, 0, TAU);
   c.fill();
   c.restore();
 }
 
 function lantern(c, x, y) {
   c.save();
-  const glow = c.createRadialGradient(x, y, 1, x, y, 24);
-  glow.addColorStop(0, "rgba(255,205,103,.42)");
-  glow.addColorStop(1, "rgba(255,174,67,0)");
+
+  const glow = c.createRadialGradient(x, y, 2, x, y, 31);
+  glow.addColorStop(0, "rgba(255,211,118,.50)");
+  glow.addColorStop(.28, "rgba(241,166,73,.17)");
+  glow.addColorStop(1, "rgba(238,145,54,0)");
   c.fillStyle = glow;
   c.beginPath();
-  c.arc(x, y, 24, 0, TAU);
+  c.arc(x, y, 31, 0, TAU);
   c.fill();
-  c.fillStyle = "#30291f";
-  c.fillRect(x - 2, y + 2, 4, 12);
-  c.fillStyle = "#f0ad4e";
+
+  c.fillStyle = "rgba(5,8,7,.35)";
   c.beginPath();
-  c.arc(x, y, 3.5, 0, TAU);
+  c.ellipse(x + 3, y + 14, 7, 3, 0, 0, TAU);
+  c.fill();
+
+  c.fillStyle = "#332c22";
+  c.fillRect(x - 2, y + 2, 4, 13);
+  c.fillStyle = "#eaa34d";
+  c.beginPath();
+  c.arc(x, y, 4, 0, TAU);
+  c.fill();
+  c.fillStyle = "rgba(255,236,173,.8)";
+  c.beginPath();
+  c.arc(x - 1, y - 1, 1.5, 0, TAU);
   c.fill();
   c.restore();
 }
 
 function interpolateEdge(points, y) {
   for (let i = 1; i < points.length; i++) {
-    const [y1, x1] = points[i - 1],
-      [y2, x2] = points[i];
+    const [y1, x1] = points[i - 1], [y2, x2] = points[i];
     if (y <= y2) {
       const t = Math.max(0, Math.min(1, (y - y1) / (y2 - y1)));
       return x1 + (x2 - x1) * t;
@@ -120,14 +156,8 @@ const RIVER_INNER = [
   [445, 81], [495, 72], [545, 94], [600, 84], [640, 84],
 ];
 
-function riverOuterEdgeX(y) {
-  return interpolateEdge(RIVER_OUTER, y);
-}
-
-function riverEdgeX(y) {
-  return interpolateEdge(RIVER_INNER, y);
-}
-
+function riverOuterEdgeX(y) { return interpolateEdge(RIVER_OUTER, y); }
+function riverEdgeX(y) { return interpolateEdge(RIVER_INNER, y); }
 function isRiverReserved(x, y, padding = 8) {
   return x > riverOuterEdgeX(y) - padding && x < riverEdgeX(y) + padding;
 }
@@ -158,7 +188,7 @@ function riverRock(c, x, y, scale = 1) {
   c.scale(scale, scale);
   c.fillStyle = "rgba(0,0,0,.30)";
   c.beginPath();
-  c.ellipse(1, 4, 8, 4, -0.15, 0, TAU);
+  c.ellipse(1, 4, 8, 4, -.15, 0, TAU);
   c.fill();
   c.fillStyle = "#555a4d";
   c.strokeStyle = "rgba(118,124,101,.60)";
@@ -171,10 +201,6 @@ function riverRock(c, x, y, scale = 1) {
   c.quadraticCurveTo(-3, 7, -7, 3);
   c.fill();
   c.stroke();
-  c.fillStyle = "rgba(180,181,145,.13)";
-  c.beginPath();
-  c.ellipse(-1, -4, 3.8, 1.5, -0.15, 0, TAU);
-  c.fill();
   c.restore();
 }
 
@@ -214,23 +240,22 @@ function drawRiver(c) {
 
   const water = c.createLinearGradient(0, 0, 110, 0);
   water.addColorStop(0, "#08191f");
-  water.addColorStop(0.28, "#0d2c35");
-  water.addColorStop(0.58, "#17424c");
-  water.addColorStop(0.80, "#11343e");
+  water.addColorStop(.28, "#0d2c35");
+  water.addColorStop(.58, "#17424c");
+  water.addColorStop(.80, "#11343e");
   water.addColorStop(1, "#081c22");
   c.fillStyle = water;
   c.fill();
 
   const sheen = c.createLinearGradient(4, 0, 98, 0);
   sheen.addColorStop(0, "rgba(0,4,6,.38)");
-  sheen.addColorStop(0.30, "rgba(62,137,145,.04)");
-  sheen.addColorStop(0.56, "rgba(111,184,185,.10)");
-  sheen.addColorStop(0.76, "rgba(42,105,115,.04)");
+  sheen.addColorStop(.30, "rgba(62,137,145,.04)");
+  sheen.addColorStop(.56, "rgba(111,184,185,.10)");
+  sheen.addColorStop(.76, "rgba(42,105,115,.04)");
   sheen.addColorStop(1, "rgba(0,5,7,.32)");
   c.fillStyle = sheen;
   c.fill();
 
-  // Stronger layered banks: shadowed cut -> damp soil -> moss -> grass rim.
   for (const edge of [RIVER_OUTER, RIVER_INNER]) {
     strokeRiverEdge(c, edge, 15, "rgba(4,9,7,.60)");
     strokeRiverEdge(c, edge, 10, "rgba(61,51,34,.95)");
@@ -242,12 +267,10 @@ function drawRiver(c) {
   strokeRiverEdge(c, RIVER_OUTER.map(([y, x]) => [y, x + 4]), 1.2, "rgba(137,203,204,.18)");
   strokeRiverEdge(c, RIVER_INNER.map(([y, x]) => [y, x - 4]), 1.2, "rgba(137,203,204,.20)");
 
-  // Soft reflected bands in the water create the painted game-art look.
   for (const [y, t, width, alpha, bend] of [
-    [28, .48, 24, .17, -2], [70, .62, 15, .10, 1], [112, .38, 27, .16, -2],
-    [154, .58, 18, .11, 2], [202, .46, 23, .14, -2], [248, .62, 14, .10, 1],
-    [352, .42, 23, .15, -2], [398, .61, 19, .10, 2], [447, .48, 28, .15, -2],
-    [500, .60, 17, .11, 1], [552, .42, 24, .14, -1], [590, .58, 15, .10, 1],
+    [28,.48,24,.17,-2],[70,.62,15,.10,1],[112,.38,27,.16,-2],[154,.58,18,.11,2],
+    [202,.46,23,.14,-2],[248,.62,14,.10,1],[352,.42,23,.15,-2],[398,.61,19,.10,2],
+    [447,.48,28,.15,-2],[500,.60,17,.11,1],[552,.42,24,.14,-1],[590,.58,15,.10,1],
   ]) {
     const left = riverOuterEdgeX(y) + 11;
     const right = riverEdgeX(y) - 11;
@@ -260,39 +283,14 @@ function drawRiver(c) {
     c.stroke();
   }
 
-  // Tiny foam/ripple hooks near bends.
-  for (const [x, y, flip] of [[46, 96, 1], [41, 178, -1], [43, 371, 1], [54, 463, -1], [58, 548, 1]]) {
-    c.strokeStyle = "rgba(174,222,221,.20)";
-    c.lineWidth = 1.1;
-    c.beginPath();
-    c.arc(x, y, 8, flip > 0 ? 2.8 : 0.2, flip > 0 ? 4.4 : 1.8, flip < 0);
-    c.stroke();
-  }
-
-  // Richer shoreline dressing similar to the illustrated reference.
-  for (const [y, side, scale] of [
-    [49, 1, .70], [89, 1, .85], [135, 0, .65], [171, 1, .78],
-    [214, 1, .62], [365, 1, .82], [414, 0, .68], [474, 1, .88],
-    [524, 1, .72], [571, 0, .68],
-  ]) {
+  for (const [y, side, scale] of [[49,1,.70],[89,1,.85],[135,0,.65],[171,1,.78],[214,1,.62],[365,1,.82],[414,0,.68],[474,1,.88],[524,1,.72],[571,0,.68]]) {
     const edge = side ? riverEdgeX(y) : riverOuterEdgeX(y);
     shorelineGrass(c, edge + (side ? 10 : -8), y + 4, side ? -1 : 1, scale);
   }
-
-  for (const [y, side, scale] of [
-    [68, 1, .55], [122, 1, .42], [193, 0, .46], [229, 1, .52],
-    [386, 1, .50], [438, 0, .42], [509, 1, .57], [559, 0, .46],
-  ]) {
+  for (const [y, side, scale] of [[68,1,.55],[122,1,.42],[193,0,.46],[229,1,.52],[386,1,.50],[438,0,.42],[509,1,.57],[559,0,.46]]) {
     const edge = side ? riverEdgeX(y) : riverOuterEdgeX(y);
     riverRock(c, edge + (side ? 8 : -7), y, scale);
   }
-
-  // Small moss clumps, kept away from the bridge crossing.
-  for (const [y, side, scale] of [[38, 1, .28], [102, 1, .22], [157, 0, .20], [395, 1, .24], [487, 1, .26], [575, 1, .22]]) {
-    const edge = side ? riverEdgeX(y) : riverOuterEdgeX(y);
-    bush(c, edge + (side ? 14 : -12), y, scale);
-  }
-
   c.restore();
 }
 
@@ -300,175 +298,177 @@ function drawEntranceBridge(c) {
   const y = PATH[0].y;
   c.save();
 
-  const ravine = c.createLinearGradient(0, y - 36, 0, y + 36);
-  ravine.addColorStop(0, "rgba(12,18,15,0)");
-  ravine.addColorStop(0.25, "rgba(8,12,10,.72)");
-  ravine.addColorStop(0.5, "rgba(4,8,7,.92)");
-  ravine.addColorStop(0.75, "rgba(8,12,10,.72)");
-  ravine.addColorStop(1, "rgba(12,18,15,0)");
-  c.fillStyle = ravine;
-  c.fillRect(0, y - 42, 58, 84);
+  const bridgeShadow = c.createLinearGradient(0, y - 35, 0, y + 35);
+  bridgeShadow.addColorStop(0, "rgba(0,0,0,0)");
+  bridgeShadow.addColorStop(.5, "rgba(0,0,0,.42)");
+  bridgeShadow.addColorStop(1, "rgba(0,0,0,0)");
+  c.fillStyle = bridgeShadow;
+  c.fillRect(0, y - 40, 62, 80);
 
-  c.fillStyle = "#44473b";
-  c.strokeStyle = "#696958";
-  c.lineWidth = 1.2;
-  for (const py of [y - 31, y + 18]) {
-    c.beginPath();
-    c.roundRect(8, py, 25, 13, 3);
-    c.fill();
-    c.stroke();
+  c.fillStyle = "#33261b";
+  c.fillRect(0, y - 25, 61, 50);
+  for (let x = -2; x < 63; x += 10) {
+    const plank = c.createLinearGradient(x, y - 22, x + 8, y + 22);
+    plank.addColorStop(0, "#806447");
+    plank.addColorStop(.5, "#6f553b");
+    plank.addColorStop(1, "#59432f");
+    c.fillStyle = plank;
+    c.fillRect(x, y - 22, 8, 44);
+    c.fillStyle = "rgba(235,196,124,.10)";
+    c.fillRect(x + 1, y - 19, 1, 35);
   }
 
-  c.fillStyle = "#3a2e22";
-  c.fillRect(0, y - 24, 58, 48);
-  c.fillStyle = "#675039";
-  for (let x = -2; x < 60; x += 10) {
-    c.fillRect(x, y - 21, 8, 42);
-    c.fillStyle = "rgba(221,181,108,.09)";
-    c.fillRect(x + 1, y - 18, 1, 35);
-    c.fillStyle = "#675039";
-  }
-
-  c.strokeStyle = "rgba(211,166,87,.48)";
+  c.strokeStyle = "rgba(231,188,100,.40)";
   c.lineWidth = 1.2;
   c.beginPath();
-  c.moveTo(1, y - 24);
-  c.lineTo(58, y - 24);
-  c.moveTo(1, y + 24);
-  c.lineTo(58, y + 24);
+  c.moveTo(0, y - 25); c.lineTo(61, y - 25);
+  c.moveTo(0, y + 25); c.lineTo(61, y + 25);
   c.stroke();
-
-  c.fillStyle = "rgba(222,183,100,.72)";
-  for (const x of [10, 28, 46]) {
-    c.beginPath();
-    c.arc(x, y - 24, 1.5, 0, TAU);
-    c.arc(x, y + 24, 1.5, 0, TAU);
-    c.fill();
-  }
-
   c.restore();
 }
 
-function drawFantasyMap(c) {
+function drawGround(c, random) {
   const ground = c.createLinearGradient(0, 0, WORLD.width, WORLD.height);
-  ground.addColorStop(0, "#25352a");
-  ground.addColorStop(0.52, "#1d3027");
-  ground.addColorStop(1, "#172721");
+  ground.addColorStop(0, "#29402f");
+  ground.addColorStop(.45, "#21362b");
+  ground.addColorStop(1, "#172a22");
   c.fillStyle = ground;
   c.fillRect(0, 0, WORLD.width, WORLD.height);
 
+  // Broad painterly patches give the grass the softer illustrated look from the reference.
+  for (let i = 0; i < 55; i++) {
+    const x = random() * WORLD.width;
+    const y = random() * WORLD.height;
+    const rx = 35 + random() * 90;
+    const ry = 18 + random() * 55;
+    c.fillStyle = i % 4 === 0 ? "rgba(118,113,67,.055)" : "rgba(91,136,84,.065)";
+    c.beginPath();
+    c.ellipse(x, y, rx, ry, random() * Math.PI, 0, TAU);
+    c.fill();
+  }
+
+  // Soft darker foliage/shadow islands add depth without becoming objects.
+  for (let i = 0; i < 20; i++) {
+    const x = random() * WORLD.width;
+    const y = random() * WORLD.height;
+    c.fillStyle = "rgba(7,16,11,.08)";
+    c.beginPath();
+    c.ellipse(x, y, 30 + random() * 70, 16 + random() * 38, random() * Math.PI, 0, TAU);
+    c.fill();
+  }
+
+  for (let i = 0; i < 620; i++) {
+    const x = random() * WORLD.width;
+    const y = random() * WORLD.height;
+    if (isRiverReserved(x, y, 3)) continue;
+    const light = random() > .58;
+    c.strokeStyle = light ? "rgba(145,165,102,.12)" : "rgba(8,15,10,.15)";
+    c.lineWidth = .7;
+    c.beginPath();
+    c.moveTo(x, y);
+    c.lineTo(x + (random() - .5) * 4, y - 1 - random() * 3);
+    c.stroke();
+  }
+}
+
+function drawRoad(c, random) {
+  // Deep soft shadow, earthen rim, then a warm slightly raised road surface.
+  pathStroke(c, 66, "rgba(4,8,6,.46)");
+  pathStroke(c, 59, "#504632");
+  pathStroke(c, 53, "#776744");
+  pathStroke(c, 47, "#85724c");
+  pathStroke(c, 39, "#6d5c3f");
+  pathStroke(c, 3, "rgba(231,202,133,.12)");
+
+  // Darker lower-edge pass suggests a bevel/elevation.
+  c.save();
+  c.translate(0, 3);
+  pathStroke(c, 49, "rgba(42,35,24,.17)");
+  c.restore();
+  pathStroke(c, 41, "rgba(122,102,65,.46)");
+
+  // Sparse dirt flecks along the road.
+  for (const { a, b, length } of SEGMENTS) {
+    const angle = Math.atan2(b.y - a.y, b.x - a.x);
+    for (let d = 20; d < length - 10; d += 23 + random() * 18) {
+      const side = random() > .5 ? 1 : -1;
+      const offset = side * (5 + random() * 12);
+      const x = a.x + ((b.x - a.x) * d) / length - Math.sin(angle) * offset;
+      const y = a.y + ((b.y - a.y) * d) / length + Math.cos(angle) * offset;
+      pebble(c, x, y, .8 + random() * 1.6, random() > .5 ? "rgba(190,158,93,.26)" : "rgba(54,46,32,.34)");
+    }
+  }
+}
+
+function drawFantasyMap(c) {
   let seed = 9137;
   const random = () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;
     return seed / 4294967296;
   };
 
-  for (let i = 0; i < 42; i++) {
-    const x = random() * WORLD.width,
-      y = random() * WORLD.height,
-      rx = 35 + random() * 85,
-      ry = 20 + random() * 55;
-    c.fillStyle = i % 3 === 0 ? "rgba(91,87,53,.075)" : "rgba(83,116,70,.075)";
-    c.beginPath();
-    c.ellipse(x, y, rx, ry, random() * Math.PI, 0, TAU);
-    c.fill();
-  }
-
-  for (let i = 0; i < 1350; i++) {
-    const x = random() * WORLD.width,
-      y = random() * WORLD.height,
-      light = random() > 0.56;
-    if (isRiverReserved(x, y, 3)) continue;
-    c.strokeStyle = light ? "rgba(139,154,92,.10)" : "rgba(7,14,10,.16)";
-    c.lineWidth = 0.7;
-    c.beginPath();
-    c.moveTo(x, y);
-    c.lineTo(x + (random() - 0.5) * 5, y - 1 - random() * 4);
-    c.stroke();
-  }
-
+  drawGround(c, random);
   drawRiver(c);
-
-  pathStroke(c, 58, "rgba(8,12,10,.48)");
-  pathStroke(c, 52, "#5a5038");
-  pathStroke(c, 45, "#756345");
-  pathStroke(c, 35, "#65553c");
-  pathStroke(c, 4, "rgba(214,184,111,.13)");
-
+  drawRoad(c, random);
   drawEntranceBridge(c);
-
-  for (const { a, b, length } of SEGMENTS) {
-    const angle = Math.atan2(b.y - a.y, b.x - a.x);
-    for (let d = 30; d < length - 12; d += 34 + random() * 22) {
-      const side = random() > 0.5 ? 1 : -1,
-        offset = side * (14 + random() * 6),
-        px = a.x + ((b.x - a.x) * d) / length - Math.sin(angle) * offset,
-        py = a.y + ((b.y - a.y) * d) / length + Math.cos(angle) * offset;
-      if (isRiverReserved(px, py, 1) && px < 58) continue;
-      pebble(c, px, py, 1.6 + random() * 2.7, random() > 0.5 ? "#95805a" : "#4e4937");
-    }
-  }
 
   const clusters = new Map();
   for (const key of BLOCKED) {
-    const [gx, gy] = key.split(",").map(Number),
-      cx = Math.floor(gx / 2),
-      cy = Math.floor(gy / 2),
-      group = `${cx},${cy}`;
+    const [gx, gy] = key.split(",").map(Number);
+    const group = `${Math.floor(gx / 2)},${Math.floor(gy / 2)}`;
     if (!clusters.has(group)) clusters.set(group, []);
     clusters.get(group).push({ gx, gy });
   }
+
   let clusterIndex = 0;
   for (const cells of clusters.values()) {
-    const x = cells.reduce((sum, p) => sum + (p.gx + 0.5) * 40, 0) / cells.length,
-      y = cells.reduce((sum, p) => sum + (p.gy + 0.5) * 40, 0) / cells.length;
-    if (isRiverReserved(x, y, 20)) {
-      clusterIndex++;
-      continue;
-    }
+    const x = cells.reduce((sum, p) => sum + (p.gx + .5) * 40, 0) / cells.length;
+    const y = cells.reduce((sum, p) => sum + (p.gy + .5) * 40, 0) / cells.length;
+    if (isRiverReserved(x, y, 20)) { clusterIndex++; continue; }
+
     if (clusterIndex % 2 === 0) {
-      bush(c, x - 14, y + 5, 1.05);
-      bush(c, x + 15, y - 8, 0.78);
-      pebble(c, x + 22, y + 18, 8, "#4d5145");
+      bush(c, x - 14, y + 5, 1.08);
+      bush(c, x + 16, y - 8, .80);
+      rock(c, x + 25, y + 17, .52);
+      grassTuft(c, x - 31, y + 18, .75, .35);
     } else {
-      rock(c, x - 8, y - 2, 1.05);
-      bush(c, x + 19, y + 12, 0.72);
+      rock(c, x - 8, y - 2, 1.02);
+      bush(c, x + 19, y + 12, .74);
+      grassTuft(c, x + 33, y - 13, .62, .30);
     }
     clusterIndex++;
   }
 
-  for (const [x, y] of [
-    [205, 360], [320, 195], [510, 85], [690, 210],
-    [700, 400], [790, 530], [920, 410], [920, 240],
-  ]) lantern(c, x, y);
-
-  for (let i = 0; i < 42; i++) {
-    const gx = Math.floor(random() * 24),
-      gy = Math.floor(random() * 15),
-      key = `${gx},${gy}`;
-    if (ROAD.has(key) || BLOCKED.has(key)) continue;
-    const x = gx * 40 + 6 + random() * 28,
-      y = gy * 40 + 7 + random() * 26;
-    if (isRiverReserved(x, y, 10)) continue;
-    if (random() > 0.55) pebble(c, x, y, 2 + random() * 4, "rgba(91,91,69,.55)");
-    else {
-      c.strokeStyle = "rgba(116,140,79,.28)";
-      c.lineWidth = 1;
-      c.beginPath();
-      c.moveTo(x, y + 3);
-      c.lineTo(x - 2, y - 3);
-      c.moveTo(x, y + 3);
-      c.lineTo(x + 3, y - 2);
-      c.stroke();
-    }
+  // Small decorative groups around otherwise empty areas make the full map feel illustrated.
+  for (const [x, y, s] of [[150,82,.55],[250,505,.50],[395,515,.58],[575,470,.52],[635,105,.46],[820,115,.56],[850,470,.48]]) {
+    if (!isRiverReserved(x, y, 18)) grassTuft(c, x, y, s, .34);
+  }
+  for (const [x, y, s] of [[140,520,.38],[350,75,.32],[600,540,.36],[840,80,.30]]) {
+    if (!isRiverReserved(x, y, 20)) bush(c, x, y, s);
   }
 
-  const coreGlow = c.createRadialGradient(933, 300, 4, 933, 300, 62);
-  coreGlow.addColorStop(0, "rgba(234,174,66,.16)");
+  for (const [x, y] of [
+    [205,360],[320,195],[510,85],[690,210],[700,400],[790,530],[920,410],[920,240],
+  ]) lantern(c, x, y);
+
+  // Warm pools on the ground make the lamps read as part of the scene.
+  for (const [x, y] of [[205,360],[320,195],[510,85],[690,210],[700,400],[790,530],[920,410],[920,240]]) {
+    const pool = c.createRadialGradient(x, y + 8, 3, x, y + 8, 38);
+    pool.addColorStop(0, "rgba(230,167,76,.08)");
+    pool.addColorStop(1, "rgba(230,167,76,0)");
+    c.fillStyle = pool;
+    c.beginPath();
+    c.ellipse(x, y + 9, 38, 20, 0, 0, TAU);
+    c.fill();
+  }
+
+  const coreGlow = c.createRadialGradient(933, 300, 4, 933, 300, 68);
+  coreGlow.addColorStop(0, "rgba(242,183,72,.19)");
+  coreGlow.addColorStop(.45, "rgba(234,174,66,.08)");
   coreGlow.addColorStop(1, "rgba(234,174,66,0)");
   c.fillStyle = coreGlow;
   c.beginPath();
-  c.arc(933, 300, 62, 0, TAU);
+  c.arc(933, 300, 68, 0, TAU);
   c.fill();
 }
 
