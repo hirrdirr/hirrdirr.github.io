@@ -8,96 +8,110 @@ permalink: /games/idleguild/
 
 <div class="ig-shell">
   <header class="ig-topbar">
-    <div>
-      <p class="ig-kicker">HIRRDIRR GAMES</p>
-      <h1>Idle Guild</h1>
-      <p class="ig-subtitle">Build a guild. Train your hero. Push farther.</p>
+    <div class="ig-brand">
+      <div>
+        <p class="ig-kicker">HIRRDIRR GAMES</p>
+        <h1>Idle Guild</h1>
+      </div>
+      <p class="ig-subtitle">Train. Fight. Return stronger.</p>
     </div>
     <div class="ig-currency" aria-label="Gold"><span>🪙</span><strong id="goldValue">100</strong></div>
   </header>
 
-  <main class="ig-grid">
-    <section class="ig-panel ig-hero-card">
-      <div class="ig-panel-head">
-        <div><p class="ig-kicker">ACTIVE HERO</p><h2>Alden</h2></div>
-        <span class="ig-level">Lv. <b id="heroLevel">1</b></span>
-      </div>
+  <main class="ig-layout">
+    <aside class="ig-sidebar">
+      <section class="ig-panel ig-hero-card">
+        <div class="ig-panel-head">
+          <div><p class="ig-kicker">ACTIVE HERO</p><h2>Alden</h2></div>
+          <span class="ig-level">Lv. <b id="heroLevel">1</b></span>
+        </div>
 
-      <div id="heroPortrait" class="ig-portrait" aria-hidden="true">🛡️⚔️</div>
-      <div class="ig-class">Knight</div>
-
-      <div class="ig-xp-wrap">
-        <div class="ig-xp-label"><span>Experience</span><span><b id="xpValue">0</b> / <b id="xpNext">100</b></span></div>
-        <div class="ig-bar"><div id="xpBar" class="ig-bar-fill"></div></div>
-      </div>
-
-      <div class="ig-stats">
-        <div><span>HP</span><strong id="statHp">120</strong></div>
-        <div><span>Damage</span><strong id="statDamage">14</strong></div>
-        <div><span>Defense</span><strong id="statDefense">6</strong></div>
-        <div><span>Power</span><strong id="statPower">40</strong></div>
-      </div>
-    </section>
-
-    <section class="ig-panel ig-quest-panel">
-      <div class="ig-panel-head">
-        <div><p class="ig-kicker">GREENFIELDS</p><h2>Quest Board</h2></div>
-        <span id="areaProgress" class="ig-pill">0 / 5 cleared</span>
-      </div>
-      <div id="questList" class="ig-quest-list"></div>
-    </section>
-
-    <section class="ig-panel ig-combat-panel">
-      <div class="ig-panel-head">
-        <div><p class="ig-kicker">BATTLE</p><h2 id="activeQuestName">No active quest</h2></div>
-        <span id="activeQuestStatus" class="ig-pill">Ready</span>
-      </div>
-
-      <div id="idleState" class="ig-empty-state">
-        <div class="ig-empty-icon">🏰</div>
-        <p>Choose a quest. Alden will fight automatically until either he or the enemy falls.</p>
-      </div>
-
-      <div id="activeState" class="ig-active-state hidden">
-        <div class="ig-arena">
-          <div id="heroCombatant" class="ig-combatant hero">
-            <div class="ig-name-row"><strong>Alden</strong><span id="heroHpText">0 / 0 HP</span></div>
-            <div class="ig-health"><div id="heroHpBar" class="ig-health-fill hero"></div></div>
-            <div id="heroSprite" class="ig-battle-sprite">🛡️⚔️</div>
-          </div>
-
-          <div class="ig-versus">VS</div>
-
-          <div id="enemyCombatant" class="ig-combatant enemy">
-            <div class="ig-name-row"><strong id="enemyName">Enemy</strong><span id="enemyHpText">0 / 0 HP</span></div>
-            <div class="ig-health"><div id="enemyHpBar" class="ig-health-fill enemy"></div></div>
-            <div id="enemySprite" class="ig-battle-sprite">👺</div>
+        <div class="ig-hero-compact">
+          <div id="heroPortrait" class="ig-portrait" aria-hidden="true">🛡️⚔️</div>
+          <div class="ig-hero-info">
+            <div class="ig-class">Knight</div>
+            <div class="ig-xp-wrap">
+              <div class="ig-xp-label"><span>XP</span><span><b id="xpValue">0</b> / <b id="xpNext">100</b></span></div>
+              <div class="ig-bar"><div id="xpBar" class="ig-bar-fill"></div></div>
+            </div>
           </div>
         </div>
 
-        <div class="ig-combat-info">
-          <span id="combatRound">Battle in progress</span>
-          <span id="combatEstimate">Power comparison</span>
+        <div class="ig-stats">
+          <div><span>HP</span><strong id="statHp">120</strong></div>
+          <div><span>Damage</span><strong id="statDamage">14</strong></div>
+          <div><span>Defense</span><strong id="statDefense">6</strong></div>
+          <div><span>Power</span><strong id="statPower">40</strong></div>
         </div>
-        <div id="combatLog" class="ig-combat-log" aria-live="polite"></div>
-      </div>
+      </section>
 
-      <div id="resultBox" class="ig-result hidden" role="status"></div>
-    </section>
+      <section class="ig-panel ig-training-panel">
+        <div class="ig-panel-head">
+          <div><p class="ig-kicker">TRAINING HALL</p><h2>Upgrades</h2></div>
+          <span class="ig-pill">Permanent</span>
+        </div>
+        <div id="upgradeList" class="ig-upgrade-list"></div>
+      </section>
+    </aside>
 
-    <section class="ig-panel ig-training-panel">
-      <div class="ig-panel-head">
-        <div><p class="ig-kicker">TRAINING HALL</p><h2>Skill Training</h2></div>
-        <span class="ig-pill">Permanent</span>
-      </div>
-      <p class="ig-section-copy">Spend gold between fights to strengthen Alden. Upgrade costs increase with every rank.</p>
-      <div id="upgradeList" class="ig-upgrade-list"></div>
+    <section class="ig-main-column">
+      <section class="ig-panel ig-quest-panel">
+        <div class="ig-panel-head ig-quest-head">
+          <div><p class="ig-kicker">GREENFIELDS</p><h2>Quest</h2></div>
+          <span id="areaProgress" class="ig-pill">0 / 5 cleared</span>
+        </div>
+
+        <div class="ig-quest-picker">
+          <button id="questPrev" class="ig-arrow" type="button" aria-label="Previous quest">‹</button>
+          <div id="questCard" class="ig-quest-card"></div>
+          <button id="questNext" class="ig-arrow" type="button" aria-label="Next quest">›</button>
+        </div>
+        <div id="questDots" class="ig-quest-dots" aria-label="Quest progress"></div>
+      </section>
+
+      <section class="ig-panel ig-combat-panel">
+        <div class="ig-panel-head">
+          <div><p class="ig-kicker">BATTLE</p><h2 id="activeQuestName">No active quest</h2></div>
+          <span id="activeQuestStatus" class="ig-pill">Ready</span>
+        </div>
+
+        <div id="idleState" class="ig-empty-state">
+          <div class="ig-empty-icon">⚔️</div>
+          <p>Select a quest above and send Alden into battle.</p>
+        </div>
+
+        <div id="activeState" class="ig-active-state hidden">
+          <div class="ig-arena">
+            <div id="heroCombatant" class="ig-combatant hero">
+              <div class="ig-name-row"><strong>Alden</strong><span id="heroHpText">0 / 0 HP</span></div>
+              <div class="ig-health"><div id="heroHpBar" class="ig-health-fill hero"></div></div>
+              <div id="heroSprite" class="ig-battle-sprite">🛡️⚔️</div>
+            </div>
+
+            <div class="ig-versus">VS</div>
+
+            <div id="enemyCombatant" class="ig-combatant enemy">
+              <div class="ig-name-row"><strong id="enemyName">Enemy</strong><span id="enemyHpText">0 / 0 HP</span></div>
+              <div class="ig-health"><div id="enemyHpBar" class="ig-health-fill enemy"></div></div>
+              <div id="enemySprite" class="ig-battle-sprite">👺</div>
+            </div>
+          </div>
+
+          <div class="ig-combat-info">
+            <span id="combatRound">Battle in progress</span>
+            <span id="combatEstimate">Power comparison</span>
+          </div>
+          <div id="combatLog" class="ig-combat-log" aria-live="polite"></div>
+        </div>
+
+        <div id="resultBox" class="ig-result hidden" role="status"></div>
+      </section>
     </section>
   </main>
 
   <footer class="ig-footer">
     <button id="resetSave" class="ig-link-button" type="button">Reset save</button>
-    <span>Idle Guild v0.2</span>
+    <span>Idle Guild v0.3</span>
   </footer>
 </div>
 
