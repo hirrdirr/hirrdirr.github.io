@@ -2,9 +2,10 @@
   const hero = document.getElementById('heroCombatant');
   const enemy = document.getElementById('enemyCombatant');
   const log = document.getElementById('combatLog');
-  if (!hero || !enemy || !log) return;
+  const round = document.getElementById('combatRound');
+  if (!hero || !enemy || !log || !round) return;
 
-  let lastSeen = '';
+  let lastSeenAttack = '';
 
   function spawnDamage(target, amount, crit = false) {
     const effect = document.createElement('span');
@@ -17,9 +18,10 @@
   function inspectLatestHit() {
     const line = log.lastElementChild;
     if (!line) return;
-    const html = line.innerHTML;
-    if (!html || html === lastSeen) return;
-    lastSeen = html;
+
+    const attackKey = `${round.textContent}|${line.textContent}`;
+    if (attackKey === lastSeenAttack) return;
+    lastSeenAttack = attackKey;
 
     const amountMatch = line.textContent.match(/for\s+(\d+)/i);
     if (!amountMatch) return;
