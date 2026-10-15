@@ -1,12 +1,14 @@
 (() => {
   const SAVE_KEY = 'idleGuildSaveV2';
+  const ENEMY_ASSET_ROOT = '/games/idleguild/assets/enemies';
+  const ENEMY_FRAME_CLASSES = ['ig-frame-0','ig-frame-1','ig-frame-2','ig-frame-3'];
 
   const quests = [
-    { id:'rats', name:'Rats in the Cellar', enemy:'Giant Rat', icon:'🐀', enemyHp:72, enemyDamage:7, enemyDefense:1, enemyAttackMs:1400, gold:35, xp:15, power:28 },
-    { id:'chickens', name:'Missing Chickens', enemy:'Wild Fox', icon:'🦊', enemyHp:100, enemyDamage:10, enemyDefense:2, enemyAttackMs:1200, gold:48, xp:22, power:40 },
-    { id:'scouts', name:'Goblin Scouts', enemy:'Goblin Scout', icon:'👺', enemyHp:150, enemyDamage:13, enemyDefense:3, enemyAttackMs:1100, gold:72, xp:34, power:58 },
-    { id:'bandits', name:'Bandit Trouble', enemy:'Bandit Raider', icon:'🥷', enemyHp:220, enemyDamage:18, enemyDefense:5, enemyAttackMs:1050, gold:105, xp:50, power:82 },
-    { id:'captain', name:'Goblin Captain', enemy:'Goblin Captain', icon:'👹', enemyHp:360, enemyDamage:25, enemyDefense:7, enemyAttackMs:950, gold:180, xp:90, power:118, boss:true }
+    { id:'rats', name:'Rats in the Cellar', enemy:'Giant Rat', sprite:`${ENEMY_ASSET_ROOT}/giant-rat.png`, enemyHp:72, enemyDamage:7, enemyDefense:1, enemyAttackMs:1400, gold:35, xp:15, power:28, frameMs:270 },
+    { id:'chickens', name:'Missing Chickens', enemy:'Wild Fox', sprite:`${ENEMY_ASSET_ROOT}/wild-fox.png`, enemyHp:100, enemyDamage:10, enemyDefense:2, enemyAttackMs:1200, gold:48, xp:22, power:40, frameMs:235 },
+    { id:'scouts', name:'Goblin Scouts', enemy:'Goblin Scout', sprite:`${ENEMY_ASSET_ROOT}/goblin-scout.png`, enemyHp:150, enemyDamage:13, enemyDefense:3, enemyAttackMs:1100, gold:72, xp:34, power:58, frameMs:245 },
+    { id:'bandits', name:'Bandit Trouble', enemy:'Bandit Raider', sprite:`${ENEMY_ASSET_ROOT}/bandit-raider.png`, enemyHp:220, enemyDamage:18, enemyDefense:5, enemyAttackMs:1050, gold:105, xp:50, power:82, frameMs:250 },
+    { id:'captain', name:'Goblin Captain', enemy:'Goblin Captain', sprite:`${ENEMY_ASSET_ROOT}/goblin-captain.png`, enemyHp:360, enemyDamage:25, enemyDefense:7, enemyAttackMs:950, gold:180, xp:90, power:118, boss:true, frameMs:215 }
   ];
 
   const upgrades = [
@@ -30,6 +32,8 @@
   let state = loadState();
   let tickHandle = null;
   let saveHandle = null;
+  let enemyAnimHandle = null;
+  let enemyFrame = 0;
   let selectedQuestIndex = getDefaultQuestIndex();
 
   const $ = (id) => document.getElementById(id);
@@ -131,8 +135,9 @@
     const unlocked = isUnlocked(selectedQuestIndex);
     const cleared = state.cleared.includes(q.id);
 
-    els.questCard.className = `ig-quest-card${unlocked ? '' : ' locked'}`;
+    els.questCard.className = `ig-quest-card ig-has-preview${unlocked ? '' : ' locked'}`;
     els.questCard.innerHTML = `
+      <div class="ig-quest-enemy-preview" style="background-image:url('${q.sprite}')" aria-hidden="true"></div>
       <div>
         <h3>${q.boss ? '👑 ' : ''}${q.name}${cleared ? ' ✓' : ''}</h3>
         <div class="ig-meta">${q.enemy} • Power ${q.power}<br>Reward: 🪙 ${q.gold} • ${q.xp} XP</div>
@@ -199,6 +204,39 @@
     render();
   }
 
+  function setEnemyFrame(frame){
+    if (!els.enemySprite) return;
+    els.enemySprite.classList.remove(...ENEMY_FRAME_CLASSES);
+    els.enemySprite.classList.add(ENEMY_FRAME_CLASSES[frame % ENEMY_FRAME_CLASSES.length]);
+  }
+
+  function applyEnemySprite(q){
+    if (!els.enemySprite || !q) return;
+    els.enemySprite.textContent = '';
+    els.enemySprite.style.backgroundImage = `url('${q.sprite}')`;
+    els.enemySprite.classList.toggle('ig-boss-sprite', Boolean(q.boss));
+    els.enemySprite.classList.add('ig-enemy-ready');
+  }
+
+  function startEnemyAnimation(q){
+    stopEnemyAnimation();
+    if (!q || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setEnemyFrame(0);
+      return;
+    }
+    enemyFrame = 0;
+    setEnemyFrame(enemyFrame);
+    enemyAnimHandle = setInterval(() => {
+      enemyFrame = (enemyFrame + 1) % ENEMY_FRAME_CLASSES.length;
+      setEnemyFrame(enemyFrame);
+    }, q.frameMs || 250);
+  }
+
+  function stopEnemyAnimation(){
+    if (enemyAnimHandle) clearInterval(enemyAnimHandle);
+    enemyAnimHandle = null;
+  }
+
   function startQuest(id){
     const q = quests.find(x => x.id === id);
     const index = quests.findIndex(x => x.id === id);
@@ -242,7 +280,7 @@
     els.activeName.textContent = q.name;
     els.activeStatus.textContent = 'Fighting';
     els.enemy.textContent = q.enemy;
-    els.enemySprite.textContent = q.icon;
+    applyEnemySprite(q);
     els.heroHpText.textContent = `${Math.max(0, Math.ceil(c.heroHp))} / ${c.heroMaxHp} HP`;
     els.enemyHpText.textContent = `${Math.max(0, Math.ceil(c.enemyHp))} / ${c.enemyMaxHp} HP`;
     els.heroHpBar.style.width = `${Math.max(0, c.heroHp/c.heroMaxHp*100)}%`;
@@ -350,6 +388,8 @@
 
   function startTicker(){
     stopTicker();
+    const q = quests.find(x => x.id === state.activeQuest);
+    startEnemyAnimation(q);
     tickHandle = setInterval(() => processCombat(Date.now(), true), 100);
     saveHandle = setInterval(saveState, 2000);
   }
@@ -359,6 +399,7 @@
     if (saveHandle) clearInterval(saveHandle);
     tickHandle = null;
     saveHandle = null;
+    stopEnemyAnimation();
   }
 
   function resolveOfflineCombat(){
