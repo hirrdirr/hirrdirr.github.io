@@ -1,5 +1,6 @@
 import { WORLD, TOWERS } from "./data.js";
 import { SEGMENTS, BLOCKED } from "./map.js";
+import { TRAPS, trapPlacement } from "./traps.js";
 
 export const PLACEMENT = Object.freeze({
   towerRadius: 16,
@@ -81,10 +82,12 @@ export function canPlaceAt(game, kind, gx, gy) {
 
 export function enableFreePlacement(GameClass) {
   GameClass.prototype.placement = function placement(kind, gx, gy) {
+    if (TRAPS[kind]) return trapPlacement(this, kind, gx, gy);
     return canPlaceAt(this, kind, gx, gy);
   };
 
   GameClass.prototype.place = function place(kind, gx, gy) {
+    if (TRAPS[kind]) return this.placeTrap(kind, gx, gy);
     const check = this.placement(kind, gx, gy);
     if (!check.ok) return check;
     const t = {

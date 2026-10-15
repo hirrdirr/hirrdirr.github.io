@@ -110,6 +110,59 @@ Relä remains stationary. The source image is never edited. Upgrade statistics,
 selection outlines and range overlays still use the existing game systems.
 No third-party assets were downloaded for this integration.
 
+## Spike Trap
+
+`towers/spiketrap-sprite-sheet.png` is the repository owner's unchanged RGBA PNG,
+2172 × 724 pixels. It contains four separate drawings in a single horizontal row,
+from intact raised spikes to a low, spent/worn base. It is **not** four clean
+543-pixel-wide cells: the first drawing extends past that boundary. There is no
+separate attack row. No replacement artwork is generated.
+
+`../js/trap-sprites.js` uses these measured source rectangles (zero-based pixels):
+
+| Frame | x | y | Width | Height | Draw size in world pixels |
+| --- | --- | --- | --- | --- | --- |
+| 0 · intact / raised | 55 | 127 | 534 | 485 | 38 × 34.51 |
+| 1 · partly spent | 609 | 178 | 489 | 429 | 34.80 × 30.53 |
+| 2 · low spikes | 1129 | 267 | 497 | 344 | 35.37 × 24.48 |
+| 3 · low base | 1646 | 382 | 507 | 227 | 36.08 × 16.15 |
+
+Alpha > 16/255 gives exclusive artwork bounds (57,129)–(587,610),
+(611,180)–(1096,605), (1131,269)–(1624,609), (1648,384)–(2151,607).
+Each crop adds two pixels around those bounds; almost invisible alpha specks
+elsewhere are omitted so they cannot shrink the visible object or bleed between
+drawings. Source pixels, resolution and file bytes remain unchanged.
+
+All frames use the **same uniform scale**, 38/534. Each crop is horizontally
+centered and vertically registered to source ground y=525, so its base does not
+jump when the artwork height changes. No frame is stretched to match another.
+The maximum visible size is 38 × 34.51 world pixels; the base sits about 6 pixels
+below the placement point, inside the road. A subtle ground shadow and a small
+rearm bar are presentation overlays. Sampling is nearest-neighbor, consistent
+with the supplied pixel-styled art and current tower/enemy rendering, and is
+restored after each draw.
+
+| Gameplay state | Frame mapping |
+| --- | --- |
+| Armed, placement preview, static shop/inspector icon | 0 |
+| Triggered (0–0.24 s after contact) | 0 for 0–0.12 s, then 1 |
+| Rearming, more than 0.8 s remaining | 3 |
+| Rearming, 0.8–0.4 s remaining | 2 |
+| Rearming, less than 0.4 s remaining | 1 |
+| Ready at 4 s | 0 |
+
+These are state poses made from the supplied wear/spent drawings, not a claim
+that the sheet contains a purpose-authored retracting-spike animation. Existing
+impact feedback identifies the instant of contact. Both animation and the
+rearm bar use simulation time; pause, speed changes and reset cannot desynchronize
+them. The UI uses the most legible intact frame, centered within its icon canvas.
+
+The asset loads once, validates exact dimensions and retries one network failure.
+No procedural substitute flashes while it is loading. Only a confirmed failure
+or wrong-sized image enables a minimal emergency base/spike fallback, with a
+console warning; shop icons repaint when loading finishes. The map, shop,
+inspector and placement preview all share this loader and artwork.
+
 ## Enemy walk sprites
 
 The repository owner's supplied sheets are used unchanged:

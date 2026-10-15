@@ -4,12 +4,11 @@ A 30-wave tower defense campaign at `/games/td/`, built with native JavaScript m
 
 ## Play
 
-Click **Start Game** on the artwork menu to open the existing game. Map Select,
-Difficulty, Settings and Back to Site are clickable placeholders for future work.
-The map/difficulty labels in the artwork are decorative and do not select new rules.
+Click **Start Game** on the artwork menu to open the game. Choose Normal or Easy
+before starting; the existing Relay Station is currently the only playable map.
 Reloading the page returns to the menu; restarting an ongoing game works as before.
 
-Build beside the road, protect the core and survive wave 30. Select a placed tower to inspect, upgrade, change targeting or sell it. Mouse placement is immediate; touch placement uses a separate **Bygg här** confirmation. Keyboard: 1–7 selects a tower, arrows on the focused board move the cursor, Enter builds/selects, Escape cancels, Space pauses, R toggles ranges. Shift allows repeated placement.
+Build towers beside the road and Spike Traps on it, protect the core and survive wave 30. Select a placed tower to inspect, upgrade, change targeting or sell it; select a trap to inspect its rearm timer, damage and kills or sell it. Mouse placement is immediate; touch placement uses a separate **Bygg här** confirmation. Keyboard: 1–3 selects game speed, arrows on the focused board move the cursor, Enter builds/selects, Escape cancels, Space pauses, R toggles ranges. Shift allows repeated placement. Number keys do not select towers or traps.
 
 Pause freezes combat but permits planning and purchases. Opening help/restart pauses and closing restores the previous pause state. Hiding the tab pauses the game. Speed controls affect simulation time, not damage rules. Restart clears the entire session; there is no saved campaign yet.
 
@@ -33,6 +32,47 @@ Enemies include normal, fast, very fast, tank, armored, regenerating, elite and 
 
 An early wave can start once the previous wave has sent all enemies, with at most two active waves. The 8–25 credit bonus is paid once per accepted start. Completion rewards are separate. Escaped enemies never grant kill rewards; heavy enemies inflict more core damage. Wave 30 ends in victory after all active encounters clear.
 
+## Spike Trap
+
+| Rule | First-version value |
+| --- | --- |
+| Cost / sale refund | 50 / 35 credits (existing 70% refund) |
+| Damage | 32 physical damage to one enemy per activation |
+| Rearm | 4 simulation seconds from activation; reusable |
+| Contact | 28 world-pixel interval along the route, centered on the trap |
+| Placement | Road only, snapped to its center; clicks up to 26 pixels from it |
+| Separation | At least 44 pixels both along the route and in world space |
+| Entrance/core clearance | 48 route pixels from either end |
+| Upgrades / targeting / relay bonuses | None |
+
+Contact uses the enemy's swept route distance each fixed step, so swift enemies
+and bends cannot skip the trigger. The earliest contact wins, with stable enemy
+IDs resolving ties. A trap hits only one enemy per activation, including in a
+stack of 100 enemies, and does not hit the same enemy again while it remains on
+the trap. Enemies passing during cooldown escape that trap's damage. Armor,
+boss armor pulses, vulnerability, regen delay, kill rewards and damage statistics
+use the existing damage pipeline. Pause freezes the trap's state and animation;
+1×/2×/3× scale simulation time consistently. Restart clears every trap and timer.
+
+The cost sits below the 60-credit Repeater, but sustained output is capped at
+8 raw damage/s versus the Repeater's 19.6. A fresh Normal drone has 38 HP, so a
+single trap cannot kill it; first-act fast/swift enemies have 27/24 HP, making
+the trap a useful occasional finisher. Armor reduces a hit on an armored enemy
+to 14.4; a boss takes 16 during its pulse or 22.4 otherwise. Act-two/three HP
+scaling (1.8×/2.9×, with separate boss scaling) reduces its late-game impact.
+The 4-second cooldown spans several arrivals in the authored 0.16–0.9-second
+groups. No splash or armor penetration is added. Buying a trap also competes
+with the existing 40–45-credit first Repeater upgrades. Kill rewards (6–130)
+and wave-completion income remain unchanged.
+
+Spacing follows the 38-pixel artwork footprint plus a small gap, including at
+corners, rather than imposing a trap-count limit. Selling fits the existing
+planning UX and is available during pause. Easy naturally supplies its existing
+extra credits/lives, lower enemy HP/speed and higher rewards; trap stats stay
+identical. All seven tower definitions, upgrades, waves and enemy stats remain
+unchanged. Sprite crops, animation states and draw sizes are in
+[`assets/README.md`](assets/README.md#spike-trap).
+
 ## Structure
 
 - `menu.js` / `menu.css`: responsive artwork menu and percentage-based button overlays. Start Game reveals the game, then imports `td.js` once; no game loop or game controls run before that click.
@@ -42,6 +82,8 @@ An early wave can start once the previous wave has sent all enemies, with at mos
 - `js/map.js`: grid, blocked cells and distance-based path geometry.
 - `js/waves.js`: authored wave schedule, previews and scaling.
 - `js/engine.js`: DOM-independent simulation, validated game commands and events. Stable IDs identify towers/enemies; selection never relies on array indices.
+- `js/traps.js`: separate trap definitions, road placement, contact selection and rearm timing; traps have their own collection and stable IDs.
+- `js/trap-sprites.js`: measured owner-supplied sheet crops, loading/retry/failure fallback, icons and simulation-driven trap frames.
 - `js/renderer.js`: Canvas art, cached terrain, indicators and bounded visual effects.
 - `js/enemy-sprites.js`: presentation-only walk sheets for all eight enemy kinds, fixed frame crops, aspect-preserving pixel-sharp scaling and horizontal facing.
 - `js/ui.js`: HUD, shop, inspector, dialogs and accessible feedback. The inspector replaces the shop while inspecting a tower.
@@ -60,11 +102,48 @@ npm ci
 npm run dev
 npm test
 npm run test:balance
+npm run test:traps-balance
 ```
 
 The development preview wraps the game with the repository's existing Jekyll layout. It is a preview adapter, not a complete Jekyll build. `/__td-qa` provides 320/390/768/1024px iframe widths for layout inspection. Development tools and tests are excluded from Jekyll output. CI runs the dependency-free tests and syntax checks on TD pull requests.
 
-27 automated tests cover placement validation, money, upgrades and path locks, all 42 upgrade tiers, five targeting modes, minimum range, armor/status/support rules, regen and bosses, escaped targets, exact kill rewards, stable selection, path movement, pause, restart, loss/victory, waves, early-start limits, firing cadence, speed equivalence across 20/60/120 FPS, production imports and static UI bindings. Sprite checks cover the supplied PNG dimensions/paths, four-frame crops, movement-driven cycles through pause/speed/slow, upright horizontal facing, local smoothing state and unavailable-asset fallback.
+Automated tests cover placement validation, money, upgrades and path locks, all 42 upgrade tiers, five targeting modes, minimum range, armor/status/support rules, regen and bosses, escaped targets, exact kill rewards, stable selection, path movement, pause, restart, loss/victory, waves, early-start limits, firing cadence, speed equivalence across 20/60/120 FPS, production imports and static UI bindings. Sprite checks cover the supplied PNG dimensions/paths, four-frame crops, movement-driven cycles through pause/speed/slow, upright horizontal facing, local smoothing state and unavailable-asset fallback.
+
+### Spike Trap verification (2026-10-13)
+
+72 rule, integration and sprite tests pass, including road-only placement,
+money/spacing/gate failures, all enemy types, 100 overlapping enemies, swept
+crossings, rearming, sale, restart, pause and identical 1×/2×/3× results at
+20/60/120 FPS. Sprite tests cover actual PNG dimensions, frame boundaries,
+state selection, aspect ratio, anchors, icon selection, retry and fallback.
+The four existing balance bots match the inspected `main` revision `4d951da`
+exactly, excluding compute time, including lives, kills, spending and wave results.
+
+Reproducible fixed-defense probes (no reinvestment):
+
+| Defense | Cost | Normal waves cleared | Easy waves cleared |
+| --- | --- | --- | --- |
+| Four compact traps | 200 | 3 | 5 |
+| Three Repeaters | 180 | 6 | 8 |
+| Six compact traps | 300 | 4 | 6 |
+| Five Repeaters | 300 | 8 | 9 |
+| Two traps + two Repeaters | 220 | 6 | 8 |
+
+The 300-credit cases deliberately exceed Normal's starting budget to compare
+equal investments. Full mixed campaigns using earned credits, all seven tower
+types, 36 upgrades and four supporting traps clear all 30 waves in both modes:
+Normal retains 30 lives, Easy 40. Traps contribute about 7,591/7,022 actual damage.
+These are fixed strategies, not proof of optimal balance or human playtesting.
+
+Native Canvas renders of the actual renderer and original decoded PNG pixels
+were inspected at 1280/960/768/480/390/320-pixel **battlefield** widths, including
+armed/rearm frames, ground anchoring, icons, selection and valid/invalid placement
+previews. Existing map, river, bridge and ambience modules are unchanged.
+This does **not** verify browser CSS, touch input or viewport layout. The available
+browser could not access the local preview, so desktop (including 1366×768),
+tablet and mobile shop/inspector layout and interactive gameplay still need a
+browser pass before merge. No QA harness, screenshots or temporary assets are
+included in the repository.
 
 Browser checks performed: startup with the shared site layout, placement, selection, targeting, upgrade, sale while paused, wave start, speed controls, pause overlay and restart. Layout inspected at desktop and at 320/390/768px iframe widths; no horizontal page overflow at those narrow widths. No game JavaScript errors observed. Physical-device touch behavior and sustained mobile rendering performance still need device testing. The full Jekyll/GitHub Pages build remains a deployment-side check.
 

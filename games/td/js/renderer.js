@@ -2,6 +2,8 @@ import { WORLD, TOWERS, ENEMIES, towerStats } from "./data.js";
 import { PATH, SEGMENTS, ROAD, BLOCKED, distanceSquared } from "./map.js";
 import { EnemySprites } from "./enemy-sprites.js";
 import { getTowerSprites } from "./tower-sprites.js";
+import { TRAPS, trapState } from "./traps.js";
+import { drawTrap, getTrapSprites } from "./trap-sprites.js";
 const TAU = Math.PI * 2;
 function polygon(c, x, y, r, sides = 6, angle = 0) {
   c.beginPath();
@@ -177,12 +179,22 @@ export function paintIcons(root) {
         false,
       );
     }
+    for (const canvas of root.querySelectorAll("canvas[data-trap-icon]")) {
+      if (!canvas.dataset.trapIcon) continue;
+      const c = canvas.getContext("2d");
+      c.clearRect(0, 0, canvas.width, canvas.height);
+      drawTrap(c, { kind: canvas.dataset.trapIcon, triggeredAt: null, readyAt: 0 },
+        0, canvas.width / 2, canvas.height / 2, canvas.width / 46, true);
+    }
   };
   paint();
   // Startup is not blocked on PNG downloads. Repaint the current UI once ready.
   getTowerSprites().ready.then(() => {
     if (root.isConnected) paint();
   });
+  if ([...root.querySelectorAll("canvas[data-trap-icon]")].some((c) => c.dataset.trapIcon)) {
+    getTrapSprites().ready.then(() => { if (root.isConnected) paint(); });
+  }
 }
 export class Renderer {
   constructor(canvas) {
@@ -495,7 +507,7 @@ export class Renderer {
       hovered = game.towers.find((t) => t.id === input.hoverId);
     if (input.allRanges)
       for (const t of game.towers) this.range(c, t, towerStats(t));
-    if (selected) this.range(c, selected, towerStats(selected), true);
+    if (selected && !TRAPS[selected.kind]) this.range(c, selected, towerStats(selected), true);
     if (hovered && hovered !== selected && !input.placing)
       this.range(c, hovered, towerStats(hovered), true);
     if (selected?.kind === "relay") {
@@ -519,6 +531,7 @@ export class Renderer {
         c.strokeRect(t.x - 22, t.y - 22, 44, 44);
       }
     }
+    this.drawTraps(c, game, input);
     for (const e of game.enemies) {
       const absorbing = e.status === "absorbing";
       if (!absorbing) {
@@ -604,6 +617,7 @@ export class Renderer {
     }
     this.effects = this.effects.filter((p) => p.life > 0);
     if (input.placing && input.cursor) {
+      if (TRAPS[input.placing]) return this.drawTrapPreview(c, game, input);
       const { gx, gy } = input.cursor,
         check = game.placement(input.placing, gx, gy),
         t = { x: (gx + 0.5) * 40, y: (gy + 0.5) * 40 };
@@ -627,6 +641,40 @@ export class Renderer {
       c.lineWidth = 2;
       c.strokeRect(input.cursor.gx * 40 + 1, input.cursor.gy * 40 + 1, 38, 38);
     }
+  }
+  drawTraps(c, game, input) {
+    for (const trap of game.traps) {
+      c.save();
+      c.fillStyle = "rgba(24,17,9,.24)";
+      c.beginPath(); c.ellipse(trap.x, trap.y + 4, 17, 5, 0, 0, TAU); c.fill();
+      drawTrap(c, trap, game.time);
+      const selected = game.selectedId === trap.id;
+      const hovered = !input.placing && input.hoverId === trap.id;
+      if (selected || hovered) {
+        c.strokeStyle = selected ? "#e1bb70" : "#d3a65777";
+        c.lineWidth = selected ? 1.4 : 0.8;
+        c.beginPath(); c.ellipse(trap.x, trap.y + 1, 21, 9, 0, 0, TAU); c.stroke();
+      }
+      if (trapState(trap, game.time) === "rearming") {
+        const progress = 1 - Math.max(0, trap.readyAt - game.time) / TRAPS[trap.kind].rearm;
+        c.fillStyle = "#251d13cc"; c.fillRect(trap.x - 12, trap.y + 11, 24, 2);
+        c.fillStyle = "#c89c58"; c.fillRect(trap.x - 12, trap.y + 11, 24 * progress, 2);
+      }
+      c.restore();
+    }
+  }
+  drawTrapPreview(c, game, input) {
+    const check = game.placement(input.placing, input.cursor.gx, input.cursor.gy);
+    const x = check.x ?? (input.cursor.gx + 0.5) * WORLD.tile;
+    const y = check.y ?? (input.cursor.gy + 0.5) * WORLD.tile;
+    c.save();
+    c.fillStyle = check.ok ? "#d3a65722" : "#cf665733";
+    c.strokeStyle = check.ok ? "#e1bb70" : "#cf6657";
+    c.lineWidth = 1.5;
+    c.beginPath(); c.ellipse(x, y + 1, 21, 9, 0, 0, TAU); c.fill(); c.stroke();
+    c.globalAlpha = 0.65;
+    drawTrap(c, { kind: input.placing, triggeredAt: null, readyAt: 0 }, 0, x, y);
+    c.restore();
   }
   drawEnemy(c, e, game) {
     const def = ENEMIES[e.kind],

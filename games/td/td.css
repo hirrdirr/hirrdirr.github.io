@@ -565,6 +565,28 @@
   background: #101f25;
   min-height: 195px;
 }
+.td-trap-state {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 14px 0 7px;
+  font-size: 13px;
+  color: #c3b79a;
+}
+.td-trap-state[data-state="armed"] strong { color: #bdcd8b; }
+.td-trap-state[data-state="triggered"] strong { color: #f1cb86; }
+.td-trap-progress {
+  height: 4px;
+  background: #30291e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.td-trap-progress > span {
+  display: block;
+  height: 100%;
+  background: #c89c58;
+}
 .td-inspector-head {
   display: flex;
   align-items: center;

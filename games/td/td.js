@@ -39,7 +39,7 @@ const atCursor = () => {
     y = (input.cursor.gy + 0.5) * WORLD.tile;
   let closest = null,
     closestDistance = 22 ** 2;
-  for (const tower of game.towers) {
+  for (const tower of [...game.towers, ...game.traps]) {
     const distance = (tower.x - x) ** 2 + (tower.y - y) ** 2;
     if (distance <= closestDistance) {
       closest = tower;

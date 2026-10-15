@@ -16,7 +16,7 @@ Renderer.prototype.render = function renderWithTowerSelectionOutline(game, input
 
   // Renderer hover ranges are purely visual. Temporarily hide hoverId while the
   // base renderer draws so range circles only appear for explicitly selected towers.
-  input.hoverId = null;
+  input.hoverId = game.traps.some((trap) => trap.id === originalHoverId) ? originalHoverId : null;
 
   let result;
   try {
