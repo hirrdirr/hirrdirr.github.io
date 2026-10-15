@@ -36,41 +36,49 @@ An early wave can start once the previous wave has sent all enemies, with at mos
 
 | Rule | Value |
 | --- | --- |
-| Cost | 50 credits |
-| Damage | 32 physical damage per enemy passage |
-| HP | 10; each distinct enemy contact consumes 1 HP |
-| Cooldown / regeneration | None; animation never blocks another contact |
-| Depletion | Last hit still deals damage; remove after its 0.24-second strike animation |
-| Sale refund | 70% of the remaining HP value, rounded down (35 unused, 31 at 9 HP) |
-| Contact | 28 world-pixel interval along the route, centered on the trap |
+| Cost | 20 credits (previously 50) |
+| Damage | 12 physical damage/s **only during overlap**, replacing the 32-damage entry burst |
+| Tick rate | Existing 60 Hz simulation; 0.2 raw damage for a full 1/60 s overlap, fractional entry/exit ticks |
+| Slow | 10% only on the footprint; strongest slow wins and existing enemy slow resistance applies |
+| HP | 5 (previously 10); each new passage spends 1 HP, buying up to 1 second of contact |
+| Prolonged contact | Another HP per additional second; unused time is discarded on departure/death |
+| Cooldown / refill | None |
+| Depletion | Finish already-paid overlap at 0 unspent HP, then retract/remove after 0.24 s |
+| Sale refund | 70% of unspent HP value, rounded down (14 unused, 11 at 4 HP) |
+| Contact | Unchanged 28-world-pixel interval along the route, centered on the trap |
 | Placement | Road only, snapped to its center; clicks up to 26 pixels from it |
 | Separation | At least 44 pixels both along the route and in world space |
 | Entrance/core clearance | 48 route pixels from either end |
 | Upgrades / targeting / relay bonuses | None |
 
-The trap starts retracted. Contact raises the spikes immediately; they retract
-again over 0.24 simulation seconds. Every distinct passing enemy can be hit,
-even during that animation or on the same simulation step, while HP remains.
-A normal enemy, armored enemy or boss each consumes exactly 1 trap HP. The same
-enemy cannot take another hit or consume another HP while standing on the trap.
+The trap is a disposable leak catcher. It starts retracted, stays raised while
+it deals overlap damage, then uses the existing 0.24-second retraction poses.
+Its source PNG, crops, scale, road footprint and spacing are unchanged.
 
-Contact uses swept route distance, so swift enemies and bends cannot skip it.
-Contacts are processed in arrival order, with stable enemy IDs resolving ties.
-A stack of 100 enemies can use only the ten available hits; HP cannot become
-negative. At 0 HP the final strike stays visible briefly, then the trap is
-removed, its road space is freed and its selection cleared. No automatic refund
-or refill occurs. Pause freezes HP, animation and removal; 1×/2×/3× share the
-fixed simulation clock. Restart clears all traps and contact history.
+Damage integrates the actual swept overlap fraction of each simulation step,
+including fast crossings and bends. Slow is separate from tower status effects:
+it does not overwrite Frostlink, multiply with other slows, or linger after
+leaving/selling/depletion. Entry/exit movement is resolved at the existing 1/60 s
+step precision; no timed slow grace is attached to the enemy.
 
-Cost and per-hit damage are unchanged. The finite ten-hit capacity caps total
-raw damage at 320, making the trap a consumable road support option. A fresh
-Normal drone has 38 HP, so one trap cannot kill it. Armor, boss armor pulses,
-vulnerability, regen delay, kill rewards and damage statistics still use the
-existing damage pipeline. Selling remains available during pause, with the
-refund scaled to remaining HP so spent hits cannot be resold as a fresh trap.
+Each contact reserves its own HP, with arrival order and enemy ID breaking ties.
+Only five new enemies can receive damage simultaneously from a fresh trap.
+A stalled enemy also consumes HP every second, limiting a trap to at most five
+paid enemy-seconds / 60 raw damage before the usual armor/vulnerability rules.
+The final paid contact continues even at 0 unspent HP; it cannot admit new
+contacts. Spent HP is never refunded or regenerated. Pause freezes contact time,
+HP and animation; restart clears the contact map and all traps.
 
-Spacing, all seven towers, upgrades, waves, enemies, difficulty settings and map
-art remain unchanged. Sprite crops, animation states and draw sizes are in
+The economy follows the cheapest tower: a 20-credit trap costs one third of a
+60-credit Repeater. At 58 px/s, a normal enemy spends approximately
+28 / (58 × 0.9) = 0.536 s on the trap, taking about 6.4 damage—less than one
+7-damage Repeater shot. Five contacts normally deliver about 32 total damage;
+a Repeater provides 19.6 sustained DPS across successive waves. Fast/swift
+enemies take about 3.9/2.5 damage. Armor, boss pulses, vulnerability, regeneration,
+kill rewards and damage attribution still use the existing combat pipeline.
+
+Spacing, all seven towers, upgrades, waves, enemies, difficulties and map art
+remain unchanged. Sprite state details are in
 [`assets/README.md`](assets/README.md#spike-trap).
 
 ## Structure
@@ -117,45 +125,66 @@ The development preview wraps the game with the repository's existing Jekyll lay
 
 Automated tests cover placement validation, money, upgrades and path locks, all 42 upgrade tiers, five targeting modes, minimum range, armor/status/support rules, regen and bosses, escaped targets, exact kill rewards, stable selection, path movement, pause, restart, loss/victory, waves, early-start limits, firing cadence, speed equivalence across 20/60/120 FPS, production imports and static UI bindings. Sprite checks cover the supplied PNG dimensions/paths, four-frame crops, movement-driven cycles through pause/speed/slow, upright horizontal facing, local smoothing state and unavailable-asset fallback.
 
-### Spike Trap HP verification (2026-10-15)
+### Spike Trap utility verification (2026-10-15)
 
-80 rule, integration, inspector and sprite tests pass, including road-only placement,
-money/spacing/gate failures, all enemy types, 100 overlapping enemies, swept
-crossings, HP consumption/depletion, sale, restart, pause and identical 1×/2×/3× results at
-20/60/120 FPS. Sprite tests cover actual PNG dimensions, frame boundaries,
-state selection, aspect ratio, anchors, icon selection, retry and fallback.
-The four existing balance bots match the inspected `main` revision `4d951da`
-exactly, excluding compute time, including lives, kills, spending and wave results.
+The old 32-damage, ten-contact trap killed all ten first-wave enemies on Easy
+(31.16 HP each), and dealt 320 damage on Normal. Trials of **16 DPS** and then
+**12 DPS** used the real engine, waves, enemies and live free-placement rules.
+At 16 DPS, four traps could kill five fresh Easy drones; at 12 DPS the same
+four traps kill none. The lower value still catches the tested weak leaks.
 
-Reproducible fixed-defense probes (no reinvestment):
+All 87 automated tests pass. Reproduce with `npm test`, `npm run test:balance` and
+`npm run test:traps-balance`. Dedicated gameplay regressions verify:
 
-| Defense | Cost | Normal waves cleared | Easy waves cleared |
+- **Wave 1 alone:** one trap kills **0**, all **10 leak**, on Normal and Easy,
+  at entrance/bend/exit placements and 1×/2×/3×. It damages five enemies for
+  about **32.2 / 33.5** total and depletes. Lives end at 20 / 30; the wave ends
+  because enemies escape, not because the defense succeeds.
+- **Actual tower-damaged leaks:** on wave 2, Repeaters at (200,240) and (500,220)
+  leak 4 enemies on Normal / 1 on Easy. Adding a trap 60 route pixels before
+  the core catches one low-HP enemy: leaks become **3 / 0**, for 20 extra credits.
+  No enemy HP is manually edited in this probe.
+- **Three traps / 60 credits:** no fresh wave-1 kills in either difficulty.
+  Duplicate/overlapping placements and corner spacing are rejected as before.
+- All eight enemy kinds in all three campaign acts survive a full-health
+  passage. Normal first-act damage is approximately 6.4 drone, 3.9 fast,
+  2.5 swift, 9.1 tank, 3.1 armored, 5.5 regen and 4.5 elite. Boss damage depends
+  on its normal armor-pulse phase (roughly 6.2–8.7), and its effective slow is 3.5%.
+- 100 overlapping enemies, continuous stationary contact, depletion during
+  contact, fractional swept damage, armor, vulnerability, regen recovery,
+  stronger tower slows, refunds, pause/restart and exact speed equivalence at
+  20/60/120 rendering FPS are covered. Spikes stay raised during paid contact.
+
+Fixed-budget strategies, no reinvestment (nearest legal compact road positions):
+
+| Credits | Defense | Normal waves ended before defeat | Easy waves ended before defeat |
 | --- | --- | --- | --- |
-| Four compact traps | 200 | 4 | 5 |
-| Three Repeaters | 180 | 6 | 8 |
-| Six compact traps | 300 | 4 | 6 |
-| Five Repeaters | 300 | 8 | 9 |
-| Two traps + two Repeaters | 220 | 6 | 6 |
+| 60 | Three traps | 2 | 3 |
+| 60 | One Repeater | 3 | 4 |
+| 180 | Nine traps | 3 | 3 |
+| 180 | Three Repeaters | 6 | 8 |
+| 300 | Fifteen traps | 3 | 4 |
+| 300 | Five Repeaters | 8 | 9 |
 
-The 300-credit cases deliberately exceed Normal's starting budget to compare
-equal investments. Full mixed campaigns using earned credits, all seven tower
-types, 36 upgrades and four supporting traps clear all 30 waves in both modes:
-Normal retains 30 lives, Easy 40. Four traps purchased over the campaign
-contribute about 962/928 actual damage and are all consumed; the probe retains
-their statistics after removal.
-These are fixed strategies, not proof of optimal balance or human playtesting.
+Wave counts include escaped enemies, so they are **not** perfect-defense counts.
+All traps in these probes are consumed; even a large trap purchase does not
+provide sustained defense. Enough consecutive traps can still kill healthy
+enemies, but need continued repurchases and are inferior in these equal-budget
+probes. These strategies do not prove optimal balance or rule out every exploit.
 
-Native Canvas renders of the actual renderer and original decoded PNG pixels
-were inspected at 960/390/320-pixel **battlefield** widths, including
-retracted/strike frames, the final hit at 0 HP, ground anchoring, selection,
-depletion cleanup and restart. Existing map, river, bridge and ambience modules are unchanged.
-This does **not** verify browser CSS, touch input or viewport layout. The available
-browser could not access the local preview, so desktop (including 1366×768),
-tablet and mobile shop/inspector layout and interactive gameplay still need a
-browser pass before merge. No QA harness, screenshots or temporary assets are
-included in the repository.
+Full mixed campaigns with all seven tower kinds, 36 upgrades and four traps
+clear all 30 waves with 30 / 40 lives. Traps contribute about 82 / 86 actual
+damage. The four existing tower-only balance scenarios match baseline main
+`22ccfcc` exactly, excluding compute time.
 
-Browser checks performed: startup with the shared site layout, placement, selection, targeting, upgrade, sale while paused, wave start, speed controls, pause overlay and restart. Layout inspected at desktop and at 320/390/768px iframe widths; no horizontal page overflow at those narrow widths. No game JavaScript errors observed. Physical-device touch behavior and sustained mobile rendering performance still need device testing. The full Jekyll/GitHub Pages build remains a deployment-side check.
+Gameplay snapshots use the actual native Canvas renderer and original PNG
+pixels for solo wave 1 and rear-trap wave 2, including idle/contact/depletion,
+pause/restart and battlefield widths 960/768/390/320. This is **not** browser
+CSS, pointer/touch or viewport validation. Interactive local preview is blocked
+by the cloud browser security policy, so an interactive browser pass remains
+before merge. No QA harness, screenshots or temporary assets are committed.
+
+Historical browser checks (before the Spike Trap utility rebalance): startup with the shared site layout, placement, selection, targeting, upgrade, sale while paused, wave start, speed controls, pause overlay and restart. Layout inspected at desktop and at 320/390/768px iframe widths; no horizontal page overflow at those narrow widths. No game JavaScript errors observed. Physical-device touch behavior and sustained mobile rendering performance still need device testing. The full Jekyll/GitHub Pages build remains a deployment-side check.
 
 Start menu checks (2026-10-08): artwork and all five aligned buttons at desktop
 and 320/390/768/1024px widths, no horizontal overflow, placeholder clicks, click

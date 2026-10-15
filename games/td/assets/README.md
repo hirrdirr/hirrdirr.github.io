@@ -145,19 +145,19 @@ restored after each draw.
 | Gameplay state | Frame mapping |
 | --- | --- |
 | Retracted/idle and placement preview | 3 (lowest supplied pose) |
-| Contact, first 0–0.12 s | 0 (spikes raised immediately) |
-| Retraction, 0.12–0.20 s | 1 |
-| Retraction, 0.20–0.24 s | 2 |
-| Idle after 0.24 s | 3 |
+| During paid overlap and first 0–0.12 s after it | 0 (raised) |
+| Retraction, 0.12–0.20 s after contact | 1 |
+| Retraction, 0.20–0.24 s after contact | 2 |
+| Idle 0.24 s after contact | 3 |
 | Static shop/inspector icon | 0 (most legible intact frame) |
-| Final contact at 0 HP | Same strike sequence, then remove the trap |
+| Final paid contact at 0 unspent HP | Stay raised during paid overlap, then retract and remove |
 
 These are state poses made from the supplied wear/spent drawings, not a claim
 that the sheet contains a purpose-authored retracting-spike animation. The lowest
-pose represents the retracted trap; contact pops to the intact raised pose and
-then steps down. The original PNG, crops, ground anchor and scale are unchanged.
-Each new contact restarts the visual strike; **animation is not a cooldown** and
-does not block damage to the next enemy. The 0.24-second sequence and final
+pose represents the retracted trap; overlap holds the intact raised pose, then
+steps down after contact ends. The original PNG, crops, ground anchor and scale
+are unchanged. Each damage tick refreshes the pose; **animation is not a
+cooldown** and does not gate combat. The 0.24-second retraction and final
 removal use simulation time, so pause/speed/restart remain synchronized. The
 small ground bar and inspector meter show remaining HP, not elapsed time.
 

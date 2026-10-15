@@ -14,7 +14,7 @@ import {
   distanceSquared,
 } from "./map.js";
 import { WAVES, waveScale, waveSpawns, completionReward } from "./waves.js";
-import { TRAPS, trapPlacement, placeTrap, updateTraps } from "./traps.js";
+import { TRAPS, trapPlacement, placeTrap, updateTraps, trapSlowFor } from "./traps.js";
 export const STEP = 1 / 60;
 const CORE_X = 933,
   CORE_Y = 300,
@@ -444,7 +444,8 @@ export class Game {
       if (e.status !== "active") continue;
       if (e.regen && this.time - e.lastHit > 2)
         e.hp = Math.min(e.maxHp, e.hp + e.maxHp * e.regen * dt);
-      const slow = e.slowUntil > this.time ? e.slow * (1 - e.slowResist) : 0;
+      const slow = Math.max(e.slowUntil > this.time ? e.slow : 0,
+        trapSlowFor(this, e)) * (1 - e.slowResist);
       e.previousDistance = e.distance;
       e.distance += e.speed * (1 - slow) * dt;
       Object.assign(e, pointOnPath(e.distance));
@@ -459,7 +460,7 @@ export class Game {
     this.enemies = this.enemies.filter(
       (e) => e.status === "active" || e.status === "absorbing",
     );
-    updateTraps(this);
+    updateTraps(this, dt);
     for (const t of this.towers) {
       t.recoil = Math.max(0, t.recoil - dt * 6);
       if (t.kind === "relay") continue;
