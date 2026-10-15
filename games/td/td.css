@@ -574,7 +574,7 @@
   font-size: 13px;
   color: #c3b79a;
 }
-.td-trap-state[data-state="armed"] strong { color: #bdcd8b; }
+.td-trap-state[data-state="idle"] strong { color: #bdcd8b; }
 .td-trap-state[data-state="triggered"] strong { color: #f1cb86; }
 .td-trap-progress {
   height: 4px;

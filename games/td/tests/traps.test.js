@@ -32,14 +32,14 @@ function battle(kinds = ["normal"], wave = 1) {
   return { game, trap, enemies };
 }
 
-test("Spike Trap is a separate build type with bounded single-target output", () => {
+test("Spike Trap keeps its cost/damage and replaces cooldown with ten consumable HP", () => {
   assert.deepEqual(Object.keys(TRAPS), ["spike"]);
   assert.equal(Object.keys(TOWERS).length, 7);
   assert.equal(TOWERS.spike, undefined);
   assert.equal(def.cost, 50);
   assert.equal(def.damage, 32);
-  assert.equal(def.rearm, 4);
-  assert.ok(def.damage / def.rearm < TOWERS.repeater.damage * TOWERS.repeater.rate);
+  assert.equal(def.hp, 10);
+  assert.equal(def.rearm, undefined);
 });
 
 test("live placement snaps only road clicks to its centre and spends once", () => {
@@ -55,9 +55,13 @@ test("live placement snaps only road clicks to its centre and spends once", () =
   assert.equal(game.towers.length, 0);
   assert.equal(game.selected, trap);
   assert.equal(trap.entityType, "trap");
+  assert.equal(trap.hp, 10);
+  assert.equal(trap.maxHp, 10);
+  assert.equal(trapFrame(trap, game.time), 3);
+  assert.equal(trap.readyAt, undefined);
   assert.equal(trap.levels, undefined);
   assert.equal(trap.targeting, undefined);
-  assert.equal(trapState(trap, game.time), "armed");
+  assert.equal(trapState(trap, game.time), "idle");
 });
 
 test("grass, invalid coordinates, gates, missing money and terminal placements are atomic", () => {
@@ -130,42 +134,54 @@ test("all road segments support traps away from gates without changing tower cle
   assert.equal(legacy.place("repeater", 5, 7).ok, false);
 });
 
-test("one activation hits only one overlapping enemy, with deterministic ID ties", () => {
+test("100 overlapping enemies consume only the available HP in deterministic ID order", () => {
   const { game, trap, enemies } = battle(Array(100).fill("normal"));
   game.enemies.reverse();
   game.update(STEP);
-  assert.equal(enemies[0].hp, 6);
-  assert.ok(enemies.slice(1).every((e) => e.hp === 38));
-  assert.equal(trap.triggers, 1);
-  assert.equal(trap.totalDamage, 32);
-  assert.equal(game.totalDamage, 32);
+  assert.ok(enemies.slice(0, def.hp).every((e) => e.hp === 6));
+  assert.ok(enemies.slice(def.hp).every((e) => e.hp === 38));
+  assert.equal(trap.hp, 0);
+  assert.equal(trap.triggers, def.hp);
+  assert.equal(trap.totalDamage, def.hp * def.damage);
+  assert.equal(game.totalDamage, def.hp * def.damage);
   assert.equal(game.projectiles.length, 0);
+  game.update(STEP);
+  assert.equal(trap.hp, 0);
+  assert.equal(trap.triggers, def.hp, "A depleted trap cannot deal another hit");
 });
 
-test("rearm takes four simulation seconds; a second enemy cannot trigger early", () => {
-  const { game, trap, enemies } = battle(["normal", "normal"]);
+test("consecutive contacts hit immediately, including during the strike animation", () => {
+  const { game, trap, enemies: [first, second] } = battle(["normal", "normal"]);
+  second.distance = trap.distance - 50;
   game.update(STEP);
-  run(game, def.rearm - STEP);
-  assert.equal(trap.triggers, 1);
-  assert.equal(enemies[1].hp, 38);
+  assert.equal(first.hp, 6);
+  assert.equal(second.hp, 38);
+  assert.equal(trap.hp, 9);
+  assert.equal(trapFrame(trap, game.time), 0);
+  second.speed = 6000;
   game.update(STEP);
+  assert.equal(second.hp, 6);
+  assert.equal(trap.hp, 8);
   assert.equal(trap.triggers, 2);
-  assert.equal(enemies[0].hp, 6);
-  assert.equal(enemies[1].hp, 6);
+  assert.equal(trap.triggeredAt, game.time);
+  run(game, 0.3);
+  assert.equal(trapFrame(trap, game.time), 3);
+  assert.equal(trap.hp, 8, "Retraction does not regenerate HP");
 });
 
 test("a stationary/very slow enemy is hit only once in the same pass", () => {
   const { game, trap, enemies } = battle();
   run(game, 12);
   assert.equal(trap.triggers, 1);
+  assert.equal(trap.hp, 9);
   assert.equal(enemies[0].hp, 6);
-  assert.equal(trapState(trap, game.time), "armed");
+  assert.equal(trapState(trap, game.time), "idle");
 });
 
-test("a previously hit enemy leaving after rearm cannot be hit again on its departure tick", () => {
+test("a previously hit enemy cannot spend another HP on its departure tick", () => {
   const { game, trap, enemies: [enemy] } = battle();
   run(game, 5);
-  assert.equal(trapState(trap, game.time), "armed");
+  assert.equal(trapState(trap, game.time), "idle");
   enemy.speed = 1800;
   game.update(STEP);
   assert.equal(trap.triggers, 1);
@@ -193,6 +209,7 @@ test("swept contact catches fast enemies crossing the whole footprint in a tick"
 test("a swept bend crossing chooses the first arrival, independent of array order", () => {
   const game = new LiveGame();
   const trap = build(game, 260, 300).trap;
+  trap.hp = 1;
   const later = game.spawn("swift", 1), earlier = game.spawn("swift", 1);
   later.distance = trap.distance - 25;
   earlier.distance = trap.distance - 18;
@@ -203,15 +220,16 @@ test("a swept bend crossing chooses the first arrival, independent of array orde
   assert.equal(trap.triggers, 1);
 });
 
-test("an enemy leaving during rearm is missed, not damaged after it has passed", () => {
+test("another passing enemy is hit without waiting for a cooldown", () => {
   const { game, trap, enemies: [first, second] } = battle(["normal", "normal"]);
   second.distance = trap.distance - 50;
   game.update(STEP);
   second.speed = 148;
   run(game, 5);
-  assert.equal(trap.triggers, 1);
+  assert.equal(trap.triggers, 2);
+  assert.equal(trap.hp, 8);
   assert.equal(first.hp, 6);
-  assert.equal(second.hp, second.maxHp);
+  assert.equal(second.hp, 6);
 });
 
 for (const kind of Object.keys(ENEMIES)) {
@@ -223,6 +241,7 @@ for (const kind of Object.keys(ENEMIES)) {
     assert.ok(Math.abs(enemy.hp - Math.max(0, initial - expected)) < 1e-8);
     assert.ok(Math.abs(trap.totalDamage - expected) < 1e-8);
     assert.equal(trap.triggers, 1);
+    assert.equal(trap.hp, 9, "Every enemy type costs exactly one HP");
     assert.equal(enemy.lastHit, game.time);
   });
 }
@@ -272,16 +291,16 @@ test("dead, absorbing and off-footprint enemies cannot activate a trap", () => {
   assert.equal(trap.triggers, 0, "Boss sprite/radius does not enlarge the trigger zone");
 });
 
-test("pause freezes trap animation, cooldown and damage but permits planning and sales", () => {
+test("pause freezes trap HP, animation and damage but permits planning and sales", () => {
   const { game, trap, enemies } = battle();
   game.update(STEP);
-  const state = { time: game.time, hp: enemies[0].hp, readyAt: trap.readyAt,
+  const state = { time: game.time, hp: enemies[0].hp, trapHp: trap.hp,
     triggers: trap.triggers, frame: trapFrame(trap, game.time) };
   game.setPaused(true);
   new GameClock().advance(game, 20);
   game.update(20);
   updateTraps(game);
-  assert.deepEqual({ time: game.time, hp: enemies[0].hp, readyAt: trap.readyAt,
+  assert.deepEqual({ time: game.time, hp: enemies[0].hp, trapHp: trap.hp,
     triggers: trap.triggers, frame: trapFrame(trap, game.time) }, state);
   const second = build(game, 244).trap;
   assert.ok(second);
@@ -303,13 +322,13 @@ test("1x/2x/3x at 20/60/120 FPS produce identical trap combat and animation stat
     snapshots.push({ time: game.time, gold: game.gold, kills: game.kills,
       totalDamage: game.totalDamage, lives: game.lives,
       enemies: game.enemies.map((e) => [e.id, e.hp, e.distance]),
-      traps: game.traps.map((t) => [t.id, t.triggers, t.totalDamage, t.readyAt,
+      traps: game.traps.map((t) => [t.id, t.triggers, t.totalDamage, t.hp,
         [...t.hitIds], trapFrame(t, game.time)]) });
   }
   for (const state of snapshots.slice(1)) assert.deepEqual(state, snapshots[0]);
 });
 
-test("selling refunds 70% once, removes future triggers and preserves another selection", () => {
+test("selling an unused trap refunds 70% once and preserves another selection", () => {
   const { game, trap } = battle();
   const tower = game.place("repeater", ...coord(200, 240)).tower;
   assert.equal(game.selected, tower);
@@ -349,6 +368,70 @@ test("Easy naturally changes resources, enemy HP and rewards without altering th
   assert.equal(trap.kills, 1);
   assert.equal(trap.totalDamage, 38 * 0.82);
   assert.equal(def.cost, 50);
-  assert.equal(def.rearm, 4);
+  assert.equal(def.hp, 10);
+  assert.equal(trap.hp, 9);
   applyDifficulty("normal");
+});
+
+
+test("the final hit is credited, then depletion removes the trap and frees its road space", () => {
+  const { game, trap, enemies: [enemy] } = battle(["swift"]);
+  trap.hp = 1;
+  game.update(STEP);
+  assert.equal(enemy.status, "dead");
+  assert.equal(trap.hp, 0);
+  assert.equal(trap.kills, 1);
+  assert.equal(trap.totalDamage, enemy.maxHp);
+  assert.equal(trapState(trap, game.time), "depleted");
+  assert.equal(trapFrame(trap, game.time), 0, "The final strike is visible");
+  assert.equal(game.sellValue(trap), 0);
+  assert.equal(game.selected, trap);
+  run(game, (Math.ceil(def.attackTime / STEP) - 1) * STEP);
+  assert.equal(game.traps.length, 1);
+  game.update(STEP);
+  assert.equal(game.traps.length, 0);
+  assert.equal(game.selected, null);
+  assert.equal(game.selectedId, null);
+  assert.equal(build(game, trap.x, trap.y).ok, true);
+});
+
+test("depletion keeps a different selection and cannot regenerate or grant a refund", () => {
+  const { game, trap } = battle();
+  trap.hp = 1;
+  const other = build(game, 244).trap;
+  const credits = game.gold;
+  game.update(STEP);
+  run(game, 5);
+  assert.equal(game.selected, other);
+  assert.equal(game.traps.includes(trap), false);
+  assert.equal(game.gold, credits);
+  assert.equal(game.sell(trap.id).ok, false);
+  assert.equal(trap.triggers, 1);
+});
+
+test("pause freezes the final strike and defers depletion cleanup until resume", () => {
+  const { game, trap } = battle();
+  trap.hp = 1;
+  game.update(STEP);
+  game.setPaused(true);
+  new GameClock().advance(game, 10);
+  updateTraps(game);
+  assert.equal(game.traps[0], trap);
+  assert.equal(trapFrame(trap, game.time), 0);
+  game.setPaused(false);
+  run(game, Math.ceil(def.attackTime / STEP) * STEP);
+  assert.equal(game.traps.length, 0);
+});
+
+test("a used trap's resale value follows remaining HP, while tower refunds stay unchanged", () => {
+  const { game, trap } = battle();
+  const tower = game.place("repeater", ...coord(200, 240)).tower;
+  game.update(STEP);
+  assert.equal(trap.hp, 9);
+  assert.equal(game.sellValue(trap), 31);
+  assert.equal(game.sellValue(tower), 42);
+  const credits = game.gold;
+  assert.equal(game.sell(trap.id).value, 31);
+  assert.equal(game.gold, credits + 31);
+  assert.equal(game.sell(trap.id).ok, false);
 });

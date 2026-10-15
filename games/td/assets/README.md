@@ -138,24 +138,28 @@ centered and vertically registered to source ground y=525, so its base does not
 jump when the artwork height changes. No frame is stretched to match another.
 The maximum visible size is 38 × 34.51 world pixels; the base sits about 6 pixels
 below the placement point, inside the road. A subtle ground shadow and a small
-rearm bar are presentation overlays. Sampling is nearest-neighbor, consistent
+remaining-HP bar are presentation overlays. Sampling is nearest-neighbor, consistent
 with the supplied pixel-styled art and current tower/enemy rendering, and is
 restored after each draw.
 
 | Gameplay state | Frame mapping |
 | --- | --- |
-| Armed, placement preview, static shop/inspector icon | 0 |
-| Triggered (0–0.24 s after contact) | 0 for 0–0.12 s, then 1 |
-| Rearming, more than 0.8 s remaining | 3 |
-| Rearming, 0.8–0.4 s remaining | 2 |
-| Rearming, less than 0.4 s remaining | 1 |
-| Ready at 4 s | 0 |
+| Retracted/idle and placement preview | 3 (lowest supplied pose) |
+| Contact, first 0–0.12 s | 0 (spikes raised immediately) |
+| Retraction, 0.12–0.20 s | 1 |
+| Retraction, 0.20–0.24 s | 2 |
+| Idle after 0.24 s | 3 |
+| Static shop/inspector icon | 0 (most legible intact frame) |
+| Final contact at 0 HP | Same strike sequence, then remove the trap |
 
 These are state poses made from the supplied wear/spent drawings, not a claim
-that the sheet contains a purpose-authored retracting-spike animation. Existing
-impact feedback identifies the instant of contact. Both animation and the
-rearm bar use simulation time; pause, speed changes and reset cannot desynchronize
-them. The UI uses the most legible intact frame, centered within its icon canvas.
+that the sheet contains a purpose-authored retracting-spike animation. The lowest
+pose represents the retracted trap; contact pops to the intact raised pose and
+then steps down. The original PNG, crops, ground anchor and scale are unchanged.
+Each new contact restarts the visual strike; **animation is not a cooldown** and
+does not block damage to the next enemy. The 0.24-second sequence and final
+removal use simulation time, so pause/speed/restart remain synchronized. The
+small ground bar and inspector meter show remaining HP, not elapsed time.
 
 The asset loads once, validates exact dimensions and retries one network failure.
 No procedural substitute flashes while it is loading. Only a confirmed failure

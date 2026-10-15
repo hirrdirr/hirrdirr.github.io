@@ -1,4 +1,4 @@
-import { TRAPS, trapState } from "./traps.js";
+import { TRAPS } from "./traps.js";
 
 // The uploaded artwork is NOT four equal 543px cells: the first silhouette
 // crosses that boundary. These measured crops isolate the four drawings and
@@ -15,12 +15,12 @@ export const SPIKE_SPRITE = Object.freeze({
 });
 
 export function trapFrame(trap, time) {
-  const state = trapState(trap, time);
-  if (state === "armed") return 0;
-  if (state === "triggered")
-    return time - trap.triggeredAt < TRAPS[trap.kind].attackTime / 2 ? 0 : 1;
-  const remaining = trap.readyAt - time;
-  return remaining > 0.8 ? 3 : remaining > 0.4 ? 2 : 1;
+  const elapsed = trap.triggeredAt === null ? Infinity : time - trap.triggeredAt;
+  const duration = TRAPS[trap.kind].attackTime;
+  if (elapsed >= duration || elapsed < 0) return 3;
+  // Pop up on contact, then retract. This never gates contact damage/HP use,
+  // and also shows the last strike before a depleted trap is removed.
+  return elapsed < duration / 2 ? 0 : elapsed < duration * 5 / 6 ? 1 : 2;
 }
 
 export class TrapSprites {
@@ -86,7 +86,7 @@ export function drawTrap(c, trap, time, x = trap.x, y = trap.y, scale = 1, icon 
   c.fillStyle = "#69533b";
   c.fillRect(-16, -4, 32, 9);
   c.fillStyle = "#b6b8ad";
-  if (icon || trapState(trap, time) !== "rearming") {
+  if (icon || trapFrame(trap, time) !== 3) {
     for (const sx of [-10, 0, 10]) {
       c.beginPath(); c.moveTo(sx - 3, 0); c.lineTo(sx, -12);
       c.lineTo(sx + 3, 0); c.closePath(); c.fill();

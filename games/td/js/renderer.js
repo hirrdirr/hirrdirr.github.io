@@ -2,7 +2,7 @@ import { WORLD, TOWERS, ENEMIES, towerStats } from "./data.js";
 import { PATH, SEGMENTS, ROAD, BLOCKED, distanceSquared } from "./map.js";
 import { EnemySprites } from "./enemy-sprites.js";
 import { getTowerSprites } from "./tower-sprites.js";
-import { TRAPS, trapState } from "./traps.js";
+import { TRAPS } from "./traps.js";
 import { drawTrap, getTrapSprites } from "./trap-sprites.js";
 const TAU = Math.PI * 2;
 function polygon(c, x, y, r, sides = 6, angle = 0) {
@@ -183,7 +183,7 @@ export function paintIcons(root) {
       if (!canvas.dataset.trapIcon) continue;
       const c = canvas.getContext("2d");
       c.clearRect(0, 0, canvas.width, canvas.height);
-      drawTrap(c, { kind: canvas.dataset.trapIcon, triggeredAt: null, readyAt: 0 },
+      drawTrap(c, { kind: canvas.dataset.trapIcon, triggeredAt: null },
         0, canvas.width / 2, canvas.height / 2, canvas.width / 46, true);
     }
   };
@@ -655,8 +655,8 @@ export class Renderer {
         c.lineWidth = selected ? 1.4 : 0.8;
         c.beginPath(); c.ellipse(trap.x, trap.y + 1, 21, 9, 0, 0, TAU); c.stroke();
       }
-      if (trapState(trap, game.time) === "rearming") {
-        const progress = 1 - Math.max(0, trap.readyAt - game.time) / TRAPS[trap.kind].rearm;
+      if (selected || hovered || trap.hp < trap.maxHp) {
+        const progress = trap.hp / trap.maxHp;
         c.fillStyle = "#251d13cc"; c.fillRect(trap.x - 12, trap.y + 11, 24, 2);
         c.fillStyle = "#c89c58"; c.fillRect(trap.x - 12, trap.y + 11, 24 * progress, 2);
       }
@@ -673,7 +673,7 @@ export class Renderer {
     c.lineWidth = 1.5;
     c.beginPath(); c.ellipse(x, y + 1, 21, 9, 0, 0, TAU); c.fill(); c.stroke();
     c.globalAlpha = 0.65;
-    drawTrap(c, { kind: input.placing, triggeredAt: null, readyAt: 0 }, 0, x, y);
+    drawTrap(c, { kind: input.placing, triggeredAt: null }, 0, x, y);
     c.restore();
   }
   drawEnemy(c, e, game) {

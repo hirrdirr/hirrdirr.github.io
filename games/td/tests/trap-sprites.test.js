@@ -11,7 +11,7 @@ class LoadedImage {
     queueMicrotask(() => this.onload());
   }
 }
-const trap = { kind: "spike", x: 200, y: 300, triggeredAt: 0, readyAt: 4 };
+const trap = { kind: "spike", x: 200, y: 300, triggeredAt: 0, hp: 9, maxHp: 10 };
 function context() {
   const calls = [], stack = [];
   return { calls, imageSmoothingEnabled: true,
@@ -45,20 +45,22 @@ test("the exact supplied PNG and its four non-uniform frame crops match the insp
     "The first drawing crosses a naive equal-cell boundary");
 });
 
-test("armed, trigger, flat cooldown and rearm frames follow simulation time", () => {
-  const times = [0, 0.11, 0.13, 0.24, 2, 3.19, 3.21, 3.61, 4, 8];
-  assert.deepEqual(times.map((time) => trapFrame(trap, time)), [0, 0, 1, 3, 3, 3, 2, 1, 0, 0]);
+test("a trap starts retracted, pops up on contact and retracts on simulation time", () => {
+  const times = [0, 0.11, 0.13, 0.19, 0.21, 0.24, 2, 4, 8];
+  assert.deepEqual(times.map((time) => trapFrame(trap, time)), [0, 0, 1, 1, 2, 3, 3, 3, 3]);
   assert.equal(trapState(trap, 0.1), "triggered");
-  assert.equal(trapState(trap, 1), "rearming");
-  assert.equal(trapState(trap, 4), "armed");
-  assert.equal(trapFrame({ ...trap, triggeredAt: null, readyAt: 0 }, 0), 0);
+  assert.equal(trapState(trap, 1), "idle");
+  assert.equal(trapFrame({ ...trap, triggeredAt: null }, 0), 3);
+  assert.equal(trapFrame({ ...trap, triggeredAt: 2 }, 2), 0, "Every new contact can trigger the animation");
+  assert.equal(trapState({ ...trap, hp: 0 }, 0), "depleted");
+  assert.equal(trapFrame({ ...trap, hp: 0 }, 0), 0, "Depletion still shows its final strike");
 });
 
 test("cropped sprites stay undistorted, centred on the ground anchor, and pixel-sharp", async () => {
   const sprites = new TrapSprites(LoadedImage);
   assert.equal(sprites.draw({}, trap, 0), true, "Loading suppresses procedural flashing");
   assert.equal(await sprites.ready, true);
-  for (const time of [0, 0.13, 1, 3.3]) {
+  for (const time of [0, 0.13, 0.21, 1]) {
     const c = context(), before = structuredClone(trap);
     sprites.draw(c, trap, time);
     const frame = SPIKE_SPRITE.frames[trapFrame(trap, time)];
@@ -133,8 +135,8 @@ test("the actual draw wrapper renders a state-aware fallback only after loading 
     [name, (...args) => calls.push([name, ...args])]));
   fallback.drawTrap(c, trap, 1);
   assert.equal(calls.filter(([name]) => name === "fillRect").length, 1);
-  assert.equal(calls.filter(([name]) => name === "fill").length, 0, "Cooldown base stays flat");
+  assert.equal(calls.filter(([name]) => name === "fill").length, 0, "Idle fallback stays retracted");
   calls.length = 0;
-  fallback.drawTrap(c, trap, 4);
-  assert.equal(calls.filter(([name]) => name === "fill").length, 3, "Armed fallback shows spikes");
+  fallback.drawTrap(c, trap, 0);
+  assert.equal(calls.filter(([name]) => name === "fill").length, 3, "Contact raises the fallback spikes");
 });

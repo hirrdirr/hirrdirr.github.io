@@ -189,7 +189,8 @@ export class Game {
     return { ok: true, value };
   }
   sellValue(t) {
-    return Math.floor(t.spent * WORLD.sellRatio);
+    const remaining = t.entityType === "trap" ? t.hp / t.maxHp : 1;
+    return Math.floor(t.spent * WORLD.sellRatio * remaining);
   }
   upgrade(id, path) {
     const t = this.towers.find((t) => t.id === id);
