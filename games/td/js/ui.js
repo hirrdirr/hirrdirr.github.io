@@ -326,7 +326,7 @@ export class UI {
           : `${TOWERS[placing].name} vald. Välj en ledig ruta nära vägen.`;
     } else if (this.game.selected)
       message = gSelectedIsTrap(this.game)
-        ? "Fälla vald. Se återarmning och statistik eller sälj i fällpanelen."
+        ? "Fälla vald. Se kvarvarande HP och statistik eller sälj i fällpanelen."
         : "Torn valt. Ändra målläge, uppgradera eller sälj i tornpanelen.";
     $("placement-message").textContent = message;
     $("placement-message").classList.toggle(
@@ -413,23 +413,24 @@ export class UI {
   refreshTrapPanel(kind, trap, rebuild) {
     const def = TRAPS[kind];
     if (rebuild) {
-      this.panel.innerHTML = `<div class="td-inspector-head" style="--tower-color:${def.color}">${icon(kind)}<div><span class="td-label">${trap ? "VALD FÄLLA" : "BYGG FÄLLAN"}</span><h3>${def.name}</h3><span>${def.role}</span></div></div><p class="td-description">${def.description}</p><dl class="td-stat-grid"><div><dt>Skada / träff</dt><dd>${def.damage}</dd></div><div><dt>Återarmning</dt><dd>${def.rearm} s</dd></div><div><dt>Mål / utlösning</dt><dd>1</dd></div><div><dt>Placering</dt><dd>På vägen</dd></div>${trap ? '<div><dt>Elimineringar</dt><dd id="trap-kills"></dd></div><div><dt>Total skada</dt><dd id="trap-damage"></dd></div>' : ""}</dl><p class="td-effects-info">En träff per fiende och passage. Fällor behöver plats mellan sig. Ingen uppgradering eller reläbonus.</p>${trap ? '<div class="td-trap-state" id="trap-state"><strong id="trap-status"></strong><span id="trap-time"></span></div><div id="trap-progress" class="td-trap-progress" role="progressbar" aria-label="Fällans återarmning" aria-valuemin="0" aria-valuemax="100"><span id="trap-progress-fill"></span></div><p class="td-effects-info">Utlösningar: <strong id="trap-triggers"></strong></p><button id="sell" class="td-button td-sell">Sälj fälla <strong id="sell-value"></strong></button><p class="td-sell-note">70% tillbaka av fällans pris.</p>' : `<div class="td-preview-cost"><strong>${def.cost} krediter</strong><span>Återanvändbar · ingen uppgradering</span></div>`}`;
+      this.panel.innerHTML = `<div class="td-inspector-head" style="--tower-color:${def.color}">${icon(kind)}<div><span class="td-label">${trap ? "VALD FÄLLA" : "BYGG FÄLLAN"}</span><h3>${def.name}</h3><span>${def.role}</span></div></div><p class="td-description">${def.description}</p><dl class="td-stat-grid"><div><dt>Skada / träff</dt><dd>${def.damage}</dd></div><div><dt>HP / passager</dt><dd id="trap-hp">${trap ? trap.hp : def.hp} / ${def.hp}</dd></div><div><dt>HP / fiende</dt><dd>−1</dd></div><div><dt>Placering</dt><dd>På vägen</dd></div>${trap ? '<div><dt>Elimineringar</dt><dd id="trap-kills"></dd></div><div><dt>Total skada</dt><dd id="trap-damage"></dd></div>' : ""}</dl><p class="td-effects-info">Ingen cooldown. En träff och −1 HP per fiende och passage. Försvinner vid 0 HP. Ingen uppgradering eller reläbonus.</p>${trap ? '<div class="td-trap-state" id="trap-state"><strong id="trap-status"></strong><span id="trap-capacity"></span></div><div id="trap-progress" class="td-trap-progress" role="meter" aria-label="Fällans HP" aria-valuemin="0" aria-valuemax="10"><span id="trap-progress-fill"></span></div><p class="td-effects-info">Utlösningar: <strong id="trap-triggers"></strong></p><button id="sell" class="td-button td-sell">Sälj fälla <strong id="sell-value"></strong></button><p class="td-sell-note">70% tillbaka av värdet på kvarvarande HP.</p>' : `<div class="td-preview-cost"><strong>${def.cost} krediter</strong><span>${def.hp} HP · ingen cooldown</span></div>`}`;
       paintIcons(this.panel);
     }
     if (!trap) return;
     const state = trapState(trap, this.game.time);
-    const remaining = Math.max(0, trap.readyAt - this.game.time);
-    const progress = Math.round((1 - remaining / def.rearm) * 100);
+    const progress = Math.round(trap.hp / trap.maxHp * 100);
     $("trap-state").dataset.state = state;
-    $("trap-status").textContent = { armed: "Redo", triggered: "Utlöst", rearming: "Återarmar" }[state];
-    $("trap-time").textContent = state === "armed" ? "Redo för nästa fiende" : `${number(remaining)} s kvar`;
-    $("trap-progress").setAttribute("aria-valuenow", progress);
+    $("trap-status").textContent = { idle: "Indragen · redo", triggered: "Utlöst", depleted: "Förbrukad" }[state];
+    $("trap-capacity").textContent = `${trap.hp} passager kvar`;
+    $("trap-hp").textContent = `${trap.hp} / ${trap.maxHp}`;
+    $("trap-progress").setAttribute("aria-valuemax", trap.maxHp);
+    $("trap-progress").setAttribute("aria-valuenow", trap.hp);
     $("trap-progress-fill").style.width = `${progress}%`;
     $("trap-kills").textContent = trap.kills;
     $("trap-damage").textContent = number(trap.totalDamage);
     $("trap-triggers").textContent = trap.triggers;
     $("sell-value").textContent = `+${this.game.sellValue(trap)}`;
-    $("sell").disabled = this.game.terminal;
+    $("sell").disabled = this.game.terminal || trap.hp <= 0;
   }
 }
 

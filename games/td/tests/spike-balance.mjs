@@ -36,6 +36,7 @@ for (const difficulty of ["normal", "easy"]) {
     for (let i = 0; i < composition.towers; i++) {
       if (!game.place("repeater", ...coord(...towers[i])).ok) throw Error("Invalid tower probe");
     }
+    const placedTraps = [...game.traps];
     const spent = budget - game.gold;
     let frames = 0;
     while (!game.terminal && game.wave < 11 && frames < 150000) {
@@ -46,11 +47,12 @@ for (const difficulty of ["normal", "easy"]) {
     }
     results.push({ difficulty, strategy: name, spent, cleared: game.wavesCleared,
       wave: game.wave, lives: game.lives, kills: game.kills,
-      trapDamage: Math.round(game.traps.reduce((sum, t) => sum + t.totalDamage, 0)),
+      trapDamage: Math.round(placedTraps.reduce((sum, t) => sum + t.totalDamage, 0)),
       towerDamage: Math.round(game.towers.reduce((sum, t) => sum + t.totalDamage, 0)),
-      triggers: game.traps.reduce((sum, t) => sum + t.triggers, 0) });
+      triggers: placedTraps.reduce((sum, t) => sum + t.triggers, 0) });
     assert.ok(frames < 150000, "Fixed-defense simulation must terminate");
     assert.ok(game.gold >= 0);
+    assert.ok(placedTraps.every((t) => t.hp >= 0 && t.triggers <= t.maxHp));
   }
 }
 applyDifficulty("normal");
@@ -76,12 +78,15 @@ for (const difficulty of ["normal", "easy"]) {
   applyDifficulty(difficulty);
   const game = new LiveGame();
   let next = 0, frames = 0, upgrades = 0;
+  const placedTraps = [];
   function spend() {
     const trapDistances = [64, 152, 330, 560];
     const wanted = Math.min(4, 1 + Math.floor(game.wave / 6));
-    if (game.traps.length < wanted && game.gold >= TRAPS.spike.cost) {
-      const p = pointOnPath(trapDistances[game.traps.length]);
-      assert.ok(game.place("spike", ...coord(p.x, p.y)).ok);
+    if (placedTraps.length < wanted && game.gold >= TRAPS.spike.cost) {
+      const p = pointOnPath(trapDistances[placedTraps.length]);
+      const placed = game.place("spike", ...coord(p.x, p.y));
+      assert.ok(placed.ok);
+      placedTraps.push(placed.trap);
     }
     for (let guard = 0; guard < 30; guard++) {
       if (next < kinds.length && (next < 4 || next <= game.wave / 2 + 3)) {
@@ -113,14 +118,15 @@ for (const difficulty of ["normal", "easy"]) {
     game.drainEvents();
     frames++;
   }
-  const trapDamage = game.traps.reduce((sum, trap) => sum + trap.totalDamage, 0);
+  const trapDamage = placedTraps.reduce((sum, trap) => sum + trap.totalDamage, 0);
   campaigns.push({ difficulty, status: game.status, cleared: game.wavesCleared,
-    lives: game.lives, kills: game.kills, upgrades, traps: game.traps.length,
+    lives: game.lives, kills: game.kills, upgrades, trapsPurchased: placedTraps.length, trapsRemaining: game.traps.length,
     trapDamage: Math.round(trapDamage), credits: game.gold });
   assert.equal(game.status, "won", `${difficulty}: mixed defense must complete the campaign`);
   assert.equal(game.wavesCleared, 30);
   assert.equal(new Set(game.towers.map((t) => t.kind)).size, 7);
-  assert.equal(game.traps.length, 4);
+  assert.equal(placedTraps.length, 4);
+  assert.ok(placedTraps.every((t) => t.hp >= 0 && t.triggers <= t.maxHp));
   assert.ok(trapDamage > 0 && upgrades > 0 && game.gold >= 0);
 }
 applyDifficulty("normal");

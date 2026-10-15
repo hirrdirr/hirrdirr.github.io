@@ -5,14 +5,14 @@ import { PATH_LENGTH, distanceSquared, projectOnPath } from "./map.js";
 export const TRAPS = Object.freeze({
   spike: Object.freeze({
     name: "Spike Trap",
-    role: "Vägfälla / ett mål",
-    description: "Slår en passerande fiende, återarmas automatiskt och hjälper tornen med punktvis vägskada. Pansar minskar skadan.",
+    role: "Vägfälla / 10 HP",
+    description: "Ligger indragen och skjuter upp vid passage. Varje fiende träffas en gång och förbrukar 1 HP. Fällan försvinner vid 0 HP. Ingen cooldown; pansar minskar skadan.",
     color: "#d3bd8b",
-    // Below a Repeater's 60-credit cost, but at most 8 raw DPS versus 19.6.
-    // 32 cannot one-shot a Normal drone (38 HP); armor is never bypassed.
+    // Finite road support: ten contacts cap total raw damage at 320.
+    // Cost/damage stay unchanged; 32 cannot one-shot a Normal drone (38 HP).
     cost: 50,
     damage: 32,
-    rearm: 4,
+    hp: 10,
     attackTime: 0.24,
     contactHalfLength: 14,
     spacing: 44,
@@ -55,7 +55,8 @@ export function placeTrap(game, kind, gx, gy) {
     id: game.nextId++, kind, entityType: "trap",
     x: check.x, y: check.y, distance: check.distance,
     spent: def.cost, kills: 0, totalDamage: 0, triggers: 0,
-    triggeredAt: null, readyAt: game.time, hitIds: new Set(),
+    hp: def.hp, maxHp: def.hp,
+    triggeredAt: null, hitIds: new Set(),
   };
   game.gold -= trap.spent;
   game.traps.push(trap);
@@ -67,27 +68,36 @@ export function placeTrap(game, kind, gx, gy) {
 
 export function trapState(trap, time) {
   const def = TRAPS[trap.kind];
+  if (trap.hp <= 0) return "depleted";
   if (trap.triggeredAt !== null && time - trap.triggeredAt < def.attackTime)
     return "triggered";
-  return time + 1e-8 < trap.readyAt ? "rearming" : "armed";
+  return "idle";
 }
 
 export function updateTraps(game) {
   if (game.paused || game.terminal) return;
+  // Let the final strike remain visible, then release its road space and selection.
+  game.traps = game.traps.filter((trap) => {
+    if (trap.hp > 0 || game.time - trap.triggeredAt + 1e-8 < TRAPS[trap.kind].attackTime)
+      return true;
+    if (game.selectedId === trap.id) game.selectedId = null;
+    game.touch();
+    return false;
+  });
   for (const trap of game.traps) {
+    if (trap.hp <= 0) continue;
     const def = TRAPS[trap.kind];
     const entry = trap.distance - def.contactHalfLength;
     const exit = trap.distance + def.contactHalfLength;
     // Retain victims until their entire swept interval has left the footprint.
     // Pruning on current distance alone would let a long-stalled victim be hit
-    // again on its departure tick after the trap has rearmed.
+    // again on its departure tick.
     for (const id of trap.hitIds) {
       if (!game.enemies.some((e) => e.id === id && e.status === "active" &&
           e.distance >= entry && (e.previousDistance ?? e.distance) <= exit))
         trap.hitIds.delete(id);
     }
-    if (game.time + 1e-8 < trap.readyAt) continue;
-    let victim = null, firstCrossing = Infinity;
+    const contacts = [];
     for (const enemy of game.enemies) {
       if (enemy.status !== "active" || trap.hitIds.has(enemy.id)) continue;
       const previous = enemy.previousDistance ?? enemy.distance;
@@ -96,18 +106,20 @@ export function updateTraps(game) {
       if (enemy.distance < entry || previous > exit) continue;
       const crossing = Math.max(0, (entry - previous) /
         Math.max(1e-8, enemy.distance - previous));
-      if (crossing < firstCrossing ||
-          (crossing === firstCrossing && enemy.id < (victim?.id ?? Infinity))) {
-        victim = enemy;
-        firstCrossing = crossing;
-      }
+      contacts.push({ enemy, crossing });
     }
-    if (!victim) continue;
-    trap.hitIds.add(victim.id);
+    if (!contacts.length) continue;
+    contacts.sort((a, b) => a.crossing - b.crossing || a.enemy.id - b.enemy.id);
+    // Animation is presentation only: every distinct contact can spend HP,
+    // even on the same simulation step. Overlap never creates free damage.
+    for (const { enemy } of contacts) {
+      if (trap.hp <= 0) break;
+      trap.hitIds.add(enemy.id);
+      trap.hp--;
+      trap.triggers++;
+      game.damage(enemy, def.damage, 0, trap.id);
+    }
     trap.triggeredAt = game.time;
-    trap.readyAt = game.time + def.rearm;
-    trap.triggers++;
-    game.damage(victim, def.damage, 0, trap.id);
     game.touch();
     game.emit("impact", { x: trap.x, y: trap.y, radius: 12,
       color: def.color, kind: trap.kind });
