@@ -30,12 +30,14 @@
   let state = loadState();
   let tickHandle = null;
   let saveHandle = null;
+  let selectedQuestIndex = getDefaultQuestIndex();
 
   const $ = (id) => document.getElementById(id);
   const els = {
     gold:$('goldValue'), level:$('heroLevel'), xp:$('xpValue'), xpNext:$('xpNext'), xpBar:$('xpBar'),
     hp:$('statHp'), damage:$('statDamage'), defense:$('statDefense'), power:$('statPower'), areaProgress:$('areaProgress'),
-    questList:$('questList'), upgradeList:$('upgradeList'), activeName:$('activeQuestName'), activeStatus:$('activeQuestStatus'),
+    questCard:$('questCard'), questPrev:$('questPrev'), questNext:$('questNext'), questDots:$('questDots'),
+    upgradeList:$('upgradeList'), activeName:$('activeQuestName'), activeStatus:$('activeQuestStatus'),
     idle:$('idleState'), active:$('activeState'), enemy:$('enemyName'), heroHpText:$('heroHpText'), enemyHpText:$('enemyHpText'),
     heroHpBar:$('heroHpBar'), enemyHpBar:$('enemyHpBar'), heroSprite:$('heroSprite'), enemySprite:$('enemySprite'),
     heroCombatant:$('heroCombatant'), enemyCombatant:$('enemyCombatant'), combatRound:$('combatRound'), combatEstimate:$('combatEstimate'),
@@ -69,6 +71,15 @@
   }
 
   function isUnlocked(index){ return index === 0 || state.cleared.includes(quests[index-1].id); }
+
+  function getDefaultQuestIndex(){
+    let highest = 0;
+    for (let i = 0; i < quests.length; i++) {
+      if (isUnlocked(i)) highest = i;
+      else break;
+    }
+    return highest;
+  }
 
   function loadState(){
     try {
@@ -109,27 +120,48 @@
     els.defense.textContent = s.defense;
     els.power.textContent = s.power;
     els.areaProgress.textContent = `${state.cleared.length} / ${quests.length} cleared`;
-    renderQuestList();
+    renderQuestPicker();
     renderUpgrades();
     renderCombat();
   }
 
-  function renderQuestList(){
-    els.questList.innerHTML = '';
-    quests.forEach((q, i) => {
-      const unlocked = isUnlocked(i);
-      const cleared = state.cleared.includes(q.id);
-      const row = document.createElement('div');
-      row.className = `ig-quest${unlocked ? '' : ' locked'}`;
-      row.innerHTML = `
-        <div>
-          <h3>${q.boss ? '👑 ' : ''}${q.name}${cleared ? ' ✓' : ''}</h3>
-          <div class="ig-meta">${q.enemy} • Power ${q.power} • ${q.gold} gold • ${q.xp} XP • ${threatLabel(q)}</div>
-        </div>
-        <button type="button" ${!unlocked || state.activeQuest ? 'disabled' : ''}>${cleared ? 'Fight again' : 'Start fight'}</button>`;
-      row.querySelector('button').addEventListener('click', () => startQuest(q.id));
-      els.questList.appendChild(row);
-    });
+  function renderQuestPicker(){
+    selectedQuestIndex = Math.max(0, Math.min(quests.length - 1, selectedQuestIndex));
+    const q = quests[selectedQuestIndex];
+    const unlocked = isUnlocked(selectedQuestIndex);
+    const cleared = state.cleared.includes(q.id);
+
+    els.questCard.className = `ig-quest-card${unlocked ? '' : ' locked'}`;
+    els.questCard.innerHTML = `
+      <div>
+        <h3>${q.boss ? '👑 ' : ''}${q.name}${cleared ? ' ✓' : ''}</h3>
+        <div class="ig-meta">${q.enemy} • Power ${q.power}<br>Reward: 🪙 ${q.gold} • ${q.xp} XP</div>
+      </div>
+      <div class="ig-quest-action">
+        <span class="ig-threat">${unlocked ? threatLabel(q) : 'Locked'}</span>
+        <button type="button" ${!unlocked || state.activeQuest ? 'disabled' : ''}>${cleared ? 'Fight again' : 'Start fight'}</button>
+      </div>`;
+
+    const action = els.questCard.querySelector('button');
+    if (action) action.addEventListener('click', () => startQuest(q.id));
+
+    els.questPrev.disabled = selectedQuestIndex === 0;
+    els.questNext.disabled = selectedQuestIndex === quests.length - 1;
+
+    els.questDots.innerHTML = quests.map((quest, index) => {
+      const classes = ['ig-dot'];
+      if (index === selectedQuestIndex) classes.push('active');
+      if (state.cleared.includes(quest.id)) classes.push('cleared');
+      else if (!isUnlocked(index)) classes.push('locked');
+      return `<span class="${classes.join(' ')}" title="${quest.name}"></span>`;
+    }).join('');
+  }
+
+  function changeQuest(direction){
+    const next = selectedQuestIndex + direction;
+    if (next < 0 || next >= quests.length) return;
+    selectedQuestIndex = next;
+    renderQuestPicker();
   }
 
   function renderUpgrades(){
@@ -172,6 +204,7 @@
     const index = quests.findIndex(x => x.id === id);
     if (!q || !isUnlocked(index) || state.activeQuest) return;
 
+    selectedQuestIndex = index;
     const s = stats();
     const now = Date.now();
     state.activeQuest = id;
@@ -276,10 +309,12 @@
       state.gold += q.gold;
       addXp(q.xp);
       if (!state.cleared.includes(q.id)) state.cleared.push(q.id);
+      const current = quests.findIndex(x => x.id === q.id);
+      if (current < quests.length - 1 && isUnlocked(current + 1)) selectedQuestIndex = current + 1;
       els.result.innerHTML = `<strong>Victory!</strong><br>${q.enemy} defeated • +${q.gold} gold • +${q.xp} XP`;
       els.result.className = 'ig-result success';
     } else {
-      els.result.innerHTML = `<strong>Defeat.</strong><br>Alden was knocked out by ${q.enemy}. Spend gold in the Training Hall, level up on earlier fights, then return stronger.`;
+      els.result.innerHTML = `<strong>Defeat.</strong><br>Alden was knocked out by ${q.enemy}. Upgrade or return to an earlier quest and come back stronger.`;
       els.result.className = 'ig-result fail';
     }
     state.activeQuest = null;
@@ -331,11 +366,15 @@
     processCombat(Date.now(), false);
   }
 
+  els.questPrev.addEventListener('click', () => changeQuest(-1));
+  els.questNext.addEventListener('click', () => changeQuest(1));
+
   els.reset.addEventListener('click', () => {
     if (!confirm('Reset all Idle Guild progress?')) return;
     localStorage.removeItem(SAVE_KEY);
     localStorage.removeItem('idleGuildSaveV1');
     state = freshState();
+    selectedQuestIndex = 0;
     els.result.className = 'ig-result hidden';
     stopTicker();
     render();
@@ -343,6 +382,7 @@
 
   window.addEventListener('beforeunload', saveState);
   resolveOfflineCombat();
+  selectedQuestIndex = state.activeQuest ? Math.max(0, quests.findIndex(q => q.id === state.activeQuest)) : getDefaultQuestIndex();
   render();
   if (state.activeQuest) startTicker();
 })();
