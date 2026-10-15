@@ -35,7 +35,9 @@ export default defineConfig({
         order: "pre",
         handler(html, ctx) {
           if (!ctx.path.startsWith("/games/td")) return html;
-          const content = html.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "");
+          const content = html
+            .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")
+            .replaceAll("{{ site.time | date: '%s' }}", "td-dev");
           const nav = readFileSync(
             root + "_includes/topbar.html",
             "utf8",

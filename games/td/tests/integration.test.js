@@ -12,7 +12,7 @@ const files = [
 
 test("production entry points and transitive module imports resolve without a bundler", () => {
   assert.match(html, /permalink: \/games\/td\//);
-  assert.match(html, /<script type="module" src="\.\/menu\.js"><\/script>/);
+  assert.match(html, /import "\.\/menu\.js";/);
   for (const match of html.matchAll(/(?:src|href)="(\.\/[^"?#]+)"/g)) {
     assert.ok(existsSync(new URL(match[1], root)), match[1]);
   }
