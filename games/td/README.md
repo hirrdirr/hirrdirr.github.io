@@ -91,6 +91,14 @@ unchanged. Sprite crops, animation states and draw sizes are in
 
 The simulation advances at 60 fixed steps per simulated second. A clock accumulator preserves consistent results at 1×/2×/3× and different rendering rates, caps long frames and drops excess real time after stalls. Projectiles retain target IDs and source ownership; dead or escaped targets cannot pay rewards twice. Rendering uses device-pixel-ratio scaling, a cached background and capped effects; DOM statistics refresh at 10 Hz.
 
+The entry page uses an import map to version **every** production JavaScript
+module with the Jekyll build timestamp, including the delayed `td.js` import.
+This prevents a returning browser from mixing a cached pre-trap engine with a new
+renderer (which would stop the first frame before the map is drawn). Stylesheets
+use the same build version. Add new modules to the import map in `index.html`;
+the deployment tests check graph coverage and shared module identity. The local
+Vite preview substitutes `td-dev` for the Jekyll timestamp.
+
 Add content through the data/wave definitions. Add new combat mechanics to the engine and corresponding rule tests; keep presentation and particles in the renderer. Avoid adding browser dependencies to the engine.
 
 ## Development and checks

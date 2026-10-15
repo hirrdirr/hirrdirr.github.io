@@ -5,10 +5,10 @@ navlabel: games / core defense
 permalink: /games/td/
 ---
 
-<link rel="stylesheet" href="./td.css" />
-<link rel="stylesheet" href="./theme.css" />
-<link rel="stylesheet" href="./menu.css" />
-<link rel="stylesheet" href="./responsive.css" />
+<link rel="stylesheet" href="./td.css?v={{ site.time | date: '%s' }}" />
+<link rel="stylesheet" href="./theme.css?v={{ site.time | date: '%s' }}" />
+<link rel="stylesheet" href="./menu.css?v={{ site.time | date: '%s' }}" />
+<link rel="stylesheet" href="./responsive.css?v={{ site.time | date: '%s' }}" />
 <style>
   .td-card-cost small { display: none; }
 </style>
@@ -276,5 +276,37 @@ permalink: /games/td/
     </div>
   </dialog>
 </div>
-<script type="module" src="./js/map-theme.js"></script>
-<script type="module" src="./menu.js"></script>
+<!-- One build version for the complete module graph, including dynamic imports.
+     Versioning only menu.js would still allow an older cached engine/renderer. -->
+<script type="importmap">
+{
+  "imports": {
+    "./menu.js": "./menu.js?v={{ site.time | date: '%s' }}",
+    "./td.js": "./td.js?v={{ site.time | date: '%s' }}",
+    "./js/core-visuals.js": "./js/core-visuals.js?v={{ site.time | date: '%s' }}",
+    "./js/data.js": "./js/data.js?v={{ site.time | date: '%s' }}",
+    "./js/difficulty.js": "./js/difficulty.js?v={{ site.time | date: '%s' }}",
+    "./js/enemy-sprites.js": "./js/enemy-sprites.js?v={{ site.time | date: '%s' }}",
+    "./js/engine.js": "./js/engine.js?v={{ site.time | date: '%s' }}",
+    "./js/free-placement.js": "./js/free-placement.js?v={{ site.time | date: '%s' }}",
+    "./js/game-feel.js": "./js/game-feel.js?v={{ site.time | date: '%s' }}",
+    "./js/layout.js": "./js/layout.js?v={{ site.time | date: '%s' }}",
+    "./js/map-ambience.js": "./js/map-ambience.js?v={{ site.time | date: '%s' }}",
+    "./js/map-theme.js": "./js/map-theme.js?v={{ site.time | date: '%s' }}",
+    "./js/map.js": "./js/map.js?v={{ site.time | date: '%s' }}",
+    "./js/placement-visuals.js": "./js/placement-visuals.js?v={{ site.time | date: '%s' }}",
+    "./js/renderer.js": "./js/renderer.js?v={{ site.time | date: '%s' }}",
+    "./js/spawn-entrance.js": "./js/spawn-entrance.js?v={{ site.time | date: '%s' }}",
+    "./js/tower-selection-visuals.js": "./js/tower-selection-visuals.js?v={{ site.time | date: '%s' }}",
+    "./js/tower-sprites.js": "./js/tower-sprites.js?v={{ site.time | date: '%s' }}",
+    "./js/trap-sprites.js": "./js/trap-sprites.js?v={{ site.time | date: '%s' }}",
+    "./js/traps.js": "./js/traps.js?v={{ site.time | date: '%s' }}",
+    "./js/ui.js": "./js/ui.js?v={{ site.time | date: '%s' }}",
+    "./js/waves.js": "./js/waves.js?v={{ site.time | date: '%s' }}"
+  }
+}
+</script>
+<script type="module">
+  import "./js/map-theme.js";
+  import "./menu.js";
+</script>
