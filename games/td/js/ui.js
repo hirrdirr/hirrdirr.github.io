@@ -8,10 +8,12 @@ import {
 } from "./data.js";
 import { previewWave, WAVES } from "./waves.js";
 import { paintIcons } from "./renderer.js";
+import { TRAPS, trapState } from "./traps.js";
+const BUILD_OPTIONS = { ...TOWERS, ...TRAPS };
 const number = (n) =>
   new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(n);
 const icon = (kind) =>
-  `<canvas width="96" height="96" data-tower-icon="${kind}" aria-hidden="true"></canvas>`;
+  `<canvas width="96" height="96" ${TRAPS[kind] ? "data-trap-icon" : "data-tower-icon"}="${kind}" aria-hidden="true"></canvas>`;
 const $ = (id) => document.getElementById(id);
 export class UI {
   constructor(game, input, onReset) {
@@ -25,10 +27,10 @@ export class UI {
     this.dialogPause = false;
     this.shop = $("tower-shop");
     this.panel = $("tower-panel");
-    this.shop.innerHTML = Object.entries(TOWERS)
+    this.shop.innerHTML = Object.entries(BUILD_OPTIONS)
       .map(
-        ([kind, t], i) =>
-          `<button class="td-tower-card" data-kind="${kind}" style="--tower-color:${t.color}" aria-pressed="false" aria-label="${t.name}, ${t.cost} krediter. ${t.role}">${icon(kind)}<span class="td-card-info"><strong>${t.name}</strong><span>${t.role}</span></span><span class="td-card-cost">${t.cost}<small>${i + 1}</small></span></button>`,
+        ([kind, t]) =>
+          `<button class="td-tower-card" data-kind="${kind}" style="--tower-color:${t.color}" aria-pressed="false" aria-label="${t.name}, ${t.cost} krediter. ${t.role}">${icon(kind)}<span class="td-card-info"><strong>${t.name}</strong><span>${t.role}</span></span><span class="td-card-cost">${t.cost}</span></button>`,
       )
       .join("");
     paintIcons(this.shop);
@@ -45,9 +47,10 @@ export class UI {
         this.refresh(true);
       }
       if (b.id === "sell") {
+        const isTrap = gSelectedIsTrap(game);
         const result = game.sell(game.selectedId);
         this.notify(
-          result.ok ? `Torn sålt · +${result.value} krediter` : result.reason,
+          result.ok ? `${isTrap ? "Fälla såld" : "Torn sålt"} · +${result.value} krediter` : result.reason,
         );
         this.refresh(true);
       }
@@ -153,7 +156,8 @@ export class UI {
         this.input.placing = null;
         this.input.shopOpen = false;
       }
-      this.notify(`${TOWERS[result.tower.kind].name} byggt.`);
+      const built = result.trap || result.tower;
+      this.notify(`${BUILD_OPTIONS[built.kind].name} ${result.trap ? "utplacerad" : "byggt"}.`);
     } else this.notify(result.reason);
     this.refresh(true);
   }
@@ -197,10 +201,11 @@ export class UI {
     document
       .querySelector(".td-sidebar")
       .classList.toggle("inspecting", inspecting);
-    $("sidebar-title").textContent = inspecting ? "TORNPANEL" : "ARSENAL";
+    const trapSelected = gSelectedIsTrap(g);
+    $("sidebar-title").textContent = inspecting ? (trapSelected ? "FÄLLPANEL" : "TORNPANEL") : "ARSENAL";
     $("arsenal-count").hidden = !!g.selected;
     $("shop-toggle").hidden = !g.selected;
-    $("shop-toggle").textContent = inspecting ? "← Arsenal" : "Valt torn →";
+    $("shop-toggle").textContent = inspecting ? "← Arsenal" : trapSelected ? "Vald fälla →" : "Valt torn →";
     const text = (id, value) => {
       const el = $(id);
       if (el.textContent !== String(value)) el.textContent = value;
@@ -274,7 +279,7 @@ export class UI {
     }
     for (const b of this.shop.querySelectorAll("[data-kind]")) {
       b.setAttribute("aria-pressed", this.input.placing === b.dataset.kind);
-      b.classList.toggle("unaffordable", g.gold < TOWERS[b.dataset.kind].cost);
+      b.classList.toggle("unaffordable", g.gold < BUILD_OPTIONS[b.dataset.kind].cost);
       b.disabled = g.terminal;
     }
     this.refreshPanel(force);
@@ -307,7 +312,7 @@ export class UI {
   }
   refreshPlacement() {
     const { placing, cursor, touch } = this.input;
-    let message = "Välj ett torn i arsenalen för att bygga ditt försvar.";
+    let message = "Välj ett torn eller en fälla i arsenalen för att bygga ditt försvar.";
     let valid = false;
     if (this.game.terminal) message = "Starta en ny omgång för att spela igen.";
     else if (placing) {
@@ -316,10 +321,13 @@ export class UI {
         message = check.reason;
         valid = check.ok;
       } else
-        message = `${TOWERS[placing].name} vald. Välj en ledig ruta nära vägen.`;
+        message = TRAPS[placing]
+          ? "Spike Trap vald. Välj en ledig plats på vägen; fällan centreras där."
+          : `${TOWERS[placing].name} vald. Välj en ledig ruta nära vägen.`;
     } else if (this.game.selected)
-      message =
-        "Torn valt. Ändra målläge, uppgradera eller sälj i tornpanelen.";
+      message = gSelectedIsTrap(this.game)
+        ? "Fälla vald. Se återarmning och statistik eller sälj i fällpanelen."
+        : "Torn valt. Ändra målläge, uppgradera eller sälj i tornpanelen.";
     $("placement-message").textContent = message;
     $("placement-message").classList.toggle(
       "invalid",
@@ -333,12 +341,19 @@ export class UI {
     const g = this.game,
       t = g.selected,
       kind = this.input.placing || t?.kind,
-      key = `${this.input.placing || ""}:${t?.id || ""}:${t?.levels.join(",") || ""}:${g.terminal}`;
+      key = `${this.input.placing || ""}:${t?.id || ""}:${t?.levels?.join(",") || ""}:${g.terminal}`;
+    this.panel.setAttribute("aria-label", TRAPS[kind] ? "Fällinformation" : "Torninformation");
+    if (TRAPS[kind]) {
+      const rebuild = force || key !== this.panelKey;
+      this.panelKey = key;
+      this.refreshTrapPanel(kind, this.input.placing ? null : t, rebuild);
+      return;
+    }
     if (force || key !== this.panelKey) {
       this.panelKey = key;
       if (!kind) {
         this.panel.innerHTML =
-          '<div class="td-panel-empty"><span class="td-empty-reticle" aria-hidden="true">⌖</span><h3>Ditt nästa drag</h3><p>Välj ett torn ovanför för att se dess roll och räckvidd. Klicka på ett byggt torn för att uppgradera.</p><div class="td-tip">Tips: kombinera bromsning med ytskada. Använd Långskott mot pansar.</div></div>';
+          '<div class="td-panel-empty"><span class="td-empty-reticle" aria-hidden="true">⌖</span><h3>Ditt nästa drag</h3><p>Välj ett torn eller en fälla ovanför. Torn byggs bredvid vägen, Spike Trap på vägen. Klicka på ett byggt försvar för detaljer.</p><div class="td-tip">Tips: kombinera bromsning med ytskada. Använd Långskott mot pansar.</div></div>';
         return;
       }
       const def = TOWERS[kind],
@@ -395,4 +410,29 @@ export class UI {
       }
     }
   }
+  refreshTrapPanel(kind, trap, rebuild) {
+    const def = TRAPS[kind];
+    if (rebuild) {
+      this.panel.innerHTML = `<div class="td-inspector-head" style="--tower-color:${def.color}">${icon(kind)}<div><span class="td-label">${trap ? "VALD FÄLLA" : "BYGG FÄLLAN"}</span><h3>${def.name}</h3><span>${def.role}</span></div></div><p class="td-description">${def.description}</p><dl class="td-stat-grid"><div><dt>Skada / träff</dt><dd>${def.damage}</dd></div><div><dt>Återarmning</dt><dd>${def.rearm} s</dd></div><div><dt>Mål / utlösning</dt><dd>1</dd></div><div><dt>Placering</dt><dd>På vägen</dd></div>${trap ? '<div><dt>Elimineringar</dt><dd id="trap-kills"></dd></div><div><dt>Total skada</dt><dd id="trap-damage"></dd></div>' : ""}</dl><p class="td-effects-info">En träff per fiende och passage. Fällor behöver plats mellan sig. Ingen uppgradering eller reläbonus.</p>${trap ? '<div class="td-trap-state" id="trap-state"><strong id="trap-status"></strong><span id="trap-time"></span></div><div id="trap-progress" class="td-trap-progress" role="progressbar" aria-label="Fällans återarmning" aria-valuemin="0" aria-valuemax="100"><span id="trap-progress-fill"></span></div><p class="td-effects-info">Utlösningar: <strong id="trap-triggers"></strong></p><button id="sell" class="td-button td-sell">Sälj fälla <strong id="sell-value"></strong></button><p class="td-sell-note">70% tillbaka av fällans pris.</p>' : `<div class="td-preview-cost"><strong>${def.cost} krediter</strong><span>Återanvändbar · ingen uppgradering</span></div>`}`;
+      paintIcons(this.panel);
+    }
+    if (!trap) return;
+    const state = trapState(trap, this.game.time);
+    const remaining = Math.max(0, trap.readyAt - this.game.time);
+    const progress = Math.round((1 - remaining / def.rearm) * 100);
+    $("trap-state").dataset.state = state;
+    $("trap-status").textContent = { armed: "Redo", triggered: "Utlöst", rearming: "Återarmar" }[state];
+    $("trap-time").textContent = state === "armed" ? "Redo för nästa fiende" : `${number(remaining)} s kvar`;
+    $("trap-progress").setAttribute("aria-valuenow", progress);
+    $("trap-progress-fill").style.width = `${progress}%`;
+    $("trap-kills").textContent = trap.kills;
+    $("trap-damage").textContent = number(trap.totalDamage);
+    $("trap-triggers").textContent = trap.triggers;
+    $("sell-value").textContent = `+${this.game.sellValue(trap)}`;
+    $("sell").disabled = this.game.terminal;
+  }
+}
+
+function gSelectedIsTrap(game) {
+  return game.selected?.entityType === "trap";
 }

@@ -14,6 +14,7 @@ import {
   distanceSquared,
 } from "./map.js";
 import { WAVES, waveScale, waveSpawns, completionReward } from "./waves.js";
+import { TRAPS, trapPlacement, placeTrap, updateTraps } from "./traps.js";
 export const STEP = 1 / 60;
 const CORE_X = 933,
   CORE_Y = 300,
@@ -57,6 +58,7 @@ export class Game {
     this.paused = false;
     this.speed = 1;
     this.towers = [];
+    this.traps = [];
     this.enemies = [];
     this.projectiles = [];
     this.spawnQueue = [];
@@ -74,7 +76,8 @@ export class Game {
     return this.status === "lost" || this.status === "won";
   }
   get selected() {
-    return this.towers.find((t) => t.id === this.selectedId) || null;
+    return this.towers.find((t) => t.id === this.selectedId) ||
+      this.traps.find((t) => t.id === this.selectedId) || null;
   }
   get remaining() {
     return this.enemies.length + this.spawnQueue.length;
@@ -101,6 +104,7 @@ export class Game {
     }
   }
   placement(kind, gx, gy) {
+    if (TRAPS[kind]) return trapPlacement(this, kind, gx, gy);
     if (this.terminal) return { ok: false, reason: "Omgången är avslutad." };
     if (!TOWERS[kind]) return { ok: false, reason: "Välj ett torn först." };
     if (
@@ -127,6 +131,7 @@ export class Game {
     };
   }
   place(kind, gx, gy) {
+    if (TRAPS[kind]) return this.placeTrap(kind, gx, gy);
     const check = this.placement(kind, gx, gy);
     if (!check.ok) return check;
     const t = {
@@ -153,11 +158,25 @@ export class Game {
     return { ok: true, tower: t };
   }
   select(id) {
-    this.selectedId = this.towers.some((t) => t.id === id) ? id : null;
+    this.selectedId = this.towers.some((t) => t.id === id) ||
+      this.traps.some((t) => t.id === id) ? id : null;
     this.touch();
+  }
+  placeTrap(kind, gx, gy) {
+    return placeTrap(this, kind, gx, gy);
   }
   sell(id) {
     if (this.terminal) return { ok: false, reason: "Omgången är avslutad." };
+    const trapIndex = this.traps.findIndex((t) => t.id === id);
+    if (trapIndex >= 0) {
+      const trap = this.traps[trapIndex], value = this.sellValue(trap);
+      this.gold += value;
+      this.traps.splice(trapIndex, 1);
+      if (this.selectedId === id) this.selectedId = null;
+      this.touch();
+      this.emit("money", { x: trap.x, y: trap.y, amount: value });
+      return { ok: true, value };
+    }
     const i = this.towers.findIndex((t) => t.id === id);
     if (i < 0) return { ok: false, reason: "Tornet finns inte längre." };
     const t = this.towers[i],
@@ -254,6 +273,7 @@ export class Game {
       regen: def.regen || 0,
       slowResist: def.slowResist || 0,
       distance: 0,
+      previousDistance: 0,
       ...pointOnPath(0),
       age: 0,
       lastHit: -100,
@@ -338,7 +358,8 @@ export class Game {
     e.lastHit = this.time;
     e.hitFlash = 0.1;
     this.totalDamage += actual;
-    const source = this.towers.find((t) => t.id === sourceId);
+    const source = this.towers.find((t) => t.id === sourceId) ||
+      this.traps.find((t) => t.id === sourceId);
     if (source) source.totalDamage += actual;
     if (e.hp <= 1e-8) {
       e.hp = 0;
@@ -423,6 +444,7 @@ export class Game {
       if (e.regen && this.time - e.lastHit > 2)
         e.hp = Math.min(e.maxHp, e.hp + e.maxHp * e.regen * dt);
       const slow = e.slowUntil > this.time ? e.slow * (1 - e.slowResist) : 0;
+      e.previousDistance = e.distance;
       e.distance += e.speed * (1 - slow) * dt;
       Object.assign(e, pointOnPath(e.distance));
       if (e.distance >= PATH_LENGTH) {
@@ -436,6 +458,7 @@ export class Game {
     this.enemies = this.enemies.filter(
       (e) => e.status === "active" || e.status === "absorbing",
     );
+    updateTraps(this);
     for (const t of this.towers) {
       t.recoil = Math.max(0, t.recoil - dt * 6);
       if (t.kind === "relay") continue;

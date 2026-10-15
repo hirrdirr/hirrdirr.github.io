@@ -150,7 +150,7 @@ permalink: /games/td/
           width="960"
           height="600"
           tabindex="0"
-          aria-label="Spelplan. Välj ett torn och klicka för att placera. Piltangenter flyttar markören, Enter bekräftar, Escape avbryter."
+          aria-label="Spelplan. Välj ett torn eller en fälla och klicka för att placera. Piltangenter flyttar markören, Enter bekräftar, Escape avbryter."
           >Din webbläsare behöver stöd för Canvas för att spela.</canvas
         >
         <div class="td-boss" id="boss" hidden>
@@ -171,7 +171,7 @@ permalink: /games/td/
       </div>
       <div class="td-placement-bar">
         <span id="placement-message" role="status"
-          >Välj ett torn i arsenalen för att bygga ditt försvar.</span
+          >Välj ett torn eller en fälla i arsenalen för att bygga ditt försvar.</span
         >
         <div class="td-placement-actions">
           <button id="place-confirm" class="td-button td-primary" hidden>
@@ -190,10 +190,10 @@ permalink: /games/td/
         </button>
       </div>
     </section>
-    <aside class="td-sidebar" aria-label="Torn och uppgraderingar">
+    <aside class="td-sidebar" aria-label="Torn, fällor och uppgraderingar">
       <div class="td-panel-heading">
         <h2 id="sidebar-title">ARSENAL</h2>
-        <span id="arsenal-count">7 torn · 14 specialiseringar</span
+        <span id="arsenal-count">7 torn · 1 fälla</span
         ><button id="shop-toggle" class="td-text-button" hidden>
           ← Arsenal
         </button>
@@ -225,8 +225,9 @@ permalink: /games/td/
       </p>
       <ol>
         <li>
-          Välj ett torn och placera på en ledig ruta nära vägen. På touch: välj
-          ruta och tryck <strong>Bygg här</strong>.
+          Välj ett torn och placera på en ledig plats bredvid vägen. Spike Trap
+          placeras på vägen och centreras automatiskt. På touch: välj en plats
+          och tryck <strong>Bygg här</strong>.
         </li>
         <li>
           Klicka på ett byggt torn för statistik, målläge, uppgraderingar och
@@ -240,6 +241,11 @@ permalink: /games/td/
           Använd pansarbrytning mot pansar, bromsning mot snabba fiender och
           ytskada mot grupper. Stödtornens bonusar staplas inte; starkaste
           bonusen gäller.
+        </li>
+        <li>
+          Spike Trap slår en passerande fiende åt gången och återarmas
+          automatiskt. Fällor behöver utrymme mellan sig. Välj en fälla för
+          återarmning, statistik och försäljning; de har inga uppgraderingar.
         </li>
         <li>
           När alla fiender har skickats ut kan nästa våg startas tidigt. Du får

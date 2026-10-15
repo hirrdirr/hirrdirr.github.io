@@ -56,3 +56,23 @@ export function pointOnPath(distance) {
   return { ...PATH.at(-1), angle: 0 };
 }
 export const distanceSquared = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+
+// Nearest road centre, including its distance along the route. Traps use this
+// projection; existing tower placement and enemy movement remain unchanged.
+export function projectOnPath(x, y) {
+  let best = null, travelled = 0;
+  for (const { a, b, length } of SEGMENTS) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const fraction = Math.max(0, Math.min(1,
+      ((x - a.x) * dx + (y - a.y) * dy) / (length * length),
+    ));
+    const point = { x: a.x + dx * fraction, y: a.y + dy * fraction };
+    const offsetSquared = distanceSquared(point, { x, y });
+    if (!best || offsetSquared < best.offsetSquared) {
+      best = { ...point, offsetSquared, distance: travelled + length * fraction,
+        angle: Math.atan2(dy, dx) };
+    }
+    travelled += length;
+  }
+  return best;
+}
