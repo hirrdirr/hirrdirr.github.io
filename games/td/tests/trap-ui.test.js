@@ -5,7 +5,7 @@ import { UI } from "../js/ui.js";
 import { WORLD } from "../js/data.js";
 import { pointOnPath } from "../js/map.js";
 
-test("the trap inspector shows HP, immediate triggers, remaining-value sale and depletion", (t) => {
+test("the trap inspector shows DPS, slow, HP, remaining-value sale and depletion", (t) => {
   const ids = ["trap-state", "trap-status", "trap-capacity", "trap-hp",
     "trap-progress", "trap-progress-fill", "trap-kills", "trap-damage",
     "trap-triggers", "sell-value", "sell"];
@@ -31,10 +31,12 @@ test("the trap inspector shows HP, immediate triggers, remaining-value sale and 
   const text = (id) => elements.get(id).textContent;
   refresh(true);
   assert.match(ui.panel.innerHTML, /role="meter" aria-label="Fällans HP"/);
-  assert.doesNotMatch(ui.panel.innerHTML, /Återarmning|Återanvändbar|trap-time/);
-  assert.equal(text("trap-hp"), "10 / 10");
+  assert.doesNotMatch(ui.panel.innerHTML, /Återarmning|Återanvändbar|trap-time|Skada \/ träff/);
+  assert.match(ui.panel.innerHTML, /Skada \/ sekund<\/dt><dd>12/);
+  assert.match(ui.panel.innerHTML, /Bromsning på spikar<\/dt><dd>10%/);
+  assert.equal(text("trap-hp"), "5 / 5");
   assert.equal(text("trap-status"), "Indragen · redo");
-  assert.equal(text("sell-value"), "+35");
+  assert.equal(text("sell-value"), "+14");
 
   const enemy = game.spawn("normal", 1);
   enemy.distance = trap.distance;
@@ -42,15 +44,15 @@ test("the trap inspector shows HP, immediate triggers, remaining-value sale and 
   Object.assign(enemy, pointOnPath(enemy.distance));
   game.update(STEP);
   refresh();
-  assert.equal(text("trap-hp"), "9 / 10");
+  assert.equal(text("trap-hp"), "4 / 5");
   assert.equal(text("trap-status"), "Utlöst");
-  assert.equal(text("trap-capacity"), "9 passager kvar");
-  assert.equal(text("sell-value"), "+31");
-  assert.equal(elements.get("trap-progress").attributes["aria-valuenow"], "9");
-  assert.equal(elements.get("trap-progress").attributes["aria-valuemax"], "10");
-  assert.equal(elements.get("trap-progress-fill").style.width, "90%");
+  assert.equal(text("trap-capacity"), "4 passager kvar");
+  assert.equal(text("sell-value"), "+11");
+  assert.equal(elements.get("trap-progress").attributes["aria-valuenow"], "4");
+  assert.equal(elements.get("trap-progress").attributes["aria-valuemax"], "5");
+  assert.equal(elements.get("trap-progress-fill").style.width, "80%");
 
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 4; i++) {
     const other = game.spawn("normal", 1);
     other.distance = trap.distance;
     other.speed = 0;
@@ -58,8 +60,8 @@ test("the trap inspector shows HP, immediate triggers, remaining-value sale and 
   }
   game.update(STEP);
   refresh();
-  assert.equal(text("trap-hp"), "0 / 10");
-  assert.equal(text("trap-status"), "Förbrukad");
+  assert.equal(text("trap-hp"), "0 / 5");
+  assert.equal(text("trap-status"), "Utlöst", "Zero unspent HP still finishes paid contacts");
   assert.equal(elements.get("trap-progress-fill").style.width, "0%");
   assert.equal(elements.get("sell").disabled, true);
   assert.equal(text("sell-value"), "+0");

@@ -5,14 +5,16 @@ import { PATH_LENGTH, distanceSquared, projectOnPath } from "./map.js";
 export const TRAPS = Object.freeze({
   spike: Object.freeze({
     name: "Spike Trap",
-    role: "Vägfälla / 10 HP",
-    description: "Ligger indragen och skjuter upp vid passage. Varje fiende träffas en gång och förbrukar 1 HP. Fällan försvinner vid 0 HP. Ingen cooldown; pansar minskar skadan.",
+    role: "Läckageskydd / 5 HP",
+    description: "Tillfälligt stöd mot läckande fiender. Skadar och bromsar 10% endast på spikarna. Varje passage kostar 1 HP; långvarig kontakt sliter ytterligare 1 HP per sekund. Pansar minskar skadan.",
     color: "#d3bd8b",
-    // Finite road support: ten contacts cap total raw damage at 320.
-    // Cost/damage stay unchanged; 32 cannot one-shot a Normal drone (38 HP).
-    cost: 50,
-    damage: 32,
-    hp: 10,
+    // Short, consumable support: one contact normally costs one HP.
+    // Prolonged overlap also consumes HP, so stalled crowds cannot farm damage.
+    cost: 20,
+    dps: 12,
+    slow: 0.1,
+    hp: 5,
+    contactSeconds: 1,
     attackTime: 0.24,
     contactHalfLength: 14,
     spacing: 44,
@@ -56,7 +58,7 @@ export function placeTrap(game, kind, gx, gy) {
     x: check.x, y: check.y, distance: check.distance,
     spent: def.cost, kills: 0, totalDamage: 0, triggers: 0,
     hp: def.hp, maxHp: def.hp,
-    triggeredAt: null, hitIds: new Set(),
+    triggeredAt: null, contacts: new Map(),
   };
   game.gold -= trap.spent;
   game.traps.push(trap);
@@ -68,15 +70,87 @@ export function placeTrap(game, kind, gx, gy) {
 
 export function trapState(trap, time) {
   const def = TRAPS[trap.kind];
-  if (trap.hp <= 0) return "depleted";
   if (trap.triggeredAt !== null && time - trap.triggeredAt < def.attackTime)
     return "triggered";
-  return "idle";
+  return trap.hp <= 0 ? "depleted" : "idle";
 }
 
-export function updateTraps(game) {
-  if (game.paused || game.terminal) return;
-  // Let the final strike remain visible, then release its road space and selection.
+// A separate overlap-only slow never overwrites a tower's timed status effect.
+// The strongest slow wins; traps cannot multiply each other's slow or a cryo hit.
+export function trapSlowFor(game, enemy) {
+  let slow = 0;
+  for (const trap of game.traps) {
+    const def = TRAPS[trap.kind], contact = trap.contacts.get(enemy.id);
+    if (contact && (contact.remaining > 1e-8 || trap.hp > 0) &&
+        Math.abs(enemy.distance - trap.distance) < def.contactHalfLength)
+      slow = Math.max(slow, def.slow);
+  }
+  return slow;
+}
+
+export function updateTraps(game, dt) {
+  if (game.paused || game.terminal || !game.traps.length) return;
+  const active = new Map(game.enemies.filter((e) => e.status === "active").map((e) => [e.id, e]));
+  for (const trap of game.traps) {
+    const def = TRAPS[trap.kind];
+    const entry = trap.distance - def.contactHalfLength;
+    const exit = trap.distance + def.contactHalfLength;
+    for (const id of trap.contacts.keys()) {
+      const enemy = active.get(id);
+      if (!enemy || (enemy.previousDistance ?? enemy.distance) >= exit || enemy.distance < entry)
+        trap.contacts.delete(id);
+    }
+    const contacts = [];
+    for (const enemy of active.values()) {
+      if (enemy.status !== "active") continue;
+      const previous = enemy.previousDistance ?? enemy.distance;
+      const travel = enemy.distance - previous;
+      // Integrate only the part of this step inside the 28px road footprint.
+      // A fast enemy sweeping the whole trap gets a fractional tick, not a burst.
+      const duration = travel > 1e-8
+        ? dt * Math.max(0, Math.min(enemy.distance, exit) - Math.max(previous, entry)) / travel
+        : (enemy.distance >= entry && enemy.distance < exit ? dt : 0);
+      if (duration <= 0) continue;
+      const crossing = Math.max(0, (entry - previous) / Math.max(1e-8, travel));
+      contacts.push({ enemy, duration, crossing });
+    }
+    contacts.sort((a, b) => a.crossing - b.crossing || a.enemy.id - b.enemy.id);
+    let damaged = false, spent = false;
+    for (const { enemy, duration } of contacts) {
+      let contact = trap.contacts.get(enemy.id);
+      if (!contact) {
+        if (trap.hp <= 0) continue;
+        contact = { remaining: 0 };
+        trap.contacts.set(enemy.id, contact);
+        trap.triggers++;
+      }
+      let remaining = duration;
+      while (remaining > 1e-8 && enemy.status === "active") {
+        if (contact.remaining <= 1e-8) {
+          if (trap.hp <= 0) break;
+          trap.hp--;
+          spent = true;
+          contact.remaining = def.contactSeconds;
+        }
+        const elapsed = Math.min(remaining, contact.remaining);
+        game.damage(enemy, def.dps * elapsed, 0, trap.id);
+        contact.remaining = Math.max(0, contact.remaining - elapsed);
+        remaining -= elapsed;
+        damaged = true;
+      }
+    }
+    if (damaged) {
+      // Hold the existing raised pose during contact, then retract normally.
+      // Emit once per activation, not 60 particles per second per enemy.
+      if (trap.triggeredAt === null || game.time - trap.triggeredAt >= def.attackTime)
+        game.emit("impact", { x: trap.x, y: trap.y, radius: 12,
+          color: def.color, kind: trap.kind });
+      trap.triggeredAt = game.time;
+    }
+    if (spent) game.touch();
+  }
+  // The last paid contact gets its full overlap time, even at zero unspent HP.
+  // Damage keeps the strike alive; after the final contact the existing pose fades.
   game.traps = game.traps.filter((trap) => {
     if (trap.hp > 0 || game.time - trap.triggeredAt + 1e-8 < TRAPS[trap.kind].attackTime)
       return true;
@@ -84,44 +158,4 @@ export function updateTraps(game) {
     game.touch();
     return false;
   });
-  for (const trap of game.traps) {
-    if (trap.hp <= 0) continue;
-    const def = TRAPS[trap.kind];
-    const entry = trap.distance - def.contactHalfLength;
-    const exit = trap.distance + def.contactHalfLength;
-    // Retain victims until their entire swept interval has left the footprint.
-    // Pruning on current distance alone would let a long-stalled victim be hit
-    // again on its departure tick.
-    for (const id of trap.hitIds) {
-      if (!game.enemies.some((e) => e.id === id && e.status === "active" &&
-          e.distance >= entry && (e.previousDistance ?? e.distance) <= exit))
-        trap.hitIds.delete(id);
-    }
-    const contacts = [];
-    for (const enemy of game.enemies) {
-      if (enemy.status !== "active" || trap.hitIds.has(enemy.id)) continue;
-      const previous = enemy.previousDistance ?? enemy.distance;
-      // Swept route distance catches fast enemies and corner crossings; no
-      // dependence on canvas FPS, enemy sprite size, or overlapping enemy count.
-      if (enemy.distance < entry || previous > exit) continue;
-      const crossing = Math.max(0, (entry - previous) /
-        Math.max(1e-8, enemy.distance - previous));
-      contacts.push({ enemy, crossing });
-    }
-    if (!contacts.length) continue;
-    contacts.sort((a, b) => a.crossing - b.crossing || a.enemy.id - b.enemy.id);
-    // Animation is presentation only: every distinct contact can spend HP,
-    // even on the same simulation step. Overlap never creates free damage.
-    for (const { enemy } of contacts) {
-      if (trap.hp <= 0) break;
-      trap.hitIds.add(enemy.id);
-      trap.hp--;
-      trap.triggers++;
-      game.damage(enemy, def.damage, 0, trap.id);
-    }
-    trap.triggeredAt = game.time;
-    game.touch();
-    game.emit("impact", { x: trap.x, y: trap.y, radius: 12,
-      color: def.color, kind: trap.kind });
-  }
 }

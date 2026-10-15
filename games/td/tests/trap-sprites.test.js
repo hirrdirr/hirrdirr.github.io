@@ -11,7 +11,7 @@ class LoadedImage {
     queueMicrotask(() => this.onload());
   }
 }
-const trap = { kind: "spike", x: 200, y: 300, triggeredAt: 0, hp: 9, maxHp: 10 };
+const trap = { kind: "spike", x: 200, y: 300, triggeredAt: 0, hp: 4, maxHp: 5 };
 function context() {
   const calls = [], stack = [];
   return { calls, imageSmoothingEnabled: true,
@@ -52,7 +52,8 @@ test("a trap starts retracted, pops up on contact and retracts on simulation tim
   assert.equal(trapState(trap, 1), "idle");
   assert.equal(trapFrame({ ...trap, triggeredAt: null }, 0), 3);
   assert.equal(trapFrame({ ...trap, triggeredAt: 2 }, 2), 0, "Every new contact can trigger the animation");
-  assert.equal(trapState({ ...trap, hp: 0 }, 0), "depleted");
+  assert.equal(trapState({ ...trap, hp: 0 }, 0), "triggered", "Last paid contact stays active");
+  assert.equal(trapState({ ...trap, hp: 0 }, 1), "depleted");
   assert.equal(trapFrame({ ...trap, hp: 0 }, 0), 0, "Depletion still shows its final strike");
 });
 

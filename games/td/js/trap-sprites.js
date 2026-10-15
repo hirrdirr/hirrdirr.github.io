@@ -18,8 +18,8 @@ export function trapFrame(trap, time) {
   const elapsed = trap.triggeredAt === null ? Infinity : time - trap.triggeredAt;
   const duration = TRAPS[trap.kind].attackTime;
   if (elapsed >= duration || elapsed < 0) return 3;
-  // Pop up on contact, then retract. This never gates contact damage/HP use,
-  // and also shows the last strike before a depleted trap is removed.
+  // Overlap refreshes triggeredAt, holding the raised pose while dealing damage.
+  // Retract after contact; animation never gates damage or HP consumption.
   return elapsed < duration / 2 ? 0 : elapsed < duration * 5 / 6 ? 1 : 2;
 }
 

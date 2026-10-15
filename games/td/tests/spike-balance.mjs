@@ -13,9 +13,11 @@ enableFreePlacement(LiveGame);
 const coord = (x, y) => [x / WORLD.tile - 0.5, y / WORLD.tile - 0.5];
 const towers = [[200, 240], [320, 200], [560, 200], [680, 400], [800, 400], [800, 260]];
 const strategies = {
-  "4 compact spikes": { spikes: 4, towers: 0 },
+  "3 compact spikes": { spikes: 3, towers: 0 },
+  "1 repeater": { spikes: 0, towers: 1 },
+  "9 compact spikes": { spikes: 9, towers: 0 },
   "3 repeaters": { spikes: 0, towers: 3 },
-  "6 compact spikes": { spikes: 6, towers: 0 },
+  "15 compact spikes": { spikes: 15, towers: 0 },
   "5 repeaters": { spikes: 0, towers: 5 },
   "2 spikes + 2 repeaters": { spikes: 2, towers: 2 },
 };
@@ -29,9 +31,16 @@ for (const difficulty of ["normal", "easy"]) {
     const budget = Math.max(WORLD.gold,
       composition.spikes * TRAPS.spike.cost + composition.towers * TOWERS.repeater.cost);
     game.gold = budget;
+    let distance = 64;
     for (let i = 0; i < composition.spikes; i++) {
-      const p = pointOnPath(64 + i * TRAPS.spike.spacing);
-      if (!game.place("spike", ...coord(p.x, p.y)).ok) throw Error("Invalid compact trap probe");
+      // Use the nearest legal position: world-space spacing can be wider at bends.
+      for (;;) {
+        assert.ok(distance < 1450, "Compact probe must fit on the existing road");
+        const p = pointOnPath(distance++);
+        if (!game.place("spike", ...coord(p.x, p.y)).ok) continue;
+        distance += TRAPS.spike.spacing - 1;
+        break;
+      }
     }
     for (let i = 0; i < composition.towers; i++) {
       if (!game.place("repeater", ...coord(...towers[i])).ok) throw Error("Invalid tower probe");
@@ -59,12 +68,16 @@ applyDifficulty("normal");
 console.table(results);
 for (const difficulty of ["normal", "easy"]) {
   const result = (name) => results.find((r) => r.difficulty === difficulty && r.strategy === name);
-  assert.ok(result("4 compact spikes").cleared < result("3 repeaters").cleared,
+  assert.ok(result("3 compact spikes").cleared < result("1 repeater").cleared);
+  assert.equal(result("3 compact spikes").spent, result("1 repeater").spent);
+  assert.equal(result("9 compact spikes").spent, result("3 repeaters").spent);
+  assert.equal(result("15 compact spikes").spent, result("5 repeaters").spent);
+  assert.ok(result("9 compact spikes").cleared < result("3 repeaters").cleared,
     `${difficulty}: compact road traps must not replace sustained tower defense`);
-  assert.ok(result("6 compact spikes").cleared < result("5 repeaters").cleared,
+  assert.ok(result("15 compact spikes").cleared < result("5 repeaters").cleared,
     `${difficulty}: equal-budget compact stacking must remain weaker than towers`);
   assert.ok(result("2 spikes + 2 repeaters").trapDamage > 0);
-  assert.ok(result("2 spikes + 2 repeaters").cleared >= result("4 compact spikes").cleared);
+  assert.ok(result("2 spikes + 2 repeaters").cleared >= result("9 compact spikes").cleared);
 }
 
 // Full campaigns use earned credits, all seven tower types, upgrades and four
