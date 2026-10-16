@@ -26,6 +26,14 @@ Pause freezes combat but permits planning and purchases. Opening help/restart pa
 
 Each tower has two paths with three upgrades each. Both first tiers may be bought. Buying tier two commits to that path; the other path's tier two and three become unavailable. A sale refunds 70% of the complete investment, rounded down. Statistics count actual damage and credited kills, including lingering damage after selling a tower.
 
+Each available upgrade also shows **current → after purchase** values beneath its
+button, including damage, firing rate, range, penetration and any changed status
+or support effects. These use the combat stat calculation with the tower's current
+upgrades and strongest applicable relay bonuses. Only changed values appear;
+unaffordable upgrades remain readable for planning, while locked/completed paths
+and ended games show no purchase preview. Values use the inspector's existing
+one-decimal display precision. The preview is read-only and requires no new input.
+
 Target modes: First/Last use progress along the full path; Strong/Weak use current HP; Closest uses distance. Ties resolve deterministically. Support bonuses use the strongest applicable value rather than stacking. Weaker slow, burn and vulnerability applications do not extend a stronger effect.
 
 Enemies include normal, fast, very fast, tank, armored, regenerating, elite and boss variants. Bosses have slow resistance and a periodic armor pulse. Waves 10, 20 and 30 introduce bosses. Authored combinations, spacing, reinforcements and act-based scaling vary pressure without an endless linear HP ramp. The next-wave preview shows the composition before committing.
@@ -95,6 +103,7 @@ remain unchanged. Sprite state details are in
 - `js/renderer.js`: Canvas art, cached terrain, indicators and bounded visual effects.
 - `js/enemy-sprites.js`: presentation-only walk sheets for all eight enemy kinds, fixed frame crops, aspect-preserving pixel-sharp scaling and horizontal facing.
 - `js/ui.js`: HUD, shop, inspector, dialogs and accessible feedback. The inspector replaces the shop while inspecting a tower.
+- `js/upgrade-preview.js`: read-only before/after stat comparisons for the next legal upgrade on each path.
 - `td.css`: scoped responsive styling with reduced-motion support.
 
 The simulation advances at 60 fixed steps per simulated second. A clock accumulator preserves consistent results at 1×/2×/3× and different rendering rates, caps long frames and drops excess real time after stalls. Projectiles retain target IDs and source ownership; dead or escaped targets cannot pay rewards twice. Rendering uses device-pixel-ratio scaling, a cached background and capped effects; DOM statistics refresh at 10 Hz.
@@ -124,6 +133,26 @@ npm run test:traps-balance
 The development preview wraps the game with the repository's existing Jekyll layout. It is a preview adapter, not a complete Jekyll build. `/__td-qa` provides 320/390/768/1024px iframe widths for layout inspection. Development tools and tests are excluded from Jekyll output. CI runs the dependency-free tests and syntax checks on TD pull requests.
 
 Automated tests cover placement validation, money, upgrades and path locks, all 42 upgrade tiers, five targeting modes, minimum range, armor/status/support rules, regen and bosses, escaped targets, exact kill rewards, stable selection, path movement, pause, restart, loss/victory, waves, early-start limits, firing cadence, speed equivalence across 20/60/120 FPS, production imports and static UI bindings. Sprite checks cover the supplied PNG dimensions/paths, four-frame crops, movement-driven cycles through pause/speed/slow, upright horizontal facing, local smoothing state and unavailable-asset fallback.
+
+### Upgrade preview verification (2026-10-16)
+
+All 93 tests pass, including six new preview tests. Every previewed stat is
+compared with an actual purchase across all 42 tiers, both with and without the
+opposite first-tier upgrade. Tests cover relay upgrades/sales, strongest-aura
+rules, zero credits, locked/completed paths, status-effect units, terminal states,
+and stable DOM updates. Reading previews throughout waves 1–3 produces exactly
+the same gameplay state as the control run on Easy/Normal at 1×/2×/3×.
+The existing tower and Spike Trap balance scripts pass with unchanged outcomes.
+
+Additional local QA ran the real UI in a DOM harness with the real engine and
+native Canvas renderer: three waves on each difficulty, purchases during pause,
+relay placement, speed changes and restart. Both runs stopped all 34 enemies.
+All seven tower panels were checked with a static CSS renderer at four narrow
+component widths (204–342 px of content). These are **not browser viewport or
+touch tests**. The published baseline was played in the browser; interactive
+testing of the changed local build remains blocked by the cloud browser's local
+URL security policy. Browser/responsive validation of this change remains a
+follow-up before deployment. No QA harness, images or dependencies are committed.
 
 ### Spike Trap utility verification (2026-10-15)
 
