@@ -9,6 +9,7 @@ import {
 import { previewWave, WAVES } from "./waves.js";
 import { paintIcons } from "./renderer.js";
 import { TRAPS, trapState } from "./traps.js";
+import { upgradePreview } from "./upgrade-preview.js";
 const BUILD_OPTIONS = { ...TOWERS, ...TRAPS };
 const number = (n) =>
   new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(n);
@@ -363,11 +364,11 @@ export class UI {
           ? `<div class="td-target-row"><label for="targeting">Målläge</label><select id="targeting" ${kind === "relay" ? "disabled" : ""}>${TARGET_MODES.map((m) => `<option ${t.targeting === m ? "selected" : ""}>${m}</option>`).join("")}</select></div><div class="td-upgrades"><div class="td-upgrades-title"><strong>UPPGRADERINGAR</strong><span>Nivå 2 väljer väg</span></div>${def.paths
               .map((path, p) => {
                 const o = upgradeOption(t, p);
-                return `<div class="td-upgrade-path"><div class="td-path-label"><span>${p === 0 ? "A" : "B"} · ${path.name}</span><span class="td-level-dots" aria-label="Nivå ${t.levels[p]} av 3">${[1, 2, 3].map((l) => `<i class="${t.levels[p] >= l ? "filled" : ""}"></i>`).join("")}</span></div><button data-upgrade="${p}" class="td-upgrade-button"><span><strong>${o.maxed ? "Fullt uppgraderad" : o.locked ? "Annan specialisering vald" : o.name}</strong><small>${o.maxed ? "Alla tre nivåer installerade" : o.locked ? "Nivå 2–3 är låsta" : o.description}</small></span><b>${o.maxed ? "✓" : o.locked ? "Låst" : o.cost}</b></button></div>`;
+                return `<div class="td-upgrade-path"><div class="td-path-label"><span>${p === 0 ? "A" : "B"} · ${path.name}</span><span class="td-level-dots" aria-label="Nivå ${t.levels[p]} av 3">${[1, 2, 3].map((l) => `<i class="${t.levels[p] >= l ? "filled" : ""}"></i>`).join("")}</span></div><button data-upgrade="${p}" class="td-upgrade-button" aria-describedby="upgrade-preview-${p}"><span><strong>${o.maxed ? "Fullt uppgraderad" : o.locked ? "Annan specialisering vald" : o.name}</strong><small>${o.maxed ? "Alla tre nivåer installerade" : o.locked ? "Nivå 2–3 är låsta" : o.description}</small></span><b>${o.maxed ? "✓" : o.locked ? "Låst" : o.cost}</b></button><dl id="upgrade-preview-${p}" class="td-upgrade-preview" data-upgrade-preview="${p}"></dl></div>`;
               })
               .join(
                 "",
-              )}</div><button id="sell" class="td-button td-sell">Sälj torn <strong id="sell-value"></strong></button><p class="td-sell-note">70% tillbaka av torn och uppgraderingar.</p>`
+              )}<p id="upgrade-preview-note" class="td-effects-info"></p></div><button id="sell" class="td-button td-sell">Sälj torn <strong id="sell-value"></strong></button><p class="td-sell-note">70% tillbaka av torn och uppgraderingar.</p>`
           : `<div class="td-preview-cost"><strong>${def.cost} krediter</strong><span>Två vägar · tre nivåer per väg</span></div>`
       }`;
       paintIcons(this.panel);
@@ -400,6 +401,21 @@ export class UI {
       $("stat-total").textContent = number(t.totalDamage);
       $("sell-value").textContent = `+${g.sellValue(t)}`;
       $("sell").disabled = g.terminal;
+      let hasPreview = false;
+      for (const preview of this.panel.querySelectorAll("[data-upgrade-preview]")) {
+        const changes = g.terminal ? [] : upgradePreview(g, t, Number(preview.dataset.upgradePreview));
+        hasPreview ||= changes.length > 0;
+        const html = changes.map(({ label, unit, before, after }) => {
+          const value = (n) => `${number(unit === "%" ? n * 100 : n)}${unit}`;
+          return `<div><dt>${label}</dt><dd><span>${value(before)}</span><span aria-hidden="true"> → </span><span class="td-sr-only"> till </span><strong>${value(after)}</strong></dd></div>`;
+        }).join("");
+        // Preserve the DOM during the 10 Hz HUD refresh unless values changed.
+        if (preview.innerHTML !== html) preview.innerHTML = html;
+        preview.hidden = changes.length === 0;
+      }
+      $("upgrade-preview-note").textContent = hasPreview
+        ? `Nu → efter köp.${s.auraDamage || s.auraRate ? " Aktuell reläbonus ingår." : ""}`
+        : "";
       for (const b of this.panel.querySelectorAll("[data-upgrade]")) {
         const o = upgradeOption(t, Number(b.dataset.upgrade));
         b.disabled = g.terminal || o.maxed || o.locked || g.gold < o.cost;
