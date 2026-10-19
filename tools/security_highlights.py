@@ -7,9 +7,12 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from html import unescape
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import re
+from urllib.parse import urljoin, urlsplit
+from urllib.request import Request, urlopen
 
 POSTS_DIR = Path("_posts")
 OUTPUT = Path("_data/security_highlights.json")
@@ -64,6 +67,77 @@ def select_highlights(markdown: str, limit: int = 4) -> list[dict[str, str]]:
     return selected
 
 
+
+# Only request article pages from publishers already used by the digest.
+# Unknown sites still display a publisher-specific fallback in the homepage.
+TRUSTED_ARTICLE_DOMAINS = (
+    "cert.se", "bleepingcomputer.com", "malwarebytes.com",
+    "microsoft.com", "isc.sans.edu", "cloud.google.com", "cisa.gov",
+)
+
+
+class ImageMetadataParser(HTMLParser):
+    """Collect publisher-provided article hero image metadata."""
+    META_PRIORITY = {
+        "og:image:secure_url": 0,
+        "og:image": 1,
+        "twitter:image": 2,
+        "twitter:image:src": 3,
+    }
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.candidates: list[tuple[int, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() != "meta":
+            return
+        attributes = {key.lower(): value for key, value in attrs if key}
+        key = (attributes.get("property") or attributes.get("name") or "").lower()
+        url = attributes.get("content") or ""
+        if key in self.META_PRIORITY and url.strip():
+            self.candidates.append((self.META_PRIORITY[key], unescape(url.strip())))
+
+
+def find_article_image(article_url: str) -> str | None:
+    """Find an article-specific image, without affecting daily digest generation on failure."""
+    parsed = urlsplit(article_url)
+    hostname = (parsed.hostname or "").lower()
+    if parsed.scheme != "https" or not any(
+        hostname == domain or hostname.endswith("." + domain)
+        for domain in TRUSTED_ARTICLE_DOMAINS
+    ):
+        return None
+
+    request = Request(
+        article_url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; hirrdirr-security-digest/1.0)",
+            "Accept": "text/html",
+        },
+    )
+    try:
+        with urlopen(request, timeout=5) as response:
+            content_type = response.headers.get("Content-Type", "").lower()
+            if "html" not in content_type:
+                return None
+            html = response.read(384 * 1024).decode(
+                response.headers.get_content_charset() or "utf-8", errors="replace"
+            )
+            resolved_url = response.geturl()
+    except (OSError, ValueError, UnicodeError):
+        return None
+
+    parser = ImageMetadataParser()
+    parser.feed(html)
+    for _, image in sorted(parser.candidates):
+        image_url = urljoin(resolved_url, image)
+        image_parts = urlsplit(image_url)
+        # Render only remotely hosted HTTPS images. No inline SVG or data URIs.
+        if image_parts.scheme == "https" and image_parts.netloc and not image_parts.path.lower().endswith(".svg"):
+            return image_url
+    return None
+
 def main() -> None:
     posts = sorted(POSTS_DIR.glob("????-??-??-daily-security-digest.md"))
     if not posts:
@@ -73,6 +147,10 @@ def main() -> None:
     newest = posts[-1]
     date = newest.name[:10]
     highlights = select_highlights(newest.read_text(encoding="utf-8"))
+    for item in highlights:
+        image = find_article_image(item["url"])
+        if image:
+            item["image"] = image
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(
         json.dumps({"digest_date": date, "articles": highlights},

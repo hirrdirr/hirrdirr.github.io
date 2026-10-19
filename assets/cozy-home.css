@@ -67,8 +67,12 @@ body:has(.pixel-home) main{padding:0!important}
 .pixel-video small{font-size:10px;display:block;color:#b5c3cd}
 .pixel-news-grid{gap:8px}
 .pixel-news-item{background:#0b1e2c;border:1px solid #263e51;border-radius:5px;min-width:0;display:grid;grid-template-columns:47% 1fr;gap:6px;padding:4px}
-.pixel-news-image{background:url('/assets/pixel-ref-games.svg') no-repeat 0 0;background-size:400% 100%;min-height:75px;border-radius:3px}
-.art-news-0{background-position:0%}.art-news-1{background-position:33.33%}.art-news-2{background-position:100%}.art-news-3{background:url('/assets/pixel-ref-hero.svg') 30% center /auto 100% no-repeat}
+.pixel-news-image{position:relative;min-height:75px;border-radius:3px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#193448,#091b2a);border:1px solid #355066}
+.pixel-news-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.pixel-news-image img[hidden]{display:none}
+.pixel-news-fallback{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;text-align:center;color:#ffb184;padding:5px;min-width:0}
+.pixel-news-fallback svg{width:22px;height:22px}
+.pixel-news-fallback small{max-width:100%;font-size:9px;line-height:1.2;overflow-wrap:anywhere;color:#cbd9e4}
 .pixel-news-item strong{font-size:10px;line-height:1.2;display:block}
 .pixel-news-item p,.pixel-news-item small{font-size:9px;line-height:1.25;margin:3px 0;color:#b3c1cd}
 .pixel-news-item small{display:block;color:#8fa1b2}
