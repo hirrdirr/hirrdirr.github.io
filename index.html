@@ -42,7 +42,7 @@ navlabel: home
         <div class="pixel-news-grid">
           {% for item in site.data.security_highlights.articles limit:4 %}
           <a class="pixel-news-item" href="{{ item.url | escape }}" target="_blank" rel="noopener noreferrer">
-            <div class="pixel-news-image art-news-{{ forloop.index0 }}" aria-hidden="true"></div>
+            <div class="pixel-news-image" aria-hidden="true">{% if item.image %}<img src="{{ item.image | escape }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true">{% endif %}<span class="pixel-news-fallback"><i data-lucide="shield-check"></i><small>{{ item.source | escape }}</small></span></div>
             <div><strong>{{ item.title | escape }}</strong><p>{{ item.source | escape }}</p><small>{{ site.data.security_highlights.digest_date }}</small></div>
           </a>
           {% else %}
