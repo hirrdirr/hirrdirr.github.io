@@ -33,12 +33,12 @@ navlabel: home
         {% assign video_dates = '12 juli 2025|28 juni 2025|14 juni 2025|31 maj 2025' | split: '|' %}
         <div class="pixel-video-grid">
           {% for v in site.data.videos limit:4 %}
-            <a class="pixel-video" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer"><div class="pixel-video-image art-video-{{ forloop.index0 }}" role="img" aria-label="{{ v.title | escape }}"><span class="pixel-duration">{% case forloop.index0 %}{% when 0 %}8:42{% when 1 %}10:17{% when 2 %}9:03{% else %}11:26{% endcase %}</span></div><strong>{{ v.title }}</strong><small>{{ video_dates[forloop.index0] }}</small></a>
+            <a class="pixel-video" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer"><div class="pixel-video-image art-video-{{ forloop.index0 }}" role="img" aria-label="{{ v.title | escape }}">{% if v.id == "wXifh0nB72Y" %}<img class="pixel-video-thumbnail" src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" loading="lazy" alt="" referrerpolicy="no-referrer">{% endif %}<span class="pixel-duration">{% case forloop.index0 %}{% when 0 %}8:42{% when 1 %}10:17{% when 2 %}9:03{% else %}11:26{% endcase %}</span></div><strong>{{ v.title }}</strong><small>{{ video_dates[forloop.index0] }}</small></a>
           {% endfor %}
         </div>
       </section>
       <section class="pixel-panel" aria-labelledby="pixel-news-title">
-        <div class="pixel-panel-head"><div><h2 id="pixel-news-title"><span class="pixel-panel-icon pixel-paper"><i data-lucide="file-text"></i></span> Senaste nyheter</h2><p>Aktuella nyheter inom projekt, teknik och allt möjligt.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
+        <div class="pixel-panel-head"><div><h2 id="pixel-news-title"><span class="pixel-panel-icon pixel-paper"><i data-lucide="file-text"></i></span> Senaste nyheter</h2><p>De senaste säkerhetsnyheterna från utvalda källor.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
         <div class="pixel-news-grid">
           {% for item in site.data.security_highlights.articles limit:4 %}
           <a class="pixel-news-item" href="{{ item.url | escape }}" target="_blank" rel="noopener noreferrer">
@@ -52,7 +52,7 @@ navlabel: home
       </section>
     </div>
     <aside class="pixel-aside">
-      <section class="pixel-panel pixel-about" id="om" aria-labelledby="pixel-about-title"><div class="pixel-avatar" aria-hidden="true">👨🏻‍💻</div><div class="pixel-about-text"><h2 id="pixel-about-title">Om hirrdirr.se</h2><p>En personlig plats för projekt, idéer, teknik, nyheter och allt som inspirerar.</p><p>Här delar jag med mig av saker jag jobbar med, tycker är intressanta eller bara vill spara för framtiden.</p><a class="pixel-about-button" href="#om">Läs mer om mig <i data-lucide="arrow-right"></i></a></div></section>
+      <div class="pixel-aside-art" role="img" aria-label="Pixelkonst: en katt på en japansk balkong bland lyktor och nattstad"></div>
       <section class="pixel-panel pixel-social" aria-labelledby="pixel-social-title"><div class="pixel-panel-head"><div><h2 id="pixel-social-title"><span class="pixel-panel-icon pixel-social-title-icon"><i data-lucide="contact"></i></span> Följ mig</h2><p>Häng med på andra plattformar!</p></div></div><div class="pixel-social-icons" aria-label="Sociala plattformar"><span title="YouTube"><i data-lucide="youtube"></i></span><span title="Discord"><i data-lucide="message-circle"></i></span><span title="GitHub"><i data-lucide="github"></i></span><span title="RSS"><i data-lucide="rss"></i></span></div><div class="pixel-side-scene" aria-hidden="true"></div></section>
     </aside>
   </div>
