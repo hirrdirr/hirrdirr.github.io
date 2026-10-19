@@ -69,7 +69,7 @@
   const initActiveNav = () => {
     const path = normPath(location.pathname);
 
-    document.querySelectorAll(".iconbtn[data-route]").forEach((a) => {
+    document.querySelectorAll(".iconbtn[data-route], .cozy-topnav a[data-route]").forEach((a) => {
       const r = normPath(a.getAttribute("data-route"));
       if (r === path) a.classList.add("active");
       else a.classList.remove("active");
