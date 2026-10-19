@@ -1,41 +1,12 @@
-<header class="gh-topbar">
-  <div class="gh-left">
-    <a class="gh-brand" href="/">
-      <span class="gh-dot" aria-hidden="true"></span>
-      <span>hirrdirr</span>
-    </a>
-
-    <div class="gh-crumbs" aria-label="Breadcrumb">
-      <span class="sep">/</span>
-      <span class="current" id="pageLabel">{{ page.navlabel | default: "home" }}</span>
-    </div>
-  </div>
-
-  <div class="gh-right">
-    <div class="gh-iconrow" role="navigation" aria-label="Snabbknappar">
-      <a class="iconbtn" href="/" data-route="/" title="Home" aria-label="Home">
-        <i class="lucide" data-lucide="house" aria-hidden="true"></i>
-      </a>
-      
-      <a class="iconbtn" href="/news/" data-route="/news/" title="News" aria-label="News">
-        <i class="lucide" data-lucide="newspaper" aria-hidden="true"></i>
-      </a>
-      
-      <a class="iconbtn" href="/games/" data-route="/games/" title="Games" aria-label="Games">
-        <i class="lucide" data-lucide="gamepad-2" aria-hidden="true"></i>
-      </a>
-
-      <a class="iconbtn" href="/videos/" data-route="/videos/" title="Videos" aria-label="Videos">
-        <i class="lucide" data-lucide="clapperboard" aria-hidden="true"></i>
-      </a>
-
-      <button class="iconbtn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme" type="button">
-        <!-- Dark active => show moon, Light active => show sun -->
-        <span class="themeicon" aria-hidden="true">
-          <i id="moon" class="lucide" data-lucide="moon"></i>
-          <i id="sun" class="lucide" data-lucide="sun"></i>
-        </span>
-      </button>
-    </div>
+<header class="cozy-topbar">
+  <a class="cozy-brand" href="/" aria-label="hirrdirr.se – Hem"><span class="cozy-brand-mark" aria-hidden="true">🦊</span><span>hirrdirr.se</span></a>
+  <nav class="cozy-topnav" aria-label="Huvudnavigation">
+    <a href="/" data-route="/"><i data-lucide="house"></i><span>Hem</span></a>
+    <a href="/games/" data-route="/games/"><i data-lucide="gamepad-2"></i><span>Games</span></a>
+    <a href="/videos/" data-route="/videos/"><i data-lucide="play-square"></i><span>Videos</span></a>
+    <a href="/news/" data-route="/news/"><i data-lucide="newspaper"></i><span>News</span></a>
+  </nav>
+  <div class="cozy-top-actions">
+    <button class="iconbtn" id="themeBtn" title="Byt tema" aria-label="Byt tema" type="button"><span class="themeicon" aria-hidden="true"><i id="moon" data-lucide="moon"></i><i id="sun" data-lucide="sun"></i></span></button>
   </div>
 </header>
