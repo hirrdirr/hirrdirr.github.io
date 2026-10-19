@@ -1,0 +1,12 @@
+---
+layout: default
+---
+<article class="container reading-page">
+  <h1>{{ page.title | escape }}</h1>
+  <p><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%Y-%m-%d" }}</time></p>
+  {{ content }}
+  <nav class="news-navigation" aria-label="Nyhetsnavigation">
+    <a href="{{ '/news/' | relative_url }}">← Senaste nyheter</a>
+    <a href="{{ '/news/archive/' | relative_url }}">Nyhetsarkivet →</a>
+  </nav>
+</article>

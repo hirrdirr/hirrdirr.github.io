@@ -4,6 +4,7 @@ title: News Archive
 permalink: /news/archive/
 ---
 
+<div class="container reading-page">
 <h1>News – Arkiv</h1>
 
 {% assign news_posts = site.posts | where_exp: "p", "p.categories contains 'news'" %}
@@ -17,6 +18,8 @@ permalink: /news/archive/
   {% endfor %}
 </ul>
 
-<p style="margin-top:2rem;">
+<p class="news-navigation">
   <a href="{{ '/news/' | relative_url }}">← Till senaste</a>
 </p>
+
+</div>
