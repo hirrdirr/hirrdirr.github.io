@@ -1,0 +1,25 @@
+{
+  "digest_date": "2026-09-11",
+  "articles": [
+    {
+      "source": "CERT-SE",
+      "title": "Patchtisdag september 2026 – samlad information om månadens säkerhetsuppdateringar",
+      "url": "https://www.cert.se/2026/09/patchtisdag-september-2026-samlad-information-om-manadens-sakerhetsuppdateringar.html"
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "Microsoft fixes Teams, Outlook launch failures on ARM Windows PCs",
+      "url": "https://www.bleepingcomputer.com/news/microsoft/microsoft-fixes-teams-outlook-launch-failures-on-arm-windows-pcs/"
+    },
+    {
+      "source": "Malwarebytes",
+      "title": "BlueMoon exploit kit turns Chrome and Windows flaws into attacks",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/09/bluemoon-exploit-kit-turns-chrome-and-windows-flaws-into-attacks"
+    },
+    {
+      "source": "SANS ISC Diary",
+      "title": "ISC Stormcast For Friday, September 11th, 2026 https://isc.sans.edu/podcastdetail/10090, (Fri, Sep 11th)",
+      "url": "https://isc.sans.edu/diary/rss/33330"
+    }
+  ]
+}
