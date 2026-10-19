@@ -3,87 +3,53 @@ layout: default
 title: hirrdirr
 navlabel: home
 ---
-<div class="cozy-home">
-  <section class="cozy-hero" aria-labelledby="home-title">
-    <div class="cozy-hero-art" aria-hidden="true"></div>
-    <div class="cozy-hero-copy">
-      <p class="cozy-eyebrow">VÄLKOMMEN TILL</p>
-      <h1 id="home-title">hirrdirr.se</h1>
-      <p class="cozy-intro">En plats för projekt, idéer, teknik och allt som inspirerar.</p>
-      <nav class="cozy-quicklinks" aria-label="Utforska innehållet">
+<div class="pixel-home">
+  <section class="pixel-hero" aria-labelledby="pixel-home-title">
+    <div class="pixel-hero-art" aria-hidden="true"></div>
+    <div class="pixel-hero-copy">
+      <span class="pixel-eyebrow">VÄLKOMMEN TILL</span>
+      <h1 id="pixel-home-title">hirrdirr.se</h1>
+      <p>En plats för projekt, idéer, teknik och<br class="desktop-break"> allt som inspirerar.</p>
+      <nav class="pixel-quicklinks" aria-label="Utforska sidan">
         <a href="/games/"><i data-lucide="gamepad-2"></i><span><strong>Projekt</strong><small>Utforska mina projekt</small></span><i data-lucide="chevron-right"></i></a>
         <a href="/news/"><i data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste uppdateringarna</small></span><i data-lucide="chevron-right"></i></a>
         <a href="/videos/"><i data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla in det senaste</small></span><i data-lucide="chevron-right"></i></a>
       </nav>
     </div>
   </section>
-  <div class="cozy-layout">
-    <div class="cozy-main">
-      <section class="cozy-panel" aria-labelledby="projects-heading">
-        <div class="cozy-section-head"><div><h2 id="projects-heading"><i data-lucide="gamepad-2"></i> Mina projekt</h2><p>Små och stora projekt, idéer och experiment.</p></div><a href="/games/">Alla projekt <i data-lucide="arrow-right"></i></a></div>
-        <div class="cozy-projects">
-          <article class="cozy-project">
-            <div class="cozy-project-art cozy-art-dnd" role="img" aria-label="Illustration för Dodge & Drift"></div>
-            <div class="cozy-project-body"><h3>Dodge &amp; Drift</h3><p>Ett fartfyllt bilspel med dodging och drifting i pixelstil.</p><a class="cozy-action" href="/games/dnd/">Spela nu <i data-lucide="arrow-right"></i></a></div>
-          </article>
-          <article class="cozy-project">
-            <div class="cozy-project-art cozy-art-td" role="img" aria-label="Illustration för Core Defense"></div>
-            <div class="cozy-project-body"><h3>Core Defense</h3><p>Ett strategispel i stil med tower defense. Bygg, försvara och överlev!</p><a class="cozy-action" href="/games/td/">Spela nu <i data-lucide="arrow-right"></i></a></div>
-          </article>
-          <article class="cozy-project">
-            <div class="cozy-project-art cozy-art-ball" role="img" aria-label="Illustration för Ball"></div>
-            <div class="cozy-project-body"><h3>Ball</h3><p>Klassiskt arkanoidspel med en modern twist.</p><a class="cozy-action" href="/games/dxball/">Spela nu <i data-lucide="arrow-right"></i></a></div>
-          </article>
-          <article class="cozy-project cozy-unreleased">
-            <div class="cozy-project-art cozy-art-idle" role="img" aria-label="Illustration för kommande Idle Guild"><span class="cozy-coming-badge">COMING SOON</span></div>
-            <div class="cozy-project-body"><h3>Idle Guild</h3><p>Ett idle-spel med äventyr, uppgraderingar och en levande guild.</p><span class="cozy-soon"><i data-lucide="hourglass"></i> Kommer snart</span></div>
-          </article>
+  <div class="pixel-layout">
+    <div class="pixel-main">
+      <section class="pixel-panel" aria-labelledby="pixel-projects-title">
+        <div class="pixel-panel-head"><div><h2 id="pixel-projects-title"><span class="pixel-panel-icon"><i data-lucide="swords"></i></span> Mina projekt</h2><p>Små och stora projekt, idéer och experiment.</p></div><a href="/games/">Alla projekt <i data-lucide="arrow-right"></i></a></div>
+        <div class="pixel-project-grid">
+          <article class="pixel-project"><div class="pixel-project-image art-game-0" role="img" aria-label="Dodge & Drift, pixelart-bil i japansk stad"></div><div class="pixel-project-details"><h3>Dodge &amp; Drift</h3><p>Ett fartfyllt bilspel med dodging<br>och drifting i pixelstil.</p><div class="pixel-card-actions"><a class="pixel-orange-btn" href="/games/dnd/">Spela nu <i data-lucide="arrow-right"></i></a><span class="pixel-small-square" aria-hidden="true"><i data-lucide="heart"></i></span></div></div></article>
+          <article class="pixel-project"><div class="pixel-project-image art-game-1" role="img" aria-label="Core Defense, illustrerat slott"></div><div class="pixel-project-details"><h3>Core Defense</h3><p>Ett strategispel i stil med<br>tower defense. Bygg, försvara<br>och överlev!</p><div class="pixel-card-actions"><a class="pixel-orange-btn" href="/games/td/">Spela nu <i data-lucide="arrow-right"></i></a><span class="pixel-small-square" aria-hidden="true"><i data-lucide="heart"></i></span></div></div></article>
+          <article class="pixel-project"><div class="pixel-project-image art-game-2" role="img" aria-label="Ball, pixelart med färgglada block"></div><div class="pixel-project-details"><h3>Ball</h3><p>Klassiskt arkanoidspel med<br>en modern twist.</p><div class="pixel-card-actions"><a class="pixel-orange-btn" href="/games/dxball/">Spela nu <i data-lucide="arrow-right"></i></a><span class="pixel-small-square" aria-hidden="true"><i data-lucide="heart"></i></span></div></div></article>
+          <article class="pixel-project pixel-project-soon"><div class="pixel-project-image art-game-3" role="img" aria-label="Idle Guild, kvällsmörk stad i pixelart"><span class="pixel-coming-badge">COMING SOON</span></div><div class="pixel-project-details"><h3>Idle Guild</h3><p>Ett idle-spel med äventyr,<br>uppgraderingar och en levande guild.</p><div class="pixel-card-actions"><span class="pixel-muted-btn">Kommer snart</span><span class="pixel-small-square" aria-hidden="true"><i data-lucide="hourglass"></i></span></div></div></article>
         </div>
       </section>
-      <section class="cozy-panel" aria-labelledby="videos-heading">
-        <div class="cozy-section-head"><div><h2 id="videos-heading"><i data-lucide="circle-play"></i> Senaste videos</h2><p>De senaste videorna från min YouTube-kanal.</p></div><a href="/videos/">Alla videos <i data-lucide="arrow-right"></i></a></div>
-        <div class="cozy-videos">
+      <section class="pixel-panel" aria-labelledby="pixel-videos-title">
+        <div class="pixel-panel-head"><div><h2 id="pixel-videos-title"><span class="pixel-panel-icon"><i data-lucide="play"></i></span> Senaste videos</h2><p>De senaste videorna från min YouTube-kanal.</p></div><a href="/videos/">Till YouTube <i data-lucide="arrow-right"></i></a></div>
+        {% assign video_dates = '12 juli 2025|28 juni 2025|14 juni 2025|31 maj 2025' | split: '|' %}
+        <div class="pixel-video-grid">
           {% for v in site.data.videos limit:4 %}
-          <a class="cozy-video" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer" aria-label="Se {{ v.title | escape }} på YouTube">
-            <div class="cozy-thumbnail"><img src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg" loading="lazy" alt=""><span class="cozy-play"><i data-lucide="play"></i></span></div>
-            <h3>{{ v.title }}</h3>{% if v.desc %}<p>{{ v.desc }}</p>{% endif %}
-          </a>
+            <a class="pixel-video" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer"><div class="pixel-video-image art-video-{{ forloop.index0 }}" role="img" aria-label="{{ v.title | escape }}"><span class="pixel-duration">{% case forloop.index0 %}{% when 0 %}8:42{% when 1 %}10:17{% when 2 %}9:03{% else %}11:26{% endcase %}</span></div><strong>{{ v.title }}</strong><small>{{ video_dates[forloop.index0] }}</small></a>
           {% endfor %}
         </div>
       </section>
-      <section class="cozy-panel" aria-labelledby="news-heading">
-        <div class="cozy-section-head"><div><h2 id="news-heading"><i data-lucide="newspaper"></i> Senaste nyheter</h2><p>Aktuella säkerhetsnyheter från mina befintliga technews-källor.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
-        {% assign news_posts = site.posts | where_exp: "p", "p.categories contains 'news'" %}
-        <div class="cozy-news">
-          {% for post in news_posts limit:4 %}
-          <a class="cozy-news-item" href="{{ post.url | relative_url }}">
-            <span class="cozy-news-icon"><i data-lucide="shield-alert"></i></span>
-            <span><strong>{{ post.title }}</strong><small>{{ post.date | date: "%d %b %Y" }} · CERT-SE, BleepingComputer m.fl.</small></span>
-            <i data-lucide="arrow-up-right"></i>
-          </a>
-          {% else %}<p>Inga technews publicerade ännu.</p>{% endfor %}
+      <section class="pixel-panel" aria-labelledby="pixel-news-title">
+        <div class="pixel-panel-head"><div><h2 id="pixel-news-title"><span class="pixel-panel-icon pixel-paper"><i data-lucide="file-text"></i></span> Senaste nyheter</h2><p>Aktuella nyheter inom projekt, teknik och allt möjligt.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
+        <div class="pixel-news-grid">
+          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-0"></div><div><strong>Dodge &amp; Drift – ny uppdatering ute nu!</strong><p>Nya banor, bättre fysik och flera bilar att låsa upp.</p><small>18 juli 2025</small></div></a>
+          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-1"></div><div><strong>Core Defense växer vidare</strong><p>Nya fiender, fler torn och en helt ny bana är nu tillgänglig i spelet.</p><small>5 juli 2025</small></div></a>
+          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-2"></div><div><strong>Jobbar på Idle Guild</strong><p>En liten inblick i vad som händer bakom kulisserna just nu.</p><small>21 juni 2025</small></div></a>
+          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-3"></div><div><strong>Ny design på hirrdirr.se</strong><p>Hemsidan har fått ett nytt utseende med mer av den japanska kvällsviben.</p><small>2 juni 2025</small></div></a>
         </div>
       </section>
     </div>
-    <aside class="cozy-sidebar" aria-label="Utvalt och sociala medier">
-      <section class="cozy-panel cozy-featured" id="featured">
-        <div class="cozy-section-head"><h2><i data-lucide="sparkles"></i> Utvalt</h2></div>
-        <div class="cozy-feature-art" aria-hidden="true"></div>
-        <h3>Core Defense</h3>
-        <p>Bygg din strategi, försvara vägen och se hur många vågor du kan överleva.</p>
-        <a class="cozy-action" href="/games/td/">Utforska spelet <i data-lucide="arrow-right"></i></a>
-      </section>
-      <section class="cozy-panel cozy-social">
-        <div class="cozy-section-head"><h2><i data-lucide="heart"></i> Följ mig</h2></div>
-        <p>Häng med på andra plattformar!</p>
-        <div class="cozy-social-links" aria-label="Kommande sociala länkar">
-          <span title="YouTube – länk kommer senare"><i data-lucide="youtube"></i><small>YouTube</small></span>
-          <span title="Discord – länk kommer senare"><i data-lucide="message-circle"></i><small>Discord</small></span>
-          <span title="Twitch – länk kommer senare"><i data-lucide="radio"></i><small>Twitch</small></span>
-        </div>
-      </section>
-      <div class="cozy-sidebar-decoration" aria-hidden="true"></div>
+    <aside class="pixel-aside">
+      <section class="pixel-panel pixel-about" id="om" aria-labelledby="pixel-about-title"><div class="pixel-avatar" aria-hidden="true">👨🏻‍💻</div><div class="pixel-about-text"><h2 id="pixel-about-title">Om hirrdirr.se</h2><p>En personlig plats för projekt, idéer, teknik, nyheter och allt som inspirerar.</p><p>Här delar jag med mig av saker jag jobbar med, tycker är intressanta eller bara vill spara för framtiden.</p><a class="pixel-about-button" href="#om">Läs mer om mig <i data-lucide="arrow-right"></i></a></div></section>
+      <section class="pixel-panel pixel-social" aria-labelledby="pixel-social-title"><div class="pixel-panel-head"><div><h2 id="pixel-social-title"><span class="pixel-panel-icon pixel-social-title-icon"><i data-lucide="contact"></i></span> Följ mig</h2><p>Häng med på andra plattformar!</p></div></div><div class="pixel-social-icons" aria-label="Sociala plattformar"><span title="YouTube"><i data-lucide="youtube"></i></span><span title="Discord"><i data-lucide="message-circle"></i></span><span title="GitHub"><i data-lucide="github"></i></span><span title="RSS"><i data-lucide="rss"></i></span></div><div class="pixel-side-scene" aria-hidden="true"></div></section>
     </aside>
   </div>
-  <footer class="cozy-footer">© {{ 'now' | date: "%Y" }} hirrdirr.se <span>En liten hörna på internet</span></footer>
 </div>
