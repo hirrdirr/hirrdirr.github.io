@@ -8,3 +8,4 @@ exclude:
   - games/td/tests
   - games/td/vite.config.js
   - games/td/README.md
+  - games/idleguild
