@@ -5,6 +5,7 @@ navlabel: news
 permalink: /news/
 ---
 
+<div class="container reading-page">
 {% assign news_posts = site.posts | where_exp: "p", "p.categories contains 'news'" %}
 {% assign latest = news_posts.first %}
 
@@ -16,10 +17,12 @@ permalink: /news/
     {{ latest.content }}
   </div>
 
-  <p style="margin-top:2rem;">
+  <p class="news-navigation">
     <a href="{{ '/news/archive/' | relative_url }}">→ Gå till arkivet</a>
   </p>
 {% else %}
   <h1>News</h1>
   <p>Inga news-inlägg ännu.</p>
 {% endif %}
+
+</div>

@@ -6,7 +6,8 @@
   position: relative;
   /* negate main padding from site.css: 24px 16px 48px */
   margin: -24px -16px -48px;
-  height: calc(100vh - 62px); /* approx topbar height; keeps it from hiding under the topbar */
+  height: calc(100dvh - var(--site-header-height, 64px));
+  min-height: 320px;
   background: #0b0f14;
   overflow: hidden;
 }
@@ -116,3 +117,5 @@
 @media (max-width: 520px){
   .dnd-page .hud{ padding: 12px; }
 }
+/* Long leaderboards must remain reachable in short/mobile viewports. */
+.dnd-page .center { max-height: calc(100% - 24px); overflow-y: auto; overscroll-behavior: contain; pointer-events: auto; }

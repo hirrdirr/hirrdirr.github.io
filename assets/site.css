@@ -1,6 +1,4 @@
-/* hirrdirr.se — GitHub-ish theme (single-file site.css)
-   Replace your existing /assets/site.css with this file.
-*/
+/* Shared components. Pixel-art shell and homepage are in cozy-home.css. */
 
 :root{
   --bg: #0d1117;
@@ -94,7 +92,7 @@ svg.icon{
 /* Layout container */
 main{ padding: 24px 16px 48px; }
 .container{
-  max-width: 1100px;
+  max-width: var(--site-width, 2200px);
   margin: 0 auto;
 }
 
@@ -215,7 +213,7 @@ body.light .btn:hover{ background: rgba(31,35,40,0.06); }
 /* --- Grid of cards (games/videos) --- */
 .grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
   gap: 16px;
   margin-top: 16px;
 }
@@ -237,7 +235,7 @@ body.light .btn:hover{ background: rgba(31,35,40,0.06); }
   transform: translateY(0);
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
-.game:hover{
+a.game:hover{
   text-decoration: none;
   transform: translateY(-2px);
   background: rgba(255,255,255,0.05);
@@ -247,7 +245,7 @@ body.light .game{
   background: rgba(31,35,40,0.02);
   box-shadow: 0 8px 20px rgba(27,31,36,0.08);
 }
-body.light .game:hover{
+body.light a.game:hover{
   background: rgba(31,35,40,0.04);
   border-color: rgba(31,35,40,0.18);
 }
@@ -324,7 +322,7 @@ body.light .badge{
 /* Default layout: player + meta */
 .video-card .row{
   display: grid;
-  grid-template-columns: minmax(280px, 1.2fr) minmax(220px, 1fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 14px;
   align-items: start;
 }
@@ -351,7 +349,7 @@ body.light .badge{
 }
 
 /* Link styling under meta */
-.video-links{
+.video-meta .video-links{
   margin-top: 10px;
   font-size: 13px;
 }
@@ -415,3 +413,31 @@ body.light .card-badge{
   justify-content: center;
 }
 
+
+/* Shared page spacing; game-specific shells retain their own main padding. */
+main:has(> .container) { padding: var(--site-gap, 24px) var(--site-gutter, 16px) 48px; }
+.container > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--site-gap, 16px); }
+.container .game { min-width: 0; }
+.container .game .row > div { min-width: 0; }
+.container .game:has(> .badge) { display: flex; flex-direction: column; gap: 12px; }
+.container .game > .badge { position: static; align-self: flex-end; }
+.video-meta { overflow-wrap: anywhere; }
+.reading-page { max-width: 90ch; font-size: 16px; overflow-wrap: anywhere; }
+.reading-page h1 { font-size: clamp(24px, 2vw, 36px); line-height: 1.25; }
+.reading-page h2 { margin-top: 1.75em; }
+.reading-page li { margin-block: 8px; }
+.reading-page a { text-decoration: underline; text-underline-offset: 3px; }
+.news-navigation { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.news-navigation a { display: inline-flex; align-items: center; min-height: 44px; }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 3px solid #ffb383; outline-offset: 3px; }
+body.light :where(a, button, input, select, textarea, [tabindex]):focus-visible { outline-color: #a54916; }
+.skip-link { position: fixed; left: 16px; top: 8px; z-index: 1000; padding: 10px 16px; background: #ffb383; color: #071421; border-radius: 4px; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+@media (max-width: 700px) { .container > .grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .game { transition: none; } a.game:hover { transform: none; } }
+
+@media (min-width: 1800px) { .container > .grid:not(:has(.video-card)) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+#themeBtn #sun { opacity: 0; }
+body.light #themeBtn #sun { opacity: 1; }
+body.light #themeBtn #moon { opacity: 0; }

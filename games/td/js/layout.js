@@ -34,7 +34,7 @@ export function fitGameToViewport(app) {
   }
 
   const observer = new ResizeObserver(schedule);
-  for (const element of [app, main, document.querySelector(".gh-topbar")]) {
+  for (const element of [app, main, document.querySelector(".pixel-topbar, .gh-topbar")]) {
     if (element) observer.observe(element);
   }
   window.addEventListener("resize", () => {
