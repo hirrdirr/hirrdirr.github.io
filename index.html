@@ -40,10 +40,14 @@ navlabel: home
       <section class="pixel-panel" aria-labelledby="pixel-news-title">
         <div class="pixel-panel-head"><div><h2 id="pixel-news-title"><span class="pixel-panel-icon pixel-paper"><i data-lucide="file-text"></i></span> Senaste nyheter</h2><p>Aktuella nyheter inom projekt, teknik och allt möjligt.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
         <div class="pixel-news-grid">
-          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-0"></div><div><strong>Dodge &amp; Drift – ny uppdatering ute nu!</strong><p>Nya banor, bättre fysik och flera bilar att låsa upp.</p><small>18 juli 2025</small></div></a>
-          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-1"></div><div><strong>Core Defense växer vidare</strong><p>Nya fiender, fler torn och en helt ny bana är nu tillgänglig i spelet.</p><small>5 juli 2025</small></div></a>
-          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-2"></div><div><strong>Jobbar på Idle Guild</strong><p>En liten inblick i vad som händer bakom kulisserna just nu.</p><small>21 juni 2025</small></div></a>
-          <a class="pixel-news-item" href="/news/"><div class="pixel-news-image art-news-3"></div><div><strong>Ny design på hirrdirr.se</strong><p>Hemsidan har fått ett nytt utseende med mer av den japanska kvällsviben.</p><small>2 juni 2025</small></div></a>
+          {% for item in site.data.security_highlights.articles limit:4 %}
+          <a class="pixel-news-item" href="{{ item.url | escape }}" target="_blank" rel="noopener noreferrer">
+            <div class="pixel-news-image art-news-{{ forloop.index0 }}" aria-hidden="true"></div>
+            <div><strong>{{ item.title | escape }}</strong><p>{{ item.source | escape }}</p><small>{{ site.data.security_highlights.digest_date }}</small></div>
+          </a>
+          {% else %}
+          <p>Inga säkerhetsnyheter tillgängliga ännu.</p>
+          {% endfor %}
         </div>
       </section>
     </div>
