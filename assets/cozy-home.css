@@ -134,3 +134,9 @@ html,body{margin:0}
 @media(max-width:400px) { .pixel-brand > span:last-child {width:126px;height:30px;} }
 
 /* Existing site components retain their own stylesheet and routes. */
+
+
+/* Focused homepage updates: actual Flickväncentralen thumbnail and new sidebar artwork. */
+.art-video-3{background:none}
+.pixel-video-thumbnail{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
+.pixel-aside-art{width:100%;height:169px;min-height:169px;border:1px solid #29465b;border-radius:6px;background:#0b1e2d url('/assets/pixel-ref-side.svg') center 52%/cover no-repeat;overflow:hidden}
