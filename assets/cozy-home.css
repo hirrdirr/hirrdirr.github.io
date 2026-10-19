@@ -18,7 +18,7 @@ body:has(.cozy-home) main{padding:0 20px 30px}
 .cozy-home svg{width:18px;height:18px;flex-shrink:0}
 .cozy-home a:focus-visible{outline:3px solid #ffa673;outline-offset:3px}
 .cozy-hero{position:relative;isolation:isolate;height:315px;overflow:hidden;background:#081626;border-bottom:1px solid #43546a}
-.cozy-hero-art{position:absolute;inset:0;background:url('/assets/cozy-home-hero.webp') right 46% center/cover no-repeat;z-index:-2}
+.cozy-hero-art{position:absolute;inset:0;background:url('/assets/cozy-home-hero.svg') right 46% center/cover no-repeat;z-index:-2}
 .cozy-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#061424ee 0%,#071524d7 25%,#07152424 60%,transparent 100%);z-index:-1;pointer-events:none}
 .cozy-hero-copy{padding:35px 38px}
 .cozy-eyebrow{font-size:11px;color:#ffab78;letter-spacing:.11em;font-weight:800;margin:0 0 3px}
@@ -42,7 +42,7 @@ body:has(.cozy-home) main{padding:0 20px 30px}
 .cozy-section-head>a{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px;color:#ffb88e}
 .cozy-projects,.cozy-videos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .cozy-project{min-width:0;display:flex;flex-direction:column;background:#0a1c2d;border:1px solid #34516a;border-radius:6px;overflow:hidden}
-.cozy-project-art{height:117px;position:relative;background-image:url('/assets/cozy-home-cards.webp');background-repeat:no-repeat;background-size:400% 100%}
+.cozy-project-art{height:117px;position:relative;background-image:url('/assets/cozy-home-cards.svg');background-repeat:no-repeat;background-size:400% 100%}
 .cozy-art-dnd{background-position:0 50%}
 .cozy-art-td{background-position:33.333% 50%}
 .cozy-art-ball{background-position:66.666% 50%}
@@ -69,14 +69,14 @@ body:has(.cozy-home) main{padding:0 20px 30px}
 .cozy-news-item small{display:block;font-size:10px;margin-top:8px;color:var(--muted)}
 .cozy-news-item>svg:last-child{width:13px;height:13px;color:#ffa673}
 .cozy-news-icon{color:#ffa673}
-.cozy-feature-art{height:125px;background:linear-gradient(180deg,#0c202c52,#0c1722a8),url('/assets/cozy-home-cards.webp') 33.333% center/400% 100% no-repeat;border:1px solid #3b5269;border-radius:5px}
+.cozy-feature-art{height:125px;background:linear-gradient(180deg,#0c202c52,#0c1722a8),url('/assets/cozy-home-cards.svg') 33.333% center/400% 100% no-repeat;border:1px solid #3b5269;border-radius:5px}
 .cozy-featured h3{font-size:17px;margin:10px 0 5px}
 .cozy-featured p,.cozy-social>p{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 14px}
 .cozy-social-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .cozy-social-links span{display:grid;place-items:center;gap:6px;padding:12px 4px;background:#183043;border:1px solid #3e5368;border-radius:5px;cursor:default}
 .cozy-social-links span svg{width:22px;height:22px;color:#ff9c69}
 .cozy-social-links span small{font-size:10px;color:#d3e0ea}
-.cozy-sidebar-decoration{min-height:150px;background:radial-gradient(circle at 50% 40%,#b8764259,transparent 65%),url('/assets/cozy-home-hero.webp') 80% 56% / auto 330px no-repeat;border-radius:8px}
+.cozy-sidebar-decoration{min-height:150px;background:radial-gradient(circle at 50% 40%,#b8764259,transparent 65%),url('/assets/cozy-home-hero.svg') 80% 56% / auto 330px no-repeat;border-radius:8px}
 .cozy-footer{display:flex;justify-content:space-between;border-top:1px solid #2a4257;padding:14px 3px;color:#a1b1c0;font-size:11px;margin-top:14px}
 body.light .cozy-home{color:#edf3f8}
 @media(max-width:1100px){.cozy-layout{grid-template-columns:minmax(0,1fr) 220px}.cozy-projects,.cozy-videos{grid-template-columns:repeat(2,minmax(0,1fr))}.cozy-news{grid-template-columns:repeat(2,minmax(0,1fr))}.cozy-project-art{height:145px}.cozy-topbar{gap:10px}.cozy-topnav a{padding:9px}}
