@@ -3,24 +3,39 @@ layout: default
 title: hirrdirr
 navlabel: home
 ---
-
-<div class="container">
-  <section class="card hero">
-    <h1>Hem</h1>
-    <p>En liten hörna på internet för spel, tester och annat nörderi.</p>
-
-    <div class="actions">
-      <a class="btn" href="/games/">Games</a>
-      <a class="btn" href="/videos/">Videos</a>
-      <a class="btn" href="/news/">News</a>
-    </div>
-  </section>
-
-  <section class="card hero" style="margin-top:16px;">
-    <h1 style="font-size:20px;margin-bottom:6px;">Senaste videos</h1>
-  </section>
-
-  {% include video_grid.html limit=4 %}
-
-  <div class="footer">© 2025 hirrdirr.se</div>
+<div class="cozy-home">
+<section class="cozy-hero">
+  <div class="cozy-hero-copy"><p class="cozy-eyebrow">VÄLKOMMEN TILL</p><h1>hirrdirr.se</h1><p>En liten hörna på internet för spel, tester och annat nörderi.</p>
+    <nav class="cozy-quicklinks" aria-label="Upptäck sidan">
+      <a href="/games/"><i data-lucide="gamepad-2"></i><span><strong>Games</strong><small>Utforska mina spel</small></span><i data-lucide="arrow-right"></i></a>
+      <a href="/news/"><i data-lucide="newspaper"></i><span><strong>News</strong><small>Senaste säkerhetsnytt</small></span><i data-lucide="arrow-right"></i></a>
+      <a href="/videos/"><i data-lucide="play-square"></i><span><strong>Videos</strong><small>Kolla in det senaste</small></span><i data-lucide="arrow-right"></i></a>
+    </nav>
+  </div><div class="cozy-hero-art" aria-hidden="true"></div>
+</section>
+<div class="cozy-layout"><div class="cozy-main">
+<section class="cozy-panel" aria-labelledby="projects-heading">
+  <div class="cozy-section-head"><div><h2 id="projects-heading"><i data-lucide="gamepad-2"></i> Mina projekt</h2><p>Små och stora experiment direkt i webbläsaren.</p></div><a href="/games/">Alla spel <i data-lucide="arrow-right"></i></a></div>
+  <div class="cozy-projects">
+    <article class="cozy-project"><div class="cozy-project-art cozy-art-dnd"><i data-lucide="car-front"></i></div><div class="cozy-project-body"><h3>Dodge &amp; Drift</h3><p>Undvik hinder och håll dig kvar på vägen.</p><a class="cozy-action" href="/games/dnd/">Spela nu <i data-lucide="arrow-right"></i></a></div></article>
+    <article class="cozy-project"><div class="cozy-project-art cozy-art-td"><i data-lucide="castle"></i></div><div class="cozy-project-body"><h3>Core Defense</h3><p>Bygg torn och försvara din bas.</p><a class="cozy-action" href="/games/td/">Spela nu <i data-lucide="arrow-right"></i></a></div></article>
+    <article class="cozy-project"><div class="cozy-project-art cozy-art-ball"><i data-lucide="blocks"></i></div><div class="cozy-project-body"><h3>Ball</h3><p>Krossa block och klara nästa nivå.</p><a class="cozy-action" href="/games/dxball/">Spela nu <i data-lucide="arrow-right"></i></a></div></article>
+    <article class="cozy-project cozy-unreleased"><div class="cozy-project-art cozy-art-idle"><i data-lucide="swords"></i><span>COMING SOON</span></div><div class="cozy-project-body"><h3>Idle Guild</h3><p>Ett nytt äventyr är under utveckling.</p><span class="cozy-soon"><i data-lucide="hourglass"></i> Kommer snart</span></div></article>
+  </div>
+</section>
+<section class="cozy-panel" aria-labelledby="videos-heading">
+  <div class="cozy-section-head"><div><h2 id="videos-heading"><i data-lucide="circle-play"></i> Senaste videos</h2><p>Videorna som redan finns på hirrdirr.se.</p></div><a href="/videos/">Alla videos <i data-lucide="arrow-right"></i></a></div>
+  <div class="cozy-videos">{% for v in site.data.videos limit:4 %}<a class="cozy-video" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer" aria-label="Se {{ v.title | escape }} på YouTube"><div class="cozy-thumbnail"><img src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg" loading="lazy" alt=""><span class="cozy-play"><i data-lucide="play"></i></span></div><h3>{{ v.title }}</h3>{% if v.desc %}<p>{{ v.desc }}</p>{% endif %}</a>{% endfor %}</div>
+</section>
+<section class="cozy-panel" aria-labelledby="news-heading">
+  <div class="cozy-section-head"><div><h2 id="news-heading"><i data-lucide="newspaper"></i> Senaste technews</h2><p>Från sidans befintliga security-digests.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
+  {% assign news_posts = site.posts | where_exp: "p", "p.categories contains 'news'" %}
+  <div class="cozy-news">{% for post in news_posts limit:3 %}<a class="cozy-news-item" href="{{ post.url | relative_url }}"><span class="cozy-news-icon"><i data-lucide="shield-check"></i></span><span><strong>{{ post.title }}</strong><small>{{ post.date | date: "%Y-%m-%d" }} · Säkerhetsnyheter från dina källor</small></span><i data-lucide="arrow-up-right"></i></a>{% else %}<p>Inga nyheter publicerade ännu.</p>{% endfor %}</div>
+</section>
+</div>
+<aside class="cozy-sidebar" aria-label="Utvalt och sociala medier">
+<section class="cozy-panel cozy-featured"><div class="cozy-section-head"><h2><i data-lucide="sparkles"></i> Utvalt</h2></div><div class="cozy-feature-art"><i data-lucide="shield"></i><span>FEATURED PROJECT</span></div><h3>Core Defense</h3><p>Testa tower defense-spelet och se hur länge du kan hålla stånd.</p><a class="cozy-action" href="/games/td/">Utforska spelet <i data-lucide="arrow-right"></i></a></section>
+<section class="cozy-panel cozy-social"><div class="cozy-section-head"><h2><i data-lucide="heart"></i> Följ mig</h2></div><p>Fler kanaler och länkar kommer framöver.</p><div class="cozy-social-links"><span title="YouTube – länk kommer senare"><i data-lucide="youtube"></i><small>YouTube</small></span><span title="Discord – länk kommer senare"><i data-lucide="message-circle"></i><small>Discord</small></span><span title="Twitch – länk kommer senare"><i data-lucide="radio"></i><small>Twitch</small></span></div></section>
+</aside></div>
+<footer class="cozy-footer">© {{ 'now' | date: "%Y" }} hirrdirr.se <span>Made with curiosity <i data-lucide="heart"></i></span></footer>
 </div>

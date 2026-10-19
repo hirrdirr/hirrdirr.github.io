@@ -4,21 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{{ page.title | default: site.title }}</title>
-
   <link rel="stylesheet" href="/assets/site.css" />
+  {% if page.url == '/' %}<link rel="stylesheet" href="/assets/cozy-home.css" />{% endif %}
   <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
 </head>
 <body>
-
   {% include topbar.html %}
-
-  <main>
-    {{ content }}
-  </main>
-
+  <main>{{ content }}</main>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="/assets/site.js"></script>
 </body>
 </html>
-
