@@ -1,25 +1,28 @@
 {
-  "digest_date": "2026-09-11",
+  "digest_date": "2026-10-20",
   "articles": [
     {
-      "source": "CERT-SE",
-      "title": "Patchtisdag september 2026 – samlad information om månadens säkerhetsuppdateringar",
-      "url": "https://www.cert.se/2026/09/patchtisdag-september-2026-samlad-information-om-manadens-sakerhetsuppdateringar.html"
-    },
-    {
       "source": "BleepingComputer",
-      "title": "Microsoft fixes Teams, Outlook launch failures on ARM Windows PCs",
-      "url": "https://www.bleepingcomputer.com/news/microsoft/microsoft-fixes-teams-outlook-launch-failures-on-arm-windows-pcs/"
+      "title": "Revolut outage disrupts online banking operations worldwide",
+      "url": "https://www.bleepingcomputer.com/news/security/revolut-outage-disrupts-online-banking-operations-worldwide/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/20/Revolut.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "BlueMoon exploit kit turns Chrome and Windows flaws into attacks",
-      "url": "https://www.malwarebytes.com/blog/bugs/2026/09/bluemoon-exploit-kit-turns-chrome-and-windows-flaws-into-attacks"
+      "title": "Meta glasses caught recording conversations without wake phrase",
+      "url": "https://www.malwarebytes.com/blog/news/2026/10/meta-says-it-fixed-smart-glasses-unprompted-eavesdropping",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/06/meta-glasses.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Friday, September 11th, 2026 https://isc.sans.edu/podcastdetail/10090, (Fri, Sep 11th)",
-      "url": "https://isc.sans.edu/diary/rss/33330"
+      "title": "ISC Stormcast For Tuesday, October 20th, 2026 https://isc.sans.edu/podcastdetail/10142, (Tue, Oct 20th)",
+      "url": "https://isc.sans.edu/diary/rss/33436"
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "Nikkei discloses third data breach in a month, 1.8M records exposed",
+      "url": "https://www.bleepingcomputer.com/news/security/nikkei-discloses-third-data-breach-in-a-month-18m-records-exposed/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/19/nikkei.jpg"
     }
   ]
 }
