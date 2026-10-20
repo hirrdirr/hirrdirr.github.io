@@ -1,0 +1,6 @@
+<script>
+  // Restore the saved theme before artwork elements are parsed to avoid a dark-image flash.
+  try {
+    if (localStorage.getItem("hirrdirr_theme") === "light") document.body.classList.add("light");
+  } catch { /* Storage may be unavailable; keep the default dark theme. */ }
+</script>

@@ -54,19 +54,28 @@
 .pixel-header-actions .pixel-search-icon { color: #9ba9b7; cursor: default; }
 .pixel-header-actions svg { width: 18px; height: 18px; }
 .pixel-home { width: 100%; max-width: calc(var(--site-width) + var(--site-gutter) * 2); margin: 0 auto; padding: 0 var(--site-gutter) var(--site-gap); color: #f0f4f8; }
+/* Paired scenes share the existing layout; only the selected theme's URLs are used. */
+.pixel-home {
+  --home-hero: url('/assets/artwork/home/hero-dark.webp');
+  --home-garden: url('/assets/artwork/home/garden-dark.webp');
+  --home-station: url('/assets/artwork/home/station-dark.webp');
+  --hero-surface: #071522;
+  --hero-scrim: linear-gradient(90deg,#051525 0%,#091625 46%,transparent 70%);
+  --hero-mobile-scrim: linear-gradient(90deg,#071525f0,#091727ad);
+}
 .pixel-home a { color: inherit; text-decoration: none; }
 .pixel-home svg { width: 16px; height: 16px; }
 .pixel-hero {
   min-height: clamp(260px, 17vw, 370px); position: relative; isolation: isolate;
-  overflow: hidden; background: #071522;
+  overflow: hidden; background: var(--hero-surface);
 }
 .pixel-hero::before {
   content: ''; position: absolute; inset: 0 0 0 35%; z-index: -2;
-  background: url('/assets/pixel-ref-hero.svg') center / cover no-repeat;
+  background: var(--home-hero) center / cover no-repeat;
 }
 .pixel-hero::after {
   content: ''; position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(90deg,#051525 0%,#091625 46%,transparent 70%);
+  background: var(--hero-scrim);
 }
 .pixel-hero-copy { padding: clamp(24px, 2.6vw, 56px) clamp(16px, 2vw, 44px); }
 .pixel-eyebrow { display: block; font-weight: 750; font-size: 12px; color: #faa56f; letter-spacing: .08em; }
@@ -91,12 +100,12 @@
 .pixel-panel-icon svg { width: 20px; height: 20px; }
 .pixel-project-grid, .pixel-video-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 1vw, 20px); }
 .pixel-project { min-width: 0; display: flex; flex-direction: column; border: 1px solid #243f53; border-radius: 6px; background: #0b1b2a; overflow: hidden; }
-/* Each project occupies exactly one 240 x 95 cell of the existing artwork. */
+/* Keep the 240:95 card crop. The first three projects use the existing sprite strip. */
 .pixel-project-image { aspect-ratio: 240 / 95; background: url('/assets/pixel-ref-games.svg') no-repeat; background-size: 400% 100%; position: relative; }
 .art-game-0 { background-position: 0% 50%; }
 .art-game-1 { background-position: 33.333% 50%; }
 .art-game-2 { background-position: 66.666% 50%; }
-.art-game-3 { background-position: 100% 50%; }
+.art-game-3 { background-image: url('/assets/artwork/home/idle-guild.webp'); background-size: cover; background-position: center; }
 .pixel-project-details { padding: 12px; display: flex; flex-direction: column; flex: 1; gap: 8px; }
 .pixel-project-details h3 { font-size: 16px; line-height: 1.3; margin: 0; color: #fff; }
 .pixel-project-details p { color: #bfccd7; font-size: 13px; line-height: 1.5; margin: 0; }
@@ -135,7 +144,7 @@
 .pixel-news-item strong { font-size: 14px; line-height: 1.45; display: block; overflow-wrap: anywhere; }
 .pixel-news-item p, .pixel-news-item small { font-size: 12px; line-height: 1.4; margin: 6px 0 0; color: #b3c1cd; }
 .pixel-news-item small { display: block; }
-.pixel-aside-art { width: 100%; aspect-ratio: 222 / 169; border: 1px solid var(--pixel-border); border-radius: 6px; background: #0b1e2d url('/assets/pixel-ref-side.svg') center 52% / cover no-repeat; overflow: hidden; }
+.pixel-aside-art { width: 100%; aspect-ratio: 222 / 169; border: 1px solid var(--pixel-border); border-radius: 6px; background: #0b1e2d var(--home-garden) center 52% / cover no-repeat; overflow: hidden; }
 .pixel-social { overflow: hidden; }
 .pixel-social-icons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .pixel-social-icons > * { min-height: 48px; background: #13283a; border: 1px solid #233b50; border-radius: 5px; display: grid; place-items: center; }
@@ -145,8 +154,26 @@
 .pixel-social-icons > :nth-child(4) { color: #e99b60; }
 .pixel-social-icons a:hover { border-color: #f0a476; }
 .pixel-social-icons svg { width: 23px; height: 23px; }
-.pixel-side-scene { aspect-ratio: 222 / 109; background: url('/assets/pixel-ref-side.svg') center / cover no-repeat; margin: 16px calc(-1 * clamp(14px, 1.15vw, 24px)) calc(-1 * clamp(14px, 1.15vw, 24px)); }
-/* Reuse the existing light palette for reading surfaces; artwork stays original. */
+.pixel-side-scene { aspect-ratio: 222 / 109; background: var(--home-station) center / cover no-repeat; margin: 16px calc(-1 * clamp(14px, 1.15vw, 24px)) calc(-1 * clamp(14px, 1.15vw, 24px)); }
+/* Daytime artwork and a matching scrim keep the unchanged hero copy readable. */
+body.light .pixel-home {
+  --home-hero: url('/assets/artwork/home/hero-light.webp');
+  --home-garden: url('/assets/artwork/home/garden-light.webp');
+  --home-station: url('/assets/artwork/home/station-light.webp');
+  --hero-surface: var(--bg);
+  --hero-scrim: linear-gradient(90deg,#f6f8fa 0%,#f6f8fa 46%,transparent 70%);
+  --hero-mobile-scrim: linear-gradient(90deg,#f6f8faf0,#f6f8faad);
+}
+body.light .pixel-hero h1 { filter: brightness(.17) grayscale(1); }
+body.light .pixel-hero::before { opacity: 1; }
+body.light .pixel-hero-copy > p { color: var(--text); }
+body.light .pixel-eyebrow { color: #884426; }
+body.light .pixel-quicklinks a { background: #ffffffde; border-color: var(--border); }
+body.light .pixel-quicklinks a:hover { background: #fff; border-color: #884426; }
+body.light .pixel-quicklinks strong { color: var(--text); }
+body.light .pixel-quicklinks small { color: var(--muted); }
+body.light .pixel-quicklinks a > svg:first-child { color: #884426; }
+/* Reuse the existing light palette for reading surfaces. */
 .site-page.light { background: var(--bg); color: var(--text); }
 body.light .pixel-home { color: var(--text); }
 body.light :is(.pixel-panel, .pixel-project, .pixel-news-item) { background: var(--panel); border-color: var(--border); }
@@ -178,7 +205,7 @@ body.light .pixel-news-fallback small { color: #cbd9e4; }
   .pixel-navigation svg { width: 14px; height: 14px; }
   .pixel-header-actions { gap: 6px; }
   .pixel-hero::before { inset: 0; background-position: 48% center; opacity: .5; }
-  .pixel-hero::after { background: linear-gradient(90deg,#071525f0,#091727ad); }
+  .pixel-hero::after { background: var(--hero-mobile-scrim); }
   .pixel-hero-copy { padding: 28px 14px; }
   .pixel-hero-copy > p { font-size: 16px; }
   .pixel-quicklinks { grid-template-columns: 1fr; max-width: 350px; gap: 10px; }
