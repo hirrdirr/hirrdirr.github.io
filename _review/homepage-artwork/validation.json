@@ -1,0 +1,140 @@
+{
+  "method": "Chromium iframe at target CSS viewport; geometry rounded to 0.01 CSS px",
+  "selectors": [
+    ".art-game-3",
+    ".pixel-aside-art",
+    ".pixel-hero",
+    ".pixel-hero-copy",
+    ".pixel-home",
+    ".pixel-layout",
+    ".pixel-news-grid",
+    ".pixel-project-grid",
+    ".pixel-side-scene",
+    ".pixel-topbar",
+    ".pixel-video-grid"
+  ],
+  "dark": [
+    {
+      "viewport": [
+        2560,
+        1440
+      ],
+      "geometryUnchanged": true,
+      "width": 2545,
+      "scrollWidth": 2545,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "geometryUnchanged": true,
+      "width": 1905,
+      "scrollWidth": 1905,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        1366,
+        768
+      ],
+      "geometryUnchanged": true,
+      "width": 1351,
+      "scrollWidth": 1351,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "geometryUnchanged": true,
+      "width": 1265,
+      "scrollWidth": 1265,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "geometryUnchanged": true,
+      "width": 753,
+      "scrollWidth": 753,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "geometryUnchanged": true,
+      "width": 375,
+      "scrollWidth": 375,
+      "overflow": []
+    }
+  ],
+  "light": [
+    {
+      "viewport": [
+        2560,
+        1440
+      ],
+      "geometryUnchanged": true,
+      "width": 2545,
+      "scrollWidth": 2545,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "geometryUnchanged": true,
+      "width": 1905,
+      "scrollWidth": 1905,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        1366,
+        768
+      ],
+      "geometryUnchanged": true,
+      "width": 1351,
+      "scrollWidth": 1351,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "geometryUnchanged": true,
+      "width": 1265,
+      "scrollWidth": 1265,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        768,
+        1024
+      ],
+      "geometryUnchanged": true,
+      "width": 753,
+      "scrollWidth": 753,
+      "overflow": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "geometryUnchanged": true,
+      "width": 375,
+      "scrollWidth": 375,
+      "overflow": []
+    }
+  ]
+}
