@@ -68,6 +68,8 @@
 .pixel-hero {
   min-height: clamp(260px, 17vw, 370px); position: relative; isolation: isolate;
   overflow: hidden; background: var(--hero-surface);
+  margin-bottom: var(--site-gap);
+  border-radius: 6px;
 }
 .pixel-hero::before {
   content: ''; position: absolute; inset: 0 0 0 35%; z-index: -2;
@@ -100,12 +102,12 @@
 .pixel-panel-icon svg { width: 20px; height: 20px; }
 .pixel-project-grid, .pixel-video-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 1vw, 20px); }
 .pixel-project { min-width: 0; display: flex; flex-direction: column; border: 1px solid #243f53; border-radius: 6px; background: #0b1b2a; overflow: hidden; }
-/* Keep the 240:95 card crop. The first three projects use the existing sprite strip. */
-.pixel-project-image { aspect-ratio: 240 / 95; background: url('/assets/pixel-ref-games.svg') no-repeat; background-size: 400% 100%; position: relative; }
-.art-game-0 { background-position: 0% 50%; }
-.art-game-1 { background-position: 33.333% 50%; }
-.art-game-2 { background-position: 66.666% 50%; }
-.art-game-3 { background-image: url('/assets/artwork/home/idle-guild.webp'); background-size: cover; background-position: center; }
+/* Independent illustrations share the same 240:95 crop and centered framing. */
+.pixel-project-image { aspect-ratio: 240 / 95; background: center / cover no-repeat; position: relative; }
+.art-game-0 { background-image: url('/assets/artwork/home/dodge-drift.webp'); }
+.art-game-1 { background-image: url('/assets/artwork/home/core-defense.webp'); }
+.art-game-2 { background-image: url('/assets/artwork/home/ball.webp'); }
+.art-game-3 { background-image: url('/assets/artwork/home/idle-guild.webp'); }
 .pixel-project-details { padding: 12px; display: flex; flex-direction: column; flex: 1; gap: 8px; }
 .pixel-project-details h3 { font-size: 16px; line-height: 1.3; margin: 0; color: #fff; }
 .pixel-project-details p { color: #bfccd7; font-size: 13px; line-height: 1.5; margin: 0; }
