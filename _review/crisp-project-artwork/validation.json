@@ -1,0 +1,182 @@
+[
+  {
+    "size": "2560x1440",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 28,
+    "light": false,
+    "scrollWidth": 2545,
+    "soonControls": 0,
+    "width": 2545
+  },
+  {
+    "size": "1920x1080",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 24,
+    "light": false,
+    "scrollWidth": 1905,
+    "soonControls": 0,
+    "width": 1905
+  },
+  {
+    "size": "1366x768",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 17.06,
+    "light": false,
+    "scrollWidth": 1351,
+    "soonControls": 0,
+    "width": 1351
+  },
+  {
+    "size": "1280x720",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 16,
+    "light": false,
+    "scrollWidth": 1265,
+    "soonControls": 0,
+    "width": 1265
+  },
+  {
+    "size": "768x1024",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 16,
+    "light": false,
+    "scrollWidth": 753,
+    "soonControls": 0,
+    "width": 753
+  },
+  {
+    "size": "390x844",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 16,
+    "light": false,
+    "scrollWidth": 375,
+    "soonControls": 0,
+    "width": 375
+  },
+  {
+    "size": "2560x1440",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 28,
+    "light": true,
+    "scrollWidth": 2545,
+    "soonControls": 0,
+    "width": 2545
+  },
+  {
+    "size": "1920x1080",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 24,
+    "light": true,
+    "scrollWidth": 1905,
+    "soonControls": 0,
+    "width": 1905
+  },
+  {
+    "size": "1366x768",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 17.06,
+    "light": true,
+    "scrollWidth": 1351,
+    "soonControls": 0,
+    "width": 1351
+  },
+  {
+    "size": "1280x720",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 16,
+    "light": true,
+    "scrollWidth": 1265,
+    "soonControls": 0,
+    "width": 1265
+  },
+  {
+    "size": "768x1024",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 16,
+    "light": true,
+    "scrollWidth": 753,
+    "soonControls": 0,
+    "width": 753
+  },
+  {
+    "size": "390x844",
+    "badge": "COMING SOON",
+    "cardRatios": [
+      2.53,
+      2.53,
+      2.53,
+      2.53
+    ],
+    "gap": 16,
+    "light": true,
+    "scrollWidth": 375,
+    "soonControls": 0,
+    "width": 375
+  }
+]
