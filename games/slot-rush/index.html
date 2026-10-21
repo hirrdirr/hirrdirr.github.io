@@ -27,13 +27,22 @@
   .under{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;padding:15px 2px 0}
   .instructions{font-size:12px;color:#a8b5c0;line-height:1.65}.instructions kbd{font:800 11px inherit;background:#2b3944;padding:4px 7px;border:1px solid #52636f;border-bottom:3px solid #536370;border-radius:5px;color:#f1e9d8;margin:0 3px}
   .controls{display:flex;align-items:center;gap:9px}.control{border:1px solid #55636e;border-radius:10px;background:#263641;color:#eff0e9;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:12px 17px}.control:hover{background:#324855}.pedal{min-width:150px;border:1px solid #e4a068;border-radius:10px;background:linear-gradient(155deg,#f0bc7d,#ce8453);color:#211c1c;padding:14px 19px;font-weight:1000;text-transform:uppercase;letter-spacing:.14em;box-shadow:inset 0 -4px 0 #a26a46;touch-action:none}.pedal.pressed{filter:brightness(.86);transform:translateY(2px);box-shadow:inset 0 -2px 0 #a26a46}
+  .race-setup{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;padding:10px 12px;border:1px solid #334650;border-radius:11px;background:#16222bc9}
+  .lane-select,.ghost-select{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .setup-label{font-size:10px;font-weight:900;letter-spacing:.14em;color:#a3b2bd;margin-right:4px}
+  .lane-button,#ghost-toggle{font-family:inherit;font-weight:900;font-size:11px;letter-spacing:.07em;color:#cbd7df;border:1px solid #4d636e;border-radius:8px;background:#24323b;padding:9px 12px;min-height:35px}
+  .lane-button[aria-pressed="true"]{border-color:#e5ae75;background:#49362b;color:#ffddac;box-shadow:inset 0 0 0 1px #ac8153}
+  .lane-button:disabled{opacity:.5;cursor:not-allowed}
+  #lane-info{color:#a5b9c4;font-size:11px}
+  #ghost-toggle[aria-pressed="true"]{border-color:#5e9cab;color:#a7e6ef;background:#1b3942}
+  @media(max-width:650px){.race-setup{justify-content:center;padding:9px 6px}.lane-select,.ghost-select{justify-content:center}#lane-info{width:100%;text-align:center}}
   .foot{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:13px;color:#85949e;font-size:11px}.foot strong{color:#c4a77c}
   @media(max-width:650px){.shell{padding:12px 9px 25px}.dash{gap:5px}.metric{padding:9px 6px;border-radius:7px}.metric>span{font-size:8px;letter-spacing:0}.metric>strong{font-size:16px}.metric .unit{font-size:9px}.stage{border-radius:8px}.under{justify-content:center}.instructions{order:3;text-align:center;width:100%}.controls{width:100%;justify-content:center}.pedal{flex:1}.control{padding:12px 13px}.foot{flex-wrap:wrap;justify-content:center;text-align:center}.overlay{padding:5px;overflow-y:auto}.overlay .content{max-height:100%;overflow-y:auto;width:100%}.eyebrow{font-size:9px;margin-bottom:4px}.overlay h2{font-size:27px;line-height:.94;margin-bottom:6px}.overlay p{font-size:10px;line-height:1.2;margin-bottom:7px}.action{padding:8px 14px;font-size:11px;box-shadow:0 3px 0 #915d3d}.action.secondary{padding:6px 10px;margin:5px 5px 0;font-size:9px}}
 </style>
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.2</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; ROOKIE CIRCUIT &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.3</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; ROOKIE CIRCUIT &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -41,13 +50,24 @@
     <div class="metric"><span>Krascher</span><strong id="crashes">0</strong></div>
     <div class="metric"><span>Personbästa</span><strong id="best">--:--</strong></div>
   </section>
+  <div class="race-setup" aria-label="Raceinställningar">
+    <div class="lane-select" role="group" aria-label="Välj körskena">
+      <span class="setup-label">VÄLJ SKENA</span>
+      <button type="button" id="lane-a" class="lane-button" aria-pressed="true">SPÅR A</button>
+      <button type="button" id="lane-b" class="lane-button" aria-pressed="false">SPÅR B</button>
+    </div>
+    <div class="ghost-select">
+      <span id="lane-info" aria-live="polite">Separata rekord per spår</span>
+      <button type="button" id="ghost-toggle" aria-pressed="true">GHOST: PÅ</button>
+    </div>
+  </div>
   <div class="stage" id="stage">
     <canvas id="game" width="960" height="600" aria-label="Rookie Circuit med två bilskenor och spelbar bil"></canvas>
     <div class="countdown" id="countdown">3</div>
     <div class="overlay" id="overlay"><div class="content"><span class="eyebrow" id="ovlabel">Prototype • Circuit 01</span><h2 id="ovtitle">Rookie<br>Circuit</h2><p id="ovbody">En klassisk bilbana. En gaspedal. Tre varv.<br>Håll gasen på raksträckorna och släpp innan kurvorna — annars flyger bilen av skenan.</p><button type="button" class="action" id="play">STARTA LOPP</button><br><button type="button" class="action secondary" id="help">SÅ FUNKAR DET</button></div></div>
   </div>
   <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
-  <div class="foot"><span>* Hastighet i spelvärlden, inte verklig skala. <strong>Tidig spelversion under utveckling.</strong></span><span>Design: två parallella spår; endast ett aktivt i prototypen.</span></div>
+  <div class="foot"><span>* Hastighet i spelvärlden, inte verklig skala. <strong>Tidig spelversion under utveckling.</strong></span><span>Två fysiska körskenor · separata rekord och ghosts.</span></div>
 </div>
 <script>
 (()=>{'use strict';
@@ -65,27 +85,137 @@ let total=0;for(let i=0;i<pts.length;i++){let p=pts[i],n=pts[(i+1)%pts.length];p
  for(let i=0;i<pts.length;i++){let sum=0,weight=0;for(let j=-5;j<=5;j++){const w=6-Math.abs(j);sum+=rawK[(i+j+pts.length)%pts.length]*w;weight+=w;}pts[i].k=sum/weight;}
 return {pts,total};}
 const track=trackInit(),pts=track.pts,L=track.total;
+function makeLane(offset){
+ const arr=pts.map(p=>({x:p.x-Math.sin(p.theta)*offset,y:p.y+Math.cos(p.theta)*offset}));
+ let length=0;
+ for(let i=0;i<arr.length;i++){
+  const p=arr[i],n=arr[(i+1)%arr.length];
+  p.s=length;p.theta=Math.atan2(n.y-p.y,n.x-p.x);length+=Math.hypot(n.x-p.x,n.y-p.y);
+ }
+ const raw=arr.map((p,i)=>{
+  const k=17,a=arr[(i-k+arr.length)%arr.length],b=arr[(i+k)%arr.length];
+  return deltaAngle(b.theta,a.theta)/((b.s-a.s+length)%length||length);
+ });
+ for(let i=0;i<arr.length;i++){
+  let sum=0,weight=0;
+  for(let j=-5;j<=5;j++){const w=6-Math.abs(j);sum+=raw[(i+j+arr.length)%arr.length]*w;weight+=w;}
+  arr[i].k=sum/weight;
+ }
+ return {pts:arr,total:length,offset};
+}
+const laneTracks=[makeLane(-22),makeLane(22)];let activeLane=0;
+function lapLength(){return laneTracks[activeLane].total;}
+function laneAt(d,lane=activeLane){
+ const path=laneTracks[lane],arr=path.pts,total=path.total;
+ d=((d%total)+total)%total;
+ let lo=0,hi=arr.length-1;
+ while(lo<hi){const mid=(lo+hi+1)>>1;if(arr[mid].s<=d)lo=mid;else hi=mid-1;}
+ const a=arr[lo],b=arr[(lo+1)%arr.length],bs=lo+1===arr.length?total:b.s;
+ const t=Math.max(0,Math.min(1,(d-a.s)/(bs-a.s||1)));
+ return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,
+  theta:a.theta+deltaAngle(b.theta,a.theta)*t,k:a.k+(b.k-a.k)*t};
+}
 function at(d,offset=0){d=((d%L)+L)%L;let lo=0,hi=pts.length-1;while(lo<hi){let mid=(lo+hi+1)>>1;if(pts[mid].s<=d)lo=mid;else hi=mid-1;}const a=pts[lo],b=pts[(lo+1)%pts.length],bS=(lo+1===pts.length?L:b.s),t=Math.max(0,Math.min(1,(d-a.s)/(bS-a.s||1)));let theta=a.theta+deltaAngle(b.theta,a.theta)*t;let x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;return {x:x-Math.sin(theta)*offset,y:y+Math.cos(theta)*offset,theta,k:a.k+(b.k-a.k)*t};}
 let state='menu',gas=false,distance=0,speed=0,stress=0,time=0,lapStart=0,lapTimes=[],completed=0,crashes=0,crash=null,crashT=0,respawnT=0,countT=0,gameClock=0,loadDisplay=0;
-let best=0;try{best=parseFloat(localStorage.getItem('slotrush.rookie.best')||'0')||0;}catch(e){}
+// v0.1.2's old centerline record is left untouched but not mixed with
+// new physical-rail records, which have different distances and curvature.
+const RECORD_PREFIX='slotrush.rookie.rail.v013.';
+function readRecord(i){
+ try{
+  const r=JSON.parse(localStorage.getItem(RECORD_PREFIX+i));
+  if(!r||r.schema!==1||!Number.isFinite(r.time)||r.time<=0||
+    !Array.isArray(r.frames)||r.frames.length<2||r.frames.length>9000)return null;
+  if(!r.frames.every(f=>Array.isArray(f)&&f.length===6&&
+    f.slice(0,4).every(Number.isFinite)&&f[0]>=0&&Number.isFinite(f[5])))return null;
+  if(r.frames[0][0]!==0||Math.abs(r.frames.at(-1)[0]-r.time)>.1)return null;
+  return r;
+ }catch(e){return null;}
+}
+const records=[readRecord(0),readRecord(1)];
+let best=records[activeLane]?.time||0,ghostEnabled=true;
+try{ghostEnabled=localStorage.getItem('slotrush.rookie.ghost.enabled')!=='false';}catch(e){}
+let ghostFrames=null,ghostCursor=0,runFrames=[],lastFrameTime=-1;
+function laneLabel(i=activeLane){return i===0?'SPÅR A':'SPÅR B';}
+function refreshSetup(){
+ const hasGhost=records[activeLane]&&records[activeLane].frames.length>1;
+ for(let i=0;i<2;i++){
+  const b=$(i===0?'lane-a':'lane-b');
+  b.setAttribute('aria-pressed',String(activeLane===i));
+  b.disabled=!['menu','finished'].includes(state);
+ }
+ $('ghost-toggle').setAttribute('aria-pressed',String(ghostEnabled));
+ $('ghost-toggle').textContent=ghostEnabled?'GHOST: PÅ':'GHOST: AV';
+ $('lane-info').textContent=hasGhost
+  ?laneLabel()+' · rekord '+format(best)+(ghostEnabled?' · ghost redo':' · ghost av')
+  :laneLabel()+' · inget sparat lopp ännu';
+}
+function chooseLane(i){
+ if(!['menu','finished'].includes(state)||![0,1].includes(i))return false;
+ activeLane=i;best=records[i]?.time||0;distance=0;speed=0;stress=0;
+ loadDisplay=0;ghostFrames=null;refreshSetup();hud();return true;
+}
+function recordFrame(force=false){
+ if(runFrames.length>=8500||(!force&&time-lastFrameTime<.05))return;
+ const p=state==='crashed'&&crash?crash:laneAt(distance);
+ const row=[+time.toFixed(3),+p.x.toFixed(2),+p.y.toFixed(2),+p.theta.toFixed(4),
+  state==='crashed'?1:0,+distance.toFixed(2)];
+ const prev=runFrames.at(-1);
+ if(prev&&prev[0]===row[0])runFrames[runFrames.length-1]=row;
+ else runFrames.push(row);
+ lastFrameTime=time;
+}
+function ghostPose(){
+ if(!ghostEnabled||!ghostFrames||!ghostFrames.length||state==='menu'||time>ghostFrames.at(-1)[0]+.001)return null;
+ while(ghostCursor+1<ghostFrames.length&&ghostFrames[ghostCursor+1][0]<=time)ghostCursor++;
+ const a=ghostFrames[ghostCursor],b=ghostFrames[Math.min(ghostCursor+1,ghostFrames.length-1)];
+ const t=a===b||a[4]!==b[4]?0:Math.max(0,Math.min(1,(time-a[0])/(b[0]-a[0]||1)));
+ return {x:a[1]+(b[1]-a[1])*t,y:a[2]+(b[2]-a[2])*t,
+  theta:a[3]+deltaAngle(b[3],a[3])*t};
+}
 // Arcade throttle: quick response on straights, effective lift-off braking.
  const MAX_SPEED=337, ACCEL=390, COAST=475, LAT_LIMIT=590;
- function curveRatio(){const p=at(distance,-22);return speed*speed*Math.abs(p.k)/LAT_LIMIT;}
+ function curveRatio(){const p=laneAt(distance);return speed*speed*Math.abs(p.k)/LAT_LIMIT;}
 function format(s){const m=Math.floor(s/60),sec=Math.floor(s%60),cs=Math.floor((s*100)%100);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cs).padStart(2,'0')}`}
 function hud(){ $('time').textContent=format(time);$('laps').textContent=`${Math.min(3,completed+1)} / 3`; $('speed').innerHTML=`${Math.round(speed*.75)}<span class="unit">km/h*</span>`;$('crashes').textContent=crashes;$('best').textContent=best?format(best):'--:--';}
 function showOverlay(label,title,body,btn,help=true){$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');}
 function hideOverlay(){$('overlay').classList.add('hidden')}
-function start(){distance=0;speed=0;stress=0;loadDisplay=0;time=0;lapStart=0;lapTimes=[];completed=0;crashes=0;crash=null;crashT=0;respawnT=0;gas=false;state='countdown';countT=3.4;hideOverlay();hud();}
-function finish(){state='finished';gas=false;const isBest=!best||time<best;if(isBest){best=time;try{localStorage.setItem('slotrush.rookie.best',String(best))}catch(e){}}
-const fast=Math.min(...lapTimes);showOverlay(isBest?'★ NEW PERSONAL BEST':'RACE COMPLETE',isBest?'NYTT REKORD!':'MÅLGÅNG',`Totaltid: <b>${format(time)}</b> &nbsp;·&nbsp; Snabbaste varv: <b>${format(fast)}</b><br>Krascher: <b>${crashes}</b> &nbsp;·&nbsp; Varvtider: ${lapTimes.map(format).join(' / ')}`,'KÖR IGEN');}
-function togglePause(){if(state==='racing'||state==='crashed'||state==='countdown'){const from=state;state='paused';window._resumeState=from;gas=false;showOverlay('RACE PAUSED','PAUS',`Tidtagningen är stoppad. Tryck ESC för att fortsätta.`,'FORTSÄTT');}else if(state==='paused'){state=window._resumeState||'racing';hideOverlay();syncGas()}}
-function doCrash(p){state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;}
+function start(){
+ distance=0;speed=0;stress=0;loadDisplay=0;time=0;lapStart=0;lapTimes=[];
+ completed=0;crashes=0;crash=null;crashT=0;respawnT=0;gas=false;
+ ghostFrames=records[activeLane]?.frames||null;ghostCursor=0;runFrames=[];lastFrameTime=-1;
+ state='countdown';countT=3.4;recordFrame(true);hideOverlay();refreshSetup();hud();
+}
+function finish(){
+ recordFrame(true);state='finished';gas=false;
+ const isBest=!best||time<best;
+ if(isBest){
+  best=time;const record={schema:1,time:+time.toFixed(3),frames:runFrames};
+  records[activeLane]=record;
+  try{localStorage.setItem(RECORD_PREFIX+activeLane,JSON.stringify(record));}catch(e){}
+ }
+ refreshSetup();const fast=Math.min(...lapTimes);
+ showOverlay(isBest?'★ NEW PERSONAL BEST':'RACE COMPLETE',
+  isBest?'NYTT REKORD!':'MÅLGÅNG',
+  'Spår: <b>'+laneLabel()+'</b> &nbsp;·&nbsp; Totaltid: <b>'+format(time)+
+  '</b><br>Snabbaste varv: <b>'+format(fast)+'</b> &nbsp;·&nbsp; Krascher: <b>'+crashes+
+  '</b><br>Varvtider: '+lapTimes.map(format).join(' / ')+
+  '<br><small>Välj ett annat spår ovanför banan eller kör igen för att slå din ghost.</small>',
+  'KÖR IGEN');
+}
+function togglePause(){
+ if(state==='racing'||state==='crashed'||state==='countdown'){
+  const from=state;state='paused';window._resumeState=from;gas=false;
+  showOverlay('RACE PAUSED','PAUS','Tidtagningen är stoppad. Tryck ESC för att fortsätta.','FORTSÄTT');
+ }else if(state==='paused'){state=window._resumeState||'racing';hideOverlay();syncGas();}
+ refreshSetup();
+}
+function doCrash(p){state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
 function tick(dt){gameClock+=dt;if(state==='countdown'){countT-=dt;$('countdown').classList.add('visible');$('countdown').textContent=countT>.4?Math.ceil(countT-.4):'GO!';if(countT<=0){state='racing';$('countdown').classList.remove('visible');syncGas();}return;}
 $('countdown').classList.remove('visible');if(state!=='racing'&&state!=='crashed')return;time+=dt;
-if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';syncGas();}return;}
+if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';syncGas();recordFrame(true);}else recordFrame();return;}
 const acceleration=gas?ACCEL*(1-.31*(speed/MAX_SPEED)):-COAST;
  speed=Math.max(0,Math.min(MAX_SPEED,speed+acceleration*dt));
- const current=at(distance,-22),ratio=curveRatio();
+ const current=laneAt(distance),ratio=curveRatio();
  // Continuous overload is dangerous, but a brief overshoot can be rescued by
  // lifting off. No instant crash from an isolated curvature spike.
  if(ratio>1.05){stress+=Math.pow(ratio-1.05,1.2)*2.2*dt;}
@@ -94,7 +224,8 @@ const acceleration=gas?ACCEL*(1-.31*(speed/MAX_SPEED)):-COAST;
  if(stress>=.82){doCrash(current);return;}
  loadDisplay+=(ratio-loadDisplay)*Math.min(1,dt*8);
  distance+=speed*dt;respawnT=Math.max(0,respawnT-dt);
-while(completed<3&&distance>=(completed+1)*L){lapTimes.push(time-lapStart);lapStart=time;completed++;if(completed===3){finish();break;}}
+recordFrame();
+while(completed<3&&distance>=(completed+1)*lapLength()){lapTimes.push(time-lapStart);lapStart=time;completed++;if(completed===3){finish();break;}}
 }
 function basePath(offset){ctx.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath()}
 function strokePath(offset,width,color){basePath(offset);ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=width;ctx.strokeStyle=color;ctx.stroke()}
@@ -121,15 +252,20 @@ const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos
 // Track road signage, race-direction hints and corner marker numbers.
 const marks=[{d:L*.36,t:'01',txt:'FLOW',side:-1},{d:L*.57,t:'02',txt:'S-CURVE',side:1},{d:L*.88,t:'03',txt:'HAIRPIN',side:-1}];for(const m of marks){const p=at(m.d,m.side*78);ctx.save();ctx.translate(p.x,p.y);ctx.beginPath();ctx.arc(0,0,15,0,7);ctx.fillStyle='#222c30';ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle='#c4a66d';ctx.stroke();ctx.fillStyle='#e8d19d';ctx.font='900 12px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(m.t,0,0);ctx.restore();}
 }
-function carShape(x,y,heading,shadow=true,ghost=false){ctx.save();ctx.translate(x,y);ctx.rotate(heading+Math.PI/2);if(ghost)ctx.globalAlpha=.7;
+function carShape(x,y,heading,shadow=true,ghost=false){ctx.save();ctx.translate(x,y);ctx.rotate(heading+Math.PI/2);if(ghost)ctx.globalAlpha=.48;
 if(shadow){ctx.shadowColor='#000a';ctx.shadowBlur=11;ctx.shadowOffsetY=7;}
 ctx.fillStyle='#0b0d11';ctx.fillRect(-13,-15,5,12);ctx.fillRect(8,-15,5,12);ctx.fillRect(-13,8,5,12);ctx.fillRect(8,8,5,12);ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-ctx.fillStyle='#eb7654';ctx.beginPath();ctx.roundRect(-10,-24,20,46,6);ctx.fill();ctx.fillStyle='#fbb27c';ctx.beginPath();ctx.roundRect(-8,-22,16,8,[4,4,1,1]);ctx.fill();
+ctx.fillStyle=ghost?'#60d7e9':'#eb7654';ctx.beginPath();ctx.roundRect(-10,-24,20,46,6);ctx.fill();ctx.fillStyle=ghost?'#b8f5fa':'#fbb27c';ctx.beginPath();ctx.roundRect(-8,-22,16,8,[4,4,1,1]);ctx.fill();
 ctx.fillStyle='#303c4a';ctx.beginPath();ctx.roundRect(-8,-11,16,14,[3,3,2,2]);ctx.fill();ctx.fillStyle='#98b1bf';ctx.fillRect(-6,-10,12,3);ctx.fillStyle='#252f3a';ctx.fillRect(-8,8,16,9);
-ctx.fillStyle='#f8e9c8';ctx.fillRect(-1.7,-22,3.4,11);ctx.fillRect(-1.5,3,3,13);ctx.fillStyle='#e0ecf0';ctx.fillRect(-7,-23,4,2.5);ctx.fillRect(3,-23,4,2.5);ctx.fillStyle='#d64038';ctx.fillRect(-8,19,5,2);ctx.fillRect(3,19,5,2);
+ctx.fillStyle=ghost?'#ccfaff':'#f8e9c8';ctx.fillRect(-1.7,-22,3.4,11);ctx.fillRect(-1.5,3,3,13);ctx.fillStyle='#e0ecf0';ctx.fillRect(-7,-23,4,2.5);ctx.fillRect(3,-23,4,2.5);ctx.fillStyle='#d64038';ctx.fillRect(-8,19,5,2);ctx.fillRect(3,19,5,2);
 ctx.fillStyle='#252b2d';ctx.fillRect(-12,18,24,4);ctx.fillStyle='#fdf1d8';ctx.font='900 8px system-ui';ctx.textAlign='center';ctx.fillText('07',0,5);
 ctx.restore();}
-function drawCar(){let p=at(distance,-22);if(state==='crashed'&&crash){ctx.save();ctx.shadowColor='#f1c3a777';ctx.shadowBlur=25;for(let i=0;i<5;i++){const a=crashT*25+i*2.4,rad=(crashT*80+i*8);ctx.fillStyle=`rgba(238,211,160,${Math.max(0,.35-crashT*.29)})`;ctx.beginPath();ctx.arc(crash.x+Math.cos(a)*rad*.25,crash.y+Math.sin(a)*rad*.25,6+i*1.5,0,7);ctx.fill();}ctx.restore();carShape(crash.x,crash.y,crash.theta,true);return;}
+function drawGhost(){
+ const p=ghostPose();if(!p||state==='finished')return;
+ ctx.save();ctx.shadowColor='#74dff8';ctx.shadowBlur=14;
+ carShape(p.x,p.y,p.theta,false,true);ctx.restore();
+}
+function drawCar(){let p=laneAt(distance);if(state==='crashed'&&crash){ctx.save();ctx.shadowColor='#f1c3a777';ctx.shadowBlur=25;for(let i=0;i<5;i++){const a=crashT*25+i*2.4,rad=(crashT*80+i*8);ctx.fillStyle=`rgba(238,211,160,${Math.max(0,.35-crashT*.29)})`;ctx.beginPath();ctx.arc(crash.x+Math.cos(a)*rad*.25,crash.y+Math.sin(a)*rad*.25,6+i*1.5,0,7);ctx.fill();}ctx.restore();carShape(crash.x,crash.y,crash.theta,true);return;}
 if(state==='racing'||state==='paused'||state==='finished'||state==='countdown'){if(respawnT>0&&Math.floor(respawnT*12)%2===0)return;const wobble=stress>.06?Math.min(7.5,(stress-.06)*11)*Math.sin(gameClock*20):0;carShape(p.x-Math.sin(p.theta)*wobble,p.y+Math.cos(p.theta)*wobble,p.theta,true);}
 else carShape(p.x,p.y,p.theta,true);
 }
@@ -150,7 +286,7 @@ function drawHUD(){
  if(state==='crashed'){ctx.save();ctx.textAlign='center';ctx.font='1000 47px system-ui';ctx.fillStyle='#ffbea0';ctx.shadowColor='#2d0f0d';ctx.shadowBlur=19;ctx.fillText('URSPÅRNING!',480,115);ctx.font='800 14px system-ui';ctx.fillStyle='#f8dfd4';ctx.fillText('Bilen återställs automatiskt',480,141);ctx.restore();}
 if(state==='racing'&&respawnT>0){ctx.textAlign='center';ctx.fillStyle='#fff5d4';ctx.font='900 14px system-ui';ctx.fillText('TILLBAKA PÅ SPÅRET',480,105);}
 }
-function render(){board();drawTrack();drawCar();drawHUD();}
+function render(){board();drawTrack();drawGhost();drawCar();drawHUD();}
 let last=0,acc=0;function frame(now){if(!last)last=now;const dt=Math.min(.06,(now-last)/1000);last=now;acc+=dt;let i=0;while(acc>=1/120&&i++<8){tick(1/120);acc-=1/120;}render();hud();requestAnimationFrame(frame);}
 let heldKeys=new Set(),heldStage=false,heldPedal=false;
 function setGas(on){gas=!!on&&state==='racing';$('pedal').classList.toggle('pressed',gas)}
@@ -159,9 +295,23 @@ window.addEventListener('keydown',e=>{if(['Space','KeyW','Escape','KeyR'].includ
 window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='KeyW'){heldKeys.delete(e.code);syncGas()}});window.addEventListener('blur',()=>{heldKeys.clear();heldStage=false;heldPedal=false;setGas(false);if(['racing','crashed','countdown'].includes(state))togglePause()});
 const stage=$('stage'),pedal=$('pedal');stage.addEventListener('pointerdown',e=>{if(e.target===canvas&&state==='racing'){heldStage=true;syncGas();stage.setPointerCapture(e.pointerId);}});stage.addEventListener('pointerup',()=>{heldStage=false;syncGas()});stage.addEventListener('pointercancel',()=>{heldStage=false;syncGas()});stage.addEventListener('lostpointercapture',()=>{heldStage=false;syncGas()});
 pedal.addEventListener('pointerdown',e=>{e.preventDefault();heldPedal=true;syncGas();pedal.setPointerCapture(e.pointerId)});pedal.addEventListener('pointerup',()=>{heldPedal=false;syncGas()});pedal.addEventListener('pointercancel',()=>{heldPedal=false;syncGas()});pedal.addEventListener('lostpointercapture',()=>{heldPedal=false;syncGas()});
-$('pause').addEventListener('click',togglePause);$('restart').addEventListener('click',start);$('play').addEventListener('click',()=>state==='paused'?togglePause():start());$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Tre varv. Kortaste totaltiden vinner.`,'JAG ÄR REDO',false));
-hud();requestAnimationFrame(frame);
-window.slotRushDebug={getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,time,completed,crashes,trackLength:L,lapTimes,waypoints:WAYPOINTS}),start,tick,at};
+$('lane-a').addEventListener('click',()=>chooseLane(0));
+$('lane-b').addEventListener('click',()=>chooseLane(1));
+$('ghost-toggle').addEventListener('click',()=>{
+ ghostEnabled=!ghostEnabled;
+ try{localStorage.setItem('slotrush.rookie.ghost.enabled',String(ghostEnabled));}catch(e){}
+ refreshSetup();
+});
+$('pause').addEventListener('click',togglePause);$('restart').addEventListener('click',start);$('play').addEventListener('click',()=>state==='paused'?togglePause():start());$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj SPÅR A eller B innan start; spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
+refreshSetup();hud();requestAnimationFrame(frame);
+window.slotRushDebug={
+ getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,
+  curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,time,completed,crashes,
+  activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
+  best,recordFrames:runFrames.length,ghostFrames:ghostFrames?.length||0,
+  ghostPosition:ghostPose(),lapTimes,waypoints:WAYPOINTS}),
+ start,tick,at,laneAt,chooseLane,setGas
+};
 })();
 </script>
 </body>
