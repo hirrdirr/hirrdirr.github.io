@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#131b22">
+<meta name="robots" content="noindex, nofollow">
+<title>Slot Rush — Rookie Circuit | hirrdirr</title>
+<style>
+  :root{color-scheme:dark;--bg:#0c1117;--panel:#19232c;--panel2:#202c34;--fg:#f3f1e8;--muted:#a5b0bb;--amber:#f7b463;--line:#34424b;--red:#fa765f}
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#2d3940,#0c1117 72%);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+  button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #ffc97e;outline-offset:3px}
+  .shell{max-width:1200px;margin:0 auto;padding:20px clamp(12px,2vw,28px) 25px}
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:13px}
+  .brand{display:flex;align-items:center;gap:12px}.brandmark{display:grid;place-items:center;width:41px;height:41px;border:1px solid #cb8c56;border-radius:10px;background:#2e2c2d;font-weight:1000;color:#ffd18c;transform:skewX(-7deg)}
+  h1{font-weight:1000;letter-spacing:.13em;text-transform:uppercase;font-size:clamp(20px,3vw,27px);line-height:1;margin:0}header small{display:block;color:#96a7b4;letter-spacing:.15em;font-size:10px;margin-top:5px;font-weight:700}
+  .chip{border:1px solid #39464c;border-radius:40px;padding:7px 12px;color:#bfc8cb;text-transform:uppercase;font-size:10px;letter-spacing:.12em;font-weight:800;background:#19232a}.chip b{color:#f4c07d}
+  .dash{display:grid;grid-template-columns:1.3fr 1fr 1fr .83fr .82fr;gap:9px;margin-bottom:12px}
+  .metric{background:linear-gradient(155deg,#202c35,#162028);border:1px solid #34434b;border-radius:11px;padding:11px 13px;min-width:0}.metric>span{font-size:10px;text-transform:uppercase;font-weight:800;color:#a1adb5;letter-spacing:.1em;display:block;margin-bottom:5px}.metric>strong{font-size:clamp(17px,2.5vw,28px);font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums}.metric .unit{font-size:12px;margin-left:3px;color:#a0aab1;font-weight:700}.metric.focus{border-color:#6a5540;background:linear-gradient(150deg,#352e2d,#1c252b)}.metric.focus strong{color:#f5c27e}
+  .stage{position:relative;overflow:hidden;border:1px solid #54616a;border-radius:17px;background:#302b2c;box-shadow:0 28px 60px #0006,0 0 0 4px #141b22;user-select:none;touch-action:none}
+  canvas{width:100%;aspect-ratio:8/5;display:block}
+  .overlay{position:absolute;inset:0;display:grid;place-items:center;background:#08111bd9;backdrop-filter:blur(7px);padding:15px;text-align:center;z-index:3}
+  .overlay.hidden{display:none}.overlay .content{max-width:560px;position:relative}.eyebrow{display:inline-block;text-transform:uppercase;color:#f5b977;font-size:12px;font-weight:900;letter-spacing:.22em;margin-bottom:10px}
+  .overlay h2{font-size:clamp(31px,5vw,60px);font-weight:1000;text-transform:uppercase;line-height:1;letter-spacing:.04em;margin:0 0 14px;text-shadow:0 3px 4px #0005}.overlay p{font-size:clamp(12px,1.5vw,17px);line-height:1.55;color:#ccd4da;margin:0 auto 23px;max-width:470px}
+  .action{border:0;border-radius:9px;padding:14px 25px;font-size:14px;text-transform:uppercase;letter-spacing:.13em;font-weight:1000;background:linear-gradient(180deg,#f9c17c,#dd9455);color:#292222;box-shadow:0 5px 0 #915d3d}.action:active{transform:translateY(2px);box-shadow:0 3px 0 #915d3d}.action.secondary{color:#dbe3ea;background:#293943;border:1px solid #61717e;box-shadow:none;padding:11px 16px;font-size:11px;margin:9px 5px 0}
+  .countdown{position:absolute;inset:0;display:none;place-items:center;z-index:2;pointer-events:none;color:#ffe0a8;font-size:clamp(65px,12vw,160px);font-weight:1000;text-shadow:0 8px 0 #4c2b20,0 10px 35px #000}.countdown.visible{display:grid}
+  .under{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;padding:15px 2px 0}
+  .instructions{font-size:12px;color:#a8b5c0;line-height:1.65}.instructions kbd{font:800 11px inherit;background:#2b3944;padding:4px 7px;border:1px solid #52636f;border-bottom:3px solid #536370;border-radius:5px;color:#f1e9d8;margin:0 3px}
+  .controls{display:flex;align-items:center;gap:9px}.control{border:1px solid #55636e;border-radius:10px;background:#263641;color:#eff0e9;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:12px 17px}.control:hover{background:#324855}.pedal{min-width:150px;border:1px solid #e4a068;border-radius:10px;background:linear-gradient(155deg,#f0bc7d,#ce8453);color:#211c1c;padding:14px 19px;font-weight:1000;text-transform:uppercase;letter-spacing:.14em;box-shadow:inset 0 -4px 0 #a26a46;touch-action:none}.pedal.pressed{filter:brightness(.86);transform:translateY(2px);box-shadow:inset 0 -2px 0 #a26a46}
+  .foot{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:13px;color:#85949e;font-size:11px}.foot strong{color:#c4a77c}
+  @media(max-width:650px){.shell{padding:12px 9px 25px}.dash{gap:5px}.metric{padding:9px 6px;border-radius:7px}.metric>span{font-size:8px;letter-spacing:0}.metric>strong{font-size:16px}.metric .unit{font-size:9px}.stage{border-radius:8px}.under{justify-content:center}.instructions{order:3;text-align:center;width:100%}.controls{width:100%;justify-content:center}.pedal{flex:1}.control{padding:12px 13px}.foot{flex-wrap:wrap;justify-content:center;text-align:center}.overlay{padding:5px;overflow-y:auto}.overlay .content{max-height:100%;overflow-y:auto;width:100%}.eyebrow{font-size:9px;margin-bottom:4px}.overlay h2{font-size:27px;line-height:.94;margin-bottom:6px}.overlay p{font-size:10px;line-height:1.2;margin-bottom:7px}.action{padding:8px 14px;font-size:11px;box-shadow:0 3px 0 #915d3d}.action.secondary{padding:6px 10px;margin:5px 5px 0;font-size:9px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE 0.1</small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; ROOKIE CIRCUIT &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
+  <section class="dash" aria-label="Kördata">
+    <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
+    <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
+    <div class="metric"><span>Hastighet</span><strong id="speed">0<span class="unit">km/h*</span></strong></div>
+    <div class="metric"><span>Krascher</span><strong id="crashes">0</strong></div>
+    <div class="metric"><span>Personbästa</span><strong id="best">--:--</strong></div>
+  </section>
+  <div class="stage" id="stage">
+    <canvas id="game" width="960" height="600" aria-label="Rookie Circuit med två bilskenor och spelbar bil"></canvas>
+    <div class="countdown" id="countdown">3</div>
+    <div class="overlay" id="overlay"><div class="content"><span class="eyebrow" id="ovlabel">Prototype • Circuit 01</span><h2 id="ovtitle">Rookie<br>Circuit</h2><p id="ovbody">En klassisk bilbana. En gaspedal. Tre varv.<br>Håll gasen på raksträckorna och släpp innan kurvorna — annars flyger bilen av skenan.</p><button type="button" class="action" id="play">STARTA LOPP</button><br><button type="button" class="action secondary" id="help">SÅ FUNKAR DET</button></div></div>
+  </div>
+  <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
+  <div class="foot"><span>* Hastighet i spelvärlden, inte verklig skala. <strong>Tidig spelversion under utveckling.</strong></span><span>Design: två parallella spår; endast ett aktivt i v0.1.</span></div>
+</div>
+<script>
+(()=>{'use strict';
+const W=960,H=600,canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+// Actual reusable Rookie Circuit control points, in clockwise racing order.
+const WAYPOINTS=[[288,469],[480,473],[666,469],[756,442],[810,385],[828,328],[799,270],[742,251],[692,275],[640,309],[579,310],[523,269],[473,218],[420,197],[344,211],[266,244],[215,300],[205,365],[235,421]];
+function splinePoint(p0,p1,p2,p3,t){let t2=t*t,t3=t2*t;return {x:.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),y:.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)}}
+function deltaAngle(a,b){return Math.atan2(Math.sin(a-b),Math.cos(a-b))}
+function trackInit(){const pts=[],count=WAYPOINTS.length,steps=48;for(let i=0;i<count;i++){const p0=WAYPOINTS[(i-1+count)%count],p1=WAYPOINTS[i],p2=WAYPOINTS[(i+1)%count],p3=WAYPOINTS[(i+2)%count];for(let j=0;j<steps;j++)pts.push(splinePoint(p0,p1,p2,p3,j/steps));}
+let total=0;for(let i=0;i<pts.length;i++){let p=pts[i],n=pts[(i+1)%pts.length];p.s=total;p.theta=Math.atan2(n.y-p.y,n.x-p.x);total+=Math.hypot(n.x-p.x,n.y-p.y)}
+for(let i=0;i<pts.length;i++){const k=12,a=pts[(i-k+pts.length)%pts.length],b=pts[(i+k)%pts.length],d=(() => {const f=(b.s-a.s+total)%total;return f===0?total:f})();pts[i].k=deltaAngle(b.theta,a.theta)/d;}
+return {pts,total};}
+const track=trackInit(),pts=track.pts,L=track.total;
+function at(d,offset=0){d=((d%L)+L)%L;let lo=0,hi=pts.length-1;while(lo<hi){let mid=(lo+hi+1)>>1;if(pts[mid].s<=d)lo=mid;else hi=mid-1;}const a=pts[lo],b=pts[(lo+1)%pts.length],bS=(lo+1===pts.length?L:b.s),t=Math.max(0,Math.min(1,(d-a.s)/(bS-a.s||1)));let theta=a.theta+deltaAngle(b.theta,a.theta)*t;let x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;return {x:x-Math.sin(theta)*offset,y:y+Math.cos(theta)*offset,theta,k:a.k+(b.k-a.k)*t};}
+let state='menu',gas=false,distance=0,speed=0,stress=0,time=0,lapStart=0,lapTimes=[],completed=0,crashes=0,crash=null,crashT=0,respawnT=0,countT=0,gameClock=0;
+let best=0;try{best=parseFloat(localStorage.getItem('slotrush.rookie.best')||'0')||0;}catch(e){}
+const MAX_SPEED=337, ACCEL=188, COAST=232, LAT_LIMIT=440;
+function format(s){const m=Math.floor(s/60),sec=Math.floor(s%60),cs=Math.floor((s*100)%100);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cs).padStart(2,'0')}`}
+function hud(){ $('time').textContent=format(time);$('laps').textContent=`${Math.min(3,completed+1)} / 3`; $('speed').innerHTML=`${Math.round(speed*.75)}<span class="unit">km/h*</span>`;$('crashes').textContent=crashes;$('best').textContent=best?format(best):'--:--';}
+function showOverlay(label,title,body,btn,help=true){$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');}
+function hideOverlay(){$('overlay').classList.add('hidden')}
+function start(){distance=0;speed=0;stress=0;time=0;lapStart=0;lapTimes=[];completed=0;crashes=0;crash=null;crashT=0;respawnT=0;gas=false;state='countdown';countT=3.4;hideOverlay();hud();}
+function finish(){state='finished';gas=false;const isBest=!best||time<best;if(isBest){best=time;try{localStorage.setItem('slotrush.rookie.best',String(best))}catch(e){}}
+const fast=Math.min(...lapTimes);showOverlay(isBest?'★ NEW PERSONAL BEST':'RACE COMPLETE',isBest?'NYTT REKORD!':'MÅLGÅNG',`Totaltid: <b>${format(time)}</b> &nbsp;·&nbsp; Snabbaste varv: <b>${format(fast)}</b><br>Krascher: <b>${crashes}</b> &nbsp;·&nbsp; Varvtider: ${lapTimes.map(format).join(' / ')}`,'KÖR IGEN');}
+function togglePause(){if(state==='racing'||state==='crashed'||state==='countdown'){const from=state;state='paused';window._resumeState=from;gas=false;showOverlay('RACE PAUSED','PAUS',`Tidtagningen är stoppad. Tryck ESC för att fortsätta.`,'FORTSÄTT');}else if(state==='paused'){state=window._resumeState||'racing';hideOverlay()}}
+function doCrash(p){state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;}
+function tick(dt){gameClock+=dt;if(state==='countdown'){countT-=dt;$('countdown').classList.add('visible');$('countdown').textContent=countT>.4?Math.ceil(countT-.4):'GO!';if(countT<=0){state='racing';$('countdown').classList.remove('visible');}return;}
+$('countdown').classList.remove('visible');if(state!=='racing'&&state!=='crashed')return;time+=dt;
+if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';syncGas();}return;}
+const current=at(distance,-22);const lateral=speed*speed*Math.abs(current.k);const ratio=lateral/LAT_LIMIT;
+if(ratio>1){stress+=(ratio-1)*2.05*dt;}else{stress-=1.5*dt;}stress=Math.max(0,Math.min(1,stress));
+if(stress>=.52||ratio>1.9){doCrash(current);return;}
+const acceleration=gas?ACCEL*(1-.43*(speed/MAX_SPEED)):-COAST;speed=Math.max(0,Math.min(MAX_SPEED,speed+acceleration*dt));
+const prev=distance;distance+=speed*dt;respawnT=Math.max(0,respawnT-dt);
+while(completed<3&&distance>=(completed+1)*L){lapTimes.push(time-lapStart);lapStart=time;completed++;if(completed===3){finish();break;}}
+}
+function basePath(offset){ctx.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath()}
+function strokePath(offset,width,color){basePath(offset);ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=width;ctx.strokeStyle=color;ctx.stroke()}
+function board(){const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#3d393a');bg.addColorStop(.52,'#292c31');bg.addColorStop(1,'#222932');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ctx.save();ctx.globalAlpha=.15;ctx.strokeStyle='#8f9b96';ctx.lineWidth=.5;for(let x=0;x<960;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,600);ctx.stroke()}for(let y=0;y<600;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke()}ctx.restore();
+ctx.fillStyle='#ffffff06';ctx.fillRect(30,30,900,540);ctx.strokeStyle='#b7b6af26';ctx.strokeRect(30,30,900,540);
+ctx.font='800 14px system-ui';ctx.textBaseline='middle';ctx.fillStyle='#ded8cb';ctx.fillText('ROOKIE CIRCUIT',51,65);ctx.font='700 10px system-ui';ctx.fillStyle='#aaadb0';ctx.fillText('GARAGE RACING SET  •  NO. 01',51,83);
+ctx.textAlign='right';ctx.fillStyle='#c0b7a5';ctx.font='800 10px system-ui';ctx.fillText('SLOT RUSH / PRACTICE MAT',909,550);ctx.fillStyle='#8d999c';ctx.fillText('TOP-DOWN  ·  TWO LANES',909,567);ctx.textAlign='left';
+// Tabletop fixtures, beyond track edges.
+for(const [x,y] of [[58,128],[902,128],[58,520],[902,520]]){ctx.fillStyle='#787e7c';ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.fill();ctx.fillStyle='#232a30';ctx.fillRect(x-3,y-.7,6,1.4);}
+// Start-area props (miniature stand, decals and road cones), kept outside track.
+ctx.fillStyle='#ddd0b9';ctx.globalAlpha=.23;ctx.fillRect(418,344,128,3);ctx.globalAlpha=1;ctx.textAlign='center';ctx.font='800 9px system-ui';ctx.fillStyle='#c2a987';ctx.fillText('SLOT CAR RACEWAY',480,364);ctx.font='900 17px system-ui';ctx.fillStyle='#f2c47d';ctx.fillText('01',480,392);ctx.textAlign='left';
+}
+function drawTrack(){ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=24;ctx.shadowOffsetY=13;strokePath(0,104,'#080e13');ctx.restore();
+strokePath(0,105,'#171a1c');strokePath(0,96,'#393d3f');strokePath(0,91,'#555a5b');strokePath(0,84,'#34383a');
+// Two shallow outer-edge lips.
+strokePath(-43,2,'#a0a29c');strokePath(43,2,'#a0a29c');strokePath(-40,2,'#242729');strokePath(40,2,'#242729');
+// Plastic injection seams across track every ~88 world units.
+for(let d=0;d<L;d+=84){const p=at(d);let nx=-Math.sin(p.theta),ny=Math.cos(p.theta);ctx.strokeStyle='#151b20a5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-nx*41,p.y-ny*41);ctx.lineTo(p.x+nx*41,p.y+ny*41);ctx.stroke();ctx.strokeStyle='#929a9b38';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(p.x-nx*39+Math.cos(p.theta)*3,p.y-ny*39+Math.sin(p.theta)*3);ctx.lineTo(p.x+nx*39+Math.cos(p.theta)*3,p.y+ny*39+Math.sin(p.theta)*3);ctx.stroke();}
+// Lane-separated slots; each slot has paired conductor contacts, with a central guide groove.
+for(const lane of [-22,22]){strokePath(lane,17,'#252b2d');strokePath(lane-9,3.4,'#b9bab2');strokePath(lane+9,3.4,'#b9bab2');strokePath(lane-9,1,'#eeeece88');strokePath(lane+9,1,'#eeeece88');strokePath(lane,8,'#080c0e');strokePath(lane,2.2,'#16191b');}
+// Reflective segmented start/finish stripe across the plastic between rails.
+const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos(start.theta),ty=Math.sin(start.theta);for(let u=-42;u<42;u+=9){for(let f=0;f<2;f++){ctx.fillStyle=((Math.floor((u+42)/9)+f)%2)?'#ded8c7':'#20282d';let cx=start.x+nx*(u+4)+tx*(f*6),cy=start.y+ny*(u+4)+ty*(f*6);ctx.save();ctx.translate(cx,cy);ctx.rotate(start.theta);ctx.fillRect(-3,-4,6,8);ctx.restore();}}
+// Track road signage, race-direction hints and corner marker numbers.
+const marks=[{d:L*.36,t:'01',txt:'FLOW',side:-1},{d:L*.57,t:'02',txt:'S-CURVE',side:1},{d:L*.88,t:'03',txt:'HAIRPIN',side:-1}];for(const m of marks){const p=at(m.d,m.side*78);ctx.save();ctx.translate(p.x,p.y);ctx.beginPath();ctx.arc(0,0,15,0,7);ctx.fillStyle='#222c30';ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle='#c4a66d';ctx.stroke();ctx.fillStyle='#e8d19d';ctx.font='900 12px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(m.t,0,0);ctx.restore();}
+}
+function carShape(x,y,heading,shadow=true,ghost=false){ctx.save();ctx.translate(x,y);ctx.rotate(heading+Math.PI/2);if(ghost)ctx.globalAlpha=.7;
+if(shadow){ctx.shadowColor='#000a';ctx.shadowBlur=11;ctx.shadowOffsetY=7;}
+ctx.fillStyle='#0b0d11';ctx.fillRect(-13,-15,5,12);ctx.fillRect(8,-15,5,12);ctx.fillRect(-13,8,5,12);ctx.fillRect(8,8,5,12);ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ctx.fillStyle='#eb7654';ctx.beginPath();ctx.roundRect(-10,-24,20,46,6);ctx.fill();ctx.fillStyle='#fbb27c';ctx.beginPath();ctx.roundRect(-8,-22,16,8,[4,4,1,1]);ctx.fill();
+ctx.fillStyle='#303c4a';ctx.beginPath();ctx.roundRect(-8,-11,16,14,[3,3,2,2]);ctx.fill();ctx.fillStyle='#98b1bf';ctx.fillRect(-6,-10,12,3);ctx.fillStyle='#252f3a';ctx.fillRect(-8,8,16,9);
+ctx.fillStyle='#f8e9c8';ctx.fillRect(-1.7,-22,3.4,11);ctx.fillRect(-1.5,3,3,13);ctx.fillStyle='#e0ecf0';ctx.fillRect(-7,-23,4,2.5);ctx.fillRect(3,-23,4,2.5);ctx.fillStyle='#d64038';ctx.fillRect(-8,19,5,2);ctx.fillRect(3,19,5,2);
+ctx.fillStyle='#252b2d';ctx.fillRect(-12,18,24,4);ctx.fillStyle='#fdf1d8';ctx.font='900 8px system-ui';ctx.textAlign='center';ctx.fillText('07',0,5);
+ctx.restore();}
+function drawCar(){let p=at(distance,-22);if(state==='crashed'&&crash){ctx.save();ctx.shadowColor='#f1c3a777';ctx.shadowBlur=25;for(let i=0;i<5;i++){const a=crashT*25+i*2.4,rad=(crashT*80+i*8);ctx.fillStyle=`rgba(238,211,160,${Math.max(0,.35-crashT*.29)})`;ctx.beginPath();ctx.arc(crash.x+Math.cos(a)*rad*.25,crash.y+Math.sin(a)*rad*.25,6+i*1.5,0,7);ctx.fill();}ctx.restore();carShape(crash.x,crash.y,crash.theta,true);return;}
+if(state==='racing'||state==='paused'||state==='finished'||state==='countdown'){if(respawnT>0&&Math.floor(respawnT*12)%2===0)return;const risk=Math.min(1,speed*speed*Math.abs(p.k)/LAT_LIMIT),wobble=Math.max(0,risk-.79)*Math.sin(gameClock*41)*3;carShape(p.x-Math.sin(p.theta)*wobble,p.y+Math.cos(p.theta)*wobble,p.theta,true);}
+else carShape(p.x,p.y,p.theta,true);
+}
+function drawHUD(){const risk=speed*speed*Math.abs(at(distance,-22).k)/LAT_LIMIT;const x=45,y=540;ctx.textAlign='left';ctx.fillStyle='#b9c3c5';ctx.font='800 11px system-ui';ctx.fillText('CURVE LOAD',x,0+y);ctx.fillStyle='#101820';ctx.beginPath();ctx.roundRect(x,y+9,130,8,4);ctx.fill();const frac=Math.min(1,Math.max(0,risk/1.3));ctx.fillStyle=risk<.8?'#69c6a1':risk<1.1?'#efc575':'#e76f5e';ctx.beginPath();ctx.roundRect(x,y+9,130*frac,8,4);ctx.fill();ctx.fillStyle='#aab5b8';ctx.font='700 9px system-ui';ctx.fillText(risk<.78?'STABLE':risk<1.05?'LIMIT':'DANGER',x+136,y+17);
+if(state==='crashed'){ctx.save();ctx.textAlign='center';ctx.font='1000 47px system-ui';ctx.fillStyle='#ffbea0';ctx.shadowColor='#2d0f0d';ctx.shadowBlur=19;ctx.fillText('URSPÅRNING!',480,115);ctx.font='800 14px system-ui';ctx.fillStyle='#f8dfd4';ctx.fillText('Bilen återställs automatiskt',480,141);ctx.restore();}
+if(state==='racing'&&respawnT>0){ctx.textAlign='center';ctx.fillStyle='#fff5d4';ctx.font='900 14px system-ui';ctx.fillText('TILLBAKA PÅ SPÅRET',480,105);}
+}
+function render(){board();drawTrack();drawCar();drawHUD();}
+let last=0,acc=0;function frame(now){if(!last)last=now;const dt=Math.min(.06,(now-last)/1000);last=now;acc+=dt;let i=0;while(acc>=1/120&&i++<8){tick(1/120);acc-=1/120;}render();hud();requestAnimationFrame(frame);}
+let heldKeys=new Set(),heldStage=false,heldPedal=false;
+function setGas(on){gas=!!on&&state==='racing';$('pedal').classList.toggle('pressed',gas)}
+function syncGas(){setGas(heldKeys.size>0||heldStage||heldPedal)}
+window.addEventListener('keydown',e=>{if(['Space','KeyW','Escape','KeyR'].includes(e.code))e.preventDefault();if(e.code==='Escape'){togglePause();return}if(e.code==='KeyR'){start();return}if(e.code==='Space'||e.code==='KeyW'){heldKeys.add(e.code);syncGas()}});
+window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='KeyW'){heldKeys.delete(e.code);syncGas()}});window.addEventListener('blur',()=>{heldKeys.clear();heldStage=false;heldPedal=false;setGas(false);if(['racing','crashed','countdown'].includes(state))togglePause()});
+const stage=$('stage'),pedal=$('pedal');stage.addEventListener('pointerdown',e=>{if(e.target===canvas&&state==='racing'){heldStage=true;syncGas();stage.setPointerCapture(e.pointerId);}});stage.addEventListener('pointerup',()=>{heldStage=false;syncGas()});stage.addEventListener('pointercancel',()=>{heldStage=false;syncGas()});stage.addEventListener('lostpointercapture',()=>{heldStage=false;syncGas()});
+pedal.addEventListener('pointerdown',e=>{e.preventDefault();heldPedal=true;syncGas();pedal.setPointerCapture(e.pointerId)});pedal.addEventListener('pointerup',()=>{heldPedal=false;syncGas()});pedal.addEventListener('pointercancel',()=>{heldPedal=false;syncGas()});pedal.addEventListener('lostpointercapture',()=>{heldPedal=false;syncGas()});
+$('pause').addEventListener('click',togglePause);$('restart').addEventListener('click',start);$('play').addEventListener('click',()=>state==='paused'?togglePause():start());$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Hög risk:</b> bilen börjar skaka. <b>För mycket:</b> urspårning och automatisk återställning.<br>Tre varv. Kortaste totaltiden vinner.`,'JAG ÄR REDO',false));
+hud();requestAnimationFrame(frame);
+window.slotRushDebug={getState:()=>({state,gas,distance,speed,stress,time,completed,crashes,trackLength:L,lapTimes,waypoints:WAYPOINTS}),start,tick,at};
+})();
+</script>
+</body>
+</html>
