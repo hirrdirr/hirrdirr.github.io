@@ -2,67 +2,44 @@
 layout: default
 title: hirrdirr • games
 navlabel: games
+section: games
 ---
-
-<div class="container">
-  <section class="card hero">
-    <h1>Games</h1>
-    <p>Välj en ruta. Kör en runda. Förlora. Skyll på fysikmotorn.</p>
-  </section>
-
-  <section class="grid" aria-label="Spel">
-    <a class="game" href="/games/dnd/">
-      <div class="badge">LIVE</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <i class="lucide" data-lucide="joystick"></i>
-        </div>
-        <div>
-          <h3>Dodge &amp; Drift</h3>
-          <p>Överlev så länge du kan. Hinder blir snabbare. Universum blir gladare.</p>
-        </div>
-      </div>
-    </a>
-
-    <a class="game" href="/games/td/">
-      <div class="badge">LIVE</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <i class="lucide" data-lucide="chess-rook"></i>
-        </div>
-        <div>
-          <h3>Tower Defence</h3>
-          <p>Bygg torn och förhindra fienden att nå slutet.</p>
-        </div>
-      </div>
-    </a>
-
-    <a class="game" href="/games/dxball/">
-      <div class="badge">LIVE</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <i class="lucide" data-lucide="joystick"></i>
-        </div>
-        <div>
-          <h3>Ball</h3>
-          <p>Ha sönder bricks och ta dig vidare</p>
-        </div>
-      </div>
-    </a>
-
-    <div class="game" aria-label="Kommande spel">
-      <div class="badge">COMING SOON</div>
-      <div class="row">
-        <div class="gicon" aria-hidden="true">
-          <i class="lucide" data-lucide="hourglass"></i>
-        </div>
-        <div>
-          <h3>Coming Soon</h3>
-          <p>Ett nytt spel är under utveckling.</p>
-        </div>
-      </div>
+<div class="section-page games-page">
+  <header class="arcade-entry">
+    <div class="section-art arcade-art" role="img" aria-label="Pixelkonst: en japansk arkad med spelmaskiner och lyktor"></div>
+    <div class="arcade-welcome">
+      <p class="section-kicker">HIRRDIRR / SPELHALLEN</p>
+      <h1>Games<span class="pixel-period">.</span></h1>
+      <p class="section-lead">Välj en värld.<br> Kör en runda till.</p>
+      <p>Små spel, stora utmaningar. Spela direkt i webbläsaren.</p>
+      <a class="section-button" href="#spelen">Hitta ditt nästa spel <span aria-hidden="true">↓</span></a>
     </div>
+  </header>
+  <section id="spelen" class="game-selection" aria-labelledby="games-heading">
+    <div class="section-heading"><h2 id="games-heading">Välj ditt spel</h2><span>3 spel att spela nu</span></div>
+    <div class="game-showcase">
+      <article class="hub-game hub-featured">
+        <img src="/assets/artwork/home/core-defense.webp" width="1200" height="475" alt="Försvarstorn skyddar en energikärna mot gobliner">
+        <div class="hub-game-copy">
+          <p class="section-kicker">STRATEGI / TOWER DEFENSE</p>
+          <h3>Core Defense</h3>
+          <p>Bygg torn, planera ditt försvar och stoppa fienderna innan de når kärnan.</p>
+          <a class="section-button" href="/games/td/" aria-label="Spela Core Defense">Spela Core Defense <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article class="hub-game hub-compact">
+        <img src="/assets/artwork/home/dodge-drift.webp" width="1200" height="476" alt="En lysande boll manövrerar mellan asteroider">
+        <div class="hub-game-copy"><p class="section-kicker">ARKAD / ÖVERLEVNAD</p><h3>Dodge &amp; Drift</h3><p>Styr bollen, undvik asteroider och överlev så länge du kan.</p><a class="section-button section-button-secondary" href="/games/dnd/" aria-label="Spela Dodge &amp; Drift">Spela nu <span aria-hidden="true">↗</span></a></div>
+      </article>
+      <article class="hub-game hub-compact">
+        <img src="/assets/artwork/home/ball.webp" width="1200" height="475" alt="En boll och paddel slår sönder färgglada block">
+        <div class="hub-game-copy"><p class="section-kicker">ARKAD / BRICK BREAKER</p><h3>Ball</h3><p>Håll bollen i spel, slå sönder blocken och ta dig vidare till nästa bana.</p><a class="section-button section-button-secondary" href="/games/dxball/" aria-label="Spela Ball">Spela nu <span aria-hidden="true">↗</span></a></div>
+      </article>
+    </div>
+    <article class="hub-coming" aria-labelledby="coming-title">
+      <img src="/assets/artwork/home/idle-guild.webp" width="960" height="380" loading="lazy" alt="Ett japanskt äventyrsgille i pixelart">
+      <div><span class="section-tag">COMING SOON</span><h3 id="coming-title">Idle Guild</h3><p>Ett nytt äventyr växer fram. Spelet är under utveckling.</p></div>
+      <span class="coming-status">Kommer snart</span>
+    </article>
   </section>
-
-  <div class="footer">© 2025 hirrdirr.se</div>
 </div>

@@ -1,0 +1,8 @@
+<div class="section-video-player" data-video-id="{{ include.video.id | escape }}" data-video-title="{{ include.video.title | escape }}">
+  <a class="video-poster" href="https://www.youtube.com/watch?v={{ include.video.id | escape }}" target="_blank" rel="noopener noreferrer" aria-label="Se {{ include.video.title | escape }} på YouTube">
+    <span class="poster-fallback">Förhandsbild saknas</span>
+    <img src="https://img.youtube.com/vi/{{ include.video.id | escape }}/hqdefault.jpg" width="480" height="360" loading="lazy" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">
+    <span class="poster-play" aria-hidden="true">▶</span>
+  </a>
+  <button class="video-inline-play" type="button" hidden aria-label="Spela {{ include.video.title | escape }} här">▶ Spela här</button>
+</div>
