@@ -51,11 +51,94 @@
   @media(max-width:650px){.race-setup{justify-content:center;padding:9px 6px}.lane-status,.ghost-select{justify-content:center}#lane-info{width:100%;text-align:center}.lane-choices{gap:6px;margin-bottom:12px}.lane-choices .lane-button{padding:12px 6px;min-height:80px}.lane-choices .lane-button strong{font-size:14px}.lane-choices .lane-button span{font-size:9px}}
   .foot{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:13px;color:#85949e;font-size:11px}.foot strong{color:#c4a77c}
   @media(max-width:650px){.shell{padding:12px 9px 25px}.dash{gap:5px}.metric{padding:9px 6px;border-radius:7px}.metric>span{font-size:8px;letter-spacing:0}.metric>strong{font-size:16px}.metric .unit{font-size:9px}.stage{border-radius:8px}.under{justify-content:center}.instructions{order:3;text-align:center;width:100%}.controls{width:100%;justify-content:center}.pedal{flex:1}.control{padding:12px 13px}.foot{flex-wrap:wrap;justify-content:center;text-align:center}.overlay{padding:5px;overflow-y:auto}.overlay .content{max-height:100%;overflow-y:auto;width:100%}.eyebrow{font-size:9px;margin-bottom:4px}.overlay h2{font-size:27px;line-height:.94;margin-bottom:6px}.overlay p{font-size:10px;line-height:1.2;margin-bottom:7px}.action{padding:8px 14px;font-size:11px;box-shadow:0 3px 0 #915d3d}.action.secondary{padding:6px 10px;margin:5px 5px 0;font-size:9px}}
+  /* Spårval: visa själva bilbanan i stället för att mörklägga canvasen. */
+  .overlay.choosing-lane{
+    background:transparent;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    padding:0;
+  }
+  .overlay.choosing-lane .content{
+    position:static;
+    width:clamp(235px,32%,345px);
+    max-width:none;
+    padding:21px 17px 17px;
+    background:rgba(13,24,33,.93);
+    border:1px solid #617584;
+    border-radius:16px;
+    box-shadow:0 13px 38px #0009;
+    text-shadow:0 1px 3px #0009;
+  }
+  .overlay.choosing-lane .eyebrow{font-size:10px;margin-bottom:7px}
+  .overlay.choosing-lane h2{font-size:clamp(27px,3.5vw,38px);margin:0 0 9px}
+  .overlay.choosing-lane .content>p{font-size:clamp(11px,1.2vw,13px);line-height:1.4;margin-bottom:13px}
+  /* Spårkort till vänster om banans mitt, och Kör/Tillbaka centrerat. */
+  .overlay.choosing-lane .lane-choices{
+    position:absolute;
+    left:clamp(10px,2.5%,28px);
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    width:clamp(142px,18%,192px);
+    max-width:none;
+    gap:10px;
+    margin:0;
+  }
+  .overlay.choosing-lane .lane-choices .lane-button{
+    min-height:92px;
+    padding:15px 10px;
+    background:rgba(16,28,38,.96);
+    box-shadow:0 6px 20px #0008;
+    text-shadow:0 1px 3px #0008;
+  }
+  .overlay.choosing-lane .lane-choices .lane-button[aria-pressed="true"]{
+    background:rgba(79,51,31,.97);
+    border-color:#ffcc86;
+    box-shadow:0 0 0 2px #ffc77d55,0 8px 22px #0009;
+  }
+  /* På små skärmar: hela banan syns och spårvalet ligger under canvasen. */
+  @media(max-width:740px){
+    .overlay.choosing-lane{
+      position:static;
+      display:block;
+      padding:9px;
+      background:#14212a;
+      border-top:1px solid #485e6b;
+    }
+    .overlay.choosing-lane .content{
+      width:100%;
+      max-width:none;
+      max-height:none;
+      overflow:visible;
+      padding:12px;
+      background:#182733;
+      box-shadow:none;
+    }
+    .overlay.choosing-lane .eyebrow{font-size:9px;margin-bottom:4px}
+    .overlay.choosing-lane h2{font-size:clamp(22px,6vw,28px);margin-bottom:5px}
+    .overlay.choosing-lane .content>p{font-size:11px;line-height:1.3;margin-bottom:8px}
+    .overlay.choosing-lane .lane-choices{
+      position:static;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      transform:none;
+      gap:8px;
+      width:100%;
+      max-width:none;
+      margin:10px auto;
+    }
+    .overlay.choosing-lane .lane-choices .lane-button{
+      min-height:76px;
+      padding:11px 6px;
+    }
+  }
+
 </style>
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.4</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; ROOKIE CIRCUIT &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.5</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; ROOKIE CIRCUIT &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -295,6 +378,12 @@ strokePath(-43,2,'#a0a29c');strokePath(43,2,'#a0a29c');strokePath(-40,2,'#242729
 for(let d=0;d<L;d+=84){const p=at(d);let nx=-Math.sin(p.theta),ny=Math.cos(p.theta);ctx.strokeStyle='#151b20a5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-nx*41,p.y-ny*41);ctx.lineTo(p.x+nx*41,p.y+ny*41);ctx.stroke();ctx.strokeStyle='#929a9b38';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(p.x-nx*39+Math.cos(p.theta)*3,p.y-ny*39+Math.sin(p.theta)*3);ctx.lineTo(p.x+nx*39+Math.cos(p.theta)*3,p.y+ny*39+Math.sin(p.theta)*3);ctx.stroke();}
 // Lane-separated slots; each slot has paired conductor contacts, with a central guide groove.
 for(const lane of [-22,22]){strokePath(lane,17,'#252b2d');strokePath(lane-9,3.4,'#b9bab2');strokePath(lane+9,3.4,'#b9bab2');strokePath(lane-9,1,'#eeeece88');strokePath(lane+9,1,'#eeeece88');strokePath(lane,8,'#080c0e');strokePath(lane,2.2,'#16191b');}
+ // Mark the chosen rail on the visible track while selecting the start lane.
+ if(state==='lane-select'&&laneConfirmed){
+  ctx.save();ctx.globalAlpha=.64;ctx.shadowColor='#ffce91';ctx.shadowBlur=9;
+  strokePath(laneTracks[activeLane].offset,2.8,'#ffcd82');
+  ctx.restore();
+ }
 // Reflective segmented start/finish stripe across the plastic between rails.
 const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos(start.theta),ty=Math.sin(start.theta);for(let u=-42;u<42;u+=9){for(let f=0;f<2;f++){ctx.fillStyle=((Math.floor((u+42)/9)+f)%2)?'#ded8c7':'#20282d';let cx=start.x+nx*(u+4)+tx*(f*6),cy=start.y+ny*(u+4)+ty*(f*6);ctx.save();ctx.translate(cx,cy);ctx.rotate(start.theta);ctx.fillRect(-3,-4,6,8);ctx.restore();}}
 // Track road signage, race-direction hints and corner marker numbers.
