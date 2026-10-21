@@ -2,14 +2,40 @@
 layout: default
 title: hirrdirr • videos
 navlabel: videos
+section: videos
 ---
-
-<div class="container">
-  <section class="card hero">
-    <h1>Videos</h1>
+{% assign featured = site.data.videos.first %}
+<div class="section-page videos-page">
+  <header class="video-heading">
+    <div><p class="section-kicker">HIRRDIRR / STUDION</p><h1>Videos<span class="pixel-period">.</span></h1></div>
+    <p>Spelögonblick värda en repris.<br>Klipp, clutch och annat från skärmen.</p>
+  </header>
+  {% if featured %}
+  <section class="video-stage" aria-labelledby="featured-heading">
+    <div class="studio-note">
+      <div><p class="section-kicker">FRÅN SPEL TILL KLIPP</p><h2>Bakom skärmen</h2><p>En samling ögonblick från spel och videos.</p><a class="section-text-link" href="#video-library">Bläddra bland alla {{ site.data.videos.size }} klipp ↓</a></div>
+      <div class="section-art studio-art" role="img" aria-label="Pixelkonst: en japansk inspelningsstudio med mikrofon, kamera och redigeringsskärmar"></div>
+    </div>
+    <article class="video-feature">
+      <p class="section-kicker">I FOKUS</p>
+      {% include section_video.html video=featured %}
+      <div class="video-feature-caption"><div><h2 id="featured-heading">{{ featured.title | escape }}</h2><p>{{ featured.desc | escape }}</p></div><a class="section-text-link" href="https://www.youtube.com/watch?v={{ featured.id | escape }}" target="_blank" rel="noopener noreferrer">Öppna på YouTube ↗</a></div>
+    </article>
   </section>
-
-  {% include video_grid.html %}
-
-  <div class="footer">© 2025 hirrdirr.se</div>
+  <section id="video-library" class="video-library" aria-labelledby="library-heading">
+    <div class="section-heading"><h2 id="library-heading">Alla klipp</h2><span>{{ site.data.videos.size }} videos</span></div>
+    <ol class="video-list">
+      {% for v in site.data.videos %}
+      <li class="video-row">
+        <span class="video-number" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
+        {% include section_video.html video=v %}
+        <div class="video-row-copy"><p class="section-kicker">{{ v.badge | default: 'VIDEO' | escape }}</p><h3>{{ v.title | escape }}</h3>{% if v.desc %}<p>{{ v.desc | escape }}</p>{% endif %}</div>
+        <a class="section-text-link" href="https://www.youtube.com/watch?v={{ v.id | escape }}" target="_blank" rel="noopener noreferrer" aria-label="Öppna {{ v.title | escape }} på YouTube">YouTube ↗</a>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% else %}
+  <div class="section-empty"><p>Inga videos publicerade ännu.</p></div>
+  {% endif %}
 </div>
