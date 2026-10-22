@@ -138,7 +138,7 @@
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.5</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; ROOKIE CIRCUIT &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.6</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -173,8 +173,21 @@
 (()=>{'use strict';
 const W=960,H=600,canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const $=id=>document.getElementById(id);
-// Actual reusable Rookie Circuit control points, in clockwise racing order.
-const WAYPOINTS=[[288,469],[480,473],[666,469],[756,442],[810,385],[828,328],[799,270],[742,251],[692,275],[640,309],[579,310],[523,269],[473,218],[420,197],[344,211],[266,244],[215,300],[205,365],[235,421]];
+
+const MAPS=[
+ {id:'rookie',name:'Rookie Circuit',tag:'Balans',scale:1,colors:['#3d393a','#292c31','#222932'],points:[[288,469],[480,473],[666,469],[756,442],[810,385],[828,328],[799,270],[742,251],[692,275],[640,309],[579,310],[523,269],[473,218],[420,197],[344,211],[266,244],[215,300],[205,365],[235,421]]},
+ {id:'twin-bend',name:'Twin Bend Speedway',tag:'Snabb',scale:.64,colors:['#393d3c','#263439','#1b272d'],points:[[240,452],[180,399],[171,300],[188,236],[264,188],[367,181],[464,202],[540,211],[626,183],[723,186],[805,228],[839,305],[826,382],[764,439],[676,449],[568,428],[469,402],[368,407],[294,445]]},
+ {id:'serpent-run',name:'Serpent Run',tag:'Flyt',scale:.53,colors:['#374238','#25342b','#1c2729'],points:[[180,390],[145,300],[180,220],[275,170],[380,200],[450,280],[520,295],[610,210],[705,175],[790,225],[820,300],[782,405],[690,445],[620,425],[550,380],[480,360],[400,400],[300,450],[220,435]]},
+ {id:'hairpin-yard',name:'Hairpin Yard',tag:'Teknisk',scale:.53,colors:['#443e38','#302b2a','#242932'],points:[[180,390],[150,296],[190,224],[265,190],[310,231],[298,285],[325,348],[410,362],[460,313],[469,247],[525,188],[615,195],[678,246],[677,313],[735,346],[800,301],[837,355],[807,433],[736,463],[620,432],[508,418],[416,463],[303,474],[217,444]]},
+ {id:'grand-loop',name:'Grand Loop',tag:'Långkurvor',scale:.55,colors:['#3c3a38','#283038','#1b2730'],points:[[170,350],[170,260],[205,190],[295,160],[350,185],[400,260],[450,310],[520,285],[600,200],[710,150],[790,170],[850,250],[855,340],[823,430],[750,470],[665,465],[610,415],[575,385],[500,390],[425,450],[350,475],[250,470],[180,415]]},
+ {id:'chicane-point',name:'Chicane Point',tag:'Rytm',scale:.57,colors:['#493c30','#352e29','#27282d'],points:[[196.1,319.3],[213.4,250.6],[269.5,218.2],[352.5,225.3],[406.2,259.3],[450.4,287],[490.7,240.3],[554.7,215.9],[636.9,219.8],[729.3,226.1],[777.5,260.9],[788.6,328.8],[774.3,392.8],[724.6,445.7],[632.1,453.6],[546.8,441],[472.6,447.3],[384.1,475],[294,464.7],[211.9,432.3],[173.9,388.9]]},
+ {id:'corkscrew-oval',name:'Corkscrew Oval',tag:'Svep',scale:.54,colors:['#2d4142','#263237','#202931'],points:[[183,347.8],[205.9,268.8],[260.4,216.7],[334.6,210.3],[389.9,260.1],[425.5,309.1],[476.8,306.7],[517.9,256.2],[581.1,210.3],[672.8,212.7],[736,249.8],[765.2,304.3],[753.3,361.2],[701.2,410.2],[625.4,399.9],[578,373.1],[541.6,392.8],[499.8,445.8],[442.9,463.9],[359.9,467.9],[287.2,442.6],[221.7,415.7]]},
+ {id:'switchback-pass',name:'Switchback Pass',tag:'Precision',scale:.56,colors:['#35413b','#283630','#222b30'],points:[[170,400],[143,320],[180,228],[254,183],[333,204],[372,268],[349,330],[410,367],[510,346],[560,295],[540,224],[593,184],[679,196],[768,250],[820,350],[785,426],[700,454],[640,415],[595,394],[524,448],[420,473],[310,466],[218,444]]},
+ {id:'thunder-mile',name:'Thunder Mile',tag:'Full fart',scale:.53,colors:['#363d48','#26323c','#1f2830'],points:[[191.2,339.8],[198.3,272.6],[248.8,227.6],[346.8,218.1],[479.5,216.5],[637.5,215.7],[743.4,228.4],[795.5,268.7],[808.2,324],[793.1,375.3],[746.5,406.1],[642.3,410.1],[533.2,405.3],[459,424.3],[371.3,438.5],[274.1,437.7],[198.3,407.7],[173,377.7]]},
+ {id:'final-apex',name:'Final Apex',tag:'Avancerad',scale:.52,colors:['#3b3748','#2c2937','#202532'],points:[[170,390],[145,280],[190,190],[280,160],[365,190],[430,245],[500,228],[560,175],[655,160],[760,188],[825,247],[836,320],[803,390],[751,418],[690,387],[650,337],[590,325],[550,380],[575,436],[660,472],[742,481],[795,525],[730,560],[650,550],[560,519],[480,473],[400,510],[305,530],[215,490],[172,455]]}
+];
+let activeMap=0,WAYPOINTS=MAPS[0].points;
+
 function splinePoint(p0,p1,p2,p3,t){let t2=t*t,t3=t2*t;return {x:.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),y:.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)}}
 function deltaAngle(a,b){return Math.atan2(Math.sin(a-b),Math.cos(a-b))}
 function trackInit(){const pts=[],count=WAYPOINTS.length,steps=48;for(let i=0;i<count;i++){const p0=WAYPOINTS[(i-1+count)%count],p1=WAYPOINTS[i],p2=WAYPOINTS[(i+1)%count],p3=WAYPOINTS[(i+2)%count];for(let j=0;j<steps;j++)pts.push(splinePoint(p0,p1,p2,p3,j/steps));}
@@ -184,7 +197,8 @@ let total=0;for(let i=0;i<pts.length;i++){let p=pts[i],n=pts[(i+1)%pts.length];p
  const rawK=pts.map((p,i)=>{const k=17,a=pts[(i-k+pts.length)%pts.length],b=pts[(i+k)%pts.length],d=(b.s-a.s+total)%total||total;return deltaAngle(b.theta,a.theta)/d;});
  for(let i=0;i<pts.length;i++){let sum=0,weight=0;for(let j=-5;j<=5;j++){const w=6-Math.abs(j);sum+=rawK[(i+j+pts.length)%pts.length]*w;weight+=w;}pts[i].k=sum/weight;}
 return {pts,total};}
-const track=trackInit(),pts=track.pts,L=track.total;
+let track=trackInit(),pts=track.pts,L=track.total;
+let roadScale=MAPS[0].scale;
 function makeLane(offset){
  const arr=pts.map(p=>({x:p.x-Math.sin(p.theta)*offset,y:p.y+Math.cos(p.theta)*offset}));
  let length=0;
@@ -203,7 +217,7 @@ function makeLane(offset){
  }
  return {pts:arr,total:length,offset};
 }
-const laneTracks=[makeLane(-22),makeLane(22)];let activeLane=0;
+let laneTracks=[makeLane(-22*roadScale),makeLane(22*roadScale)];let activeLane=0;
 function lapLength(){return laneTracks[activeLane].total;}
 function laneAt(d,lane=activeLane){
  const path=laneTracks[lane],arr=path.pts,total=path.total;
@@ -219,10 +233,10 @@ function at(d,offset=0){d=((d%L)+L)%L;let lo=0,hi=pts.length-1;while(lo<hi){let 
 let state='menu',gas=false,distance=0,speed=0,stress=0,time=0,lapStart=0,lapTimes=[],completed=0,crashes=0,crash=null,crashT=0,respawnT=0,countT=0,gameClock=0,loadDisplay=0;
 // v0.1.2's old centerline record is left untouched but not mixed with
 // new physical-rail records, which have different distances and curvature.
-const RECORD_PREFIX='slotrush.rookie.rail.v013.';
-function readRecord(i){
+function recordKey(mapIndex,lane){return mapIndex===0?'slotrush.rookie.rail.v013.'+lane:'slotrush.map.'+MAPS[mapIndex].id+'.rail.v016.'+lane;}
+function readRecord(i,mapIndex=activeMap){
  try{
-  const r=JSON.parse(localStorage.getItem(RECORD_PREFIX+i));
+  const r=JSON.parse(localStorage.getItem(recordKey(mapIndex,i)));
   if(!r||r.schema!==1||!Number.isFinite(r.time)||r.time<=0||
     !Array.isArray(r.frames)||r.frames.length<2||r.frames.length>9000)return null;
   if(!r.frames.every(f=>Array.isArray(f)&&f.length===6&&
@@ -231,11 +245,11 @@ function readRecord(i){
   return r;
  }catch(e){return null;}
 }
-const records=[readRecord(0),readRecord(1)];
+let records=[readRecord(0),readRecord(1)];
 let best=records[activeLane]?.time||0,ghostEnabled=true;
 try{ghostEnabled=localStorage.getItem('slotrush.rookie.ghost.enabled')!=='false';}catch(e){}
 let ghostFrames=null,ghostCursor=0,runFrames=[],lastFrameTime=-1;
-let laneConfirmed=false;
+let laneConfirmed=false,mapConfirmed=false;
 function laneLabel(i=activeLane){return i===0?'SPÅR A':'SPÅR B';}
 function refreshSetup(){
  for(let i=0;i<2;i++){
@@ -322,7 +336,7 @@ function finish(){
  if(isBest){
   best=time;const record={schema:1,time:+time.toFixed(3),frames:runFrames};
   records[activeLane]=record;
-  try{localStorage.setItem(RECORD_PREFIX+activeLane,JSON.stringify(record));}catch(e){}
+  try{localStorage.setItem(recordKey(activeMap,activeLane),JSON.stringify(record));}catch(e){}
  }
  refreshSetup();const fast=Math.min(...lapTimes);
  showOverlay(isBest?'★ NEW PERSONAL BEST':'RACE COMPLETE',
