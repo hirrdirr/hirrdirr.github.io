@@ -1,61 +1,76 @@
 ---
 layout: default
-title: DX-Ball
+title: Ball
 permalink: /games/dxball/
 ---
 
 <link rel="stylesheet" href="/games/dxball/dxball.css">
 
-<div class="dxball-wrap">
-  <canvas id="game" tabindex="0" aria-label="DX-Ball spelcanvas"></canvas>
+<div class="dxball-wrap" aria-label="Ball – arkadspel">
+  <canvas id="game" tabindex="0" aria-label="Spelyta för Ball. Styr med mus, tangentbord eller touch."></canvas>
+  <div class="dx-game-frame" aria-hidden="true"></div>
 
   <div id="hud" class="dxhud">
     <div class="dxhud-top">
-      <div class="dxstat"><span class="dxlabel">Bana</span> <span id="uiLevel">1</span>/<span id="uiLevelMax">8</span></div>
-      <div class="dxstat"><span class="dxlabel">Liv</span> <span id="uiLives">3</span></div>
-      <div class="dxstat"><span class="dxlabel">Poäng</span> <span id="uiScore">0</span></div>
-      <div class="dxstat dxpower"><span class="dxlabel">Powerups</span> <span id="uiPowers">—</span></div>
+      <div class="dx-brand" aria-label="Ball Arcade">
+        <span class="dx-brand-emblem" aria-hidden="true">球</span>
+        <span class="dx-brand-copy"><strong>BALL</strong><small>PIXEL ARCADE</small></span>
+      </div>
+      <div class="dxhud-stats">
+        <div class="dxstat"><span class="dxlabel">BANA</span><strong><span id="uiLevel">1</span><span class="dx-stat-divider">/</span><span id="uiLevelMax">8</span></strong></div>
+        <div class="dxstat dxstat-lives"><span class="dxlabel">LIV</span><strong><span class="dx-life-icon" aria-hidden="true">♥</span> <span id="uiLives">3</span></strong></div>
+        <div class="dxstat dxstat-score"><span class="dxlabel">POÄNG</span><strong id="uiScore">0</strong></div>
+      </div>
+      <button id="btnPause" class="dx-pause-button" type="button" aria-label="Pausa spelet"><span aria-hidden="true">Ⅱ</span><span class="dx-pause-text">PAUS</span></button>
+    </div>
+
+    <div class="dxhud-bottom">
+      <div class="dx-progress-card">
+        <div class="dx-progress-label"><span>LEVEL CLEAR</span><strong><span id="uiRemaining">0</span> KVAR</strong></div>
+        <div class="dx-progress-track" role="progressbar" aria-label="Andel förstörda klossar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="uiProgressBar"><span id="uiProgress"></span></div>
+      </div>
+      <div class="dx-power-card"><span class="dx-power-heading">✦ AKTIVA POWERUPS</span><span id="uiPowers">—</span></div>
     </div>
 
     <div id="overlayCenter" class="dxhud-center">
-      <div class="dxpanel">
-        <h2 id="overlayTitle">DX-Ball</h2>
-        <p id="overlayText">
-          Klicka/tappa för att starta. <br>
-          Styr med <b>WASD</b>, <b>piltangenter</b>, <b>mus</b> eller <b>touch</b>. <br>
-          Pausa med <b>ESC</b> eller <b>P</b>.
-        </p>
-
+      <div class="dxpanel dxpanel-main">
+        <div class="dx-eyebrow"><span class="dx-ornament">✦</span> HIRRDIRR ARCADE <span class="dx-ornament">✦</span></div>
+        <div class="dx-panel-badge" aria-hidden="true">球</div>
+        <h2 id="overlayTitle">BALL</h2>
+        <p id="overlayText">Tryck Spela för att börja. Klicka eller tryck mellanslag för att skjuta iväg bollen.</p>
         <div class="dxbuttons">
-          <button id="btnPlay" class="dxbtn">Spela</button>
-          <button id="btnRestart" class="dxbtn dxbtn-secondary">Börja om</button>
+          <button id="btnPlay" class="dxbtn dxbtn-primary" type="button">▶ SPELA</button>
+          <button id="btnRestart" class="dxbtn dxbtn-secondary" type="button">↻ BÖRJA OM</button>
         </div>
-
-        <div class="dxlegend">
-          <div class="dxtag"><span class="dot dot-w"></span> 1 träff</div>
-          <div class="dxtag"><span class="dot dot-y"></span> 2 träffar</div>
-          <div class="dxtag"><span class="dot dot-r"></span> 3 träffar</div>
-          <div class="dxtag"><span class="dot dot-p"></span> Powerup drop</div>
+        <div class="dxlegend" aria-label="Klosstyper">
+          <span class="dxtag"><span class="dot dot-w"></span> 1 träff</span>
+          <span class="dxtag"><span class="dot dot-y"></span> 2 träffar</span>
+          <span class="dxtag"><span class="dot dot-r"></span> 3 träffar</span>
+          <span class="dxtag"><span class="dot dot-ind"></span> Obrytbar</span>
         </div>
+        <p class="dx-controls-note">A/D · PILAR · MUS · TOUCH <span> / </span> ESC/P PAUS</p>
       </div>
     </div>
 
     <div id="overlayPause" class="dxhud-pause hidden">
-      <div class="dxpanel">
-        <h2>Pausat</h2>
-        <p>Tryck <b>ESC</b> eller <b>P</b> för att fortsätta.</p>
+      <div class="dxpanel dxpanel-pause">
+        <div class="dx-eyebrow">GAME ON HOLD</div>
+        <h2>PAUSAT</h2>
+        <p>Banan väntar på dig. Fortsätt när du är redo.</p>
         <div class="dxbuttons">
-          <button id="btnResume" class="dxbtn">Fortsätt</button>
-          <button id="btnRestart2" class="dxbtn dxbtn-secondary">Börja om</button>
+          <button id="btnResume" class="dxbtn dxbtn-primary" type="button">▶ FORTSÄTT</button>
+          <button id="btnRestart2" class="dxbtn dxbtn-secondary" type="button">↻ BÖRJA OM</button>
         </div>
+        <p class="dx-controls-note">ESC / P FORTSÄTT</p>
       </div>
     </div>
 
     <div id="overlayRotate" class="dxhud-rotate hidden">
-      <div class="dxpanel">
-        <h2>Vrid telefonen</h2>
-        <p>Spelet funkar bäst i liggande läge (landscape).</p>
-        <div class="dxrotate-icon" aria-hidden="true"></div>
+      <div class="dxpanel dxpanel-pause">
+        <div class="dx-eyebrow">MOBIL-LÄGE</div>
+        <div class="dxrotate-icon" aria-hidden="true">↻</div>
+        <h2>VRID TELEFONEN</h2>
+        <p>Vänd mobilen till liggande läge för att få plats med hela spelplanen.</p>
       </div>
     </div>
   </div>
