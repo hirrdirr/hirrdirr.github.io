@@ -151,7 +151,7 @@
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.6</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.7</span></small></div></div><div class="chip">TRACK <b>01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -179,7 +179,7 @@
 <button type="button" class="action secondary lane-back" id="lane-back">TILLBAKA</button>
 <br><button type="button" class="action secondary" id="help">SÅ FUNKAR DET</button></div></div>
   </div>
-  <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
+  <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button type="button" class="control" id="change-map">▤ BYT BANA</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
   <div class="foot"><span>* Hastighet i spelvärlden, inte verklig skala. <strong>Tidig spelversion under utveckling.</strong></span><span>Två fysiska körskenor · separata rekord och ghosts.</span></div>
 </div>
 <script>
@@ -197,13 +197,45 @@ const MAPS=[
  {id:'corkscrew-oval',name:'Corkscrew Oval',tag:'Svep',scale:.54,colors:['#2d4142','#263237','#202931'],points:[[183,347.8],[205.9,268.8],[260.4,216.7],[334.6,210.3],[389.9,260.1],[425.5,309.1],[476.8,306.7],[517.9,256.2],[581.1,210.3],[672.8,212.7],[736,249.8],[765.2,304.3],[753.3,361.2],[701.2,410.2],[625.4,399.9],[578,373.1],[541.6,392.8],[499.8,445.8],[442.9,463.9],[359.9,467.9],[287.2,442.6],[221.7,415.7]]},
  {id:'switchback-pass',name:'Switchback Pass',tag:'Precision',scale:.56,colors:['#35413b','#283630','#222b30'],points:[[170,400],[143,320],[180,228],[254,183],[333,204],[372,268],[349,330],[410,367],[510,346],[560,295],[540,224],[593,184],[679,196],[768,250],[820,350],[785,426],[700,454],[640,415],[595,394],[524,448],[420,473],[310,466],[218,444]]},
  {id:'thunder-mile',name:'Thunder Mile',tag:'Full fart',scale:.53,colors:['#363d48','#26323c','#1f2830'],points:[[191.2,339.8],[198.3,272.6],[248.8,227.6],[346.8,218.1],[479.5,216.5],[637.5,215.7],[743.4,228.4],[795.5,268.7],[808.2,324],[793.1,375.3],[746.5,406.1],[642.3,410.1],[533.2,405.3],[459,424.3],[371.3,438.5],[274.1,437.7],[198.3,407.7],[173,377.7]]},
- {id:'final-apex',name:'Final Apex',tag:'Avancerad',scale:.52,colors:['#3b3748','#2c2937','#202532'],points:[[170,390],[145,280],[190,190],[280,160],[365,190],[430,245],[500,228],[560,175],[655,160],[760,188],[825,247],[836,320],[803,390],[751,418],[690,387],[650,337],[590,325],[550,380],[575,436],[660,472],[742,481],[795,525],[730,560],[650,550],[560,519],[480,473],[400,510],[305,530],[215,490],[172,455]]}
+ {id:'final-apex',name:'Final Apex',tag:'Avancerad',scale:.52,colors:['#3b3748','#2c2937','#202532'],points:[[180,390],[155,316],[173,247],[223,195],[309,174],[385,209],[438,266],[497,278],[566,229],[637,182],[718,177],[787,211],[827,275],[832,354],[794,426],[716,460],[650,440],[604,406],[547,415],[488,468],[417,501],[332,499],[252,468],[200,435]]}
 ];
 let activeMap=0,WAYPOINTS=MAPS[0].points;
 
 function splinePoint(p0,p1,p2,p3,t){let t2=t*t,t3=t2*t;return {x:.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),y:.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)}}
+
+// Smooth a closed control polygon, then draw a uniform cubic B-spline.
+// These curves are C2-continuous and avoid interpolating V-shaped control vertices.
+// Rookie Circuit deliberately retains its original path and saved times.
+function roundedPoint(a,b,c,d,t){
+ const u=1-t,w0=u*u*u/6,w1=(3*t*t*t-6*t*t+4)/6,
+       w2=(-3*t*t*t+3*t*t+3*t+1)/6,w3=t*t*t/6;
+ return {x:w0*a[0]+w1*b[0]+w2*c[0]+w3*d[0],
+         y:w0*a[1]+w1*b[1]+w2*c[1]+w3*d[1]};
+}
+function controlPointsForMap(index){
+ if(index===0)return MAPS[0].points;
+ let p=MAPS[index].points.map(v=>v.slice());
+ for(let pass=0;pass<2;pass++){
+  const prev=p;
+  p=prev.map((v,i)=>{
+   const before=prev[(i+prev.length-1)%prev.length],after=prev[(i+1)%prev.length];
+   return [v[0]*.55+(before[0]+after[0])*.225,v[1]*.55+(before[1]+after[1])*.225];
+  });
+ }
+ return p;
+}
+const CONTROL_POINTS=MAPS.map((m,i)=>controlPointsForMap(i));
+function sampleTrackPoints(index,steps=48){
+ const source=CONTROL_POINTS[index],n=source.length,output=[];
+ const interpolate=index===0?splinePoint:roundedPoint;
+ for(let i=0;i<n;i++){
+  const a=source[(i-1+n)%n],b=source[i],c=source[(i+1)%n],d=source[(i+2)%n];
+  for(let j=0;j<steps;j++)output.push(interpolate(a,b,c,d,j/steps));
+ }
+ return output;
+}
 function deltaAngle(a,b){return Math.atan2(Math.sin(a-b),Math.cos(a-b))}
-function trackInit(){const pts=[],count=WAYPOINTS.length,steps=48;for(let i=0;i<count;i++){const p0=WAYPOINTS[(i-1+count)%count],p1=WAYPOINTS[i],p2=WAYPOINTS[(i+1)%count],p3=WAYPOINTS[(i+2)%count];for(let j=0;j<steps;j++)pts.push(splinePoint(p0,p1,p2,p3,j/steps));}
+function trackInit(){const pts=sampleTrackPoints(activeMap);
 let total=0;for(let i=0;i<pts.length;i++){let p=pts[i],n=pts[(i+1)%pts.length];p.s=total;p.theta=Math.atan2(n.y-p.y,n.x-p.x);total+=Math.hypot(n.x-p.x,n.y-p.y)}
 // Measure curvature across a physical span, then smooth neighboring samples to
  // avoid noisy, single-frame 'grip spikes' on the discretized spline.
@@ -246,7 +278,7 @@ function at(d,offset=0){d=((d%L)+L)%L;let lo=0,hi=pts.length-1;while(lo<hi){let 
 let state='menu',gas=false,distance=0,speed=0,stress=0,time=0,lapStart=0,lapTimes=[],completed=0,crashes=0,crash=null,crashT=0,respawnT=0,countT=0,gameClock=0,loadDisplay=0;
 // v0.1.2's old centerline record is left untouched but not mixed with
 // new physical-rail records, which have different distances and curvature.
-function recordKey(mapIndex,lane){return mapIndex===0?'slotrush.rookie.rail.v013.'+lane:'slotrush.map.'+MAPS[mapIndex].id+'.rail.v016.'+lane;}
+function recordKey(mapIndex,lane){return mapIndex===0?'slotrush.rookie.rail.v013.'+lane:'slotrush.map.'+MAPS[mapIndex].id+'.rail.v017.'+lane;}
 function readRecord(i,mapIndex=activeMap){
  try{
   const r=JSON.parse(localStorage.getItem(recordKey(mapIndex,i)));
@@ -264,11 +296,11 @@ try{ghostEnabled=localStorage.getItem('slotrush.rookie.ghost.enabled')!=='false'
 let ghostFrames=null,ghostCursor=0,runFrames=[],lastFrameTime=-1;
 let laneConfirmed=false,mapConfirmed=false;
 function laneLabel(i=activeLane){return i===0?'SPÅR A':'SPÅR B';}
-function miniMap(points){let d='';const n=points.length;for(let i=0;i<n;i++)for(let j=0;j<8;j++){const p=splinePoint(points[(i-1+n)%n],points[i],points[(i+1)%n],points[(i+2)%n],j/8);d+=(d?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)+' ';}return '<svg viewBox="75 85 815 480" aria-hidden="true"><path class="mini-base" d="'+d+'Z"/><path class="mini-slot" d="'+d+'Z"/></svg>';}
+function miniMap(index){const points=sampleTrackPoints(index,8);let d='';for(const p of points)d+=(d?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)+' ';return '<svg viewBox="75 85 815 480" aria-hidden="true"><path class="mini-base" d="'+d+'Z"/><path class="mini-slot" d="'+d+'Z"/></svg>';}
 function paintMapCards(){
  $('map-grid').innerHTML=MAPS.map((m,i)=>{
  const a=readRecord(0,i),b=readRecord(1,i);
- return '<button type="button" class="map-card" data-map="'+i+'" aria-pressed="'+(mapConfirmed&&activeMap===i)+'">'+miniMap(m.points)+'<strong>'+(i+1)+'. '+m.name+'</strong><span>'+m.tag+'</span><small>A '+(a?format(a.time):'--')+' | B '+(b?format(b.time):'--')+'</small></button>';
+ return '<button type="button" class="map-card" data-map="'+i+'" aria-pressed="'+(mapConfirmed&&activeMap===i)+'">'+miniMap(i)+'<strong>'+(i+1)+'. '+m.name+'</strong><span>'+m.tag+'</span><small>A '+(a?format(a.time):'--')+' | B '+(b?format(b.time):'--')+'</small></button>';
  }).join('');
 }
 function chooseMap(i){
@@ -283,8 +315,16 @@ function chooseMap(i){
  $('play').disabled=false;$('play').textContent='VÄLJ SPÅR';
  paintMapCards();refreshSetup();hud();return true;
 }
+function changeMap(){
+ // Changing map abandons the current run without saving an unfinished ghost.
+ heldKeys.clear();heldStage=false;heldPedal=false;setGas(false);
+ crash=null;crashT=0;respawnT=0;distance=0;speed=0;stress=0;loadDisplay=0;
+ time=0;lapStart=0;lapTimes=[];completed=0;crashes=0;
+ runFrames=[];lastFrameTime=-1;ghostFrames=null;ghostCursor=0;
+ showMapSelect();
+}
 function showMapSelect(){
- if(!['menu','finished','map-select','lane-select'].includes(state))return;
+ if(!['menu','finished','map-select','lane-select','racing','countdown','crashed','paused'].includes(state))return;
  state='map-select';mapConfirmed=false;laneConfirmed=false;
  showOverlay('TRACK SELECTION','VÄLJ BANA','Välj en bana för att fortsätta till spårvalet.','VÄLJ BANA',false);
  $('overlay').classList.add('choosing-map');$('play').disabled=true;
@@ -496,12 +536,13 @@ $('ghost-toggle').addEventListener('click',()=>{
 });
 $('map-grid').addEventListener('click',event=>{const b=event.target.closest('[data-map]');if(b)chooseMap(Number(b.dataset.map));});
 $('lane-back').addEventListener('click',()=>state==='lane-select'?showMapSelect():showMainMenu());
+$('change-map').addEventListener('click',changeMap);
 $('pause').addEventListener('click',togglePause);
 $('restart').addEventListener('click',()=>{
  if(['racing','crashed','paused','countdown'].includes(state))start();
  else showMapSelect();
 });
-$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Tryck Starta lopp, välj SPÅR A eller B och sedan Kör. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
+$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
 refreshSetup();hud();requestAnimationFrame(frame);
 window.slotRushDebug={
  getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,
@@ -509,7 +550,8 @@ window.slotRushDebug={
   activeMap,mapCount:MAPS.length,activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
   best,recordFrames:runFrames.length,ghostFrames:ghostFrames?.length||0,
   ghostPosition:ghostPose(),laneConfirmed,lapTimes,waypoints:WAYPOINTS}),
- start,tick,at,laneAt,chooseLane,chooseMap,showMapSelect,setGas,showLaneSelect,confirmRace
+ start,tick,at,laneAt,chooseLane,chooseMap,showMapSelect,changeMap,setGas,showLaneSelect,confirmRace
+ ,getGeometry:()=>({roadScale,centerline:pts.map(p=>({x:p.x,y:p.y})),lanes:laneTracks.map(l=>l.pts.map(p=>({x:p.x,y:p.y,k:p.k})))})
 };
 })();
 </script>
