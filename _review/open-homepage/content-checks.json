@@ -1,0 +1,18 @@
+{
+  "internalLinksAndImages": "pass",
+  "videoDataAndUrls": "4/4 exact",
+  "newsDataAndUrls": "4/4 exact",
+  "idleGuild": "non-interactive; UI label intact",
+  "unchangedRenderedRoutes": [
+    "/games/",
+    "/videos/",
+    "/news/",
+    "/news/archive/",
+    "/games/dnd/",
+    "/games/td/",
+    "/games/dxball/",
+    "/games/idleguild/"
+  ],
+  "responsiveThemeCases": 12,
+  "allThemeAssetsCorrect": true
+}

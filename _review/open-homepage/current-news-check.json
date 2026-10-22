@@ -1,0 +1,43 @@
+{
+  "brokenImages": [],
+  "focus": {
+    "element": "home-play",
+    "outline": "rgb(255, 177, 126) solid 3px"
+  },
+  "news": [
+    {
+      "date": "2026-10-22",
+      "image": null,
+      "source": "CERT-SE",
+      "title": "Kritiska sårbarheter i PHP",
+      "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+    },
+    {
+      "date": "2026-10-22",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/05/18/INTERPOL.jpg",
+      "source": "BleepingComputer",
+      "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+      "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+    },
+    {
+      "date": "2026-10-22",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/delivery-robot.jpg",
+      "source": "Malwarebytes",
+      "title": "Delivery bots accused of illegally scanning customers",
+      "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+    },
+    {
+      "date": "2026-10-22",
+      "image": null,
+      "source": "SANS ISC Diary",
+      "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+      "url": "https://isc.sans.edu/diary/rss/33446"
+    }
+  ],
+  "scroll": 375,
+  "viewport": [
+    390,
+    844
+  ],
+  "width": 375
+}

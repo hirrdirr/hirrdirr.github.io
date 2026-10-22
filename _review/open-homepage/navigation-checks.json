@@ -1,0 +1,25 @@
+[
+  {
+    "heading": "Games.",
+    "homepageStyles": false,
+    "light": true,
+    "path": "/after/games/"
+  },
+  {
+    "heading": "Videos.",
+    "homepageStyles": false,
+    "light": true,
+    "path": "/after/videos/"
+  },
+  {
+    "heading": "Security News.",
+    "homepageStyles": false,
+    "light": true,
+    "path": "/after/news/"
+  },
+  {
+    "hero": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+    "light": true,
+    "path": "/after/"
+  }
+]
