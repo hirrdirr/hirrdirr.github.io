@@ -2,58 +2,90 @@
 layout: default
 title: hirrdirr
 navlabel: home
+home_layout: open
 ---
-<div class="pixel-home">
-  <section class="pixel-hero" aria-labelledby="pixel-home-title">
-    <div class="pixel-hero-art" aria-hidden="true"></div>
-    <div class="pixel-hero-copy">
-      <span class="pixel-eyebrow">VÄLKOMMEN TILL</span>
+<div class="pixel-home home-open">
+  <section class="pixel-hero home-hero" aria-labelledby="pixel-home-title">
+    <div class="home-hero-art" aria-hidden="true"></div>
+    <div class="home-hero-copy">
+      <p class="home-eyebrow">VÄLKOMMEN TILL</p>
       <h1 id="pixel-home-title">hirrdirr.se</h1>
-      <p>En plats för projekt, idéer, teknik och<br class="desktop-break"> allt som inspirerar.</p>
-      <nav class="pixel-quicklinks" aria-label="Utforska sidan">
-        <a href="/games/"><i data-lucide="gamepad-2"></i><span><strong>Projekt</strong><small>Utforska mina projekt</small></span><i data-lucide="chevron-right"></i></a>
-        <a href="/news/"><i data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste uppdateringarna</small></span><i data-lucide="chevron-right"></i></a>
-        <a href="/videos/"><i data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla in det senaste</small></span><i data-lucide="chevron-right"></i></a>
+      <p class="home-intro">En plats för projekt, idéer, teknik och allt som inspirerar.</p>
+      <nav class="home-quicklinks" aria-label="Utforska sidan">
+        <a href="/games/"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Projekt</strong><small>Spel och experiment</small></span></a>
+        <a href="/news/"><i aria-hidden="true" data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste nytt</small></span></a>
+        <a href="/videos/"><i aria-hidden="true" data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla det senaste</small></span></a>
       </nav>
     </div>
   </section>
-  <div class="pixel-layout">
-    <div class="pixel-main">
-      <section class="pixel-panel" aria-labelledby="pixel-projects-title">
-        <div class="pixel-panel-head"><div><h2 id="pixel-projects-title"><span class="pixel-panel-icon"><i data-lucide="swords"></i></span> Mina projekt</h2><p>Små och stora projekt, idéer och experiment.</p></div><a href="/games/">Alla projekt <i data-lucide="arrow-right"></i></a></div>
-        <div class="pixel-project-grid">
-          <article class="pixel-project"><div class="pixel-project-image art-game-0" role="img" aria-label="Dodge & Drift, en lysande boll som undviker asteroider"></div><div class="pixel-project-details"><h3>Dodge &amp; Drift</h3><p>Styr bollen, undvik asteroider och överlev så länge du kan.</p><div class="pixel-card-actions"><a class="pixel-orange-btn" href="/games/dnd/" aria-label="Spela Dodge &amp; Drift">Spela nu <i data-lucide="arrow-right"></i></a><span class="pixel-small-square" aria-hidden="true"><i data-lucide="heart"></i></span></div></div></article>
-          <article class="pixel-project"><div class="pixel-project-image art-game-1" role="img" aria-label="Core Defense, försvarstorn som skyddar en energikärna mot gobliner"></div><div class="pixel-project-details"><h3>Core Defense</h3><p>Ett strategispel i stil med tower defense. Bygg, försvara och överlev!</p><div class="pixel-card-actions"><a class="pixel-orange-btn" href="/games/td/" aria-label="Spela Core Defense">Spela nu <i data-lucide="arrow-right"></i></a><span class="pixel-small-square" aria-hidden="true"><i data-lucide="heart"></i></span></div></div></article>
-          <article class="pixel-project"><div class="pixel-project-image art-game-2" role="img" aria-label="Ball, boll och paddel som slår sönder färgglada block"></div><div class="pixel-project-details"><h3>Ball</h3><p>Klassiskt arkanoidspel med en modern twist.</p><div class="pixel-card-actions"><a class="pixel-orange-btn" href="/games/dxball/" aria-label="Spela Ball">Spela nu <i data-lucide="arrow-right"></i></a><span class="pixel-small-square" aria-hidden="true"><i data-lucide="heart"></i></span></div></div></article>
-          <article class="pixel-project pixel-project-soon"><div class="pixel-project-image art-game-3" role="img" aria-label="Idle Guild, japanskt äventyrsgille i pixelart"><span class="pixel-coming-badge">COMING SOON</span></div><div class="pixel-project-details"><h3>Idle Guild</h3><p>Ett idle-spel med äventyr, uppgraderingar och en levande guild.</p><div class="pixel-card-actions"><span class="pixel-muted-btn">Kommer snart</span><span class="pixel-small-square" aria-hidden="true"><i data-lucide="hourglass"></i></span></div></div></article>
+
+  <section class="home-projects" aria-labelledby="home-projects-title">
+    <div class="home-section-head">
+      <h2 id="home-projects-title"><i aria-hidden="true" data-lucide="gamepad-2"></i> Mina projekt</h2>
+      <a class="home-text-link" href="/games/">Alla projekt <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="home-project-composition">
+      <article class="home-feature" aria-labelledby="home-feature-title">
+        <a class="home-feature-art" href="/games/dnd/" aria-label="Spela Dodge &amp; Drift">
+          <img src="/assets/artwork/home/dodge-drift.webp" width="1200" height="476" alt="Dodge &amp; Drift, en lysande boll som undviker asteroider">
+        </a>
+        <div class="home-feature-copy">
+          <p class="home-eyebrow">UTVALT PROJEKT</p>
+          <h3 id="home-feature-title">Dodge &amp; Drift</h3>
+          <p>Styr bollen, undvik asteroider och överlev så länge du kan.</p>
+          <a class="home-play" href="/games/dnd/" aria-label="Spela Dodge &amp; Drift">Spela nu <span aria-hidden="true">→</span></a>
+          <p class="home-feature-note"><i aria-hidden="true" data-lucide="orbit"></i> Arkad · Överlevnad</p>
         </div>
-      </section>
-      <section class="pixel-panel" aria-labelledby="pixel-videos-title">
-        <div class="pixel-panel-head"><div><h2 id="pixel-videos-title"><span class="pixel-panel-icon"><i data-lucide="play"></i></span> Senaste videos</h2><p>De senaste videorna från min YouTube-kanal.</p></div><a href="/videos/">Alla videos <i data-lucide="arrow-right"></i></a></div>
-        {% assign video_dates = '12 juli 2025|28 juni 2025|14 juni 2025|31 maj 2025' | split: '|' %}
-        <div class="pixel-video-grid">
+      </article>
+      <div class="home-other-projects" aria-labelledby="home-more-title">
+        <h3 id="home-more-title" class="home-eyebrow">FLER PROJEKT</h3>
+        <a class="home-project-row" href="/games/td/" aria-label="Spela Core Defense">
+          <img src="/assets/artwork/home/core-defense.webp" width="1200" height="475" alt="Försvarstorn skyddar en energikärna mot gobliner">
+          <div><h4>Core Defense</h4><p>Ett strategispel i stil med tower defense. Bygg, försvara och överlev!</p></div><span class="home-row-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="home-project-row" href="/games/dxball/" aria-label="Spela Ball">
+          <img src="/assets/artwork/home/ball.webp" width="1200" height="475" alt="En boll och paddel slår sönder färgglada block">
+          <div><h4>Ball</h4><p>Klassiskt arkanoidspel med en modern twist.</p></div><span class="home-row-arrow" aria-hidden="true">↗</span>
+        </a>
+        <article class="home-project-row home-coming" aria-labelledby="home-idle-title">
+          <img src="/assets/artwork/home/idle-guild.webp" width="960" height="380" loading="lazy" alt="Ett japanskt äventyrsgille i pixelart">
+          <div><h4 id="home-idle-title">Idle Guild</h4><p>Ett idle-spel med äventyr, uppgraderingar och en levande guild.</p><span class="home-coming-label">COMING SOON</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="home-stories">
+    <div class="home-feed">
+      <section class="home-videos" aria-labelledby="pixel-videos-title">
+        <div class="home-section-head"><h2 id="pixel-videos-title"><i aria-hidden="true" data-lucide="play"></i> Senaste videos</h2><a class="home-text-link" href="/videos/">Alla videos <span aria-hidden="true">↗</span></a></div>
+        <div class="home-video-gallery">
           {% for v in site.data.videos limit:4 %}
-            <a class="pixel-video" href="https://www.youtube.com/watch?v={{ v.id }}" target="_blank" rel="noopener noreferrer"><div class="pixel-video-image art-video-{{ forloop.index0 }}" role="img" aria-label="{{ v.title | escape }}">{% if v.id == "wXifh0nB72Y" %}<img class="pixel-video-thumbnail" src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" loading="lazy" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">{% endif %}<span class="pixel-duration">{% case forloop.index0 %}{% when 0 %}8:42{% when 1 %}10:17{% when 2 %}9:03{% else %}11:26{% endcase %}</span></div><strong>{{ v.title }}</strong><small>{{ video_dates[forloop.index0] }}</small></a>
-          {% endfor %}
+          <a class="home-video" href="https://www.youtube.com/watch?v={{ v.id | escape }}" target="_blank" rel="noopener noreferrer">
+            <div class="home-video-image"><span class="home-video-fallback">Se på YouTube ↗</span><img src="https://img.youtube.com/vi/{{ v.id | escape }}/mqdefault.jpg" width="320" height="180" loading="lazy" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"><span class="home-video-play" aria-hidden="true">▶</span></div>
+            <h3>{{ v.title | escape }}</h3>{% if v.desc %}<p>{{ v.desc | escape }}</p>{% endif %}
+          </a>
+          {% else %}<p class="home-empty">Inga videos publicerade ännu.</p>{% endfor %}
         </div>
       </section>
-      <section class="pixel-panel" aria-labelledby="pixel-news-title">
-        <div class="pixel-panel-head"><div><h2 id="pixel-news-title"><span class="pixel-panel-icon pixel-paper"><i data-lucide="file-text"></i></span> Senaste nyheter</h2><p>De senaste säkerhetsnyheterna från utvalda källor.</p></div><a href="/news/">Alla nyheter <i data-lucide="arrow-right"></i></a></div>
-        <div class="pixel-news-grid">
+      <section class="home-news" aria-labelledby="pixel-news-title">
+        <div class="home-section-head"><h2 id="pixel-news-title"><i aria-hidden="true" data-lucide="newspaper"></i> Senaste nyheter</h2><a class="home-text-link" href="/news/">Alla nyheter <span aria-hidden="true">↗</span></a></div>
+        <p class="home-news-intro">Säkerhetsnyheter från utvalda källor.{% if site.data.security_highlights.digest_date %} Sammanställt <time datetime="{{ site.data.security_highlights.digest_date }}">{{ site.data.security_highlights.digest_date }}</time>.{% endif %}</p>
+        <div class="home-news-list">
           {% for item in site.data.security_highlights.articles limit:4 %}
-          <a class="pixel-news-item" href="{{ item.url | escape }}" target="_blank" rel="noopener noreferrer">
-            <div class="pixel-news-image" aria-hidden="true">{% if item.image %}<img src="{{ item.image | escape }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true">{% endif %}<span class="pixel-news-fallback"><i data-lucide="shield-check"></i><small>{{ item.source | escape }}</small></span></div>
-            <div><strong>{{ item.title | escape }}</strong><p>{{ item.source | escape }}</p><small>{{ site.data.security_highlights.digest_date }}</small></div>
+          <a class="home-news-story" href="{{ item.url | escape }}" target="_blank" rel="noopener noreferrer">
+            <div class="home-news-image" aria-hidden="true"><span class="home-news-fallback"><i data-lucide="shield-check"></i><small>{{ item.source | escape }}</small></span>{% if item.image %}<img src="{{ item.image | escape }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true">{% endif %}</div>
+            <div class="home-news-copy"><p class="home-news-source">{{ item.source | escape }}</p><h3>{{ item.title | escape }}</h3><time datetime="{{ site.data.security_highlights.digest_date }}">{{ site.data.security_highlights.digest_date }}</time></div>
           </a>
-          {% else %}
-          <p>Inga säkerhetsnyheter tillgängliga ännu.</p>
-          {% endfor %}
+          {% else %}<p class="home-empty">Inga säkerhetsnyheter tillgängliga ännu.</p>{% endfor %}
         </div>
       </section>
     </div>
-    <aside class="pixel-aside">
-      <div class="pixel-aside-art" role="img" aria-label="Pixelkonst: japansk trädgård med bro och koidamm"></div>
-      <section class="pixel-panel pixel-social" aria-labelledby="pixel-social-title"><div class="pixel-panel-head"><div><h2 id="pixel-social-title"><span class="pixel-panel-icon pixel-social-title-icon"><i data-lucide="contact"></i></span> Följ mig</h2><p>Häng med på andra plattformar!</p></div></div>{% include social_icons.html %}<div class="pixel-side-scene" aria-hidden="true"></div></section>
-    </aside>
+    <aside class="home-garden" role="img" aria-label="Pixelkonst: japansk trädgård med bro och koidamm"></aside>
   </div>
+
+  <footer class="home-outro" aria-labelledby="pixel-social-title">
+    <div class="home-station" role="img" aria-label="Pixelkonst: en liten japansk station med lyktor och körsbärsblom"></div>
+    <div class="home-social"><p class="home-eyebrow">VI SES IGEN</p><h2 id="pixel-social-title">Följ mig</h2><p>Häng med på andra plattformar!</p>{% include social_icons.html %}</div>
+  </footer>
 </div>

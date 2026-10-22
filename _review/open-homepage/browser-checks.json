@@ -1,0 +1,554 @@
+[
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 753,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 753,
+    "theme": "dark",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 753,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 753,
+    "theme": "light",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 1351,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 1351,
+    "theme": "dark",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 1351,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 1351,
+    "theme": "light",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 1265,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 1265,
+    "theme": "dark",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 1265,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 1265,
+    "theme": "light",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 2545,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 2545,
+    "theme": "dark",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 2545,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 2545,
+    "theme": "light",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 1905,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 1905,
+    "theme": "light",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 1905,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 1905,
+    "theme": "dark",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 375,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 375,
+    "theme": "light",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "art": [
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+        "element": "home-hero-art"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+        "element": "home-garden"
+      },
+      {
+        "background": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")",
+        "element": "home-station"
+      }
+    ],
+    "brokenImages": [],
+    "clientWidth": 375,
+    "idleInteractive": 0,
+    "newsCount": 4,
+    "overflow": [],
+    "scrollWidth": 375,
+    "theme": "dark",
+    "videoCount": 4,
+    "videoThumbnails": [
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/Auss7fLMiIE/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg"
+      },
+      {
+        "loaded": true,
+        "src": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg"
+      }
+    ],
+    "viewport": [
+      390,
+      844
+    ]
+  }
+]
