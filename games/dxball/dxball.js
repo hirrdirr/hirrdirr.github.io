@@ -11,6 +11,7 @@
   const uiLives = document.getElementById("uiLives");
   const uiScore = document.getElementById("uiScore");
   const uiPowers = document.getElementById("uiPowers");
+  const uiTheme = document.getElementById("uiTheme");
   const uiRemaining = document.getElementById("uiRemaining");
   const uiProgress = document.getElementById("uiProgress");
   const uiProgressBar = document.getElementById("uiProgressBar");
@@ -243,6 +244,7 @@
     uiLives.textContent = String(lives);
     uiScore.textContent = String(score);
     uiPowers.textContent = powersLabel();
+    if (uiTheme) uiTheme.textContent = BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length].name;
     const left = remainingBricks();
     const total = bricks.filter(b => !b.indestructible).length;
     const percent = total ? Math.round((1 - left / total) * 100) : 0;
@@ -329,6 +331,7 @@
   }
 
   function buildLevel(idx) {
+    scenery.image = null; // A freshly generated level gets its own background.
     const cols = clamp(Math.floor(W / 70), 9, 14);
     const rows = clamp(Math.floor(H / 52), 6, 9);
 
@@ -871,113 +874,282 @@
     paddle.y = H - 54;
   }
 
-  // --- Pixel-art inspired atmosphere / purely cosmetic ---
-  const scenery = { image: null, width: 0, height: 0, light: null };
+  // --- Eight atmospheric scenes. All decoration is cached per level / size. ---
+  // Keep the playfield readable: no foreground buildings or hard-edged icons.
+  const BACKGROUND_THEMES = [
+    {
+      name: "TWILIGHT GARDEN", sky: ["#101b33", "#3c3d62", "#9b666c", "#142c42"],
+      glow: "#ffb89b", glowX: .76, glowY: .57,
+      far: "#434560", mid: "#293b54", near: "#142e41",
+      fog: "#e5a3ad", sparkA: "#ffd6b3", sparkB: "#b1e7f0", kind: "dusk"
+    },
+    {
+      name: "MOONLIT LAKE", sky: ["#07162e", "#223d63", "#3f6881", "#102638"],
+      glow: "#b1d8f3", glowX: .72, glowY: .33,
+      far: "#385b7a", mid: "#24465d", near: "#0c2a3e",
+      fog: "#a7d2eb", sparkA: "#d1e8ff", sparkB: "#9ee3eb", kind: "lake"
+    },
+    {
+      name: "CRIMSON DUSK", sky: ["#23162b", "#66354f", "#b86d60", "#32253c"],
+      glow: "#ffc18c", glowX: .28, glowY: .61,
+      far: "#725063", mid: "#43384f", near: "#2b2943",
+      fog: "#f9ada6", sparkA: "#ffcea1", sparkB: "#f8a9bd", kind: "dusk"
+    },
+    {
+      name: "TEMPLE MIST", sky: ["#141b38", "#3d4069", "#736a85", "#202b45"],
+      glow: "#d3b7f4", glowX: .58, glowY: .46,
+      far: "#62647f", mid: "#424d69", near: "#23344c",
+      fog: "#d0c4f1", sparkA: "#ddd0ff", sparkB: "#b8d9fa", kind: "mist"
+    },
+    {
+      name: "LANTERN NIGHT", sky: ["#071628", "#223249", "#634853", "#111c32"],
+      glow: "#ffa771", glowX: .73, glowY: .69,
+      far: "#42495f", mid: "#243b51", near: "#12293e",
+      fog: "#efa885", sparkA: "#ffd49f", sparkB: "#ffc2a3", kind: "lantern"
+    },
+    {
+      name: "STORM HORIZON", sky: ["#0b1424", "#28354b", "#5b6071", "#172637"],
+      glow: "#b9c6e1", glowX: .43, glowY: .49,
+      far: "#4a566b", mid: "#303e53", near: "#1a2b3e",
+      fog: "#a9b9cb", sparkA: "#c3d8e8", sparkB: "#a5c0d8", kind: "storm"
+    },
+    {
+      name: "AURORA PEAKS", sky: ["#071729", "#193a51", "#295b65", "#102639"],
+      glow: "#7fe0c9", glowX: .53, glowY: .30,
+      far: "#3d5b70", mid: "#26495b", near: "#142e43",
+      fog: "#99d5d2", sparkA: "#abffde", sparkB: "#e3bbff", kind: "aurora"
+    },
+    {
+      name: "FINAL NIGHTFALL", sky: ["#070e20", "#222345", "#4c3554", "#0c192b"],
+      glow: "#bc90d7", glowX: .64, glowY: .57,
+      far: "#4b4568", mid: "#2d3555", near: "#111f38",
+      fog: "#ae95d3", sparkA: "#ffc1bb", sparkB: "#b5cbff", kind: "nightfall"
+    }
+  ];
+
+  const scenery = { image: null, width: 0, height: 0, themeIndex: -1, light: null };
+
+  function sceneRandom(seed) {
+    // Deterministic for a given scene: resizing never changes the composition.
+    const n = Math.sin(seed * 127.13 + levelIndex * 79.97) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
+  function glowAt(g, x, y, radius, color, alpha) {
+    g.save();
+    g.globalAlpha = alpha;
+    const gradient = g.createRadialGradient(x, y, 0, x, y, radius);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = gradient;
+    g.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    g.restore();
+  }
+
+  function softClouds(g, color, amount, high, strength) {
+    // Blurred color fields rather than vector cloud drawings.
+    for (let i = 0; i < amount; i++) {
+      const x = sceneRandom(i + 1.3) * W;
+      const y = H * (high + sceneRandom(i + 27.2) * .29);
+      const width = W * (.13 + sceneRandom(i + 43.4) * .23);
+      g.save();
+      g.translate(x, y);
+      g.scale(1, .25 + sceneRandom(i + 17) * .12);
+      glowAt(g, 0, 0, width, color, strength * (.6 + sceneRandom(i + 13) * .4));
+      g.restore();
+    }
+  }
+
+  function ridge(g, baseY, amp, phase, color, opacity) {
+    g.save();
+    g.globalAlpha = opacity;
+    g.shadowColor = color;
+    g.shadowBlur = 13;
+    g.beginPath();
+    g.moveTo(0, H);
+    for (let x = 0; x <= W + 12; x += 12) {
+      const t = x / W;
+      const y = baseY
+        + Math.sin(t * Math.PI * 3.6 + phase) * amp
+        + Math.sin(t * Math.PI * 8.4 + phase * .7) * amp * .25
+        + Math.sin(t * Math.PI * 14 + phase * 1.3) * amp * .075;
+      g.lineTo(x, y);
+    }
+    g.lineTo(W, H);
+    g.closePath();
+    g.fillStyle = color;
+    g.fill();
+    g.restore();
+  }
+
+  function drawLake(g, theme) {
+    const waterTop = H * .74;
+    const water = g.createLinearGradient(0, waterTop, 0, H);
+    water.addColorStop(0, "#41667b");
+    water.addColorStop(.28, "#1c3e58");
+    water.addColorStop(1, "#091f35");
+    g.globalAlpha = .79;
+    g.fillStyle = water;
+    g.fillRect(0, waterTop, W, H - waterTop);
+    g.globalAlpha = 1;
+
+    glowAt(g, W * theme.glowX, waterTop + H * .055, W * .20, "#9dc6dc", .16);
+    for (let i = 0; i < 145; i++) {
+      const depth = sceneRandom(i + 301);
+      const y = waterTop + H * .015 + depth * H * .22;
+      const x = W * (theme.glowX + (sceneRandom(i + 812) - .5) * (.18 + depth * .84));
+      const w = (5 + depth * 46) * (.4 + sceneRandom(i + 512));
+      g.globalAlpha = .035 + (1 - depth) * .17;
+      g.fillStyle = i % 4 === 0 ? "#e5d9d0" : "#acdfeb";
+      g.fillRect(x, y, w, Math.max(1, depth * 1.5));
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawAurora(g) {
+    // Translucent light curtains with blurred boundaries, behind the blocks.
+    const strips = [
+      { color: "#69d5b6", x: .20, turn: -.09, alpha: .20 },
+      { color: "#8de8cf", x: .41, turn: .12, alpha: .17 },
+      { color: "#a78bdc", x: .65, turn: -.07, alpha: .13 }
+    ];
+    g.save();
+    g.globalCompositeOperation = "screen";
+    for (const strip of strips) {
+      g.beginPath();
+      g.moveTo(W * (strip.x - .13), -H * .08);
+      g.bezierCurveTo(W * (strip.x + strip.turn), H * .11,
+        W * (strip.x - .16), H * .25,
+        W * (strip.x + .19), H * .60);
+      g.lineWidth = Math.max(45, W * .115);
+      g.lineCap = "round";
+      g.strokeStyle = strip.color;
+      g.globalAlpha = strip.alpha;
+      g.shadowBlur = 32;
+      g.shadowColor = strip.color;
+      g.stroke();
+    }
+    g.restore();
+  }
 
   function createScenery() {
+    const theme = BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length];
     const layer = document.createElement("canvas");
-    layer.width = Math.ceil(W); layer.height = Math.ceil(H);
+    layer.width = Math.max(1, Math.ceil(W));
+    layer.height = Math.max(1, Math.ceil(H));
     const g = layer.getContext("2d");
     const light = document.body.classList.contains("light");
+
     const sky = g.createLinearGradient(0, 0, 0, H);
-    if (light) {
-      sky.addColorStop(0, "#263b5a"); sky.addColorStop(.48, "#655771");
-      sky.addColorStop(.82, "#98666d"); sky.addColorStop(1, "#272e4a");
+    sky.addColorStop(0, theme.sky[0]);
+    sky.addColorStop(.45, theme.sky[1]);
+    sky.addColorStop(.78, theme.sky[2]);
+    sky.addColorStop(1, theme.sky[3]);
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, H);
+
+    // Place lighting in the *atmosphere*, not as a pasted-on building or emblem.
+    glowAt(g, W * theme.glowX, H * theme.glowY, H * .68, theme.glow, .29);
+    glowAt(g, W * theme.glowX, H * theme.glowY, H * .28, theme.glow, .12);
+
+    if (theme.kind === "aurora") drawAurora(g);
+    softClouds(g, theme.fog, theme.kind === "storm" ? 22 : 13,
+      theme.kind === "storm" ? .13 : .28,
+      theme.kind === "mist" ? .14 : .075);
+
+    ridge(g, H * .63, H * .070, 1.4 + levelIndex * .83, theme.far, .87);
+    ridge(g, H * .74, H * .047, 2.8 + levelIndex * .47, theme.mid, .96);
+
+    if (theme.kind === "lake") {
+      drawLake(g, theme);
     } else {
-      sky.addColorStop(0, "#061b33"); sky.addColorStop(.46, "#1d2c4c");
-      sky.addColorStop(.77, "#593e57"); sky.addColorStop(1, "#091c35");
+      ridge(g, H * .86, H * .029, 1.1 + levelIndex * .66, theme.near, 1);
     }
-    g.fillStyle = sky; g.fillRect(0,0,W,H);
 
-    // Golden dusk glow / full-bleed gradient. More saturated near the horizon.
-    const glow = g.createRadialGradient(W * .72, H * .57, H * .02, W * .72, H * .57, H * .70);
-    glow.addColorStop(0, light ? "rgba(255,174,139,.34)" : "rgba(255,138,116,.22)");
-    glow.addColorStop(.5, "rgba(227,118,141,.10)");
-    glow.addColorStop(1,"rgba(0,0,0,0)");
-    g.fillStyle=glow; g.fillRect(0,0,W,H);
-
-    // Moon / lantern sun, behind playfield.
-    const mx = W * .76, my = H * .49, mr = Math.min(W,H) * .081;
-    const halo = g.createRadialGradient(mx,my,mr*.2,mx,my,mr*2.8);
-    halo.addColorStop(0,"rgba(255,214,167,.40)");
-    halo.addColorStop(.52,"rgba(255,182,138,.12)");
-    halo.addColorStop(1,"rgba(255,182,138,0)");
-    g.fillStyle=halo; g.fillRect(mx-mr*3,my-mr*3,mr*6,mr*6);
-    g.fillStyle="rgba(255,222,182,.82)";
-    g.beginPath();g.arc(mx,my,mr,0,Math.PI*2);g.fill();
-
-    // Distant mountain layers.
-    function ridge(baseY, amp, wave, color) {
-      g.beginPath();g.moveTo(0,H);
-      g.lineTo(0,baseY);
-      for(let x=0;x<=W+8;x+=8) {
-        const y=baseY + Math.sin(x/W*Math.PI*wave)*amp
-          + Math.sin(x/W*Math.PI*(wave*2.8)+1.6)*amp*.31;
-        g.lineTo(x,Math.round(y/3)*3);
+    // Scene-specific conditions are atmospheric, never intrusive in gameplay.
+    if (theme.kind === "lantern") {
+      for (let i = 0; i < 22; i++) {
+        const x = sceneRandom(i + 601) * W;
+        const y = H * (.56 + sceneRandom(i + 755) * .35);
+        glowAt(g, x, y, Math.min(W,H) * (.015 + sceneRandom(i + 869) * .03),
+          "#ffae75", .07 + sceneRandom(i + 433) * .19);
       }
-      g.lineTo(W,H);g.closePath();g.fillStyle=color;g.fill();
+    } else if (theme.kind === "storm") {
+      g.save();
+      g.strokeStyle = "#c5d6e7";
+      g.lineWidth = 1;
+      g.globalAlpha = .055;
+      for (let i = 0; i < 170; i++) {
+        const x = sceneRandom(i + 923) * W;
+        const y = sceneRandom(i + 1139) * H;
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x - 5, y + 13);
+        g.stroke();
+      }
+      g.restore();
+    } else if (theme.kind === "nightfall") {
+      glowAt(g, W * .27, H * .24, H * .34, "#a683c7", .09);
     }
-    ridge(H*.63, H*.085, 3, light?"#4e4b70":"#283451");
-    ridge(H*.74, H*.057, 5, light?"#313652":"#172c43");
-    ridge(H*.87, H*.037, 7, light?"#1e3148":"#0c2639");
 
-    // Torii and roof silhouettes turn the otherwise dark lower field into a place.
+    // Thin mist between foreground and playfield.
+    const fog = g.createLinearGradient(0, H * .54, 0, H);
+    fog.addColorStop(0, "rgba(0,0,0,0)");
+    fog.addColorStop(.60, "rgba(179,186,219,.045)");
+    fog.addColorStop(1, "rgba(170,196,230,.075)");
+    g.fillStyle = fog;
+    g.fillRect(0, H * .54, W, H * .46);
+    softClouds(g, theme.fog, 10, .66, .060);
+
+    // Small light flecks; seeded and baked into the cache so they never jitter.
     g.save();
-    g.globalAlpha=.64;
-    const tx = W*.83, ty = H*.78, unit = Math.min(H*.20, W*.13);
-    g.fillStyle="#081b2a";
-    g.fillRect(tx-unit*.37,ty-unit*.38,unit*.10,unit*.50);
-    g.fillRect(tx+unit*.29,ty-unit*.38,unit*.10,unit*.50);
-    g.fillRect(tx-unit*.50,ty-unit*.43,unit,unit*.085);
-    g.fillRect(tx-unit*.43,ty-unit*.54,unit*.86,unit*.12);
-    g.beginPath();g.moveTo(tx-unit*.57,ty-unit*.53);g.lineTo(tx,ty-unit*.60);
-    g.lineTo(tx+unit*.57,ty-unit*.53);g.lineTo(tx+unit*.43,ty-unit*.47);
-    g.lineTo(tx-unit*.43,ty-unit*.47);g.closePath();g.fill();
-    const hx=W*.18,hy=H*.83,hu=Math.min(H*.14,W*.09);
-    g.fillRect(hx-hu*.40,hy-hu*.32,hu*.80,hu*.55);
-    g.beginPath();g.moveTo(hx-hu*.64,hy-hu*.31);g.lineTo(hx,hy-hu*.70);
-    g.lineTo(hx+hu*.64,hy-hu*.31);g.closePath();g.fill();
+    for (let i = 0; i < 135; i++) {
+      const x = sceneRandom(i + 1551) * W;
+      const y = sceneRandom(i + 1741) * H * .69;
+      g.globalAlpha = .06 + sceneRandom(i + 1811) * .22;
+      g.fillStyle = i % 2 ? theme.sparkA : theme.sparkB;
+      const dot = i % 12 ? 1 : 2;
+      g.fillRect(Math.floor(x), Math.floor(y), dot, dot);
+    }
+    // Light grain prevents the smooth gradients from feeling like flat vectors.
+    for (let i = 0; i < 470; i++) {
+      g.globalAlpha = .022;
+      g.fillStyle = i % 2 ? "#ffffff" : "#05101e";
+      g.fillRect(sceneRandom(i + 2031) * W,
+        sceneRandom(i + 2901) * H, 2, 2);
+    }
     g.restore();
 
-    // Little lanterns in the foreground.
-    for (const side of [.09,.91]) {
-      const x = W*side, y=H*.85;
-      g.fillStyle="#091b2d";g.fillRect(x-3,y-4,6,H-y);
-      const lg=g.createRadialGradient(x,y-10,1,x,y-10,30);
-      lg.addColorStop(0,"rgba(255,181,108,.28)");
-      lg.addColorStop(1,"rgba(255,181,108,0)");
-      g.fillStyle=lg;g.fillRect(x-30,y-40,60,60);
-      g.fillStyle="#ffd094";g.fillRect(x-6,y-20,12,16);
-      g.fillStyle="#1d2532";g.fillRect(x-9,y-22,18,4);g.fillRect(x-9,y-4,18,3);
-    }
+    // Darkening keeps projectiles and blocks easy to track, including light mode.
+    g.fillStyle = light ? "rgba(10,17,35,.13)" : "rgba(3,12,27,.19)";
+    g.fillRect(0, 0, W, H);
 
-    // Tiny night-sky flecks, fully deterministic on every redraw/resize.
-    for (let i=0;i<88;i++) {
-      const x=((i*6173+41)%997)/997*W;
-      const y=((i*3571+71)%991)/991*H*.72;
-      const size=i%9===0?2:1;
-      g.globalAlpha=.12+(i%5)*.08;
-      g.fillStyle=i%7===0?"#ffcdac":"#bddcea";
-      g.fillRect(Math.round(x),Math.round(y),size,size);
-    }
-    g.globalAlpha=1;
-    // Subtle dark veil to keep the colored bricks legible.
-    g.fillStyle="rgba(4,14,30,.23)";g.fillRect(0,0,W,H);
-    scenery.image=layer;scenery.width=W;scenery.height=H;scenery.light=light;
+    scenery.image = layer;
+    scenery.width = W;
+    scenery.height = H;
+    scenery.themeIndex = levelIndex;
+    scenery.light = light;
   }
 
   function drawAtmosphere() {
-    const light=document.body.classList.contains("light");
-    if (!scenery.image || scenery.width!==W || scenery.height!==H || scenery.light!==light) createScenery();
-    ctx.drawImage(scenery.image,0,0,W,H);
-    if (reduceMotion) return;
-    for (let n=0;n<18;n++) {
-      const seed=n*3.87;
-      const x=(W*((n*47%101)/101)+Math.sin(sceneTime*.20+seed)*20+W)%W;
-      const y=(H*((n*13%29)/29)+Math.cos(sceneTime*.35+seed)*16+H)%H;
-      ctx.fillStyle=n%3===0?"rgba(255,186,134,.25)":"rgba(142,227,244,.14)";
-      ctx.fillRect(x,y,n%5===0?3:2,n%5===0?3:2);
+    const light = document.body.classList.contains("light");
+    if (!scenery.image || scenery.width !== W || scenery.height !== H ||
+        scenery.themeIndex !== levelIndex || scenery.light !== light) {
+      createScenery();
     }
+    ctx.drawImage(scenery.image, 0, 0, W, H);
+    if (reduceMotion) return;
+
+    const theme = BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length];
+    for (let n = 0; n < 14; n++) {
+      const seed = n * 3.87;
+      const x = (W * ((n * 47 % 101) / 101) + Math.sin(sceneTime * .20 + seed) * 18 + W) % W;
+      const y = (H * ((n * 13 % 29) / 29) + Math.cos(sceneTime * .27 + seed) * 11 + H) % H;
+      ctx.globalAlpha = n % 4 === 0 ? .17 : .10;
+      ctx.fillStyle = n % 2 ? theme.sparkA : theme.sparkB;
+      ctx.fillRect(x, y, n % 5 === 0 ? 2 : 1, n % 5 === 0 ? 2 : 1);
+    }
+    ctx.globalAlpha = 1;
   }
 
   function drawBrick(b) {
