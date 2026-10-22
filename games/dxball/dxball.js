@@ -1032,6 +1032,80 @@
     g.restore();
   }
 
+  // Integrated scenery: rounded clusters share the horizon rather than
+  // appearing as isolated vector buildings or icons.
+  function drawTreeBand(g, baseY, color, opacity, density, maxHeight, seedOffset) {
+    g.save();
+    g.fillStyle = color;
+    g.globalAlpha = opacity;
+    g.shadowColor = color;
+    g.shadowBlur = Math.max(5, Math.min(18, H * .018));
+    g.fillRect(0, baseY, W, H - baseY);
+
+    const spacing = W / density;
+    for (let i = -1; i <= density; i++) {
+      const jitter = sceneRandom(i + 3201 + seedOffset) * spacing * .7;
+      const x = (i + .15) * spacing + jitter;
+      const height = maxHeight * (.25 + sceneRandom(i + 3247 + seedOffset) * .75);
+      const spread = spacing * (1.15 + sceneRandom(i + 3299 + seedOffset) * 1.6);
+      const top = baseY - height;
+      g.beginPath();
+      g.moveTo(x - spread * .62, baseY + 2);
+      g.bezierCurveTo(x - spread * .68, top + height * .63,
+        x - spread * .28, top + height * .12, x - spread * .13, top + height * .14);
+      g.quadraticCurveTo(x, top - height * .07, x + spread * .14, top + height * .15);
+      g.bezierCurveTo(x + spread * .44, top + height * .18,
+        x + spread * .72, top + height * .7, x + spread * .62, baseY + 2);
+      g.closePath();
+      g.fill();
+    }
+    g.restore();
+  }
+
+  function scatterLanternGlows(g, count, minY, maxY, color, seedOffset) {
+    for (let i = 0; i < count; i++) {
+      const x = sceneRandom(i + 4101 + seedOffset) * W;
+      const y = H * (minY + sceneRandom(i + 4231 + seedOffset) * (maxY - minY));
+      const radius = Math.min(W, H) * (.014 + sceneRandom(i + 4311 + seedOffset) * .024);
+      glowAt(g, x, y, radius, color, .075 + sceneRandom(i + 4431 + seedOffset) * .14);
+      // Tiny warm centres read as distant lights nested in the landscape.
+      g.save();
+      g.fillStyle = color;
+      g.globalAlpha = .13 + sceneRandom(i + 4489 + seedOffset) * .22;
+      g.beginPath();
+      g.arc(x, y, Math.max(1, radius * .035), 0, Math.PI * 2);
+      g.fill();
+      g.restore();
+    }
+  }
+
+  function drawShrubMist(g, yTop, color) {
+    const fog = g.createLinearGradient(0, yTop, 0, H);
+    fog.addColorStop(0, "rgba(0,0,0,0)");
+    fog.addColorStop(.43, color);
+    fog.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = fog;
+    g.fillRect(0, yTop, W, H - yTop);
+  }
+
+  function drawLakeReeds(g) {
+    g.save();
+    g.strokeStyle = "#163b48";
+    g.lineWidth = Math.max(1, Math.min(2.4, W / 720));
+    g.globalAlpha = .32;
+    for (let i = 0; i < 85; i++) {
+      const x = sceneRandom(i + 5101) * W;
+      const y = H * (.86 + sceneRandom(i + 5167) * .13);
+      const tall = H * (.012 + sceneRandom(i + 5207) * .037);
+      g.beginPath();
+      g.moveTo(x, y + tall * .5);
+      g.quadraticCurveTo(x + (sceneRandom(i + 5219) - .5) * 11,
+        y - tall * .25, x + (sceneRandom(i + 5233) - .5) * 16, y - tall);
+      g.stroke();
+    }
+    g.restore();
+  }
+
   function createScenery() {
     const theme = BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length];
     const layer = document.createElement("canvas");
@@ -1066,14 +1140,28 @@
       ridge(g, H * .86, H * .029, 1.1 + levelIndex * .66, theme.near, 1);
     }
 
+    // Overlapping foliage is softened into the landscape, not drawn as standalone objects.
+    drawTreeBand(g, H * .83,
+      theme.kind === "storm" ? "#21354a" : theme.kind === "dusk" ? "#273348" : "#1d3547",
+      theme.kind === "mist" ? .29 : .37, 66, H * .081, 0);
+    drawTreeBand(g, H * .90,
+      theme.kind === "mist" ? "#1b3248" : "#10283a",
+      theme.kind === "lake" ? .23 : .39, 90, H * .044, 131);
+    if (theme.kind === "lake") drawLakeReeds(g);
+    drawShrubMist(g, H * .68,
+      theme.kind === "mist" ? "rgba(207,205,255,.080)" :
+      theme.kind === "storm" ? "rgba(171,191,221,.058)" :
+      "rgba(179,198,223,.047)");
+
     // Scene-specific conditions are atmospheric, never intrusive in gameplay.
     if (theme.kind === "lantern") {
-      for (let i = 0; i < 22; i++) {
-        const x = sceneRandom(i + 601) * W;
-        const y = H * (.56 + sceneRandom(i + 755) * .35);
-        glowAt(g, x, y, Math.min(W,H) * (.015 + sceneRandom(i + 869) * .03),
-          "#ffae75", .07 + sceneRandom(i + 433) * .19);
-      }
+      scatterLanternGlows(g, 22, .59, .87, "#ffae75", 0);
+    } else if (theme.kind === "dusk") {
+      scatterLanternGlows(g, 11, .68, .87, "#ffca9a", 37);
+    } else if (theme.kind === "mist") {
+      scatterLanternGlows(g, 8, .68, .85, "#ded5ff", 71);
+    } else if (theme.kind === "aurora") {
+      scatterLanternGlows(g, 9, .69, .86, "#99ecd5", 103);
     } else if (theme.kind === "storm") {
       g.save();
       g.strokeStyle = "#c5d6e7";
@@ -1090,6 +1178,7 @@
       g.restore();
     } else if (theme.kind === "nightfall") {
       glowAt(g, W * .27, H * .24, H * .34, "#a683c7", .09);
+      scatterLanternGlows(g, 8, .68, .88, "#c1a3ff", 167);
     }
 
     // Thin mist between foreground and playfield.
@@ -1196,24 +1285,47 @@
 
   function drawPaddle() {
     ctx.save();
-    const x=paddle.x,y=paddle.y,w=paddle.w,h=paddle.h;
-    const halo=ctx.createRadialGradient(x+w/2,y+h/2,2,x+w/2,y+h/2,w*.82);
-    halo.addColorStop(0,powers.wide>0?"rgba(255,180,123,.24)":"rgba(79,224,235,.22)");
-    halo.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=halo;ctx.fillRect(x-w*.35,y-35,w*1.7,80);
-    ctx.shadowBlur=17;
-    ctx.shadowColor=powers.wide>0?"#ffb182":"#5ae7eb";
-    ctx.fillStyle="#15334b";
-    roundRect(ctx,x-3,y-2,w+6,h+5,6);ctx.fill();
-    ctx.shadowBlur=0;
-    const paint=ctx.createLinearGradient(0,y,0,y+h);
-    paint.addColorStop(0,powers.wide>0?"#ffe1a4":"#d3ffff");
-    paint.addColorStop(.4,powers.wide>0?"#f6aa7b":"#6fe1e9");
-    paint.addColorStop(1,powers.wide>0?"#bb6a74":"#397c99");
-    ctx.fillStyle=paint;roundRect(ctx,x,y,w,h,6);ctx.fill();
-    ctx.fillStyle="rgba(255,255,255,.58)";roundRect(ctx,x+10,y+2,w-20,2,1);ctx.fill();
-    ctx.fillStyle="#17384e";ctx.fillRect(x+w/2-9,y+5,18,5);
-    ctx.fillStyle=powers.wide>0?"#ffde98":"#b4f9f2";ctx.fillRect(x+w/2-4,y+6,8,3);
+    const x = paddle.x, y = paddle.y, w = paddle.w, h = paddle.h;
+    const wide = powers.wide > 0;
+    const glowColor = wide ? "#ffb182" : "#5ae7eb";
+
+    // The previous radial gradient was painted into a short rectangle (y - 35 .. y + 45),
+    // clipping its upper edge into a hard horizontal line. Draw a complete, scaled
+    // radial-gradient disc instead: both axes fade continuously to true transparency.
+    ctx.save();
+    ctx.translate(x + w / 2, y + h / 2);
+    ctx.scale(Math.max(w * .87, 88), Math.max(h * 4.3, 52));
+    const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    halo.addColorStop(0, wide ? "rgba(255,180,123,.24)" : "rgba(79,224,235,.22)");
+    halo.addColorStop(.52, wide ? "rgba(255,180,123,.12)" : "rgba(79,224,235,.10)");
+    halo.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(0, 0, 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.shadowBlur = 17;
+    ctx.shadowColor = glowColor;
+    ctx.fillStyle = "#15334b";
+    roundRect(ctx, x - 3, y - 2, w + 6, h + 5, 6);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    const paint = ctx.createLinearGradient(0, y, 0, y + h);
+    paint.addColorStop(0, wide ? "#ffe1a4" : "#d3ffff");
+    paint.addColorStop(.4, wide ? "#f6aa7b" : "#6fe1e9");
+    paint.addColorStop(1, wide ? "#bb6a74" : "#397c99");
+    ctx.fillStyle = paint;
+    roundRect(ctx, x, y, w, h, 6);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.58)";
+    roundRect(ctx, x + 10, y + 2, w - 20, 2, 1);
+    ctx.fill();
+    ctx.fillStyle = "#17384e";
+    ctx.fillRect(x + w / 2 - 9, y + 5, 18, 5);
+    ctx.fillStyle = wide ? "#ffde98" : "#b4f9f2";
+    ctx.fillRect(x + w / 2 - 4, y + 6, 8, 3);
     ctx.restore();
   }
 
