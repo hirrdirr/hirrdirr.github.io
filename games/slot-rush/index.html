@@ -33,6 +33,19 @@
   .setup-label{font-size:10px;font-weight:900;letter-spacing:.14em;color:#a3b2bd;margin-right:4px}
   .lane-button,#ghost-toggle{font-family:inherit;font-weight:900;font-size:11px;letter-spacing:.07em;color:#cbd7df;border:1px solid #4d636e;border-radius:8px;background:#24323b;padding:9px 12px;min-height:35px}
   .lane-button[aria-pressed="true"]{border-color:#e5ae75;background:#49362b;color:#ffddac;box-shadow:inset 0 0 0 1px #ac8153}
+  .map-grid{display:none;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;max-height:370px;overflow:auto;padding:4px;margin:8px 0 16px}
+  .overlay.choosing-map{background:#08111bee;backdrop-filter:none}
+  .overlay.choosing-map .content{max-width:920px;width:100%}
+  .overlay.choosing-map .map-grid{display:grid}
+  .map-card{border:1px solid #566a75;border-radius:9px;background:#1c2932;color:#e9e5d8;padding:8px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+  .map-card[aria-pressed="true"]{border-color:#ffca83;background:#4a382b;box-shadow:inset 0 0 0 1px #ffca83}
+  .map-card svg{width:100%;height:64px;overflow:visible}
+  .map-card path{fill:none;stroke-linejoin:round;stroke-linecap:round}
+  .map-card .mini-base{stroke:#737778;stroke-width:38}
+  .map-card .mini-slot{stroke:#ffd08d;stroke-width:3.5}
+  .map-card strong{font-size:10px;line-height:1.1}
+  .map-card span,.map-card small{font-size:9px;color:#bdc9c9}
+  @media(max-width:750px){.overlay.choosing-map{position:static;display:block;padding:8px;background:#15242d}.overlay.choosing-map .content{max-height:none;overflow:visible}.overlay.choosing-map .map-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:300px}.map-card svg{height:52px}}
   .lane-choices{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;max-width:470px;margin:0 auto 19px}
   .overlay.choosing-lane .lane-choices{display:grid}
   .lane-choices .lane-button{display:flex;flex-direction:column;align-items:center;gap:9px;padding:19px 10px;min-height:100px;border-width:2px;transition:background .15s,border-color .15s}
@@ -159,7 +172,7 @@
   <div class="stage" id="stage">
     <canvas id="game" width="960" height="600" aria-label="Rookie Circuit med två bilskenor och spelbar bil"></canvas>
     <div class="countdown" id="countdown">3</div>
-    <div class="overlay" id="overlay"><div class="content"><span class="eyebrow" id="ovlabel">Prototype • Circuit 01</span><h2 id="ovtitle">Rookie<br>Circuit</h2><p id="ovbody">En klassisk bilbana. En gaspedal. Tre varv.<br>Håll gasen på raksträckorna och släpp innan kurvorna — annars flyger bilen av skenan.</p><div class="lane-choices" id="lane-choices" role="group" aria-label="Välj spår för loppet">
+    <div class="overlay" id="overlay"><div class="content"><span class="eyebrow" id="ovlabel">Prototype • Circuit 01</span><h2 id="ovtitle">Rookie<br>Circuit</h2><p id="ovbody">En klassisk bilbana. En gaspedal. Tre varv.<br>Håll gasen på raksträckorna och släpp innan kurvorna — annars flyger bilen av skenan.</p><div id="map-grid" class="map-grid" role="group" aria-label="Välj bana"></div><div class="lane-choices" id="lane-choices" role="group" aria-label="Välj spår för loppet">
   <button type="button" id="lane-a" class="lane-button" aria-pressed="false"><strong>SPÅR A</strong><span id="lane-a-record">Inget rekord ännu</span></button>
   <button type="button" id="lane-b" class="lane-button" aria-pressed="false"><strong>SPÅR B</strong><span id="lane-b-record">Inget rekord ännu</span></button>
 </div><button type="button" class="action" id="play">STARTA LOPP</button>
@@ -251,6 +264,32 @@ try{ghostEnabled=localStorage.getItem('slotrush.rookie.ghost.enabled')!=='false'
 let ghostFrames=null,ghostCursor=0,runFrames=[],lastFrameTime=-1;
 let laneConfirmed=false,mapConfirmed=false;
 function laneLabel(i=activeLane){return i===0?'SPÅR A':'SPÅR B';}
+function miniMap(points){let d='';const n=points.length;for(let i=0;i<n;i++)for(let j=0;j<8;j++){const p=splinePoint(points[(i-1+n)%n],points[i],points[(i+1)%n],points[(i+2)%n],j/8);d+=(d?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)+' ';}return '<svg viewBox="75 85 815 480" aria-hidden="true"><path class="mini-base" d="'+d+'Z"/><path class="mini-slot" d="'+d+'Z"/></svg>';}
+function paintMapCards(){
+ $('map-grid').innerHTML=MAPS.map((m,i)=>{
+ const a=readRecord(0,i),b=readRecord(1,i);
+ return '<button type="button" class="map-card" data-map="'+i+'" aria-pressed="'+(mapConfirmed&&activeMap===i)+'">'+miniMap(m.points)+'<strong>'+(i+1)+'. '+m.name+'</strong><span>'+m.tag+'</span><small>A '+(a?format(a.time):'--')+' | B '+(b?format(b.time):'--')+'</small></button>';
+ }).join('');
+}
+function chooseMap(i){
+ if(state!=='map-select'||!Number.isInteger(i)||i<0||i>=MAPS.length)return false;
+ activeMap=i;WAYPOINTS=MAPS[i].points;roadScale=MAPS[i].scale;
+ track=trackInit();pts=track.pts;L=track.total;
+ laneTracks=[makeLane(-22*roadScale),makeLane(22*roadScale)];
+ activeLane=0;records=[readRecord(0),readRecord(1)];best=records[0]?.time||0;
+ distance=0;speed=0;stress=0;loadDisplay=0;ghostFrames=null;ghostCursor=0;
+ mapConfirmed=true;
+ $('track-name').textContent=MAPS[i].name.toUpperCase();
+ $('play').disabled=false;$('play').textContent='VÄLJ SPÅR';
+ paintMapCards();refreshSetup();hud();return true;
+}
+function showMapSelect(){
+ if(!['menu','finished','map-select','lane-select'].includes(state))return;
+ state='map-select';mapConfirmed=false;laneConfirmed=false;
+ showOverlay('TRACK SELECTION','VÄLJ BANA','Välj en bana för att fortsätta till spårvalet.','VÄLJ BANA',false);
+ $('overlay').classList.add('choosing-map');$('play').disabled=true;
+ paintMapCards();refreshSetup();
+}
 function refreshSetup(){
  for(let i=0;i<2;i++){
   const b=$(i===0?'lane-a':'lane-b');
@@ -300,8 +339,8 @@ function ghostPose(){
  function curveRatio(){const p=laneAt(distance);return speed*speed*Math.abs(p.k)/LAT_LIMIT;}
 function format(s){const m=Math.floor(s/60),sec=Math.floor(s%60),cs=Math.floor((s*100)%100);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cs).padStart(2,'0')}`}
 function hud(){ $('time').textContent=format(time);$('laps').textContent=`${Math.min(3,completed+1)} / 3`; $('speed').innerHTML=`${Math.round(speed*.75)}<span class="unit">km/h*</span>`;$('crashes').textContent=crashes;$('best').textContent=best?format(best):'--:--';}
-function showOverlay(label,title,body,btn,help=true){$('overlay').classList.remove('choosing-lane');$('play').disabled=false;$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');}
-function hideOverlay(){$('overlay').classList.add('hidden');$('overlay').classList.remove('choosing-lane');}
+function showOverlay(label,title,body,btn,help=true){$('overlay').classList.remove('choosing-lane','choosing-map');$('play').disabled=false;$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');}
+function hideOverlay(){$('overlay').classList.add('hidden');$('overlay').classList.remove('choosing-lane','choosing-map');}
 function showMainMenu(){
  state='menu';laneConfirmed=false;
  showOverlay('PROTOTYPE • CIRCUIT 01','ROOKIE<br>CIRCUIT',
@@ -310,7 +349,7 @@ function showMainMenu(){
  refreshSetup();
 }
 function showLaneSelect(){
- if(!['menu','finished','lane-select'].includes(state))return;
+ if(!['map-select','lane-select'].includes(state)||!mapConfirmed)return;
  state='lane-select';laneConfirmed=false;
  showOverlay('RACE SETUP','VÄLJ SPÅR',
   'Välj din skena för det här loppet. Båda har egna kurvor, rekord och spökbilar.',
@@ -322,7 +361,8 @@ function showLaneSelect(){
 function confirmRace(){
  if(state==='paused'){togglePause();return;}
  if(state==='lane-select'){if(laneConfirmed)start();return;}
- if(state==='menu'||state==='finished')showLaneSelect();
+ if(state==='map-select'){if(mapConfirmed)showLaneSelect();return;}
+ if(state==='menu'||state==='finished')showMapSelect();
 }
 function start(){
  distance=0;speed=0;stress=0;loadDisplay=0;time=0;lapStart=0;lapTimes=[];
@@ -374,24 +414,24 @@ while(completed<3&&distance>=(completed+1)*lapLength()){lapTimes.push(time-lapSt
 }
 function basePath(offset){ctx.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath()}
 function strokePath(offset,width,color){basePath(offset);ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=width;ctx.strokeStyle=color;ctx.stroke()}
-function board(){const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#3d393a');bg.addColorStop(.52,'#292c31');bg.addColorStop(1,'#222932');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+function board(){const bg=ctx.createLinearGradient(0,0,W,H);const palette=MAPS[activeMap].colors;bg.addColorStop(0,palette[0]);bg.addColorStop(.52,palette[1]);bg.addColorStop(1,palette[2]);ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 ctx.save();ctx.globalAlpha=.15;ctx.strokeStyle='#8f9b96';ctx.lineWidth=.5;for(let x=0;x<960;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,600);ctx.stroke()}for(let y=0;y<600;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke()}ctx.restore();
 ctx.fillStyle='#ffffff06';ctx.fillRect(30,30,900,540);ctx.strokeStyle='#b7b6af26';ctx.strokeRect(30,30,900,540);
-ctx.font='800 14px system-ui';ctx.textBaseline='middle';ctx.fillStyle='#ded8cb';ctx.fillText('ROOKIE CIRCUIT',51,65);ctx.font='700 10px system-ui';ctx.fillStyle='#aaadb0';ctx.fillText('GARAGE RACING SET  •  NO. 01',51,83);
+ctx.font='800 14px system-ui';ctx.textBaseline='middle';ctx.fillStyle='#ded8cb';ctx.fillText(MAPS[activeMap].name.toUpperCase(),51,65);ctx.font='700 10px system-ui';ctx.fillStyle='#aaadb0';ctx.fillText('GARAGE RACING SET  •  NO. 01',51,83);
 ctx.textAlign='right';ctx.fillStyle='#c0b7a5';ctx.font='800 10px system-ui';ctx.fillText('SLOT RUSH / PRACTICE MAT',909,550);ctx.fillStyle='#8d999c';ctx.fillText('TOP-DOWN  ·  TWO LANES',909,567);ctx.textAlign='left';
 // Tabletop fixtures, beyond track edges.
 for(const [x,y] of [[58,128],[902,128],[58,520],[902,520]]){ctx.fillStyle='#787e7c';ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.fill();ctx.fillStyle='#232a30';ctx.fillRect(x-3,y-.7,6,1.4);}
 // Start-area props (miniature stand, decals and road cones), kept outside track.
 ctx.fillStyle='#ddd0b9';ctx.globalAlpha=.23;ctx.fillRect(418,344,128,3);ctx.globalAlpha=1;ctx.textAlign='center';ctx.font='800 9px system-ui';ctx.fillStyle='#c2a987';ctx.fillText('SLOT CAR RACEWAY',480,364);ctx.font='900 17px system-ui';ctx.fillStyle='#f2c47d';ctx.fillText('01',480,392);ctx.textAlign='left';
 }
-function drawTrack(){ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=24;ctx.shadowOffsetY=13;strokePath(0,104,'#080e13');ctx.restore();
-strokePath(0,105,'#171a1c');strokePath(0,96,'#393d3f');strokePath(0,91,'#555a5b');strokePath(0,84,'#34383a');
+function drawTrack(){ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=24;ctx.shadowOffsetY=13;strokePath(0,104*roadScale,'#080e13');ctx.restore();
+strokePath(0,105*roadScale,'#171a1c');strokePath(0,96*roadScale,'#393d3f');strokePath(0,91*roadScale,'#555a5b');strokePath(0,84*roadScale,'#34383a');
 // Two shallow outer-edge lips.
-strokePath(-43,2,'#a0a29c');strokePath(43,2,'#a0a29c');strokePath(-40,2,'#242729');strokePath(40,2,'#242729');
+strokePath(-43*roadScale,2*roadScale,'#a0a29c');strokePath(43*roadScale,2*roadScale,'#a0a29c');strokePath(-40*roadScale,2*roadScale,'#242729');strokePath(40*roadScale,2*roadScale,'#242729');
 // Plastic injection seams across track every ~88 world units.
 for(let d=0;d<L;d+=84){const p=at(d);let nx=-Math.sin(p.theta),ny=Math.cos(p.theta);ctx.strokeStyle='#151b20a5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-nx*41,p.y-ny*41);ctx.lineTo(p.x+nx*41,p.y+ny*41);ctx.stroke();ctx.strokeStyle='#929a9b38';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(p.x-nx*39+Math.cos(p.theta)*3,p.y-ny*39+Math.sin(p.theta)*3);ctx.lineTo(p.x+nx*39+Math.cos(p.theta)*3,p.y+ny*39+Math.sin(p.theta)*3);ctx.stroke();}
 // Lane-separated slots; each slot has paired conductor contacts, with a central guide groove.
-for(const lane of [-22,22]){strokePath(lane,17,'#252b2d');strokePath(lane-9,3.4,'#b9bab2');strokePath(lane+9,3.4,'#b9bab2');strokePath(lane-9,1,'#eeeece88');strokePath(lane+9,1,'#eeeece88');strokePath(lane,8,'#080c0e');strokePath(lane,2.2,'#16191b');}
+for(const lane of [-22*roadScale,22*roadScale]){strokePath(lane,17*roadScale,'#252b2d');strokePath(lane-9*roadScale,3.4*roadScale,'#b9bab2');strokePath(lane+9*roadScale,3.4*roadScale,'#b9bab2');strokePath(lane-9*roadScale,1*roadScale,'#eeeece88');strokePath(lane+9*roadScale,1*roadScale,'#eeeece88');strokePath(lane,8*roadScale,'#080c0e');strokePath(lane,2.2*roadScale,'#16191b');}
  // Mark the chosen rail on the visible track while selecting the start lane.
  if(state==='lane-select'&&laneConfirmed){
   ctx.save();ctx.globalAlpha=.64;ctx.shadowColor='#ffce91';ctx.shadowBlur=9;
@@ -399,7 +439,7 @@ for(const lane of [-22,22]){strokePath(lane,17,'#252b2d');strokePath(lane-9,3.4,
   ctx.restore();
  }
 // Reflective segmented start/finish stripe across the plastic between rails.
-const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos(start.theta),ty=Math.sin(start.theta);for(let u=-42;u<42;u+=9){for(let f=0;f<2;f++){ctx.fillStyle=((Math.floor((u+42)/9)+f)%2)?'#ded8c7':'#20282d';let cx=start.x+nx*(u+4)+tx*(f*6),cy=start.y+ny*(u+4)+ty*(f*6);ctx.save();ctx.translate(cx,cy);ctx.rotate(start.theta);ctx.fillRect(-3,-4,6,8);ctx.restore();}}
+const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos(start.theta),ty=Math.sin(start.theta);for(let u=-42*roadScale;u<42*roadScale;u+=9*roadScale){for(let f=0;f<2;f++){ctx.fillStyle=((Math.floor((u+42)/9)+f)%2)?'#ded8c7':'#20282d';let cx=start.x+nx*(u+4)+tx*(f*6),cy=start.y+ny*(u+4)+ty*(f*6);ctx.save();ctx.translate(cx,cy);ctx.rotate(start.theta);ctx.fillRect(-3,-4,6,8);ctx.restore();}}
 // Track road signage, race-direction hints and corner marker numbers.
 const marks=[{d:L*.36,t:'01',txt:'FLOW',side:-1},{d:L*.57,t:'02',txt:'S-CURVE',side:1},{d:L*.88,t:'03',txt:'HAIRPIN',side:-1}];for(const m of marks){const p=at(m.d,m.side*78);ctx.save();ctx.translate(p.x,p.y);ctx.beginPath();ctx.arc(0,0,15,0,7);ctx.fillStyle='#222c30';ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle='#c4a66d';ctx.stroke();ctx.fillStyle='#e8d19d';ctx.font='900 12px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(m.t,0,0);ctx.restore();}
 }
@@ -454,21 +494,22 @@ $('ghost-toggle').addEventListener('click',()=>{
  try{localStorage.setItem('slotrush.rookie.ghost.enabled',String(ghostEnabled));}catch(e){}
  refreshSetup();
 });
-$('lane-back').addEventListener('click',showMainMenu);
+$('map-grid').addEventListener('click',event=>{const b=event.target.closest('[data-map]');if(b)chooseMap(Number(b.dataset.map));});
+$('lane-back').addEventListener('click',()=>state==='lane-select'?showMapSelect():showMainMenu());
 $('pause').addEventListener('click',togglePause);
 $('restart').addEventListener('click',()=>{
  if(['racing','crashed','paused','countdown'].includes(state))start();
- else showLaneSelect();
+ else showMapSelect();
 });
 $('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Tryck Starta lopp, välj SPÅR A eller B och sedan Kör. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
 refreshSetup();hud();requestAnimationFrame(frame);
 window.slotRushDebug={
  getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,
   curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,time,completed,crashes,
-  activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
+  activeMap,mapCount:MAPS.length,activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
   best,recordFrames:runFrames.length,ghostFrames:ghostFrames?.length||0,
   ghostPosition:ghostPose(),laneConfirmed,lapTimes,waypoints:WAYPOINTS}),
- start,tick,at,laneAt,chooseLane,setGas,showLaneSelect,confirmRace
+ start,tick,at,laneAt,chooseLane,chooseMap,showMapSelect,setGas,showLaneSelect,confirmRace
 };
 })();
 </script>
