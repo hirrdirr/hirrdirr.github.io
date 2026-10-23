@@ -129,7 +129,7 @@ function rock(g,x,y,r,rnd,sand=false){
  poly(g,pts,sand?'#483729b3':'#142019ae');
  const shift=pts.map(p=>[p[0]-4,p[1]-6]);
  poly(g,shift,radial(g,x-3,y-6,r,sand?'#c5a078':'#809488',sand?'#78604c':'#3e544d'),'#c3b29624');
- poly(g,[[x-3,y-6],shift[0],shift[1]],[0].length&& (sand?'#d6b68b77':'#b1bfb077'));
+ poly(g,[[x-3,y-6],shift[0],shift[1]],sand?'#d6b68b77':'#b1bfb077');
  stroke(g,x-r*.3,y-r*.35,x+r*.18,y-r*.17,sand?'#e4cba17f':'#b9cdc270',1);
 }
 function stand(g,x,y,w,h,rnd,roof='#485d55'){
@@ -166,7 +166,7 @@ function floodlight(g,x,y,light){
 function tireStack(g,x,y,r=11){
  oval(g,x+3,y+4,r+4,r*.62,'#0008');
  for(let i=2;i>=0;i--){
-  oval(g,x,y-i*3,r,r*.62,'#111a19','#000');
+  oval(g,x,y-i*3,r,r*.62,'#111a19');
   g.strokeStyle='#75807566';g.lineWidth=1;g.beginPath();g.ellipse(x,y-i*3,r-2,r*.47,0,0,TAU);g.stroke();
   oval(g,x,y-i*3,r*.45,r*.24,'#303d39');
  }
