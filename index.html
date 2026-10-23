@@ -5,14 +5,18 @@ navlabel: home
 home_layout: open
 ---
 <div class="pixel-home home-open">
+  <div class="home-atmosphere" aria-hidden="true">
+    <div class="home-hero-art"></div>
+    <div class="home-garden"></div>
+    <div class="home-station"></div>
+  </div>
   <section class="pixel-hero home-hero" aria-labelledby="pixel-home-title">
-    <div class="home-hero-art" aria-hidden="true"></div>
     <div class="home-hero-copy">
       <p class="home-eyebrow">VÄLKOMMEN TILL</p>
       <h1 id="pixel-home-title">hirrdirr.se</h1>
       <p class="home-intro">En plats för projekt, idéer, teknik och allt som inspirerar.</p>
       <nav class="home-quicklinks" aria-label="Utforska sidan">
-        <a href="/games/"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Projekt</strong><small>Spel och experiment</small></span></a>
+        <a href="/games/"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Mina projekt</strong><small>Spel och experiment</small></span></a>
         <a href="/news/"><i aria-hidden="true" data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste nytt</small></span></a>
         <a href="/videos/"><i aria-hidden="true" data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla det senaste</small></span></a>
       </nav>
@@ -21,7 +25,7 @@ home_layout: open
 
   <section class="home-projects" aria-labelledby="home-projects-title">
     <div class="home-section-head">
-      <h2 id="home-projects-title"><i aria-hidden="true" data-lucide="gamepad-2"></i> Mina projekt</h2>
+      <h2 id="home-projects-title"><i aria-hidden="true" data-lucide="gamepad-2"></i> Utvalt projekt</h2>
       <a class="home-text-link" href="/games/">Alla projekt <span aria-hidden="true">↗</span></a>
     </div>
     <div class="home-project-composition">
@@ -81,11 +85,8 @@ home_layout: open
         </div>
       </section>
     </div>
-    <aside class="home-garden" role="img" aria-label="Pixelkonst: japansk trädgård med bro och koidamm"></aside>
+    <footer class="home-outro" aria-labelledby="pixel-social-title">
+      <div class="home-social"><p class="home-eyebrow">VI SES IGEN</p><h2 id="pixel-social-title">Följ mig</h2><p>Häng med på andra plattformar!</p>{% include social_icons.html %}</div>
+    </footer>
   </div>
-
-  <footer class="home-outro" aria-labelledby="pixel-social-title">
-    <div class="home-station" role="img" aria-label="Pixelkonst: en liten japansk station med lyktor och körsbärsblom"></div>
-    <div class="home-social"><p class="home-eyebrow">VI SES IGEN</p><h2 id="pixel-social-title">Följ mig</h2><p>Häng med på andra plattformar!</p>{% include social_icons.html %}</div>
-  </footer>
 </div>

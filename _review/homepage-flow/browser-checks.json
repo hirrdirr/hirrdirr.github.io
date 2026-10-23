@@ -1,0 +1,926 @@
+[
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1170,
+    "overflow": [],
+    "pageBackground": "rgb(246, 248, 250)",
+    "playHeight": 46,
+    "scroll": 2545,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      2560,
+      1440
+    ],
+    "width": 2545
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1170,
+    "overflow": [],
+    "pageBackground": "rgb(6, 29, 39)",
+    "playHeight": 46,
+    "scroll": 2545,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      2560,
+      1440
+    ],
+    "width": 2545
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1045,
+    "overflow": [],
+    "pageBackground": "rgb(246, 248, 250)",
+    "playHeight": 46,
+    "scroll": 1905,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      1920,
+      1080
+    ],
+    "width": 1905
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1045,
+    "overflow": [],
+    "pageBackground": "rgb(6, 29, 39)",
+    "playHeight": 46,
+    "scroll": 1905,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      1920,
+      1080
+    ],
+    "width": 1905
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 956,
+    "overflow": [],
+    "pageBackground": "rgb(246, 248, 250)",
+    "playHeight": 46,
+    "scroll": 1351,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      1366,
+      768
+    ],
+    "width": 1351
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 956,
+    "overflow": [],
+    "pageBackground": "rgb(6, 29, 39)",
+    "playHeight": 46,
+    "scroll": 1351,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      1366,
+      768
+    ],
+    "width": 1351
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 945,
+    "overflow": [],
+    "pageBackground": "rgb(246, 248, 250)",
+    "playHeight": 46,
+    "scroll": 1265,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      1280,
+      720
+    ],
+    "width": 1265
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 945,
+    "overflow": [],
+    "pageBackground": "rgb(6, 29, 39)",
+    "playHeight": 46,
+    "scroll": 1265,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      1280,
+      720
+    ],
+    "width": 1265
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1161,
+    "overflow": [],
+    "pageBackground": "rgb(246, 248, 250)",
+    "playHeight": 46,
+    "scroll": 753,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      768,
+      1024
+    ],
+    "width": 753
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1161,
+    "overflow": [],
+    "pageBackground": "rgb(6, 29, 39)",
+    "playHeight": 46,
+    "scroll": 753,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      768,
+      1024
+    ],
+    "width": 753
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1679,
+    "overflow": [],
+    "pageBackground": "rgb(246, 248, 250)",
+    "playHeight": 46,
+    "scroll": 375,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      390,
+      844
+    ],
+    "width": 375
+  },
+  {
+    "art": [
+      {
+        "name": "home-hero-art",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")"
+      },
+      {
+        "name": "home-garden",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")"
+      },
+      {
+        "name": "home-station",
+        "url": "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+      }
+    ],
+    "brokenImages": [],
+    "idleLinks": 0,
+    "news": [
+      {
+        "date": "2026-10-22",
+        "source": "CERT-SE",
+        "title": "Kritiska sårbarheter i PHP",
+        "url": "https://www.cert.se/2026/10/kritiska-s%C3%A5rbarheter-i-php.html"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "BleepingComputer",
+        "title": "Authorities disrupt nearly 11,000 cybercrime networks in Africa",
+        "url": "https://www.bleepingcomputer.com/news/security/authorities-disrupt-nearly-11-000-cybercrime-networks-in-africa/"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Malwarebytes",
+        "title": "Delivery bots accused of illegally scanning customers",
+        "url": "https://www.malwarebytes.com/blog/privacy/2026/10/delivery-bots-accused-of-illegally-scanning-customers"
+      },
+      {
+        "date": "2026-10-22",
+        "source": "SANS ISC Diary",
+        "title": "ISC Stormcast For Thursday, October 22nd, 2026 https://isc.sans.edu/podcastdetail/10146, (Thu, Oct 22nd)",
+        "url": "https://isc.sans.edu/diary/rss/33446"
+      }
+    ],
+    "newsTop": 1679,
+    "overflow": [],
+    "pageBackground": "rgb(6, 29, 39)",
+    "playHeight": 46,
+    "scroll": 375,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "thumbnailLoaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "thumbnailLoaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "thumbnailLoaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "thumbnailLoaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "viewport": [
+      390,
+      844
+    ],
+    "width": 375
+  }
+]
