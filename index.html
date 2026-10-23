@@ -13,9 +13,9 @@ home_layout: open
       <div class="home-welcome">
         <p class="home-intro">En plats för projekt, idéer, teknik och allt som inspirerar.</p>
         <nav class="home-quicklinks" aria-label="Utforska sidan">
-          <a href="/games/"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Mina projekt</strong><small>Spel och experiment</small></span></a>
-          <a href="/news/"><i aria-hidden="true" data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste nytt</small></span></a>
-          <a href="/videos/"><i aria-hidden="true" data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla det senaste</small></span></a>
+          <a href="#home-projects"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Mina projekt</strong><small>Spel och experiment</small></span></a>
+          <a href="#home-videos"><i aria-hidden="true" data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla det senaste</small></span></a>
+          <a href="#home-news"><i aria-hidden="true" data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste nytt</small></span></a>
         </nav>
       </div>
       <a class="home-scroll" href="#home-projects"><span>Utforska</span><span aria-hidden="true">↓</span></a>
@@ -61,7 +61,7 @@ home_layout: open
 
   <div class="home-stories">
     <div class="home-feed">
-      <section class="home-videos" aria-labelledby="pixel-videos-title">
+      <section id="home-videos" class="home-videos" aria-labelledby="pixel-videos-title">
         <div class="home-section-head"><div><p class="home-eyebrow">02 / FRÅN SKÄRMEN</p><h2 id="pixel-videos-title">Senaste videos<span aria-hidden="true">.</span></h2></div><a class="home-text-link" href="/videos/">Alla videos <span aria-hidden="true">↗</span></a></div>
         <div class="home-video-gallery">
           {% for v in site.data.videos limit:4 %}
@@ -72,7 +72,7 @@ home_layout: open
           {% else %}<p class="home-empty">Inga videos publicerade ännu.</p>{% endfor %}
         </div>
       </section>
-      <section class="home-news" aria-labelledby="pixel-news-title">
+      <section id="home-news" class="home-news" aria-labelledby="pixel-news-title">
         <div class="home-section-head"><div><p class="home-eyebrow">03 / OMVÄRLDEN</p><h2 id="pixel-news-title">Senaste nyheter<span aria-hidden="true">.</span></h2></div><a class="home-text-link" href="/news/">Alla nyheter <span aria-hidden="true">↗</span></a></div>
         <p class="home-news-intro">Säkerhetsnyheter från utvalda källor.{% if site.data.security_highlights.digest_date %} Sammanställt <time datetime="{{ site.data.security_highlights.digest_date }}">{{ site.data.security_highlights.digest_date }}</time>.{% endif %}</p>
         <div class="home-news-list">
