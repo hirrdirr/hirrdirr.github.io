@@ -5,27 +5,26 @@ navlabel: home
 home_layout: open
 ---
 <div class="pixel-home home-open">
-  <div class="home-atmosphere" aria-hidden="true">
-    <div class="home-hero-art"></div>
-    <div class="home-garden"></div>
-    <div class="home-station"></div>
-  </div>
   <section class="pixel-hero home-hero" aria-labelledby="pixel-home-title">
+    <div class="home-hero-art" aria-hidden="true"></div>
     <div class="home-hero-copy">
       <p class="home-eyebrow">VÄLKOMMEN TILL</p>
       <h1 id="pixel-home-title">hirrdirr.se</h1>
-      <p class="home-intro">En plats för projekt, idéer, teknik och allt som inspirerar.</p>
-      <nav class="home-quicklinks" aria-label="Utforska sidan">
-        <a href="/games/"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Mina projekt</strong><small>Spel och experiment</small></span></a>
-        <a href="/news/"><i aria-hidden="true" data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste nytt</small></span></a>
-        <a href="/videos/"><i aria-hidden="true" data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla det senaste</small></span></a>
-      </nav>
+      <div class="home-welcome">
+        <p class="home-intro">En plats för projekt, idéer, teknik och allt som inspirerar.</p>
+        <nav class="home-quicklinks" aria-label="Utforska sidan">
+          <a href="/games/"><i aria-hidden="true" data-lucide="gamepad-2"></i><span><strong>Mina projekt</strong><small>Spel och experiment</small></span></a>
+          <a href="/news/"><i aria-hidden="true" data-lucide="newspaper"></i><span><strong>Nyheter</strong><small>Senaste nytt</small></span></a>
+          <a href="/videos/"><i aria-hidden="true" data-lucide="clapperboard"></i><span><strong>Videos</strong><small>Kolla det senaste</small></span></a>
+        </nav>
+      </div>
+      <a class="home-scroll" href="#home-projects"><span>Utforska</span><span aria-hidden="true">↓</span></a>
     </div>
   </section>
 
-  <section class="home-projects" aria-labelledby="home-projects-title">
+  <section id="home-projects" class="home-projects" aria-labelledby="home-projects-title">
     <div class="home-section-head">
-      <h2 id="home-projects-title"><i aria-hidden="true" data-lucide="gamepad-2"></i> Utvalt projekt</h2>
+      <div><p class="home-eyebrow">01 / SPEL &amp; EXPERIMENT</p><h2 id="home-projects-title">Mina projekt<span aria-hidden="true">.</span></h2></div>
       <a class="home-text-link" href="/games/">Alla projekt <span aria-hidden="true">↗</span></a>
     </div>
     <div class="home-project-composition">
@@ -57,23 +56,24 @@ home_layout: open
         </article>
       </div>
     </div>
+    <div class="home-garden" aria-hidden="true"></div>
   </section>
 
   <div class="home-stories">
     <div class="home-feed">
       <section class="home-videos" aria-labelledby="pixel-videos-title">
-        <div class="home-section-head"><h2 id="pixel-videos-title"><i aria-hidden="true" data-lucide="play"></i> Senaste videos</h2><a class="home-text-link" href="/videos/">Alla videos <span aria-hidden="true">↗</span></a></div>
+        <div class="home-section-head"><div><p class="home-eyebrow">02 / FRÅN SKÄRMEN</p><h2 id="pixel-videos-title">Senaste videos<span aria-hidden="true">.</span></h2></div><a class="home-text-link" href="/videos/">Alla videos <span aria-hidden="true">↗</span></a></div>
         <div class="home-video-gallery">
           {% for v in site.data.videos limit:4 %}
           <a class="home-video" href="https://www.youtube.com/watch?v={{ v.id | escape }}" target="_blank" rel="noopener noreferrer">
-            <div class="home-video-image"><span class="home-video-fallback">Se på YouTube ↗</span><img src="https://img.youtube.com/vi/{{ v.id | escape }}/mqdefault.jpg" width="320" height="180" loading="lazy" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"><span class="home-video-play" aria-hidden="true">▶</span></div>
+            <div class="home-video-image"><span class="home-video-fallback">Se på YouTube ↗</span><img src="https://img.youtube.com/vi/{{ v.id | escape }}/mqdefault.jpg" {% if forloop.first %}srcset="https://img.youtube.com/vi/{{ v.id | escape }}/mqdefault.jpg 320w, https://img.youtube.com/vi/{{ v.id | escape }}/maxresdefault.jpg 1280w" sizes="(max-width: 590px) calc(100vw - 44px), 46vw"{% endif %} width="320" height="180" loading="lazy" alt="" referrerpolicy="no-referrer" onerror="if(this.srcset){this.removeAttribute('srcset')}else{this.hidden=true}"><span class="home-video-play" aria-hidden="true">▶</span></div>
             <h3>{{ v.title | escape }}</h3>{% if v.desc %}<p>{{ v.desc | escape }}</p>{% endif %}
           </a>
           {% else %}<p class="home-empty">Inga videos publicerade ännu.</p>{% endfor %}
         </div>
       </section>
       <section class="home-news" aria-labelledby="pixel-news-title">
-        <div class="home-section-head"><h2 id="pixel-news-title"><i aria-hidden="true" data-lucide="newspaper"></i> Senaste nyheter</h2><a class="home-text-link" href="/news/">Alla nyheter <span aria-hidden="true">↗</span></a></div>
+        <div class="home-section-head"><div><p class="home-eyebrow">03 / OMVÄRLDEN</p><h2 id="pixel-news-title">Senaste nyheter<span aria-hidden="true">.</span></h2></div><a class="home-text-link" href="/news/">Alla nyheter <span aria-hidden="true">↗</span></a></div>
         <p class="home-news-intro">Säkerhetsnyheter från utvalda källor.{% if site.data.security_highlights.digest_date %} Sammanställt <time datetime="{{ site.data.security_highlights.digest_date }}">{{ site.data.security_highlights.digest_date }}</time>.{% endif %}</p>
         <div class="home-news-list">
           {% for item in site.data.security_highlights.articles limit:4 %}
@@ -86,6 +86,7 @@ home_layout: open
       </section>
     </div>
     <footer class="home-outro" aria-labelledby="pixel-social-title">
+      <div class="home-station" aria-hidden="true"></div>
       <div class="home-social"><p class="home-eyebrow">VI SES IGEN</p><h2 id="pixel-social-title">Följ mig</h2><p>Häng med på andra plattformar!</p>{% include social_icons.html %}</div>
     </footer>
   </div>
