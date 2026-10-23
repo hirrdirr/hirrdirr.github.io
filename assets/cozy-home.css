@@ -10,13 +10,18 @@
   --site-gap: clamp(16px, 1.25vw, 28px);
 }
 .site-page {
+  min-height: 100%;
+  height: auto;
   background: var(--pixel-bg);
   color: #f1f4f7;
   font-family: Arial, Helvetica, sans-serif;
 }
 .site-page:has(.pixel-home) main { padding: 0; }
+/* Keep anchors and keyboard scroll targets below the measured sticky header. */
+html:has(.pixel-topbar) { scroll-padding-top: var(--site-header-height, 132px); }
 .pixel-topbar {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 20;
   display: flex;
   align-items: center;
