@@ -1,0 +1,338 @@
+{
+  "homepage": [
+    {
+      "background": "rgb(28, 25, 29)",
+      "hash": "#home-projects",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "scroll": 626,
+      "sectionTop": 146,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "background": "rgb(28, 25, 29)",
+      "hash": "#home-videos",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "scroll": 2009,
+      "sectionTop": 145.625,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "background": "rgb(28, 25, 29)",
+      "hash": "#home-news",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "scroll": 2807,
+      "sectionTop": 146.375,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "background": "rgb(238, 233, 223)",
+      "hash": "#home-projects",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "scroll": 626,
+      "sectionTop": 146,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "background": "rgb(238, 233, 223)",
+      "hash": "#home-videos",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "scroll": 2009,
+      "sectionTop": 145.625,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "background": "rgb(238, 233, 223)",
+      "hash": "#home-news",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "scroll": 2807,
+      "sectionTop": 146.375,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "background": "rgb(28, 25, 29)",
+      "hash": "#home-projects",
+      "headerBottom": 94,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "scroll": 802,
+      "sectionTop": 117.59375,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "background": "rgb(28, 25, 29)",
+      "hash": "#home-videos",
+      "headerBottom": 94,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "scroll": 1889,
+      "sectionTop": 117.65625,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "background": "rgb(28, 25, 29)",
+      "hash": "#home-news",
+      "headerBottom": 94,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "scroll": 2702,
+      "sectionTop": 118.203125,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "background": "rgb(238, 233, 223)",
+      "hash": "#home-projects",
+      "headerBottom": 94,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "scroll": 802,
+      "sectionTop": 117.59375,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "background": "rgb(238, 233, 223)",
+      "hash": "#home-videos",
+      "headerBottom": 94,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "scroll": 1889,
+      "sectionTop": 117.65625,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "background": "rgb(238, 233, 223)",
+      "hash": "#home-news",
+      "headerBottom": 94,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "scroll": 2702,
+      "sectionTop": 118.203125,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "hash": "#home-projects",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "sectionTop": 146,
+      "width": 768
+    },
+    {
+      "hash": "#home-videos",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "sectionTop": 145.546875,
+      "width": 768
+    },
+    {
+      "hash": "#home-news",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": false,
+      "overflow": false,
+      "sectionTop": 145.65625,
+      "width": 768
+    },
+    {
+      "hash": "#home-projects",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "sectionTop": 146,
+      "width": 768
+    },
+    {
+      "hash": "#home-videos",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "sectionTop": 145.546875,
+      "width": 768
+    },
+    {
+      "hash": "#home-news",
+      "headerBottom": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "sectionTop": 145.65625,
+      "width": 768
+    }
+  ],
+  "pageBottoms": [
+    {
+      "headerHeight": 122,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/",
+      "scroll": 3584,
+      "width": 390
+    },
+    {
+      "headerHeight": 109,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/games/",
+      "scroll": 1291,
+      "width": 390
+    },
+    {
+      "headerHeight": 109,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/videos/",
+      "scroll": 1819,
+      "width": 390
+    },
+    {
+      "headerHeight": 109,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/news/",
+      "scroll": 3005,
+      "width": 390
+    },
+    {
+      "headerHeight": 109,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/news/archive/",
+      "scroll": 11167,
+      "width": 390
+    },
+    {
+      "headerHeight": 94,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/",
+      "scroll": 2937,
+      "width": 1920
+    },
+    {
+      "headerHeight": 64,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/games/",
+      "scroll": 583,
+      "width": 1920
+    },
+    {
+      "headerHeight": 64,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/videos/",
+      "scroll": 1485,
+      "width": 1920
+    },
+    {
+      "headerHeight": 64,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/news/",
+      "scroll": 722,
+      "width": 1920
+    },
+    {
+      "headerHeight": 64,
+      "headerTop": 0,
+      "light": true,
+      "overflow": false,
+      "path": "/news/archive/",
+      "scroll": 5891,
+      "width": 1920
+    }
+  ],
+  "secondaryAnchors": [
+    {
+      "hash": "#spelen",
+      "headerBottom": 109,
+      "path": "/games/",
+      "targetTop": 133.484375
+    },
+    {
+      "hash": "#video-library",
+      "headerBottom": 109,
+      "path": "/videos/",
+      "targetTop": 132.6875
+    },
+    {
+      "hash": "#digest",
+      "headerBottom": 109,
+      "path": "/news/",
+      "targetTop": 133.28125
+    }
+  ]
+}

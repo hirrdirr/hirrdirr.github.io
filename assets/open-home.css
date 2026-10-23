@@ -42,7 +42,7 @@ body:has(.home-open) .pixel-topbar {
   min-height: 94px;
   padding: 22px var(--site-gutter);
   gap: 28px;
-  background: transparent;
+  background: var(--home-bg);
   border: 0;
 }
 body:has(.home-open) .pixel-brand { gap: 12px; }
