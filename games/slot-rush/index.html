@@ -148,6 +148,9 @@
   }
 
 
+  /* v0.1.9: restrained animated racing venues, with the racetrack always foremost. */
+  .venue-label{display:inline-block;margin-left:10px;padding-left:10px;border-left:1px solid #657263;color:#f0d3a6;letter-spacing:.11em}
+  @media(max-width:600px){.chip{line-height:1.9}.venue-label{margin-left:7px;padding-left:7px}}
   /* v0.1.8 visual direction: precision toy racing, not an array of web cards. */
   :root{
     --bg:#121715;--panel:#1b221f;--panel2:#222b26;--fg:#f2eee4;
@@ -235,7 +238,7 @@
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.8</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.1.9</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -397,6 +400,7 @@ function chooseMap(i){
  mapConfirmed=true;
  $('track-name').textContent=MAPS[i].name.toUpperCase();
  $('track-number').textContent=String(i+1).padStart(2,'0');
+ $('venue-label').textContent=VENUES[i].label;
  $('play').disabled=false;$('play').textContent='VÄLJ SPÅR';
  paintMapCards();refreshSetup();hud();return true;
 }
@@ -540,25 +544,241 @@ while(completed<3&&distance>=(completed+1)*lapLength()){lapTimes.push(time-lapSt
 function basePath(offset){ctx.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath()}
 function strokePath(offset,width,color){basePath(offset);ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=width;ctx.strokeStyle=color;ctx.stroke()}
 
-function board(){
- // Crisp hobby mat; color varies subtly by map, without blurry overlays.
- const palette=MAPS[activeMap].colors;
- ctx.fillStyle=palette[1];ctx.fillRect(0,0,W,H);
- ctx.fillStyle='#131c18a8';ctx.fillRect(0,0,W,H);
- ctx.strokeStyle='#c5d2bb18';ctx.lineWidth=1;
- ctx.strokeRect(22.5,22.5,W-45,H-45);
- // Sharp, restrained microtexture drawn at whole-world-pixel positions.
- ctx.fillStyle='#dbe2d012';
- for(let y=33;y<H-27;y+=35){
-  for(let x=32;x<W-26;x+=35)ctx.fillRect(x,y,1.25,1.25);
- }
- // Mechanical corner fasteners belong to the board, not on the driving surface.
- for(const [x,y] of [[34,34],[W-34,34],[34,H-34],[W-34,H-34]]){
-  ctx.fillStyle='#333f36';ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#849486';ctx.lineWidth=1;ctx.beginPath();
-  ctx.moveTo(x-2.5,y);ctx.lineTo(x+2.5,y);ctx.stroke();
+
+/*
+ * Each circuit has its own hand-composed, trackside venue (not a looping
+ * generic texture). All elements render BEHIND the road and vehicle.
+ * Tiny ambient motions are deterministic and respect reduced-motion settings.
+ */
+const VENUES=[
+ {label:'GARAGE',ground:'#29362e',trim:'#465d4d',light:'#b3ca9c',shade:'#1a241d'},
+ {label:'SPEEDWAY',ground:'#293642',trim:'#4f6876',light:'#9fc9d7',shade:'#1a2830'},
+ {label:'WOODLAND',ground:'#25392e',trim:'#42634a',light:'#b0c98a',shade:'#19291f'},
+ {label:'PIT YARD',ground:'#38372f',trim:'#706651',light:'#e0b77e',shade:'#252720'},
+ {label:'GRAND PRIX',ground:'#313b32',trim:'#656f53',light:'#e4d9a8',shade:'#202b23'},
+ {label:'DESERT RUN',ground:'#3d3028',trim:'#856245',light:'#e9bd88',shade:'#2e251f'},
+ {label:'HARBOR',ground:'#20343c',trim:'#3f7480',light:'#a8d7da',shade:'#162730'},
+ {label:'HIGHLANDS',ground:'#28372f',trim:'#506b5d',light:'#b6cabb',shade:'#1a2721'},
+ {label:'NIGHT RACE',ground:'#25283b',trim:'#525579',light:'#b6b9ec',shade:'#191b2c'},
+ {label:'CHAMPIONSHIP',ground:'#302c3a',trim:'#80647f',light:'#edd3a3',shade:'#201d2a'}
+];
+const venueReducedMotion=typeof window.matchMedia==='function'&&
+ window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function venueLine(x1,y1,x2,y2,color,width=1){
+ ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();
+ ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+}
+function venueBox(x,y,w,h,fill,edge){
+ ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);
+ if(edge){ctx.strokeStyle=edge;ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);}
+}
+function venueDisc(x,y,r,fill,stroke){
+ ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();
+ if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
+}
+function venueFlag(x,y,t,color){
+ const wave=Math.sin(t*1.45+x*.035)*3.5;
+ venueLine(x,y-2,x,y+31,'#9ca99e',2.5);
+ ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x+1,y-1);
+ ctx.lineTo(x+26,y+3+wave);ctx.lineTo(x+21,y+15+wave*.6);
+ ctx.lineTo(x+1,y+12);ctx.closePath();ctx.fill();
+ venueLine(x+3,y+3,x+18,y+7+wave*.5,'#ffffff44',1);
+}
+function venueLamp(x,y,t,accent){
+ venueBox(x-2,y,4,27,'#6e7774','#111e21');
+ venueDisc(x,y-3,6,'#29312b','#8b9690');
+ const lit=.58+.42*Math.sin(t*1.35+x*.014);
+ ctx.globalAlpha=.32+lit*.55;
+ venueDisc(x,y-3,3.4,accent);ctx.globalAlpha=1;
+}
+function venueStand(x,y,width,rows=3){
+ venueBox(x,y,width,rows*13+10,'#202b30','#70807b');
+ for(let row=0;row<rows;row++){
+  venueBox(x+5,y+6+row*13,width-10,8,row%2?'#495a62':'#3b4d55');
+  for(let col=0;col<Math.floor((width-10)/14);col++){
+   venueBox(x+8+col*14,y+8+row*13,7,4,(col+row)%3?'#b6a387':'#b7c7c8');
+  }
  }
 }
+function venueTree(x,y,r,shade='#41634d'){
+ venueDisc(x+2,y+4,r+4,'#17271d');
+ venueDisc(x,y,r,shade,'#678568');
+ venueDisc(x-r*.22,y-r*.32,r*.58,'#648668');
+ venueDisc(x+r*.37,y+r*.1,r*.33,'#345e42');
+}
+function venuePine(x,y,r){
+ venueBox(x-3,y+2,6,r*.8,'#6a604a');
+ ctx.fillStyle='#273f35';
+ for(let step=0;step<3;step++){
+  let h=r*(1.25-step*.23),ry=y+r*.3-step*r*.3;
+  ctx.beginPath();ctx.moveTo(x,ry-h);ctx.lineTo(x+r*(.83-step*.08),ry);
+  ctx.lineTo(x-r*(.83-step*.08),ry);ctx.closePath();ctx.fill();
+ }
+ venueLine(x-r*.24,y-r*.55,x,y-r*1.1,'#8aab91',1);
+}
+function venueCone(x,y){
+ venueDisc(x,y+3,8,'#1d2725');
+ ctx.fillStyle='#d49a61';ctx.beginPath();ctx.moveTo(x,y-9);
+ ctx.lineTo(x-5,y+3);ctx.lineTo(x+5,y+3);ctx.closePath();ctx.fill();
+ venueLine(x-2.4,y-2,x+2.4,y-2,'#e8d8be',2);
+}
+function venueBarrier(x,y,w,rotate=0){
+ ctx.save();ctx.translate(x,y);ctx.rotate(rotate);
+ venueBox(0,0,w,9,'#303b37','#839084');
+ for(let k=0;k<w-11;k+=25)venueBox(k+5,2,13,5,'#c0ad83');
+ ctx.restore();
+}
+function venueContainer(x,y,w,h,fill){
+ venueBox(x+4,y+5,w,h,'#171f1b');
+ venueBox(x,y,w,h,fill,'#778179');
+ for(let k=7;k<w-5;k+=12)venueLine(x+k,y+5,x+k,y+h-5,'#ffffff24',1.3);
+}
+function venuePebble(x,y,r,fill){
+ ctx.fillStyle=fill;ctx.beginPath();ctx.ellipse(x,y,r,r*.58,-.28,0,Math.PI*2);ctx.fill();
+ venueLine(x-r*.4,y-1,x+r*.4,y-2,'#ffffff19',1);
+}
+function venueWater(x,y,w,h,t){
+ venueBox(x,y,w,h,'#294a54','#4b7780');
+ for(let row=0;row<Math.floor(h/16);row++){
+  const ry=y+10+row*16;
+  for(let col=0;col<3;col++){
+   const rx=x+9+((col*39+row*13+t*9)%Math.max(40,w-30));
+   venueLine(rx,ry,rx+15,ry,'#85b9ba66',1.3);
+  }
+ }
+}
+function venueDust(x,y,t,seed){
+ const drift=t*(4+seed%3);
+ for(let i=0;i<5;i++){
+  const px=x+((i*29+drift*2+seed*5)%126),py=y+Math.sin(t*.6+i+seed)*4+i*11;
+  venueLine(px,py,px+9+i*2,py-1,'#ead1ad36',1+i%2);
+ }
+}
+function venueDecor(){
+ const v=VENUES[activeMap],t=venueReducedMotion?0:gameClock;
+ // Distinct crisp ground hues. No full-screen haze, soft-focus filters or text.
+ ctx.fillStyle=v.ground;ctx.fillRect(0,0,W,H);
+ // Subtle board-edge outline and tiny hardware, subordinate to the track.
+ ctx.strokeStyle=v.trim;ctx.lineWidth=1;
+ ctx.strokeRect(19.5,19.5,W-39,H-39);
+ ctx.strokeStyle='#cbd3bb0d';
+ for(let y=33;y<575;y+=42)for(let x=30;x<940;x+=42){
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+1,y);ctx.stroke();
+ }
+ ctx.save();
+ switch(activeMap){
+  case 0: // Rookie Circuit – garage workshop / test bench
+   venueBox(57,75,181,59,'#313c34','#69806c');
+   for(let i=0;i<4;i++)venueBox(69+i*39,89,29,28,i%2?'#44574a':'#3c4b41','#879587');
+   venueBox(719,90,182,42,'#30382f','#71816f');
+   for(let i=0;i<5;i++){venueBox(732+i*34,99,26,18,'#526456');venueLine(736+i*34,123,753+i*34,123,'#a1bba4',2);}
+   for(let i=0;i<4;i++)venueCone(75+i*30,485);
+   venueBarrier(648,510,198);
+   for(let i=0;i<4;i++)venueLamp(285+i*130,93,t,'#e4b979');
+   break;
+  case 1: // Twin Bend – lively spectator speedway
+   venueStand(70,69,280,4);venueStand(609,69,281,4);
+   venueStand(325,509,302,3);
+   for(let i=0;i<5;i++)venueFlag(110+i*182,138,t+i*.4,i%2?'#d8e5d5':'#c9956e');
+   venueBarrier(55,468,168);venueBarrier(739,468,165);
+   for(let i=0;i<6;i++)venueLamp(106+i*148,46,t,'#c7dfdc');
+   break;
+  case 2: // Serpent – wooded race park, gentle moving leaves
+   for(let i=0;i<10;i++){venueTree(69+i*87,66+(i%3)*23,13+i%4*2,i%2?'#365c43':'#43694b');}
+   for(let i=0;i<9;i++)venueTree(89+i*96,532+(i%2)*12,13+i%3*2,'#416b4d');
+   for(let i=0;i<8;i++){
+    const leafX=46+(i*115+(t*(3+i%3))%W)%860;
+    const leafY=140+(i*59)%345+Math.sin(t*.9+i)*5;
+    venueDisc(leafX,leafY,1.7,'#b6cb9577');
+   }
+   venueBarrier(65,475,140);
+   break;
+  case 3: // Hairpin Yard – busy concrete pit paddock
+   venueContainer(52,75,190,51,'#6d6857');
+   venueContainer(714,72,198,56,'#4d6459');
+   for(let i=0;i<5;i++){venueBox(76+i*171,532,94,26,'#55564b','#8d9181');
+    venueLine(78+i*171,540,160+i*171,540,'#c1bc8d',2);}
+   for(let i=0;i<4;i++)venueCone(90+i*32,473);
+   for(let i=0;i<3;i++)venueLamp(170+i*312,145,t,'#e9bd82');
+   venueBarrier(728,474,168);
+   break;
+  case 4: // Grand Loop – classic motorsport grandstands and flags
+   venueStand(80,66,350,4);venueStand(538,66,342,4);
+   venueStand(80,512,275,3);venueStand(628,512,255,3);
+   for(let i=0;i<6;i++)venueFlag(110+i*145,151,t+i,'#e1d5a0');
+   venueBox(396,368,168,61,'#354337','#526a52');
+   for(let i=0;i<6;i++)venueLine(411,376+i*8,544,376+i*8,'#9aab8255',1);
+   break;
+  case 5: // Chicane – warm canyon and windblown dust
+   for(let i=0;i<7;i++){
+    const x=50+i*138;
+    venuePebble(x,70+i%2*37,16+i%3*7,'#68503f');
+    venuePebble(x+24,528-(i%3)*21,22+i%2*10,'#795945');
+   }
+   venueBarrier(65,164,178,-.07);venueBarrier(718,492,169,.09);
+   venueDust(78,238,t,1);venueDust(750,394,t,2);
+   for(let i=0;i<4;i++)venueCone(99+i*30,477);
+   break;
+  case 6: // Corkscrew – harbor quays, bright animated ripples
+   venueWater(40,91,103,400,t);
+   venueWater(818,90,98,405,t*.78);
+   venueBox(60,156,65,16,'#7a857c','#bdc6b0');
+   venueBox(830,342,64,16,'#79877e','#bdc6b0');
+   for(let i=0;i<6;i++){
+    venueDisc(74,112+i*65,5,i%2?'#a4b5ac':'#dfb681','#17252a');
+    venueDisc(873,126+i*59,5,i%2?'#d3a577':'#9ec3c3','#17252a');
+   }
+   venueBarrier(349,511,261);
+   for(let i=0;i<3;i++)venueFlag(326+i*161,69,t,'#b8d8d9');
+   break;
+  case 7: // Switchback – highland pine rally paddock
+   for(let i=0;i<11;i++){
+    venuePine(68+i*86,105+(i%3)*9,12+i%3*4);
+    venuePine(76+i*83,524+(i%2)*20,12+i%4*3);
+   }
+   for(let i=0;i<8;i++){
+    const x=57+i*120;
+    venuePebble(x,477+(i%2)*34,9+i%4*5,'#607369');
+   }
+   for(let i=0;i<13;i++){
+    const x=43+(i*71+t*(2+i%2))%875,y=129+(i*53)%340;
+    venueDisc(x,y+Math.sin(t*.7+i)*3,1.3,'#c9d4b970');
+   }
+   venueBarrier(84,461,124);
+   break;
+  case 8: // Thunder Mile – night race, sweeping marshal LEDs
+   venueBox(40,69,877,40,'#1c2638','#576080');
+   venueBox(40,494,877,45,'#1c2638','#576080');
+   for(let i=0;i<38;i++){
+    const pulse=.4+.6*Math.max(0,Math.sin(t*1.9-i*.33));
+    ctx.globalAlpha=.22+pulse*.5;
+    venueBox(53+i*22.2,82,13,6,i%4?'#9faee5':'#eecb8d');
+    venueBox(53+i*22.2,516,13,5,i%4?'#798ed0':'#eecb8d');
+   }
+   ctx.globalAlpha=1;
+   venueStand(71,113,193,2);venueStand(710,113,181,2);
+   venueBarrier(372,549,236);
+   for(let i=0;i<6;i++)venueLamp(109+i*148,112,t,'#acc5f7');
+   break;
+  case 9: // Final Apex – championship arena and moving race flags
+   venueStand(71,67,316,4);venueStand(575,67,314,4);
+   venueStand(332,525,287,3);
+   venueBox(405,120,149,32,'#393248','#aa8f9b');
+   for(let i=0;i<5;i++){
+    const bright=.3+.7*Math.max(0,Math.sin(t*1.4+i*.65));
+    ctx.globalAlpha=.45+.45*bright;
+    venueBox(424+i*25,134,16,5,i%2?'#e8d098':'#b9b4db');
+   }
+   ctx.globalAlpha=1;
+   for(let i=0;i<6;i++)venueFlag(99+i*151,165,t+i,'#dec69c');
+   for(let i=0;i<5;i++)venueLamp(154+i*166,548,t,'#f4d69c');
+   venueBarrier(61,471,154);
+   break;
+ }
+ ctx.restore();
+}
+
+function board(){venueDecor();}
 function drawTrack(){ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=7;ctx.shadowOffsetY=5;strokePath(0,104*roadScale,'#080e13');ctx.restore();
 strokePath(0,105*roadScale,'#101713');strokePath(0,97*roadScale,'#414640');strokePath(0,91*roadScale,'#64695f');strokePath(0,84*roadScale,'#343c34');
 // Two shallow outer-edge lips.
