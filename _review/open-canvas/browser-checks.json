@@ -1,0 +1,530 @@
+[
+  {
+    "size": "2560x1440",
+    "active": "Hem",
+    "background": "rgb(28, 25, 29)",
+    "brokenImages": [],
+    "height": 4619,
+    "heroHeight": 1020,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+    ],
+    "scrollWidth": 2545,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 2545
+  },
+  {
+    "size": "1920x1080",
+    "active": "Hem",
+    "background": "rgb(28, 25, 29)",
+    "brokenImages": [],
+    "height": 4017,
+    "heroHeight": 825.59375,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+    ],
+    "scrollWidth": 1905,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 1905
+  },
+  {
+    "size": "1366x768",
+    "active": "Hem",
+    "background": "rgb(28, 25, 29)",
+    "brokenImages": [],
+    "height": 3451,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+    ],
+    "scrollWidth": 1351,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 1351
+  },
+  {
+    "size": "1280x720",
+    "active": "Hem",
+    "background": "rgb(28, 25, 29)",
+    "brokenImages": [],
+    "height": 3405,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+    ],
+    "scrollWidth": 1265,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 1265
+  },
+  {
+    "size": "768x1024",
+    "active": "Hem",
+    "background": "rgb(28, 25, 29)",
+    "brokenImages": [],
+    "height": 3454,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+    ],
+    "scrollWidth": 753,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 753
+  },
+  {
+    "size": "390x844",
+    "active": "Hem",
+    "background": "rgb(28, 25, 29)",
+    "brokenImages": [],
+    "height": 4405,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-dark.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-dark.webp\")"
+    ],
+    "scrollWidth": 375,
+    "theme": "dark",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 375
+  },
+  {
+    "size": "2560x1440",
+    "active": "Hem",
+    "background": "rgb(238, 233, 223)",
+    "brokenImages": [],
+    "height": 4619,
+    "heroHeight": 1020,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+    ],
+    "scrollWidth": 2545,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 2545
+  },
+  {
+    "size": "1920x1080",
+    "active": "Hem",
+    "background": "rgb(238, 233, 223)",
+    "brokenImages": [],
+    "height": 4017,
+    "heroHeight": 825.59375,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+    ],
+    "scrollWidth": 1905,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 1905
+  },
+  {
+    "size": "1366x768",
+    "active": "Hem",
+    "background": "rgb(238, 233, 223)",
+    "brokenImages": [],
+    "height": 3451,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+    ],
+    "scrollWidth": 1351,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 1351
+  },
+  {
+    "size": "1280x720",
+    "active": "Hem",
+    "background": "rgb(238, 233, 223)",
+    "brokenImages": [],
+    "height": 3405,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+    ],
+    "scrollWidth": 1265,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 1265
+  },
+  {
+    "size": "768x1024",
+    "active": "Hem",
+    "background": "rgb(238, 233, 223)",
+    "brokenImages": [],
+    "height": 3454,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+    ],
+    "scrollWidth": 753,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 753
+  },
+  {
+    "size": "390x844",
+    "active": "Hem",
+    "background": "rgb(238, 233, 223)",
+    "brokenImages": [],
+    "height": 4405,
+    "heroHeight": 650,
+    "idleInteractive": 0,
+    "playHeight": 54,
+    "sceneUrls": [
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/hero-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/garden-light.webp\")",
+      "url(\"http://terminal.local:4173/after/assets/artwork/home/station-light.webp\")"
+    ],
+    "scrollWidth": 375,
+    "theme": "light",
+    "videos": [
+      {
+        "href": "https://www.youtube.com/watch?v=Auss7fLMiIE",
+        "img": "https://img.youtube.com/vi/Auss7fLMiIE/maxresdefault.jpg",
+        "loaded": true,
+        "title": "Clutch"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=FGZndqSzgbg",
+        "img": "https://img.youtube.com/vi/FGZndqSzgbg/mqdefault.jpg",
+        "loaded": true,
+        "title": "RessChamp"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=x_FQXDfmamw",
+        "img": "https://img.youtube.com/vi/x_FQXDfmamw/mqdefault.jpg",
+        "loaded": true,
+        "title": "Onetap"
+      },
+      {
+        "href": "https://www.youtube.com/watch?v=wXifh0nB72Y",
+        "img": "https://img.youtube.com/vi/wXifh0nB72Y/mqdefault.jpg",
+        "loaded": true,
+        "title": "Flickväncentralen"
+      }
+    ],
+    "width": 375
+  }
+]
