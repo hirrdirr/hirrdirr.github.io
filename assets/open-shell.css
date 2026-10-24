@@ -1,0 +1,65 @@
+/* Open canvas palette and navigation shared by Home, Games, Videos and News. */
+body:has(:is(.home-open, .section-page)) {
+  --canvas-bg: #1c191d;
+  --canvas-text: #f1ede5;
+  --canvas-muted: #bdb5bd;
+  --canvas-accent: #c4ceab;
+  --canvas-line: #49434a;
+  --canvas-soft: #302b32;
+  --canvas-rgb: 28, 25, 29;
+  --pixel-bg: var(--canvas-bg);
+  --bg: var(--canvas-bg);
+  --text: var(--canvas-text);
+  --muted: var(--canvas-muted);
+  --accent: var(--canvas-accent);
+  --site-gutter: clamp(22px, 5.2vw, 132px);
+  background: var(--canvas-bg);
+  color: var(--canvas-text);
+}
+body.light:has(:is(.home-open, .section-page)) {
+  --canvas-bg: #eee9df;
+  --canvas-text: #29252c;
+  --canvas-muted: #635c63;
+  --canvas-accent: #536443;
+  --canvas-line: #c6bfb9;
+  --canvas-soft: #ddd6cf;
+  --canvas-rgb: 238, 233, 223;
+  background: var(--canvas-bg);
+  color: var(--canvas-text);
+}
+/* The navigation sits on the same canvas, without a toolbar panel. */
+body:has(:is(.home-open, .section-page)) .pixel-topbar {
+  max-width: 2560px;
+  margin: auto;
+  min-height: 94px;
+  padding: 22px var(--site-gutter);
+  gap: 28px;
+  background: var(--canvas-bg);
+  border: 0;
+}
+body:has(:is(.home-open, .section-page)) .pixel-brand { gap: 12px; }
+body:has(:is(.home-open, .section-page)) .pixel-brand-fox { width: 38px; height: 40px; }
+body:has(:is(.home-open, .section-page)) .pixel-brand > span:last-child { width: 146px; height: 32px; image-rendering: pixelated; }
+body:has(:is(.home-open, .section-page)) .pixel-navigation { margin-left: auto; gap: clamp(8px, 1.8vw, 36px); }
+body:has(:is(.home-open, .section-page)) .pixel-navigation > :is(a,span) { padding: 4px 0; font-size: 14px; border: 0; border-radius: 0; }
+body:has(:is(.home-open, .section-page)) .pixel-navigation svg { display: none; }
+body:has(:is(.home-open, .section-page)) .pixel-topbar a { color: var(--canvas-text); }
+body:has(:is(.home-open, .section-page)) .pixel-navigation a:is(:hover,.active) { background: transparent; color: var(--canvas-accent); text-decoration: underline; text-underline-offset: 8px; }
+body:has(:is(.home-open, .section-page)) .pixel-navigation [aria-disabled] { color: var(--canvas-muted); }
+body:has(:is(.home-open, .section-page)) .pixel-header-actions { margin-left: 16px; }
+body:has(:is(.home-open, .section-page)) .pixel-header-actions :is(.iconbtn,.pixel-search-icon) { color: var(--canvas-text); border: 0; border-radius: 50%; background: transparent; }
+body:has(:is(.home-open, .section-page)) .pixel-header-actions .iconbtn:hover { background: var(--canvas-soft); }
+body:has(:is(.home-open, .section-page)) .pixel-header-actions .pixel-search-icon { color: var(--canvas-muted); }
+body:has(:is(.home-open, .section-page)) .pixel-topbar :is(a,button):focus-visible { outline: 3px solid var(--canvas-accent); outline-offset: 6px; }
+body.light:has(:is(.home-open, .section-page)) .pixel-brand > span:last-child { filter: brightness(.2) sepia(.1); }
+@media (max-width: 850px) {
+  body:has(:is(.home-open, .section-page)) .pixel-topbar { padding-block: 14px; gap: 6px 16px; }
+  body:has(:is(.home-open, .section-page)) .pixel-navigation { margin: 0; justify-content: space-between; gap: 16px; }
+  body:has(:is(.home-open, .section-page)) .pixel-header-actions { margin-left: auto; }
+}
+@media (max-width: 590px) {
+  body:has(:is(.home-open, .section-page)) .pixel-brand > span:last-child { width: 126px; height: 28px; }
+  body:has(:is(.home-open, .section-page)) .pixel-brand-fox { width: 30px; height: 32px; }
+  body:has(:is(.home-open, .section-page)) .pixel-navigation > :is(a,span) { font-size: 13px; min-height: 44px; }
+  body:has(:is(.home-open, .section-page)) .pixel-header-actions { gap: 0; }
+}

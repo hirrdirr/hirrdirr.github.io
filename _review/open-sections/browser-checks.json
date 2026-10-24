@@ -1,0 +1,632 @@
+[
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 557,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+        "width": 1002
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": false,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 561,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+        "width": 523
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 442,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+        "width": 1018
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 442,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+        "width": 1018
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 561,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+        "width": 523
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 557,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+        "width": 1002
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": true,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 184,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+        "width": 331
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": true,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 197,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+        "width": 147
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 166,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+        "width": 331
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 166,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+        "width": 331
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 197,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+        "width": 147
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 184,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+        "width": 331
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": false,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 280,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+        "width": 673
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": false,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 280,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+        "width": 673
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": true,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 427,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+        "width": 321
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 427,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+        "width": 321
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 224,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+        "width": 673
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 224,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+        "width": 673
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 400,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+        "width": 710
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": true,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 400,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+        "width": 710
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": false,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 383,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+        "width": 371
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 383,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+        "width": 371
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 320,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+        "width": 721
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 320,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+        "width": 721
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      1366,
+      768
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 680,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+        "width": 1345
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": false,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "active": "Games",
+    "art": [
+      {
+        "height": 680,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+        "width": 1345
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 4,
+    "headerTop": 0,
+    "idleLinks": 0,
+    "light": true,
+    "overflow": false,
+    "page": "/games/",
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 774,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+        "width": 705
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "active": "Videos",
+    "art": [
+      {
+        "height": 774,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+        "width": 705
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 11,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/videos/",
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 540,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+        "width": 1366
+      }
+    ],
+    "bg": "rgb(28, 25, 29)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": false,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      2560,
+      1440
+    ]
+  },
+  {
+    "active": "News",
+    "art": [
+      {
+        "height": 540,
+        "url": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+        "width": 1366
+      }
+    ],
+    "bg": "rgb(238, 233, 223)",
+    "contentLinks": 25,
+    "headerTop": 0,
+    "idleLinks": null,
+    "light": true,
+    "overflow": false,
+    "page": "/news/",
+    "viewport": [
+      2560,
+      1440
+    ]
+  }
+]

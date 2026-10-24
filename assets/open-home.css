@@ -1,31 +1,12 @@
 /* Homepage only. One open canvas; shared layouts and theme asset URLs stay intact. */
 body:has(.home-open) {
-  --home-bg: #1c191d;
-  --home-text: #f1ede5;
-  --home-muted: #bdb5bd;
-  --home-accent: #c4ceab;
-  --home-line: #49434a;
-  --home-soft: #302b32;
-  --home-rgb: 28, 25, 29;
-  --pixel-bg: var(--home-bg);
-  --bg: var(--home-bg);
-  --text: var(--home-text);
-  --muted: var(--home-muted);
-  --accent: var(--home-accent);
-  --site-gutter: clamp(22px, 5.2vw, 132px);
-  background: var(--home-bg);
-  color: var(--home-text);
-}
-body.light:has(.home-open) {
-  --home-bg: #eee9df;
-  --home-text: #29252c;
-  --home-muted: #635c63;
-  --home-accent: #536443;
-  --home-line: #c6bfb9;
-  --home-soft: #ddd6cf;
-  --home-rgb: 238, 233, 223;
-  background: var(--home-bg);
-  color: var(--home-text);
+  --home-bg: var(--canvas-bg);
+  --home-text: var(--canvas-text);
+  --home-muted: var(--canvas-muted);
+  --home-accent: var(--canvas-accent);
+  --home-line: var(--canvas-line);
+  --home-soft: var(--canvas-soft);
+  --home-rgb: var(--canvas-rgb);
 }
 .home-open {
   --home-gap: clamp(44px, 6vw, 140px);
@@ -43,32 +24,7 @@ body.light .home-open {
   --home-studio: url('/assets/artwork/sections/videos-light.webp');
   --home-newsroom: url('/assets/artwork/sections/news-light.webp');
 }
-/* The navigation sits on the same canvas, without a toolbar panel. */
-body:has(.home-open) .pixel-topbar {
-  max-width: 2560px;
-  margin: auto;
-  min-height: 94px;
-  padding: 22px var(--site-gutter);
-  gap: 28px;
-  background: var(--home-bg);
-  border: 0;
-}
-body:has(.home-open) .pixel-brand { gap: 12px; }
-body:has(.home-open) .pixel-brand-fox { width: 38px; height: 40px; }
-body:has(.home-open) .pixel-brand > span:last-child { width: 146px; height: 32px; image-rendering: pixelated; }
-body:has(.home-open) .pixel-navigation { margin-left: auto; gap: clamp(8px, 1.8vw, 36px); }
-body:has(.home-open) .pixel-navigation > :is(a,span) { padding: 4px 0; font-size: 14px; border: 0; border-radius: 0; }
-body:has(.home-open) .pixel-navigation svg { display: none; }
-body:has(.home-open) .pixel-topbar a { color: var(--home-text); }
-body:has(.home-open) .pixel-navigation a:is(:hover,.active) { background: transparent; color: var(--home-accent); text-decoration: underline; text-underline-offset: 8px; }
-body:has(.home-open) .pixel-navigation [aria-disabled] { color: var(--home-muted); }
-body:has(.home-open) .pixel-header-actions { margin-left: 16px; }
-body:has(.home-open) .pixel-header-actions :is(.iconbtn,.pixel-search-icon) { color: var(--home-text); border: 0; border-radius: 50%; background: transparent; }
-body:has(.home-open) .pixel-header-actions .iconbtn:hover { background: var(--home-soft); }
-body:has(.home-open) .pixel-header-actions .pixel-search-icon { color: var(--home-muted); }
-body:has(.home-open) .pixel-topbar :is(a,button):focus-visible,
 .home-open a:focus-visible { outline: 3px solid var(--home-accent); outline-offset: 6px; }
-body.light:has(.home-open) .pixel-brand > span:last-child { filter: brightness(.2) sepia(.1); }
 .home-open :is(h2,h3,h4,p) { margin: 0; }
 .home-open :is(h2,h3,h4) { color: var(--home-text); line-height: 1.08; }
 .home-open p { color: var(--home-muted); }
@@ -229,9 +185,6 @@ body.light .home-open .home-hero h1 { filter: brightness(.2); }
   .home-news-story { grid-template-columns: 72px minmax(0,1fr); gap: 16px; }
 }
 @media (max-width: 850px) {
-  body:has(.home-open) .pixel-topbar { padding-block: 14px; gap: 6px 16px; }
-  body:has(.home-open) .pixel-navigation { margin: 0; justify-content: space-between; gap: 16px; }
-  body:has(.home-open) .pixel-header-actions { margin-left: auto; }
   .home-open .home-hero { min-height: 650px; }
   .home-hero-copy { padding-top: 32px; }
   .home-open .home-hero h1 { margin-bottom: 50px; }
@@ -262,10 +215,6 @@ body.light .home-open .home-hero h1 { filter: brightness(.2); }
 }
 @media (max-width: 590px) {
   .home-open { --home-gap: 72px; }
-  body:has(.home-open) .pixel-brand > span:last-child { width: 126px; height: 28px; }
-  body:has(.home-open) .pixel-brand-fox { width: 30px; height: 32px; }
-  body:has(.home-open) .pixel-navigation > :is(a,span) { font-size: 13px; min-height: 44px; }
-  body:has(.home-open) .pixel-header-actions { gap: 0; }
   .home-open .home-hero { min-height: 650px; }
   .home-hero-copy { padding-top: 30px; }
   .home-open .home-hero h1 { margin: 24px 0 46px; }
