@@ -1,0 +1,351 @@
+{
+  "viewports": [
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 407,
+          "width": 977
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 606,
+          "width": 413
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 300,
+          "width": 601
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": false,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 407,
+          "width": 977
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 606,
+          "width": 413
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 300,
+          "width": 601
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": true,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 163,
+          "width": 392
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 325,
+          "width": 243
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 310,
+          "width": 620
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": true,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        768,
+        1024
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 163,
+          "width": 392
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 325,
+          "width": 243
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 310,
+          "width": 620
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": false,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        768,
+        1024
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 138,
+          "width": 331
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 191,
+          "width": 143
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 166,
+          "width": 331
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": false,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 138,
+          "width": 331
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 191,
+          "width": 143
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 166,
+          "width": 331
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": true,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 550,
+          "width": 1321
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 745,
+          "width": 558
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 406,
+          "width": 813
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": true,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 550,
+          "width": 1321
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 745,
+          "width": 558
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 406,
+          "width": 813
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": false,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 289,
+          "width": 693
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 467,
+          "width": 293
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 213,
+          "width": 426
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": false,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "artwork": [
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+          "class": "home-section-art home-arcade-art",
+          "height": 289,
+          "width": 693
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+          "class": "home-section-art home-studio-art",
+          "height": 467,
+          "width": 293
+        },
+        {
+          "background": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+          "class": "home-section-art home-news-art",
+          "height": 213,
+          "width": 426
+        }
+      ],
+      "header": 0,
+      "idleLinks": 0,
+      "light": true,
+      "newsCount": 4,
+      "overflow": false,
+      "videoCount": 4,
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "light": true,
+      "title": "Games.",
+      "url": "/games/"
+    },
+    {
+      "hash": "#home-videos",
+      "headerBottom": 94,
+      "targetTop": 117.984375
+    },
+    {
+      "light": true,
+      "title": "Videos.",
+      "url": "/videos/"
+    },
+    {
+      "hash": "#home-news",
+      "headerBottom": 94,
+      "targetTop": 117.984375
+    },
+    {
+      "light": true,
+      "title": "Security News.",
+      "url": "/news/"
+    }
+  ]
+}

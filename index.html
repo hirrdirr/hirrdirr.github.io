@@ -23,9 +23,12 @@ home_layout: open
   </section>
 
   <section id="home-projects" class="home-projects" aria-labelledby="home-projects-title">
-    <div class="home-section-head">
-      <div><p class="home-eyebrow">01 / SPEL &amp; EXPERIMENT</p><h2 id="home-projects-title">Mina projekt<span aria-hidden="true">.</span></h2></div>
-      <a class="home-text-link" href="/games/">Alla projekt <span aria-hidden="true">↗</span></a>
+    <div class="home-project-intro">
+      <div class="home-section-head">
+        <div><p class="home-eyebrow">01 / SPEL &amp; EXPERIMENT</p><h2 id="home-projects-title">Mina projekt<span aria-hidden="true">.</span></h2></div>
+        <a class="home-text-link" href="/games/">Alla projekt <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="home-section-art home-arcade-art" aria-hidden="true"></div>
     </div>
     <div class="home-project-composition">
       <article class="home-feature" aria-labelledby="home-feature-title">
@@ -56,13 +59,13 @@ home_layout: open
         </article>
       </div>
     </div>
-    <div class="home-garden" aria-hidden="true"></div>
   </section>
 
   <div class="home-stories">
     <div class="home-feed">
       <section id="home-videos" class="home-videos" aria-labelledby="pixel-videos-title">
         <div class="home-section-head"><div><p class="home-eyebrow">02 / FRÅN SKÄRMEN</p><h2 id="pixel-videos-title">Senaste videos<span aria-hidden="true">.</span></h2></div><a class="home-text-link" href="/videos/">Alla videos <span aria-hidden="true">↗</span></a></div>
+        <div class="home-section-art home-studio-art" aria-hidden="true"></div>
         <div class="home-video-gallery">
           {% for v in site.data.videos limit:4 %}
           <a class="home-video" href="https://www.youtube.com/watch?v={{ v.id | escape }}" target="_blank" rel="noopener noreferrer">
@@ -75,6 +78,7 @@ home_layout: open
       <section id="home-news" class="home-news" aria-labelledby="pixel-news-title">
         <div class="home-section-head"><div><p class="home-eyebrow">03 / OMVÄRLDEN</p><h2 id="pixel-news-title">Senaste nyheter<span aria-hidden="true">.</span></h2></div><a class="home-text-link" href="/news/">Alla nyheter <span aria-hidden="true">↗</span></a></div>
         <p class="home-news-intro">Säkerhetsnyheter från utvalda källor.{% if site.data.security_highlights.digest_date %} Sammanställt <time datetime="{{ site.data.security_highlights.digest_date }}">{{ site.data.security_highlights.digest_date }}</time>.{% endif %}</p>
+        <div class="home-section-art home-news-art" aria-hidden="true"></div>
         <div class="home-news-list">
           {% for item in site.data.security_highlights.articles limit:4 %}
           <a class="home-news-story" href="{{ item.url | escape }}" target="_blank" rel="noopener noreferrer">
