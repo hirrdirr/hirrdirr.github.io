@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-10-23",
+  "digest_date": "2026-10-24",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "Kritisk sårbarhet i GitLab CE och EE",
-      "url": "https://www.cert.se/2026/10/Kritisk-s%C3%A5rbarhet-i-GitLab-CE-och-EE.html"
+      "title": "CERT-SE:s veckobrev v.43",
+      "url": "https://www.cert.se/2026/10/cert-se-veckobrev-v43.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "Railway warns devs to rotate secrets after potential breach",
-      "url": "https://www.bleepingcomputer.com/news/security/railway-warns-devs-to-rotate-secrets-after-potential-breach/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/22/railway.jpg"
+      "title": "Abandoned Popcorn Time app exposed millions of devices to RCE attacks",
+      "url": "https://www.bleepingcomputer.com/news/security/abandoned-popcorn-time-app-exposed-millions-of-device-to-rce-attacks/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/23/popcorn.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Crime Stoppers chapter freezes tips after breach breaks anonymity promise",
-      "url": "https://www.malwarebytes.com/blog/data-breaches/2026/10/crime-stoppers-chapter-freezes-tips-after-breach-breaks-anonymity-promise",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/03/Crime_stoppers.png"
+      "title": "Resident Evil maker Capcom warns of phishing after 11.7 million records exposed",
+      "url": "https://www.malwarebytes.com/blog/data-breaches/2026/10/resident-evil-maker-capcom-warns-of-phishing-after-11-7-million-records-exposed",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/capcom.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Friday, October 23rd, 2026 https://isc.sans.edu/podcastdetail/10148, (Fri, Oct 23rd)",
-      "url": "https://isc.sans.edu/diary/rss/33448"
+      "title": "(Reliable)? php2shell exploitability, (Fri, Oct 23rd)",
+      "url": "https://isc.sans.edu/diary/rss/33452"
     }
   ]
 }
