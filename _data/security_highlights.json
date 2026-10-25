@@ -1,27 +1,11 @@
 {
-  "digest_date": "2026-10-24",
+  "digest_date": "2026-10-25",
   "articles": [
     {
-      "source": "CERT-SE",
-      "title": "CERT-SE:s veckobrev v.43",
-      "url": "https://www.cert.se/2026/10/cert-se-veckobrev-v43.html"
-    },
-    {
       "source": "BleepingComputer",
-      "title": "Abandoned Popcorn Time app exposed millions of devices to RCE attacks",
-      "url": "https://www.bleepingcomputer.com/news/security/abandoned-popcorn-time-app-exposed-millions-of-device-to-rce-attacks/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/23/popcorn.jpg"
-    },
-    {
-      "source": "Malwarebytes",
-      "title": "Resident Evil maker Capcom warns of phishing after 11.7 million records exposed",
-      "url": "https://www.malwarebytes.com/blog/data-breaches/2026/10/resident-evil-maker-capcom-warns-of-phishing-after-11-7-million-records-exposed",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/capcom.png"
-    },
-    {
-      "source": "SANS ISC Diary",
-      "title": "(Reliable)? php2shell exploitability, (Fri, Oct 23rd)",
-      "url": "https://isc.sans.edu/diary/rss/33452"
+      "title": "BlackX UEFI bootkit exploits Baton Drop flaw to bypass Secure Boot",
+      "url": "https://www.bleepingcomputer.com/news/security/blackx-uefi-bootkit-exploits-baton-drop-flaw-to-bypass-secure-boot/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/23/blackX.jpg"
     }
   ]
 }
