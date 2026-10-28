@@ -436,7 +436,7 @@
     setPaused(true);
 
     showStartOverlay(
-      "DX-Ball",
+      "Ball",
       `Tryck <b>Spela</b> för att starta runnen.<br>
        <b>Klicka/tappa</b> (eller <b>SPACE</b>) för att släppa kulan.<br>
        Pausa med <b>ESC</b> eller <b>P</b>.`
