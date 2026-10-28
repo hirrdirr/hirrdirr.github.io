@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-10-27",
+  "digest_date": "2026-10-28",
   "articles": [
     {
+      "source": "CERT-SE",
+      "title": "Kritisk sårbarhet i Google Brotli",
+      "url": "https://www.cert.se/2026/10/kritisk-sarbarhet-i-google-brotli.html"
+    },
+    {
       "source": "BleepingComputer",
-      "title": "Apple backports CoreGraphics zero-day patches to older iPhones",
-      "url": "https://www.bleepingcomputer.com/news/apple/apple-backports-coregraphics-zero-day-patches-to-older-iphones/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2023/09/11/apple_triangle.jpg"
+      "title": "Hackers now scanning systems for recently-patched Oracle flaw",
+      "url": "https://www.bleepingcomputer.com/news/security/hackers-now-scanning-systems-for-recently-patched-oracle-flaw/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/28/Oracle-headpic.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Samsung TVs without mics may listen through soundbars, researcher says",
-      "url": "https://www.malwarebytes.com/blog/privacy/2026/10/samsung-tvs-without-mics-may-listen-through-soundbars-researcher-says",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2025/11/samsung-stand.jpg"
+      "title": "Chrome and Firefox updates fix serious security flaws. Install them now",
+      "url": "https://www.malwarebytes.com/blog/ai/2026/10/chrome-and-firefox-updates-fix-serious-security-flaws-install-them-now",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/ChromeFox.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Tuesday, October 27th, 2026 https://isc.sans.edu/podcastdetail/10152, (Tue, Oct 27th)",
-      "url": "https://isc.sans.edu/diary/rss/33462"
-    },
-    {
-      "source": "CISA KEV (nyligen tillagda)",
-      "title": "CVE-2026-109618 — PHP Group PHP",
-      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+      "title": "ISC Stormcast For Wednesday, October 28th, 2026 https://isc.sans.edu/podcastdetail/10154, (Wed, Oct 28th)",
+      "url": "https://isc.sans.edu/diary/rss/33464"
     }
   ]
 }
