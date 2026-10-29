@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-10-24",
+  "digest_date": "2026-10-29",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "CERT-SE:s veckobrev v.43",
-      "url": "https://www.cert.se/2026/10/cert-se-veckobrev-v43.html"
+      "title": "Kritisk sårbarhet i Google Brotli",
+      "url": "https://www.cert.se/2026/10/kritisk-sarbarhet-i-google-brotli.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "Abandoned Popcorn Time app exposed millions of devices to RCE attacks",
-      "url": "https://www.bleepingcomputer.com/news/security/abandoned-popcorn-time-app-exposed-millions-of-device-to-rce-attacks/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/23/popcorn.jpg"
+      "title": "Windows 11 KB5127936 update released with 41 changes and fixes",
+      "url": "https://www.bleepingcomputer.com/news/microsoft/windows-11-kb5127936-update-released-with-41-changes-and-fixes/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/29/Windows-11-logo.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Resident Evil maker Capcom warns of phishing after 11.7 million records exposed",
-      "url": "https://www.malwarebytes.com/blog/data-breaches/2026/10/resident-evil-maker-capcom-warns-of-phishing-after-11-7-million-records-exposed",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/capcom.png"
+      "title": "Have an older iPhone or iPad? Apple has a security update for you",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/10/have-an-older-iphone-or-ipad-apple-has-a-security-update-for-you",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2024/10/Apple-logo-1.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "(Reliable)? php2shell exploitability, (Fri, Oct 23rd)",
-      "url": "https://isc.sans.edu/diary/rss/33452"
+      "title": "Deploying a Local Ghidra Server for Your Malware Analysis Lab, (Thu, Oct 29th)",
+      "url": "https://isc.sans.edu/diary/rss/33470"
     }
   ]
 }

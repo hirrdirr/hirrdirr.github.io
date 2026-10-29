@@ -4,7 +4,7 @@ The three section pages now use the homepage's plum/charcoal canvas, sage accent
 
 - **Games:** arcade entrance, Core Defense feature, Dodge & Drift / Ball side picks and the non-clickable Idle Guild upcoming strip. Remove enclosing panels, give artwork and copy space, and use rounded play buttons.
 - **Videos:** studio portrait beside the featured player, followed by the existing numbered clip list. Keep real thumbnails, YouTube links and click-to-load privacy-enhanced embeds.
-- **News:** monitoring-room masthead, edition navigation, publisher-grouped digest and highlights/archive rail. Keep readable source sections and the existing empty-source messages.
+- **News:** monitoring-room masthead, edition navigation, publisher-grouped digest and highlights/archive rail. Publisher names sit in the left margin beside a single reading column on desktop; compact screens stack each publisher above its headlines. This replaces the fragmented newspaper columns while preserving the generated digest and empty-source messages.
 
 The six existing section WebP assets are reused. Dark/light switching still follows `body.light` and the existing persisted preference; no JavaScript, artwork bytes, content, data sources, URLs, gameplay or workflows changed.
 
@@ -12,7 +12,7 @@ The six existing section WebP assets are reused. Dark/light switching still foll
 
 `assets/open-shell.css` contains the existing homepage palette and navigation styles shared by the homepage and these three section pages. `open-home.css` retains homepage-specific composition rules and aliases the shared color tokens. `sections.css` is updated in place rather than adding a competing override layer. The default layout loads the common stylesheet only on the homepage and the three section pages.
 
-## Validation — 2026-10-24
+## Validation — 2026-10-29 (refinement), 2026-10-24 (initial pass)
 
 - Browser-rendered checks at **2560×1440, 1920×1080, 1366×768, 768×1024 and 390×844**, on all three pages in both themes: **30 combinations**. No horizontal overflow, correct artwork variants, nonzero artwork dimensions and correct active navigation.
 - Visually reviewed desktop, tablet and mobile compositions, both themes, plus the mobile game list, clip list and digest content.
@@ -22,6 +22,8 @@ The six existing section WebP assets are reused. Dark/light switching still foll
 - Source checks confirm page content/templates, video/news data, images, game files, JavaScript and workflows remain unchanged. Idle Guild contains no links. All six artwork references exist.
 - Compared the homepage before/after shared-CSS extraction at the same five sizes in both themes. Dimensions, positioning, colors, font sizes and padding of the body, header, branding, navigation, hero, content container, quicklinks, three sections and outro are identical in all **10 comparisons**.
 - `git diff --check` passes.
+
+The 2026-10-29 refinement repeats the 30 size/theme checks against main `3d70fbb`, verifies publisher/list alignment, and corrects a mobile studio-art overflow. After images show the current refinement; before images and the unchanged homepage regression measurements are from 2026-10-24. The original functional checks above remain applicable; section jumps and keyboard video activation were also rechecked on 2026-10-29.
 
 Raw measurements: [browser-checks.json](browser-checks.json), [home-regression.json](home-regression.json).
 
@@ -40,3 +42,9 @@ The preview rendered the repository's Liquid templates, layouts and data using L
 | Games | Videos | News |
 | --- | --- | --- |
 | ![Mobile Games](mobile-games-light.jpg) | ![Mobile Videos](mobile-videos-light.jpg) | ![Mobile News](mobile-news-light.jpg) |
+
+## News reading view (1920×1080 CSS viewport)
+
+| Dark | Light |
+| --- | --- |
+| ![News reading dark](news-reading-dark.jpg) | ![News reading light](news-reading-light.jpg) |

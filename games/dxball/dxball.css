@@ -1,4 +1,4 @@
-/* BALL / Pixel Arcade. Local to the DX-Ball page; site navigation remains Jekyll-owned. */
+/* BALL / Pixel Arcade. Local to the Ball page; site navigation remains Jekyll-owned. */
 .site-page:has(.dxball-wrap) #main-content { padding: 0; overflow: hidden; }
 .site-page:has(.dxball-wrap) { overflow: hidden; overscroll-behavior: none; }
 .dxball-wrap {
