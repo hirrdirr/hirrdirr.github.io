@@ -1,0 +1,632 @@
+[
+  {
+    "page": "news",
+    "size": "2560,1440",
+    "theme": "light",
+    "scrollWidth": 2545,
+    "width": 2545,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+    "sourceRows": [
+      {
+        "listY": 1074.03125,
+        "title": "CERT-SE",
+        "y": 1074.03125
+      },
+      {
+        "listY": 1174.71875,
+        "title": "BleepingComputer",
+        "y": 1174.71875
+      },
+      {
+        "listY": 1514.15625,
+        "title": "Malwarebytes",
+        "y": 1514.15625
+      },
+      {
+        "listY": 1734.21875,
+        "title": "MSRC Update Guide",
+        "y": 1734.21875
+      },
+      {
+        "listY": 1819.40625,
+        "title": "SANS ISC Diary",
+        "y": 1819.40625
+      },
+      {
+        "listY": 2170.53125,
+        "title": "Google Threat Intelligence",
+        "y": 2170.53125
+      },
+      {
+        "listY": 2255.71875,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2255.71875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "2560,1440",
+    "theme": "dark",
+    "scrollWidth": 2545,
+    "width": 2545,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+    "sourceRows": [
+      {
+        "listY": 1074.03125,
+        "title": "CERT-SE",
+        "y": 1074.03125
+      },
+      {
+        "listY": 1174.71875,
+        "title": "BleepingComputer",
+        "y": 1174.71875
+      },
+      {
+        "listY": 1514.15625,
+        "title": "Malwarebytes",
+        "y": 1514.15625
+      },
+      {
+        "listY": 1734.21875,
+        "title": "MSRC Update Guide",
+        "y": 1734.21875
+      },
+      {
+        "listY": 1819.40625,
+        "title": "SANS ISC Diary",
+        "y": 1819.40625
+      },
+      {
+        "listY": 2170.53125,
+        "title": "Google Threat Intelligence",
+        "y": 2170.53125
+      },
+      {
+        "listY": 2255.71875,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2255.71875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "1920,1080",
+    "theme": "light",
+    "scrollWidth": 1905,
+    "width": 1905,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+    "sourceRows": [
+      {
+        "listY": 984.46875,
+        "title": "CERT-SE",
+        "y": 984.46875
+      },
+      {
+        "listY": 1083.734375,
+        "title": "BleepingComputer",
+        "y": 1083.734375
+      },
+      {
+        "listY": 1416.0625,
+        "title": "Malwarebytes",
+        "y": 1416.0625
+      },
+      {
+        "listY": 1631.859375,
+        "title": "MSRC Update Guide",
+        "y": 1631.859375
+      },
+      {
+        "listY": 1714.421875,
+        "title": "SANS ISC Diary",
+        "y": 1714.421875
+      },
+      {
+        "listY": 2057.015625,
+        "title": "Google Threat Intelligence",
+        "y": 2057.015625
+      },
+      {
+        "listY": 2169.140625,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2169.140625
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "1920,1080",
+    "theme": "dark",
+    "scrollWidth": 1905,
+    "width": 1905,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+    "sourceRows": [
+      {
+        "listY": 984.46875,
+        "title": "CERT-SE",
+        "y": 984.46875
+      },
+      {
+        "listY": 1083.734375,
+        "title": "BleepingComputer",
+        "y": 1083.734375
+      },
+      {
+        "listY": 1416.0625,
+        "title": "Malwarebytes",
+        "y": 1416.0625
+      },
+      {
+        "listY": 1631.859375,
+        "title": "MSRC Update Guide",
+        "y": 1631.859375
+      },
+      {
+        "listY": 1714.421875,
+        "title": "SANS ISC Diary",
+        "y": 1714.421875
+      },
+      {
+        "listY": 2057.015625,
+        "title": "Google Threat Intelligence",
+        "y": 2057.015625
+      },
+      {
+        "listY": 2169.140625,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2169.140625
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "1366,768",
+    "theme": "light",
+    "scrollWidth": 1351,
+    "width": 1351,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+    "sourceRows": [
+      {
+        "listY": 841.21875,
+        "title": "CERT-SE",
+        "y": 841.21875
+      },
+      {
+        "listY": 933.40625,
+        "title": "BleepingComputer",
+        "y": 933.40625
+      },
+      {
+        "listY": 1230.34375,
+        "title": "Malwarebytes",
+        "y": 1230.34375
+      },
+      {
+        "listY": 1424.90625,
+        "title": "MSRC Update Guide",
+        "y": 1424.90625
+      },
+      {
+        "listY": 1501.703125,
+        "title": "SANS ISC Diary",
+        "y": 1501.703125
+      },
+      {
+        "listY": 1801.828125,
+        "title": "Google Threat Intelligence",
+        "y": 1801.828125
+      },
+      {
+        "listY": 1902.421875,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 1902.421875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "1366,768",
+    "theme": "dark",
+    "scrollWidth": 1351,
+    "width": 1351,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+    "sourceRows": [
+      {
+        "listY": 841.21875,
+        "title": "CERT-SE",
+        "y": 841.21875
+      },
+      {
+        "listY": 933.40625,
+        "title": "BleepingComputer",
+        "y": 933.40625
+      },
+      {
+        "listY": 1230.34375,
+        "title": "Malwarebytes",
+        "y": 1230.34375
+      },
+      {
+        "listY": 1424.90625,
+        "title": "MSRC Update Guide",
+        "y": 1424.90625
+      },
+      {
+        "listY": 1501.703125,
+        "title": "SANS ISC Diary",
+        "y": 1501.703125
+      },
+      {
+        "listY": 1801.828125,
+        "title": "Google Threat Intelligence",
+        "y": 1801.828125
+      },
+      {
+        "listY": 1902.421875,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 1902.421875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "768,1024",
+    "theme": "light",
+    "scrollWidth": 753,
+    "width": 753,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+    "sourceRows": [
+      {
+        "listY": 964.578125,
+        "title": "CERT-SE",
+        "y": 915.78125
+      },
+      {
+        "listY": 1100.5625,
+        "title": "BleepingComputer",
+        "y": 1051.765625
+      },
+      {
+        "listY": 1441.296875,
+        "title": "Malwarebytes",
+        "y": 1392.5
+      },
+      {
+        "listY": 1679.65625,
+        "title": "MSRC Update Guide",
+        "y": 1630.859375
+      },
+      {
+        "listY": 1788.25,
+        "title": "SANS ISC Diary",
+        "y": 1739.453125
+      },
+      {
+        "listY": 2132.171875,
+        "title": "Google Threat Intelligence",
+        "y": 2083.375
+      },
+      {
+        "listY": 2240.765625,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2191.96875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "768,1024",
+    "theme": "dark",
+    "scrollWidth": 753,
+    "width": 753,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+    "sourceRows": [
+      {
+        "listY": 964.578125,
+        "title": "CERT-SE",
+        "y": 915.78125
+      },
+      {
+        "listY": 1100.5625,
+        "title": "BleepingComputer",
+        "y": 1051.765625
+      },
+      {
+        "listY": 1441.296875,
+        "title": "Malwarebytes",
+        "y": 1392.5
+      },
+      {
+        "listY": 1679.65625,
+        "title": "MSRC Update Guide",
+        "y": 1630.859375
+      },
+      {
+        "listY": 1788.25,
+        "title": "SANS ISC Diary",
+        "y": 1739.453125
+      },
+      {
+        "listY": 2132.171875,
+        "title": "Google Threat Intelligence",
+        "y": 2083.375
+      },
+      {
+        "listY": 2240.765625,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2191.96875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "390,844",
+    "theme": "light",
+    "scrollWidth": 375,
+    "width": 375,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-light.webp\")",
+    "sourceRows": [
+      {
+        "listY": 1014.28125,
+        "title": "CERT-SE",
+        "y": 965.484375
+      },
+      {
+        "listY": 1150.265625,
+        "title": "BleepingComputer",
+        "y": 1101.46875
+      },
+      {
+        "listY": 1626.9375,
+        "title": "Malwarebytes",
+        "y": 1578.140625
+      },
+      {
+        "listY": 1946.859375,
+        "title": "MSRC Update Guide",
+        "y": 1898.0625
+      },
+      {
+        "listY": 2055.453125,
+        "title": "SANS ISC Diary",
+        "y": 2006.65625
+      },
+      {
+        "listY": 2508.125,
+        "title": "Google Threat Intelligence",
+        "y": 2459.328125
+      },
+      {
+        "listY": 2616.71875,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2567.921875
+      }
+    ]
+  },
+  {
+    "page": "news",
+    "size": "390,844",
+    "theme": "dark",
+    "scrollWidth": 375,
+    "width": 375,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/news-dark.webp\")",
+    "sourceRows": [
+      {
+        "listY": 1014.28125,
+        "title": "CERT-SE",
+        "y": 965.484375
+      },
+      {
+        "listY": 1150.265625,
+        "title": "BleepingComputer",
+        "y": 1101.46875
+      },
+      {
+        "listY": 1626.9375,
+        "title": "Malwarebytes",
+        "y": 1578.140625
+      },
+      {
+        "listY": 1946.859375,
+        "title": "MSRC Update Guide",
+        "y": 1898.0625
+      },
+      {
+        "listY": 2055.453125,
+        "title": "SANS ISC Diary",
+        "y": 2006.65625
+      },
+      {
+        "listY": 2508.125,
+        "title": "Google Threat Intelligence",
+        "y": 2459.328125
+      },
+      {
+        "listY": 2616.71875,
+        "title": "CISA KEV (nyligen tillagda)",
+        "y": 2567.921875
+      }
+    ]
+  },
+  {
+    "page": "games",
+    "size": "2560,1440",
+    "theme": "dark",
+    "scrollWidth": 2545,
+    "width": 2545,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "2560,1440",
+    "theme": "light",
+    "scrollWidth": 2545,
+    "width": 2545,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "1920,1080",
+    "theme": "dark",
+    "scrollWidth": 1905,
+    "width": 1905,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "1920,1080",
+    "theme": "light",
+    "scrollWidth": 1905,
+    "width": 1905,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "1366,768",
+    "theme": "dark",
+    "scrollWidth": 1351,
+    "width": 1351,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "1366,768",
+    "theme": "light",
+    "scrollWidth": 1351,
+    "width": 1351,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "768,1024",
+    "theme": "dark",
+    "scrollWidth": 753,
+    "width": 753,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "768,1024",
+    "theme": "light",
+    "scrollWidth": 753,
+    "width": 753,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "390,844",
+    "theme": "dark",
+    "scrollWidth": 375,
+    "width": 375,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-dark.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "games",
+    "size": "390,844",
+    "theme": "light",
+    "scrollWidth": 375,
+    "width": 375,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/games-light.webp\")",
+    "idleLinks": 0
+  },
+  {
+    "page": "videos",
+    "size": "2560,1440",
+    "theme": "dark",
+    "scrollWidth": 2545,
+    "width": 2545,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "2560,1440",
+    "theme": "light",
+    "scrollWidth": 2545,
+    "width": 2545,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "1920,1080",
+    "theme": "dark",
+    "scrollWidth": 1905,
+    "width": 1905,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "1920,1080",
+    "theme": "light",
+    "scrollWidth": 1905,
+    "width": 1905,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "1366,768",
+    "theme": "dark",
+    "scrollWidth": 1351,
+    "width": 1351,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "1366,768",
+    "theme": "light",
+    "scrollWidth": 1351,
+    "width": 1351,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "768,1024",
+    "theme": "dark",
+    "scrollWidth": 753,
+    "width": 753,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "768,1024",
+    "theme": "light",
+    "scrollWidth": 753,
+    "width": 753,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "390,844",
+    "theme": "dark",
+    "scrollWidth": 375,
+    "width": 375,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-dark.webp\")",
+    "videoRows": 4
+  },
+  {
+    "page": "videos",
+    "size": "390,844",
+    "theme": "light",
+    "scrollWidth": 375,
+    "width": 375,
+    "art": "url(\"http://terminal.local:4173/assets/artwork/sections/videos-light.webp\")",
+    "videoRows": 4
+  }
+]
