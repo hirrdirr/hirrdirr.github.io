@@ -61,6 +61,11 @@
   function len(x, y) { return Math.hypot(x, y); }
 
   let W = 800, H = 600, DPR = 1;
+  // Reuse pre-rendered brick artwork instead of applying blur/shadows to every
+  // brick every frame. Cleared on resize and level changes.
+  const brickSprites = new Map();
+  const BRICK_GUTTER = 20;
+  const MAX_CANVAS_PIXELS = 2400000;
 
   function getTopbarOffsetPx() {
     const candidates = [
@@ -98,11 +103,16 @@
     wrap.style.height = availableH + "px";
 
     const rect = wrap.getBoundingClientRect();
-    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    DPR = dpr;
-
     W = Math.max(320, Math.floor(rect.width));
     H = Math.max(320, Math.floor(rect.height));
+
+    // Cap backing-buffer size on high-DPI screens. 2x at 1920x1080
+    // costs 8.3 million pixels per frame, even for this small arcade game.
+    DPR = Math.max(1, Math.min(
+      window.devicePixelRatio || 1, 1.5,
+      Math.sqrt(MAX_CANVAS_PIXELS / (W * H))
+    ));
+    brickSprites.clear();
 
     canvas.width = Math.floor(W * DPR);
     canvas.height = Math.floor(H * DPR);
@@ -485,12 +495,16 @@
   }
 
   function updateUI() {
-    uiLevel.textContent = String(levelIndex + 1);
-    uiLives.textContent = String(lives);
-    uiScore.textContent = String(score);
-    uiPowers.textContent = powersLabel();
-    uiCombo.textContent = "×" + comboMultiplier;
-    uiComboHits.textContent = comboHits >= 2 ? comboHits + " träffar" : "COMBO";
+    function textIfChanged(el, next) {
+      const value = String(next);
+      if (el.textContent !== value) el.textContent = value;
+    }
+    textIfChanged(uiLevel, String(levelIndex + 1));
+    textIfChanged(uiLives, String(lives));
+    textIfChanged(uiScore, String(score));
+    textIfChanged(uiPowers, powersLabel());
+    textIfChanged(uiCombo, "×" + comboMultiplier);
+    textIfChanged(uiComboHits, comboHits >= 2 ? comboHits + " träffar" : "COMBO");
     uiBuild.textContent = [
       runUpgrades.satellite ? `◉${runUpgrades.satellite}` : "",
       runUpgrades.turret ? "✦ TURRETS" : "",
@@ -499,13 +513,16 @@
       runUpgrades.combo ? "×+" : "",
       runUpgrades.scavenger ? "✧" : "",
     ].filter(Boolean).join(" · ") || "INGA UPPGRADERINGAR";
-    if (uiTheme) uiTheme.textContent = BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length].name;
+    if (uiTheme) textIfChanged(uiTheme, BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length].name);
     const left = remainingBricks();
     const total = bricks.filter(b => !b.indestructible).length;
     const percent = total ? Math.round((1 - left / total) * 100) : 0;
-    uiRemaining.textContent = String(left);
-    uiProgress.style.width = percent + "%";
-    uiProgressBar.setAttribute("aria-valuenow", String(percent));
+    textIfChanged(uiRemaining, String(left));
+    const width = percent + "%";
+    if (uiProgress.style.width !== width) uiProgress.style.width = width;
+    if (uiProgressBar.getAttribute("aria-valuenow") !== String(percent)) {
+      uiProgressBar.setAttribute("aria-valuenow", String(percent));
+    }
   }
 
   // --- Levels ---
@@ -586,6 +603,7 @@
   }
 
   function buildLevel(idx) {
+    brickSprites.clear();
     scenery.image = null; // A freshly generated level gets its own background.
     const cols = clamp(Math.floor(W / 70), 9, 14);
     const rows = clamp(Math.floor(H / 52), 6, 9);
@@ -980,19 +998,29 @@
 
   // --- Loop ---
   let last = performance.now();
+  let lastRender = 0;
+  let lastPhysics = last;
 
   function tick(now) {
-    const dtRaw = (now - last) / 1000;
-    last = now;
-    const dt = Math.min(0.02, dtRaw);
+    requestAnimationFrame(tick);
+    // 60 FPS max while playing; 8 FPS when paused, in menus, or hidden.
+    // The requestAnimationFrame callback may run faster but no expensive
+    // Canvas draw or game simulation is performed on skipped callbacks.
+    const active = running && !paused && !modalOpen && !gameOver && !document.hidden;
+    const interval = active ? 1000 / 60 : 1000 / 8;
+    if (now - lastRender < interval - 1) return;
+
+    const dtRaw = Math.min(.06, Math.max(0, (now - lastPhysics) / 1000));
+    lastPhysics = now;
+    lastRender = now;
+    const dt = Math.min(.02, dtRaw);
     sceneTime += dt * (reduceMotion ? 0 : (paused ? 0.20 : 1));
 
-    updateRotateOverlay();
-
-    if (running && !paused && !gameOver) step(dt);
+    // Portrait/mobile overlay only needs to be recalculated on resize,
+    // not on every rendered frame.
+    if (active) step(dt);
 
     draw();
-    requestAnimationFrame(tick);
   }
 
   function step(dt) {
@@ -1586,54 +1614,84 @@
     ctx.globalAlpha = 1;
   }
 
-  function drawBrick(b) {
+  function paintBrick(g, b) {
     const r=Math.min(5,b.h*.20);
     const metal=b.indestructible;
     const color=metal?COLORS.brickInd:
       (b.hp>=3?COLORS.brick3:(b.hp===2?COLORS.brick2:COLORS.brick1));
-    ctx.save();
-    ctx.shadowColor=metal?"rgba(92,155,185,.17)":color;
-    ctx.shadowBlur=metal?7:10;
-    ctx.globalAlpha=metal?.95:1;
-    ctx.fillStyle=metal?"#344c63":"#102235";
-    roundRect(ctx,b.x,b.y+2,b.w,b.h,r);ctx.fill();
-    ctx.shadowBlur=0;
-    ctx.fillStyle=color;
-    roundRect(ctx,b.x+1,b.y,b.w-2,b.h-3,r);ctx.fill();
+    g.save();
+    g.shadowColor=metal?"rgba(92,155,185,.17)":color;
+    g.shadowBlur=metal?7:10;
+    g.globalAlpha=metal?.95:1;
+    g.fillStyle=metal?"#344c63":"#102235";
+    roundRect(g,b.x,b.y+2,b.w,b.h,r);g.fill();
+    g.shadowBlur=0;
+    g.fillStyle=color;
+    roundRect(g,b.x+1,b.y,b.w-2,b.h-3,r);g.fill();
     // bevel and interior glints
-    ctx.fillStyle=metal?"rgba(215,237,249,.20)":"rgba(255,255,255,.36)";
-    ctx.fillRect(b.x+5,b.y+3,Math.max(0,b.w-10),Math.min(3,b.h*.15));
-    ctx.fillStyle="rgba(11,27,50,.19)";
-    ctx.fillRect(b.x+5,b.y+b.h-7,Math.max(0,b.w-10),3);
-    ctx.strokeStyle=metal?"rgba(196,220,232,.38)":"rgba(255,253,239,.18)";
-    ctx.lineWidth=1;ctx.strokeRect(b.x+3.5,b.y+3.5,b.w-7,b.h-9);
+    g.fillStyle=metal?"rgba(215,237,249,.20)":"rgba(255,255,255,.36)";
+    g.fillRect(b.x+5,b.y+3,Math.max(0,b.w-10),Math.min(3,b.h*.15));
+    g.fillStyle="rgba(11,27,50,.19)";
+    g.fillRect(b.x+5,b.y+b.h-7,Math.max(0,b.w-10),3);
+    g.strokeStyle=metal?"rgba(196,220,232,.38)":"rgba(255,253,239,.18)";
+    g.lineWidth=1;g.strokeRect(b.x+3.5,b.y+3.5,b.w-7,b.h-9);
     if (b.mystery) {
       // A recognisable mystery tile that still belongs to the arcade's palette.
-      ctx.fillStyle = "#59386c";
-      roundRect(ctx,b.x+1,b.y,b.w-2,b.h-3,r);ctx.fill();
-      ctx.fillStyle="#f9c5ff";
-      ctx.font = `700 ${Math.max(12,Math.min(21,b.h-2))}px "Pixelify Sans", Arial`;
-      ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("?",b.x+b.w/2,b.y+b.h/2-1);
+      g.fillStyle = "#59386c";
+      roundRect(g,b.x+1,b.y,b.w-2,b.h-3,r);g.fill();
+      g.fillStyle="#f9c5ff";
+      g.font = `700 ${Math.max(12,Math.min(21,b.h-2))}px "Pixelify Sans", Arial`;
+      g.textAlign="center"; g.textBaseline="middle";
+      g.fillText("?",b.x+b.w/2,b.y+b.h/2-1);
     } else if(metal) {
-      ctx.fillStyle="#1f334b";
-      for(let i=0;i<3;i++)ctx.fillRect(b.x+b.w*(.28+i*.22)-2,b.y+b.h*.34,4,Math.max(2,b.h*.28));
-      ctx.fillStyle="#bad2dd";
-      ctx.fillRect(b.x+7,b.y+b.h*.55,5,3);
-      ctx.fillRect(b.x+b.w-12,b.y+b.h*.55,5,3);
+      g.fillStyle="#1f334b";
+      for(let i=0;i<3;i++)g.fillRect(b.x+b.w*(.28+i*.22)-2,b.y+b.h*.34,4,Math.max(2,b.h*.28));
+      g.fillStyle="#bad2dd";
+      g.fillRect(b.x+7,b.y+b.h*.55,5,3);
+      g.fillRect(b.x+b.w-12,b.y+b.h*.55,5,3);
     } else {
-      ctx.fillStyle="rgba(255,255,255,.64)";
-      ctx.fillRect(b.x+7,b.y+7,Math.min(8,b.w*.17),2);
+      g.fillStyle="rgba(255,255,255,.64)";
+      g.fillRect(b.x+7,b.y+7,Math.min(8,b.w*.17),2);
       if(b.hp===3) {
-        ctx.fillStyle="rgba(72,32,68,.38)";
-        ctx.fillRect(b.x+b.w*.5-7,b.y+b.h*.5-2,14,4);
+        g.fillStyle="rgba(72,32,68,.38)";
+        g.fillRect(b.x+b.w*.5-7,b.y+b.h*.5-2,14,4);
       }
     }
-    if(b.flash>0) {
+    g.restore();
+  }
+
+
+  function brickSprite(b) {
+    const mode = b.indestructible ? "metal" : (b.mystery ? "mystery" : b.hp);
+    const key = [b.w.toFixed(3),b.h.toFixed(3),mode,DPR.toFixed(2)].join(":");
+    let sprite = brickSprites.get(key);
+    if (sprite) return sprite;
+
+    const dpr = Math.min(2, Math.max(1,DPR));
+    const width = b.w + BRICK_GUTTER*2;
+    const height = b.h + BRICK_GUTTER*2;
+    const image = document.createElement("canvas");
+    image.width = Math.ceil(width*dpr);
+    image.height = Math.ceil(height*dpr);
+    const g = image.getContext("2d");
+    g.setTransform(dpr,0,0,dpr,0,0);
+    paintBrick(g, { ...b, x:BRICK_GUTTER, y:BRICK_GUTTER, flash:0 });
+    sprite = { image, width, height };
+    brickSprites.set(key,sprite);
+    return sprite;
+  }
+
+  function drawBrick(b) {
+    const sprite = brickSprite(b);
+    ctx.drawImage(sprite.image,
+      b.x-BRICK_GUTTER,b.y-BRICK_GUTTER,sprite.width,sprite.height);
+    if (b.flash>0) {
+      ctx.save();
       ctx.fillStyle="rgba(255,255,255,"+(b.flash*.95)+")";
-      roundRect(ctx,b.x+2,b.y+1,b.w-4,b.h-5,r);ctx.fill();
+      roundRect(ctx,b.x+2,b.y+1,b.w-4,b.h-5,Math.min(5,b.h*.20));
+      ctx.fill();
+      ctx.restore();
     }
-    ctx.restore();
   }
 
   function drawPaddle() {
