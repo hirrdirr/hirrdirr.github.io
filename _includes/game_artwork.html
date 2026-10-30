@@ -1,0 +1,3 @@
+{% assign artwork_path = '/assets/artwork/home/' | append: include.name %}
+<div class="game-artwork" role="img" aria-label="{{ include.description | escape }}"
+  style="--game-art-dark: url('{{ artwork_path | append: '.webp' | relative_url }}'); --game-art-light: url('{{ artwork_path | append: '-light.webp' | relative_url }}');"></div>

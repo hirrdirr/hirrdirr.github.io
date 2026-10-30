@@ -1,0 +1,362 @@
+[
+  {
+    "size": "2560,1440",
+    "theme": "light",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 2545,
+      "width": 2545
+    },
+    "art": [
+      {
+        "height": 552.453125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense-light.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 1160.15625
+      },
+      {
+        "height": 253.890625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift-light.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 457.015625
+      },
+      {
+        "height": 253.890625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball-light.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 457.015625
+      },
+      {
+        "height": 234.390625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild-light.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 593.046875
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "2560,1440",
+    "theme": "dark",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 2545,
+      "width": 2545
+    },
+    "art": [
+      {
+        "height": 552.453125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 1160.15625
+      },
+      {
+        "height": 253.890625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 457.015625
+      },
+      {
+        "height": 253.890625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 457.015625
+      },
+      {
+        "height": 234.390625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 593.046875
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "1920,1080",
+    "theme": "light",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 1905,
+      "width": 1905
+    },
+    "art": [
+      {
+        "height": 409.890625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense-light.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 860.796875
+      },
+      {
+        "height": 186.875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift-light.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 336.375
+      },
+      {
+        "height": 186.875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball-light.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 336.375
+      },
+      {
+        "height": 175.234375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild-light.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 443.375
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "1920,1080",
+    "theme": "dark",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 1905,
+      "width": 1905
+    },
+    "art": [
+      {
+        "height": 409.890625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 860.796875
+      },
+      {
+        "height": 186.875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 336.375
+      },
+      {
+        "height": 186.875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 336.375
+      },
+      {
+        "height": 175.234375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 443.375
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "1366,768",
+    "theme": "light",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 1351,
+      "width": 1351
+    },
+    "art": [
+      {
+        "height": 290.515625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense-light.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 610.109375
+      },
+      {
+        "height": 132.421875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift-light.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 238.359375
+      },
+      {
+        "height": 132.421875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball-light.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 238.359375
+      },
+      {
+        "height": 124.21875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild-light.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 314.3125
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "1366,768",
+    "theme": "dark",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 1351,
+      "width": 1351
+    },
+    "art": [
+      {
+        "height": 290.515625,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 610.109375
+      },
+      {
+        "height": 132.421875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 238.359375
+      },
+      {
+        "height": 132.421875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 238.359375
+      },
+      {
+        "height": 124.21875,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 314.3125
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "768,1024",
+    "theme": "light",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 753,
+      "width": 753
+    },
+    "art": [
+      {
+        "height": 214.328125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense-light.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 342.9375
+      },
+      {
+        "height": 117.859375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift-light.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 298.203125
+      },
+      {
+        "height": 117.859375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball-light.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 298.203125
+      },
+      {
+        "height": 79.8125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild-light.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 201.9375
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "768,1024",
+    "theme": "dark",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 753,
+      "width": 753
+    },
+    "art": [
+      {
+        "height": 214.328125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 342.9375
+      },
+      {
+        "height": 117.859375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 298.203125
+      },
+      {
+        "height": 117.859375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 298.203125
+      },
+      {
+        "height": 79.8125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 201.9375
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "390,844",
+    "theme": "light",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 375,
+      "width": 375
+    },
+    "art": [
+      {
+        "height": 157.609375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense-light.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 331
+      },
+      {
+        "height": 130.828125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift-light.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 331
+      },
+      {
+        "height": 130.828125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball-light.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 331
+      },
+      {
+        "height": 113.8125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild-light.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 287.96875
+      }
+    ],
+    "idleLinks": 0
+  },
+  {
+    "size": "390,844",
+    "theme": "dark",
+    "layoutMatch": true,
+    "viewport": {
+      "scrollWidth": 375,
+      "width": 375
+    },
+    "art": [
+      {
+        "height": 157.609375,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/core-defense.webp\")",
+        "label": "Försvarstorn skyddar en energikärna mot gobliner",
+        "width": 331
+      },
+      {
+        "height": 130.828125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/dodge-drift.webp\")",
+        "label": "En lysande boll manövrerar mellan asteroider",
+        "width": 331
+      },
+      {
+        "height": 130.828125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/ball.webp\")",
+        "label": "En boll och paddel slår sönder färgglada block",
+        "width": 331
+      },
+      {
+        "height": 113.8125,
+        "image": "url(\"http://terminal.local:4173/assets/artwork/home/idle-guild.webp\")",
+        "label": "Ett japanskt äventyrsgille i pixelart",
+        "width": 287.96875
+      }
+    ],
+    "idleLinks": 0
+  }
+]

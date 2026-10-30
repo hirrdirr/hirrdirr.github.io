@@ -60,19 +60,22 @@ body.light .games-page { --section-scene: url('/assets/artwork/sections/games-li
 .game-selection { margin-top: var(--section-gap); }
 .game-showcase { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px clamp(28px, 5vw, 112px); align-items: start; }
 .hub-game { min-width: 0; }
-.hub-game img { width: 100%; height: auto; object-fit: cover; }
+/* Use the restored body theme directly, just like the section scenery.
+   Only the selected background is requested; the image label stays accessible. */
+.game-artwork { width: 100%; background: var(--game-art-dark) center / cover no-repeat; }
+body.light .game-artwork { background-image: var(--game-art-light); }
 .hub-featured { grid-row: span 2; }
-.hub-featured > img { aspect-ratio: 2.1; }
+.hub-featured > .game-artwork { aspect-ratio: 2.1; }
 .hub-game-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; min-width: 0; }
 .hub-featured .hub-game-copy { padding-top: 28px; }
 .hub-game-copy p:not([class]) { max-width: 48ch; font-size: 16px; line-height: 1.65; }
 .hub-game-copy .section-button { margin-top: 8px; }
 .hub-featured h3 { font: 600 clamp(36px, 3.5vw, 72px)/1.1 'Pixelify Sans', monospace; }
 .hub-compact { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-items: start; gap: clamp(20px, 2vw, 44px); }
-.hub-compact > img { aspect-ratio: 1.8; }
+.hub-compact > .game-artwork { aspect-ratio: 1.8; }
 .hub-compact + .hub-compact { padding-top: 40px; border-top: 1px solid var(--section-line); }
 .hub-coming { margin-top: var(--section-gap); padding-top: 36px; border-top: 1px solid var(--section-line); display: grid; grid-template-columns: minmax(180px, 26%) minmax(0, 1fr) auto; align-items: center; gap: clamp(24px, 4vw, 80px); }
-.hub-coming img { width: 100%; height: auto; aspect-ratio: 2.53; object-fit: cover; }
+.hub-coming .game-artwork { aspect-ratio: 2.53; }
 .hub-coming h3 { margin: 12px 0; }
 .coming-status { color: var(--section-muted); font-size: 13px; white-space: nowrap; }
 
@@ -162,7 +165,7 @@ body.light .news-page { --section-scene: url('/assets/artwork/sections/news-ligh
   .arcade-welcome { gap: 20px; }
   .game-showcase { gap: 32px; }
   .hub-compact { grid-template-columns: 1fr; }
-  .hub-compact > img { aspect-ratio: 2.53; }
+  .hub-compact > .game-artwork { aspect-ratio: 2.53; }
   .hub-coming { grid-template-columns: 30% minmax(0, 1fr); }
   .coming-status { display: none; }
   .news-desk { grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; }
@@ -183,7 +186,7 @@ body.light .news-page { --section-scene: url('/assets/artwork/sections/news-ligh
   .arcade-welcome .section-kicker { grid-column: 1 / -1; }
   .arcade-welcome h1 { grid-row: span 2; }
   .arcade-welcome .section-button { grid-column: 1 / -1; }
-  .hub-featured > img { aspect-ratio: 1.6; }
+  .hub-featured > .game-artwork { aspect-ratio: 1.6; }
   .video-stage { grid-template-columns: 1fr; gap: 40px; }
   .studio-note { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 32px; }
   .studio-note > div:first-child { padding: 0; }
@@ -209,10 +212,10 @@ body.light .news-page { --section-scene: url('/assets/artwork/sections/news-ligh
   .arcade-welcome .section-lead br { display: none; }
   .game-showcase { grid-template-columns: 1fr; gap: 44px; }
   .hub-featured { grid-row: auto; }
-  .hub-featured > img { aspect-ratio: 2.1; }
+  .hub-featured > .game-artwork { aspect-ratio: 2.1; }
   .hub-compact + .hub-compact { padding-top: 0; border: 0; }
   .hub-coming { grid-template-columns: 1fr; gap: 24px; }
-  .hub-coming img { width: 87%; }
+  .hub-coming .game-artwork { width: 87%; }
   .video-heading { display: block; margin-bottom: 40px; }
   .video-heading > p { margin-top: 24px; max-width: none; }
   .studio-note { grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); gap: 20px; }
