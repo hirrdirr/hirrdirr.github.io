@@ -256,7 +256,7 @@
     const active = [];
     for (const def of POWER_DEFS) {
       const t = powers[def.id] || 0;
-      if (t > 0) active.push(`${def.label} ${Math.ceil(t)}s`);
+      if (t > 0) active.push(def.id === "sticky" ? `${def.label} ×${t}` : `${def.label} ${Math.ceil(t)}s`);
     }
     return active.length ? active.join(" · ") : "—";
   }
@@ -524,7 +524,13 @@
       case "bigball": powers.bigball = dur; break;
       case "pierce": powers.pierce = dur; break;
       case "slow": powers.slow = 10; break;
-      case "sticky": powers.sticky = 12; break;
+      case "sticky":
+        powers.sticky = 3; // Three catches; charges don't expire with time.
+        // Useful for cheat testing while a serve is already on the paddle.
+        for (const b of balls) {
+          if (b.stuck) b.aiming = true;
+        }
+        break;
       case "multiball": {
         powers.multiball = 2;
         const newBalls = [];
@@ -775,7 +781,9 @@
 
   function step(dt) {
     updateVisualFx(dt);
-    for (const k in powers) if (powers[k] > 0) powers[k] = Math.max(0, powers[k] - dt);
+    for (const k in powers) {
+      if (k !== "sticky" && powers[k] > 0) powers[k] = Math.max(0, powers[k] - dt);
+    }
 
     updatePaddle(dt);
     updatePaddleFromPowers(dt);
@@ -809,14 +817,16 @@
       if (!b.trail) b.trail = [];
       b.trail.push({ x: b.x, y: b.y });
       if (b.trail.length > 10) b.trail.shift();
+      const beforeX = b.x, beforeY = b.y;
       b.x += b.vx * dt * slowFactor;
       b.y += b.vy * dt * slowFactor;
+      let bouncedOffWall = false;
 
       // Walls
       const left = 10, right = W - 10, top = 10;
-      if (b.x - b.r < left) { b.x = left + b.r; b.vx = Math.abs(b.vx); speedUp(b, 8); }
-      if (b.x + b.r > right) { b.x = right - b.r; b.vx = -Math.abs(b.vx); speedUp(b, 8); }
-      if (b.y - b.r < top) { b.y = top + b.r; b.vy = Math.abs(b.vy); speedUp(b, 10); }
+      if (b.x - b.r < left) { b.x = left + b.r; b.vx = Math.abs(b.vx); speedUp(b, 8); bouncedOffWall = true; }
+      if (b.x + b.r > right) { b.x = right - b.r; b.vx = -Math.abs(b.vx); speedUp(b, 8); bouncedOffWall = true; }
+      if (b.y - b.r < top) { b.y = top + b.r; b.vy = Math.abs(b.vy); speedUp(b, 10); bouncedOffWall = true; }
 
       // Paddle
       const hitP = collideBallAABB(b, b.r, paddle);
@@ -834,57 +844,74 @@
         b.vx = Math.cos(angle) * baseSpeed + spin * 260;
         b.vy = Math.sin(angle) * baseSpeed;
 
-        if (b.sticky) {
+        if (b.sticky && powers.sticky > 0) {
+          // Consume one catch (not one second). The caught ball retains aiming
+          // even when this was the last charge.
+          powers.sticky -= 1;
           b.stuck = true;
           b.aiming = true;
           b.vx = 0;
           b.vy = 0;
           b.trail = [];
           stickyAimAngle = 0;
+          updateUI();
         } else speedUp(b, 12);
       }
 
-      // Bricks
-      for (let i=0;i<bricks.length;i++){
-        const br = bricks[i];
+      // Bricks – sweep across the frame rather than just checking the end
+      // position. Pick the first impacted brick and keep the ball outside it.
+      // This stops indestructible bricks from trapping a ball inside their AABB.
+      let chosen = null;
+      const travelX = b.x - beforeX, travelY = b.y - beforeY;
+      for (const br of bricks) {
         if (br.hp <= 0) continue;
 
-        const hit = collideBallAABB(b, b.r, br);
-        if (!hit.hit) continue;
+        const swept = !bouncedOffWall
+          ? rayBoxHit(beforeX, beforeY, travelX, travelY, br, b.r)
+          : null;
+        const overlapping = collideBallAABB(b, b.r, br).hit;
+        const validSweep = swept && swept.t >= 0 && swept.t <= 1;
 
-        // O-förstörbar brick: alltid studsa, aldrig skada, aldrig pierce igenom.
+        // Swept hits take priority by travel distance. End overlaps are a
+        // fallback for a ball already embedded in a brick (old save state).
+        if (!validSweep && !overlapping) continue;
+        const t = validSweep ? swept.t : 1;
+        if (!chosen || t < chosen.t) chosen = { br, hit: validSweep ? swept : null, t };
+      }
+
+      if (chosen) {
+        const { br, hit } = chosen;
+        const normal = resolveBrickContact(b, br, beforeX, beforeY, hit);
+
+        // Unbreakable bricks always reflect, even with the pierce power-up.
         if (br.indestructible) {
           burst(b.x, b.y, "#9bb4cb", 3);
-          reflectBall(b, hit.nx, hit.ny);
-          speedUp(b, 6); // liten “thunk”-känsla
-          break;
-        }
-
-        // Normal brick:
-        // Stor boll gör extra skada (2) när power är aktiv.
-        const dmg = (powers.bigball > 0) ? BIGBALL_DAMAGE : 1;
-
-        if (!b.pierce) {
-          reflectBall(b, hit.nx, hit.ny);
-        }
-
-        br.hp -= dmg;
-        br.flash = 0.16;
-        burst(b.x, b.y, br.hp >= 3 ? COLORS.brick3 : (br.hp === 2 ? COLORS.brick2 : COLORS.brick1), br.hp <= 0 ? 11 : 5);
-        score += 10;
-
-        speedUp(b, 10 + (Math.abs(hit.nx) ? 4 : 0));
-
-        if (br.hp <= 0) {
-          score += 30;
-
-          // Global random drop from ANY destroyed brick
-          if (Math.random() < POWERUP_DROP_CHANCE) {
-            dropPower(br.x + br.w/2, br.y + br.h/2);
+          if (b.vx * normal.nx + b.vy * normal.ny < 0) {
+            reflectBall(b, normal.nx, normal.ny);
+            speedUp(b, 6);
+          }
+        } else {
+          const dmg = powers.bigball > 0 ? BIGBALL_DAMAGE : 1;
+          if (!b.pierce && b.vx * normal.nx + b.vy * normal.ny < 0) {
+            reflectBall(b, normal.nx, normal.ny);
+          }
+          if (b.pierce) {
+            // Piercing balls keep moving; avoid positional trapping on bricks.
+            b.x = beforeX + travelX;
+            b.y = beforeY + travelY;
+          }
+          br.hp -= dmg;
+          br.flash = 0.16;
+          burst(b.x, b.y, br.hp >= 3 ? COLORS.brick3 : (br.hp === 2 ? COLORS.brick2 : COLORS.brick1), br.hp <= 0 ? 11 : 5);
+          score += 10;
+          speedUp(b, 10 + (Math.abs(normal.nx) ? 4 : 0));
+          if (br.hp <= 0) {
+            score += 30;
+            if (Math.random() < POWERUP_DROP_CHANCE) {
+              dropPower(br.x + br.w / 2, br.y + br.h / 2);
+            }
           }
         }
-
-        break;
       }
 
       // Fell out
@@ -1493,26 +1520,62 @@
   // Trace the intended launch path in the same arena used by ball physics.
   // Preview stops at the first brick (including unbreakable ones), with up to
   // three wall rebounds before that. The line is a guide, not a physics override.
-  function rayDistanceToBrick(x, y, dx, dy, brick, r) {
-    const minX = brick.x - r, maxX = brick.x + brick.w + r;
-    const minY = brick.y - r, maxY = brick.y + brick.h + r;
-    let tMin = -Infinity, tMax = Infinity;
+  // Swept circle vs an expanded axis-aligned brick. Both live physics and
+  // aiming use this hit normal, so the preview matches actual side/top bounces.
+  function rayBoxHit(x, y, dx, dy, brick, radius) {
+    const minX = brick.x - radius, maxX = brick.x + brick.w + radius;
+    const minY = brick.y - radius, maxY = brick.y + brick.h + radius;
+    let near = -Infinity, far = Infinity, nx = 0, ny = 0;
 
-    if (Math.abs(dx) < 1e-8) {
-      if (x < minX || x > maxX) return Infinity;
+    if (Math.abs(dx) < 1e-9) {
+      if (x < minX || x > maxX) return null;
     } else {
-      const a = (minX - x) / dx, b = (maxX - x) / dx;
-      tMin = Math.max(tMin, Math.min(a, b));
-      tMax = Math.min(tMax, Math.max(a, b));
+      const t1 = (minX - x) / dx, t2 = (maxX - x) / dx;
+      const entry = Math.min(t1, t2), exit = Math.max(t1, t2);
+      if (entry > near) { near = entry; nx = t1 < t2 ? -1 : 1; ny = 0; }
+      far = Math.min(far, exit);
     }
-    if (Math.abs(dy) < 1e-8) {
-      if (y < minY || y > maxY) return Infinity;
+    if (Math.abs(dy) < 1e-9) {
+      if (y < minY || y > maxY) return null;
     } else {
-      const a = (minY - y) / dy, b = (maxY - y) / dy;
-      tMin = Math.max(tMin, Math.min(a, b));
-      tMax = Math.min(tMax, Math.max(a, b));
+      const t1 = (minY - y) / dy, t2 = (maxY - y) / dy;
+      const entry = Math.min(t1, t2), exit = Math.max(t1, t2);
+      if (entry > near) { near = entry; nx = 0; ny = t1 < t2 ? -1 : 1; }
+      far = Math.min(far, exit);
     }
-    return tMax >= Math.max(tMin, 0) && tMin > 0.01 ? tMin : Infinity;
+    return near >= 0 && near <= far && far >= 0
+      ? { t: near, nx, ny }
+      : null;
+  }
+
+  function resolveBrickContact(ball, brick, previousX, previousY, swept) {
+    const r = ball.r;
+    const left = brick.x - r - .5, right = brick.x + brick.w + r + .5;
+    const top = brick.y - r - .5, bottom = brick.y + brick.h + r + .5;
+
+    if (swept) {
+      ball.x = previousX + (ball.x - previousX) * swept.t;
+      ball.y = previousY + (ball.y - previousY) * swept.t;
+      if (swept.nx < 0) ball.x = left;
+      if (swept.nx > 0) ball.x = right;
+      if (swept.ny < 0) ball.y = top;
+      if (swept.ny > 0) ball.y = bottom;
+      return { nx: swept.nx, ny: swept.ny };
+    }
+
+    // Recovery path for an already embedded ball. Push it to the nearest
+    // exterior face, then only reflect if velocity still heads into that face.
+    const faces = [
+      { distance: Math.abs(ball.x - left), nx: -1, ny: 0, x: left },
+      { distance: Math.abs(right - ball.x), nx: 1, ny: 0, x: right },
+      { distance: Math.abs(ball.y - top), nx: 0, ny: -1, y: top },
+      { distance: Math.abs(bottom - ball.y), nx: 0, ny: 1, y: bottom }
+    ];
+    faces.sort((a, b) => a.distance - b.distance);
+    const face = faces[0];
+    if ("x" in face) ball.x = face.x;
+    else ball.y = face.y;
+    return { nx: face.nx, ny: face.ny };
   }
 
   function traceStickyAim(ball) {
@@ -1525,33 +1588,34 @@
     let dx = Math.sin(stickyAimAngle), dy = -Math.cos(stickyAimAngle);
     let remaining = Math.max(W, H) * 3;
 
-    for (let bounce = 0; bounce <= 3 && remaining > 1; bounce++) {
+    // All previews stop after four actual ricochets (walls OR bricks),
+    // or when the ball would return to the paddle.
+    for (let bounce = 0; bounce <= 4 && remaining > .1; bounce++) {
       let distance = remaining;
-      let wall = null;
-
+      let impact = null;
       if (dx < -1e-8) {
         const t = (left - x) / dx;
-        if (t > .001 && t < distance) { distance = t; wall = "side"; }
+        if (t > .001 && t < distance) { distance = t; impact = { nx: 1, ny: 0, type: "wall" }; }
       } else if (dx > 1e-8) {
         const t = (right - x) / dx;
-        if (t > .001 && t < distance) { distance = t; wall = "side"; }
+        if (t > .001 && t < distance) { distance = t; impact = { nx: -1, ny: 0, type: "wall" }; }
       }
       if (dy < -1e-8) {
         const t = (top - y) / dy;
-        if (t > .001 && t < distance) { distance = t; wall = "top"; }
+        if (t > .001 && t < distance) { distance = t; impact = { nx: 0, ny: 1, type: "wall" }; }
       } else if (dy > 1e-8) {
         const t = (bottom - y) / dy;
-        if (t > .001 && t < distance) { distance = t; wall = "bottom"; }
+        if (t > .001 && t < distance) { distance = t; impact = { nx: 0, ny: -1, type: "paddle" }; }
       }
 
-      let brickHit = false;
       for (const brick of bricks) {
         if (brick.hp <= 0) continue;
-        const t = rayDistanceToBrick(x, y, dx, dy, brick, r);
-        if (t < distance) {
-          distance = t;
-          brickHit = true;
-          wall = null;
+        // Piercing passes through destructible bricks (but never grey ones).
+        if (powers.pierce > 0 && !brick.indestructible) continue;
+        const hit = rayBoxHit(x, y, dx, dy, brick, r);
+        if (hit && hit.t > .001 && hit.t < distance) {
+          distance = hit.t;
+          impact = { nx: hit.nx, ny: hit.ny, type: "brick", brick };
         }
       }
 
@@ -1560,10 +1624,14 @@
       points.push({ x, y });
       remaining -= distance;
 
-      if (brickHit || !wall || wall === "bottom") break;
-      bounces.push({ x, y });
-      if (wall === "side") dx = -dx;
-      else dy = -dy;
+      if (!impact || impact.type === "paddle" || bounce === 4) break;
+      bounces.push({ x, y, type: impact.type });
+      const dot = dx * impact.nx + dy * impact.ny;
+      dx -= 2 * dot * impact.nx;
+      dy -= 2 * dot * impact.ny;
+      // Nudge away from collision surface to prevent repeat hits at distance 0.
+      x += impact.nx * .025;
+      y += impact.ny * .025;
     }
     return { points, bounces };
   }
@@ -1592,7 +1660,9 @@
     ctx.shadowBlur = 0;
 
     for (const p of path.bounces) {
-      ctx.strokeStyle = "rgba(255,208,154,.9)";
+      ctx.strokeStyle = p.type === "brick"
+        ? "rgba(244,162,255,.95)"
+        : "rgba(255,208,154,.9)";
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.stroke();
     }
