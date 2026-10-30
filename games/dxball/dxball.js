@@ -218,6 +218,36 @@
   // Powerups timers
   const powers = { wide:0, bigball:0, pierce:0, multiball:0, slow:0, sticky:0 };
 
+  // Temporary weapons are independent from the permanent between-level build.
+  // Each collected pickup adds one individually timed stack, even above the
+  // permanent upgrade limit (Orbit 2 + pickup 1 = 3 satellites).
+  const weaponBuffs = { orbit:[], turret:[] };
+  const WEAPON_DURATION = 16;
+  const TEMP_WEAPON_LIMIT = { orbit:3, turret:2 };
+  const orbitCount = () => runUpgrades.satellite + weaponBuffs.orbit.length;
+  const turretPairs = () => runUpgrades.turret + weaponBuffs.turret.length;
+
+  function addWeaponBuff(id) {
+    const timers = weaponBuffs[id];
+    if (!timers) return;
+    if (timers.length < TEMP_WEAPON_LIMIT[id]) {
+      timers.push(WEAPON_DURATION);
+    } else {
+      // At the temporary-stack cap, extend the shortest remaining buff.
+      const shortest = timers.indexOf(Math.min(...timers));
+      timers[shortest] = WEAPON_DURATION;
+    }
+  }
+
+  function tickWeaponBuffs(dt) {
+    for (const timers of Object.values(weaponBuffs)) {
+      for (let i=timers.length-1;i>=0;i--) {
+        timers[i] -= dt;
+        if (timers[i] <= 0) timers.splice(i,1);
+      }
+    }
+  }
+
   // Permanent upgrades are chosen once per cleared level and last for this run only.
   const UPGRADE_DEFS = [
     { id:"satellite", name:"Orbit Satellites", icon:"◉", max:2, description:"+1 liten satellit som kretsar runt varje aktiv boll. Varje kloss har en kort träff-cooldown." },
@@ -235,6 +265,8 @@
     { id:"multiball", label:"Multiboll", color:"#ffd166" },
     { id:"slow", label:"Slowmo", color:"#ff9bd3" },
     { id:"sticky", label:"Klister", color:"#ff6b6b" },
+    { id:"orbit", label:"Orbit", color:"#d4a4ff" },
+    { id:"turret", label:"Turrets", color:"#ffb87c" },
   ];
 
   function anyBallStuck() { return balls.some(b => b.stuck); }
@@ -254,6 +286,8 @@
     bigball: "bigball",
     slow: "slow",
     multiball: "multiball",
+    orbit: "orbit",
+    turret: "turret",
     drill: "pierce"
   };
   let cheatBuffer = "";
@@ -289,7 +323,12 @@
     const active = [];
     for (const def of POWER_DEFS) {
       const t = powers[def.id] || 0;
-      if (t > 0) active.push(def.id === "sticky" ? `${def.label} ×${t}` : `${def.label} ${Math.ceil(t)}s`);
+      if (def.id === "orbit" || def.id === "turret") {
+        const timers = weaponBuffs[def.id];
+        if (timers.length) active.push(`${def.label} +${timers.length} (${Math.ceil(Math.max(...timers))}s)`);
+      } else if (t > 0) {
+        active.push(def.id === "sticky" ? `${def.label} ×${t}` : `${def.label} ${Math.ceil(t)}s`);
+      }
     }
     return active.length ? active.join(" · ") : "—";
   }
@@ -408,17 +447,36 @@
     return true;
   }
 
-  function updateTurrets(dt) {
-    if (!runUpgrades.turret) return;
-    const activeBalls = balls.some(b=>!b.stuck);
-    if (activeBalls) {
-      turretTimer += dt;
-      if (turretTimer >= 1.95 && turretBullets.length < 4) {
-        turretTimer -= 1.95;
-        const isLeft = turretSide++ % 2 === 0;
-        turretBullets.push({ x:paddle.x+(isLeft?8:paddle.w-8), y:paddle.y-8, vy:-510 });
-      }
+  // Two physical turrets per pair. Extra pairs add barrels but only increase
+  // TOTAL fire rate moderately; this avoids 4-6 barrels becoming overpowered.
+  function turretMuzzles() {
+    const pairs = turretPairs();
+    const muzzles = [];
+    for (let i=0;i<pairs;i++) {
+      const inset = 8 + i*12;
+      muzzles.push(paddle.x + inset, paddle.x + paddle.w - inset);
     }
+    return muzzles;
+  }
+
+  function updateTurrets(dt) {
+    const pairs = turretPairs();
+    const activeBalls = balls.some(b=>!b.stuck);
+    if (pairs && activeBalls) {
+      const fireInterval = pairs === 1 ? 1.95 : (pairs === 2 ? 1.45 : 1.15);
+      turretTimer += dt;
+      if (turretTimer >= fireInterval && turretBullets.length < 4) {
+        turretTimer -= fireInterval;
+        const muzzles = turretMuzzles();
+        turretBullets.push({
+          x:muzzles[turretSide++ % muzzles.length], y:paddle.y-8, vy:-510
+        });
+      }
+    } else if (!pairs) {
+      turretTimer = 0;
+    }
+
+    // Bullets must finish their flight even after a temporary turret expires.
     for (let i=turretBullets.length-1;i>=0;i--) {
       const bullet = turretBullets[i];
       const startY = bullet.y;
@@ -437,21 +495,21 @@
     }
   }
 
-  function satelliteLocation(ball,i) {
-    const count=runUpgrades.satellite;
+  function satelliteLocation(ball,i,count=orbitCount()) {
     const angle = satelliteTime*2.4 + i*2*Math.PI/count + ball.satSeed;
     const range = ball.r+17;
     return {x:ball.x+Math.cos(angle)*range,y:ball.y+Math.sin(angle)*range};
   }
 
   function updateSatellites(dt) {
-    if (!runUpgrades.satellite) return;
+    const count = orbitCount();
+    if (!count) return;
     satelliteTime += dt;
     for (const brick of bricks) if (brick.satCooldown > 0) brick.satCooldown = Math.max(0,brick.satCooldown-dt);
     for (const ball of balls) {
       if (ball.stuck) continue;
-      for (let i=0;i<runUpgrades.satellite;i++) {
-        const p=satelliteLocation(ball,i);
+      for (let i=0;i<count;i++) {
+        const p=satelliteLocation(ball,i,count);
         for(const brick of bricks) {
           if(brick.hp<=0 || brick.indestructible || brick.satCooldown>0) continue;
           if (!collideBallAABB(p,5,brick).hit) continue;
@@ -505,14 +563,14 @@
     textIfChanged(uiPowers, powersLabel());
     textIfChanged(uiCombo, "×" + comboMultiplier);
     textIfChanged(uiComboHits, comboHits >= 2 ? comboHits + " träffar" : "COMBO");
-    uiBuild.textContent = [
-      runUpgrades.satellite ? `◉${runUpgrades.satellite}` : "",
-      runUpgrades.turret ? "✦ TURRETS" : "",
+    textIfChanged(uiBuild, [
+      orbitCount() ? `◉${orbitCount()}` : "",
+      turretPairs() ? `✦ TURRETS ×${turretPairs()}` : "",
       runUpgrades.sturdy ? `↔${runUpgrades.sturdy}` : "",
       runUpgrades.magnet ? "⌁" : "",
       runUpgrades.combo ? "×+" : "",
       runUpgrades.scavenger ? "✧" : "",
-    ].filter(Boolean).join(" · ") || "INGA UPPGRADERINGAR";
+    ].filter(Boolean).join(" · ") || "INGA UPPGRADERINGAR");
     if (uiTheme) textIfChanged(uiTheme, BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length].name);
     const left = remainingBricks();
     const total = bricks.filter(b => !b.indestructible).length;
@@ -712,6 +770,8 @@
     upgradeOverlay.classList.add("hidden");
 
     for (const k in powers) powers[k] = 0;
+    weaponBuffs.orbit.length = 0;
+    weaponBuffs.turret.length = 0;
     stickyAimAngle = 0;
     stickyTouch = null;
     cheatBuffer = "";
@@ -758,6 +818,8 @@
       case "bigball": powers.bigball = dur; break;
       case "pierce": powers.pierce = dur; break;
       case "slow": powers.slow = 10; break;
+      case "orbit": addWeaponBuff("orbit"); break;
+      case "turret": addWeaponBuff("turret"); break;
       case "sticky":
         powers.sticky = 3; // Three catches; charges don't expire with time.
         // Useful for cheat testing while a serve is already on the paddle.
@@ -1028,6 +1090,7 @@
     for (const k in powers) {
       if (k !== "sticky" && powers[k] > 0) powers[k] = Math.max(0, powers[k] - dt);
     }
+    tickWeaponBuffs(dt);
     if (comboTimer > 0) {
       comboTimer -= dt;
       if (comboTimer <= 0) { comboHits = 0; comboMultiplier = 1; comboTimer = 0; }
@@ -1768,27 +1831,32 @@
 
   function drawRogueliteWeapons() {
     ctx.save();
-    if (runUpgrades.turret) {
-      for(const side of [0,1]) {
-        const x = paddle.x+(side ? paddle.w-8 : 8);
+    const pairs = turretPairs();
+    if (pairs) {
+      const muzzles = turretMuzzles();
+      muzzles.forEach((x,index) => {
         const y = paddle.y-4;
-        ctx.shadowColor="#a0f0ff";ctx.shadowBlur=8;
+        const temporary = Math.floor(index/2) >= runUpgrades.turret;
+        ctx.shadowColor=temporary?"#ffb87c":"#a0f0ff";
+        ctx.shadowBlur=8;
         ctx.fillStyle="#294961";ctx.fillRect(x-6,y-7,12,10);
-        ctx.fillStyle="#82dff1";ctx.fillRect(x-3,y-12,6,10);
+        ctx.fillStyle=temporary?"#ffbb89":"#82dff1";
+        ctx.fillRect(x-3,y-12,6,10);
         ctx.shadowBlur=0;
-      }
-      for(const bullet of turretBullets) {
-        ctx.shadowColor="#f8b885";ctx.shadowBlur=10;
-        ctx.fillStyle="#ffe1aa";ctx.fillRect(bullet.x-2,bullet.y-9,4,12);
-      }
+      });
     }
-    if (runUpgrades.satellite) {
+    for(const bullet of turretBullets) {
+      ctx.shadowColor="#f8b885";ctx.shadowBlur=10;
+      ctx.fillStyle="#ffe1aa";ctx.fillRect(bullet.x-2,bullet.y-9,4,12);
+    }
+    const count = orbitCount();
+    if (count) {
       ctx.shadowColor="#bca0ff";ctx.shadowBlur=12;
       for(const ball of balls) {
         if(ball.stuck) continue;
-        for(let i=0;i<runUpgrades.satellite;i++) {
-          const p=satelliteLocation(ball,i);
-          ctx.fillStyle="#d3adff";
+        for(let i=0;i<count;i++) {
+          const p=satelliteLocation(ball,i,count);
+          ctx.fillStyle=i >= runUpgrades.satellite ? "#ffcbf1" : "#d3adff";
           ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fill();
         }
       }
@@ -1808,7 +1876,7 @@
   function drawDrops() {
     for(const d of drops) {
       const def=POWER_DEFS.find(item=>item.id===d.id);
-      const glyph={wide:"↔",bigball:"●",pierce:"✦",multiball:"✣",slow:"◷",sticky:"◆"}[d.id] || "✦";
+      const glyph={wide:"↔",bigball:"●",pierce:"✦",multiball:"✣",slow:"◷",sticky:"◆",orbit:"◎",turret:"⌃"}[d.id] || "✦";
       const y=d.y+(reduceMotion?0:Math.sin(sceneTime*4+d.x)*2);
       ctx.save();
       ctx.translate(d.x,y);
