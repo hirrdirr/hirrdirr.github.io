@@ -258,6 +258,21 @@
     { id:"scavenger", name:"Lucky Break", icon:"✧", max:2, description:"Ökar chansen att få slumpmässiga powerups med 3 procentenheter." },
     { id:"recovery", name:"Second Chance", icon:"♥", max:1, description:"Få tillbaka ett liv, maximalt 3 totalt." }
   ];
+  // Keep the on-screen drops and the player guide in sync.
+  const POWER_GLYPHS = {
+    wide:"↔", bigball:"●", pierce:"✦", multiball:"✣",
+    slow:"◷", sticky:"◆", orbit:"◎", turret:"⌃"
+  };
+  const POWER_HINTS = {
+    wide:"Bredare platta",
+    bigball:"Stor boll, dubbel skada",
+    pierce:"Genom vanliga klossar",
+    multiball:"Fler bollar i spel",
+    slow:"Långsammare bollar",
+    sticky:"3 fångster med sikte",
+    orbit:"+1 satellit i 16 sek",
+    turret:"+1 kanonpar i 16 sek"
+  };
   const POWER_DEFS = [
     { id:"wide", label:"Bred bräda", color:"#8ad1ff" },
     { id:"bigball", label:"Stor boll", color:"#a7ff9b" },
@@ -268,6 +283,32 @@
     { id:"orbit", label:"Orbit", color:"#d4a4ff" },
     { id:"turret", label:"Turrets", color:"#ffb87c" },
   ];
+
+  function renderPowerGuides() {
+    // Populate both start and pause guides from the same definitions the
+    // pickup rendering uses. Keep descriptions selectable and screen-reader-friendly.
+    document.querySelectorAll(".dx-power-guide-items").forEach(container => {
+      container.replaceChildren();
+      for (const def of POWER_DEFS) {
+        const entry = document.createElement("div");
+        entry.className = "dx-power-guide-entry";
+        const symbol = document.createElement("span");
+        symbol.className = "dx-power-guide-glyph";
+        symbol.style.setProperty("--power-color", def.color);
+        symbol.textContent = POWER_GLYPHS[def.id];
+        symbol.setAttribute("aria-hidden", "true");
+        const copy = document.createElement("span");
+        copy.className = "dx-power-guide-copy";
+        const name = document.createElement("strong");
+        name.textContent = def.label;
+        const effect = document.createElement("small");
+        effect.textContent = POWER_HINTS[def.id];
+        copy.append(name,effect);
+        entry.append(symbol,copy);
+        container.append(entry);
+      }
+    });
+  }
 
   function anyBallStuck() { return balls.some(b => b.stuck); }
   function isStickyAiming() {
@@ -1876,7 +1917,7 @@
   function drawDrops() {
     for(const d of drops) {
       const def=POWER_DEFS.find(item=>item.id===d.id);
-      const glyph={wide:"↔",bigball:"●",pierce:"✦",multiball:"✣",slow:"◷",sticky:"◆",orbit:"◎",turret:"⌃"}[d.id] || "✦";
+      const glyph=POWER_GLYPHS[d.id] || "✦";
       const y=d.y+(reduceMotion?0:Math.sin(sceneTime*4+d.x)*2);
       ctx.save();
       ctx.translate(d.x,y);
@@ -2126,6 +2167,7 @@
   }
 
   // --- Boot ---
+  renderPowerGuides();
   resetGame();
   requestAnimationFrame(tick);
 
