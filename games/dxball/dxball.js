@@ -11,6 +11,13 @@
   const uiLives = document.getElementById("uiLives");
   const uiScore = document.getElementById("uiScore");
   const uiPowers = document.getElementById("uiPowers");
+  const uiCombo = document.getElementById("uiCombo");
+  const uiComboHits = document.getElementById("uiComboHits");
+  const uiBuild = document.getElementById("uiBuild");
+  const upgradeOverlay = document.getElementById("upgradeOverlay");
+  const upgradeOptions = document.getElementById("upgradeOptions");
+  const upgradeNextLevel = document.getElementById("upgradeNextLevel");
+
   const uiTheme = document.getElementById("uiTheme");
   const uiRemaining = document.getElementById("uiRemaining");
   const uiProgress = document.getElementById("uiProgress");
@@ -160,6 +167,12 @@
   let levelIndex = 0;
   let lives = 3;
   let score = 0;
+  let comboHits = 0, comboMultiplier = 1, comboTimer = 0;
+  let turretTimer = 0, turretSide = 0, satelliteTime = 0, mysteryShrink = 0;
+  let eventFeedback = null;
+  let turretBullets = [];
+  let draftChoices = [];
+  const runUpgrades = { satellite:0, turret:0, sturdy:0, magnet:0, combo:0, scavenger:0, recovery:0 };
 
   // Input
   const keys = new Set();
@@ -185,7 +198,7 @@
   // Balls
   const balls = [];
   function makeBall(x, y, vx, vy, r=8) {
-    return { x, y, vx, vy, r, pierce:false, sticky:false, stuck:false, aiming:false };
+    return { x, y, vx, vy, r, pierce:false, sticky:false, stuck:false, aiming:false, satSeed:rand(0,Math.PI*2) };
   }
 
   // Bricks / drops
@@ -195,6 +208,16 @@
   // Powerups timers
   const powers = { wide:0, bigball:0, pierce:0, multiball:0, slow:0, sticky:0 };
 
+  // Permanent upgrades are chosen once per cleared level and last for this run only.
+  const UPGRADE_DEFS = [
+    { id:"satellite", name:"Orbit Satellites", icon:"◉", max:2, description:"+1 liten satellit som kretsar runt varje aktiv boll. Varje kloss har en kort träff-cooldown." },
+    { id:"turret", name:"Twin Turrets", icon:"✦", max:1, description:"Två små kanoner på plattan. De skjuter växelvis, ungefär varannan sekund. Svaga, automatiska skott." },
+    { id:"sturdy", name:"Wide Chassis", icon:"↔", max:2, description:"Plattan blir 18 pixlar bredare permanent." },
+    { id:"magnet", name:"Pickup Magnet", icon:"⌁", max:2, description:"Fånga fallande powerups lite lättare nära plattan." },
+    { id:"combo", name:"Combo Keeper", icon:"×", max:2, description:"Ditt combo-fönster får 0,7 sekunder extra för varje nivå." },
+    { id:"scavenger", name:"Lucky Break", icon:"✧", max:2, description:"Ökar chansen att få slumpmässiga powerups med 3 procentenheter." },
+    { id:"recovery", name:"Second Chance", icon:"♥", max:1, description:"Få tillbaka ett liv, maximalt 3 totalt." }
+  ];
   const POWER_DEFS = [
     { id:"wide", label:"Bred bräda", color:"#8ad1ff" },
     { id:"bigball", label:"Stor boll", color:"#a7ff9b" },
@@ -261,6 +284,175 @@
     return active.length ? active.join(" · ") : "—";
   }
 
+  function availableUpgrades() {
+    return UPGRADE_DEFS.filter(def => runUpgrades[def.id] < def.max &&
+      (def.id !== "recovery" || lives < 3));
+  }
+
+  function showUpgradeDraft() {
+    const pool = availableUpgrades();
+    draftChoices = [];
+    while (pool.length && draftChoices.length < 3) {
+      draftChoices.push(pool.splice(randi(0, pool.length - 1), 1)[0]);
+    }
+    // There are enough options for all seven drafts; fallback keeps game playable.
+    if (!draftChoices.length) {
+      showStartOverlay(`Bana ${levelIndex + 1}`,
+        "Alla uppgraderingar är maxade. Tryck Spela för att fortsätta.");
+      return;
+    }
+
+    setPaused(true);
+    modalOpen = true;
+    overlayCenter.classList.add("hidden");
+    overlayPause.classList.add("hidden");
+    document.documentElement.classList.remove("dx-cursor-hidden");
+    exitPointerLockSafe();
+    upgradeNextLevel.textContent = String(levelIndex + 1);
+    upgradeOptions.replaceChildren();
+    for (const def of draftChoices) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "dx-upgrade-choice";
+      const glyph = document.createElement("span"); glyph.className = "dx-upgrade-glyph"; glyph.textContent = def.icon;
+      const heading = document.createElement("strong"); heading.textContent = def.name;
+      const description = document.createElement("span"); description.className = "dx-upgrade-desc"; description.textContent = def.description;
+      const rank = document.createElement("small"); rank.textContent = `NIVÅ ${runUpgrades[def.id] + 1}/${def.max}`;
+      button.append(glyph, heading, description, rank);
+      button.addEventListener("click", () => chooseUpgrade(def.id));
+      upgradeOptions.append(button);
+    }
+    upgradeOverlay.classList.remove("hidden");
+    upgradeOptions.querySelector("button")?.focus({preventScroll:true});
+  }
+
+  function chooseUpgrade(id) {
+    const def = draftChoices.find(item => item.id === id);
+    if (!def || !modalOpen || upgradeOverlay.classList.contains("hidden")) return;
+    runUpgrades[id] = Math.min(def.max, runUpgrades[id] + 1);
+    if (id === "recovery") lives = Math.min(3, lives + 1);
+    if (id === "sturdy") {
+      paddle.w += 18;
+      paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
+    }
+    draftChoices = [];
+    upgradeOverlay.classList.add("hidden");
+    updateUI();
+    showStartOverlay(`Bana ${levelIndex + 1}`,
+      `${def.name} vald!<br>Liv: <b>${lives}</b>.<br>
+      Tryck <b>Spela</b>, sedan <b>klicka/tappa</b> eller <b>SPACE</b> för att skjuta.`);
+  }
+
+  function setEventFeedback(label, color="#ffe4b8") {
+    eventFeedback = { label, color, until:performance.now()+1750 };
+  }
+
+  function registerCombo(basePoints) {
+    comboHits += 1;
+    comboTimer = 2.8 + runUpgrades.combo * .7;
+    comboMultiplier = Math.min(5, 1 + Math.floor((comboHits - 1) / 4));
+    score += Math.round(basePoints * comboMultiplier);
+  }
+
+  function applyMystery(brick) {
+    const effects = ["bonus", "burst", "loot", "hex"];
+    const effect = effects[randi(0, effects.length - 1)];
+    const cx = brick.x + brick.w/2, cy = brick.y + brick.h/2;
+    if (effect === "bonus") {
+      const prize = 160 * comboMultiplier;
+      score += prize;
+      setEventFeedback(`MYSTERY • +${prize} POÄNG`, "#ffdb8b");
+    } else if (effect === "loot") {
+      dropPower(clamp(cx-12,18,W-18), cy);
+      dropPower(clamp(cx+12,18,W-18), cy);
+      setEventFeedback("MYSTERY • POWERUP-REGN", "#9bdafc");
+    } else if (effect === "burst") {
+      // Small chain reaction: a maximum of three nearby ordinary bricks.
+      const neighbors = bricks.filter(b => b !== brick && b.hp > 0 && !b.indestructible && !b.mystery &&
+        Math.hypot((b.x+b.w/2)-cx,(b.y+b.h/2)-cy) < 115);
+      neighbors.sort((a,b)=>Math.hypot(a.x-cx,a.y-cy)-Math.hypot(b.x-cx,b.y-cy));
+      for (const b of neighbors.slice(0,3)) damageBrick(b,1,b.x+b.w/2,b.y+b.h/2,"chain");
+      burst(cx, cy, "#efadff", 24);
+      setEventFeedback("MYSTERY • KEDJEREAKTION", "#dfb2ff");
+    } else {
+      mysteryShrink = 6;
+      setEventFeedback("MYSTERY • PLATTAN KRYMPER (6s)", "#ff8ca8");
+    }
+  }
+
+  function damageBrick(brick, amount, x, y, source="ball") {
+    if (brick.hp <= 0 || brick.indestructible) return false;
+    brick.hp = Math.max(0, brick.hp - amount);
+    brick.flash = .16;
+    burst(x, y, brick.hp >= 3 ? COLORS.brick3 : (brick.hp === 2 ? COLORS.brick2 : COLORS.brick1),
+      brick.hp === 0 ? 10 : 5);
+    registerCombo(10 + (brick.hp === 0 ? 30 : 0));
+    if (brick.hp === 0) {
+      if (brick.mystery) {
+        applyMystery(brick);
+      } else if (source !== "chain") {
+        const chance = (source === "ball" ? POWERUP_DROP_CHANCE : .07) + runUpgrades.scavenger*.03;
+        if (Math.random() < chance) dropPower(brick.x+brick.w/2,brick.y+brick.h/2);
+      }
+    }
+    return true;
+  }
+
+  function updateTurrets(dt) {
+    if (!runUpgrades.turret) return;
+    const activeBalls = balls.some(b=>!b.stuck);
+    if (activeBalls) {
+      turretTimer += dt;
+      if (turretTimer >= 1.95 && turretBullets.length < 4) {
+        turretTimer -= 1.95;
+        const isLeft = turretSide++ % 2 === 0;
+        turretBullets.push({ x:paddle.x+(isLeft?8:paddle.w-8), y:paddle.y-8, vy:-510 });
+      }
+    }
+    for (let i=turretBullets.length-1;i>=0;i--) {
+      const bullet = turretBullets[i];
+      const startY = bullet.y;
+      bullet.y += bullet.vy*dt;
+      let impact = null, closest = -Infinity;
+      for (const brick of bricks) {
+        if (brick.hp<=0 || bullet.x<brick.x || bullet.x>brick.x+brick.w) continue;
+        const y = brick.y+brick.h;
+        if (y<=startY && y>=bullet.y && y>closest) {impact=brick;closest=y;}
+      }
+      if (impact) {
+        if (impact.indestructible) burst(bullet.x, closest, "#b3c6d5", 3);
+        else damageBrick(impact,1,bullet.x,closest,"turret");
+        turretBullets.splice(i,1);
+      } else if (bullet.y<10) turretBullets.splice(i,1);
+    }
+  }
+
+  function satelliteLocation(ball,i) {
+    const count=runUpgrades.satellite;
+    const angle = satelliteTime*2.4 + i*2*Math.PI/count + ball.satSeed;
+    const range = ball.r+17;
+    return {x:ball.x+Math.cos(angle)*range,y:ball.y+Math.sin(angle)*range};
+  }
+
+  function updateSatellites(dt) {
+    if (!runUpgrades.satellite) return;
+    satelliteTime += dt;
+    for (const brick of bricks) if (brick.satCooldown > 0) brick.satCooldown = Math.max(0,brick.satCooldown-dt);
+    for (const ball of balls) {
+      if (ball.stuck) continue;
+      for (let i=0;i<runUpgrades.satellite;i++) {
+        const p=satelliteLocation(ball,i);
+        for(const brick of bricks) {
+          if(brick.hp<=0 || brick.indestructible || brick.satCooldown>0) continue;
+          if (!collideBallAABB(p,5,brick).hit) continue;
+          brick.satCooldown=.53;
+          damageBrick(brick,1,p.x,p.y,"satellite");
+          break;
+        }
+      }
+    }
+  }
+
   function showStartOverlay(title, text) {
     modalOpen = true;
     overlayTitle.textContent = title;
@@ -297,6 +489,16 @@
     uiLives.textContent = String(lives);
     uiScore.textContent = String(score);
     uiPowers.textContent = powersLabel();
+    uiCombo.textContent = "×" + comboMultiplier;
+    uiComboHits.textContent = comboHits >= 2 ? comboHits + " träffar" : "COMBO";
+    uiBuild.textContent = [
+      runUpgrades.satellite ? `◉${runUpgrades.satellite}` : "",
+      runUpgrades.turret ? "✦ TURRETS" : "",
+      runUpgrades.sturdy ? `↔${runUpgrades.sturdy}` : "",
+      runUpgrades.magnet ? "⌁" : "",
+      runUpgrades.combo ? "×+" : "",
+      runUpgrades.scavenger ? "✧" : "",
+    ].filter(Boolean).join(" · ") || "INGA UPPGRADERINGAR";
     if (uiTheme) uiTheme.textContent = BACKGROUND_THEMES[levelIndex % BACKGROUND_THEMES.length].name;
     const left = remainingBricks();
     const total = bricks.filter(b => !b.indestructible).length;
@@ -428,9 +630,17 @@
           w: brickW, h: brickH,
           hp,
           maxHp: hp,
-          indestructible
+          indestructible, mystery:false, satCooldown:0
         });
       }
+    }
+    // One surprise brick early on; two on later stages. Metal never becomes mystery.
+    const candidates = bricks.filter(b => !b.indestructible);
+    const count = Math.min(idx >= 3 ? 2 : 1, candidates.length);
+    for(let n=0;n<count;n++) {
+      const chosen = candidates.splice(randi(0,candidates.length-1),1)[0];
+      chosen.mystery = true;
+      chosen.hp = 1; chosen.maxHp = 1;
     }
   }
 
@@ -476,6 +686,12 @@
     levelIndex = 0;
     lives = 3;
     score = 0;
+    comboHits = 0; comboMultiplier = 1; comboTimer = 0;
+    turretTimer = 0; turretSide = 0; satelliteTime = 0; mysteryShrink = 0;
+    eventFeedback = null; turretBullets = [];
+    draftChoices = [];
+    for (const key in runUpgrades) runUpgrades[key] = 0;
+    upgradeOverlay.classList.add("hidden");
 
     for (const k in powers) powers[k] = 0;
     stickyAimAngle = 0;
@@ -551,8 +767,8 @@
   }
 
   function updatePaddleFromPowers(dt) {
-    const baseW = 120;
-    const targetW = (powers.wide > 0) ? 170 : baseW;
+    const baseW = 120 + runUpgrades.sturdy * 18;
+    const targetW = (powers.wide > 0 ? baseW + 50 : baseW) - (mysteryShrink > 0 ? 45 : 0);
     paddle.w += (targetW - paddle.w) * clamp(dt*10, 0, 1);
     paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
     paddle.y = H - 54;
@@ -784,6 +1000,11 @@
     for (const k in powers) {
       if (k !== "sticky" && powers[k] > 0) powers[k] = Math.max(0, powers[k] - dt);
     }
+    if (comboTimer > 0) {
+      comboTimer -= dt;
+      if (comboTimer <= 0) { comboHits = 0; comboMultiplier = 1; comboTimer = 0; }
+    }
+    if (mysteryShrink > 0) mysteryShrink = Math.max(0,mysteryShrink-dt);
 
     updatePaddle(dt);
     updatePaddleFromPowers(dt);
@@ -793,8 +1014,9 @@
       const d = drops[i];
       d.y += d.vy * dt;
 
-      if (d.y + d.r > paddle.y && d.y - d.r < paddle.y + paddle.h &&
-          d.x > paddle.x && d.x < paddle.x + paddle.w) {
+      const magnetRange = runUpgrades.magnet*18;
+      if (d.y + d.r > paddle.y - magnetRange && d.y - d.r < paddle.y + paddle.h &&
+          d.x > paddle.x - magnetRange && d.x < paddle.x + paddle.w + magnetRange) {
         applyPower(d.id);
         drops.splice(i, 1);
         continue;
@@ -802,6 +1024,8 @@
       if (d.y - d.r > H + 40) drops.splice(i, 1);
     }
 
+    updateTurrets(dt);
+    updateSatellites(dt);
     const slowFactor = (powers.slow > 0) ? 0.72 : 1.0;
 
     for (let bi = balls.length-1; bi >= 0; bi--) {
@@ -900,17 +1124,8 @@
             b.x = beforeX + travelX;
             b.y = beforeY + travelY;
           }
-          br.hp -= dmg;
-          br.flash = 0.16;
-          burst(b.x, b.y, br.hp >= 3 ? COLORS.brick3 : (br.hp === 2 ? COLORS.brick2 : COLORS.brick1), br.hp <= 0 ? 11 : 5);
-          score += 10;
+          damageBrick(br,dmg,b.x,b.y,"ball");
           speedUp(b, 10 + (Math.abs(normal.nx) ? 4 : 0));
-          if (br.hp <= 0) {
-            score += 30;
-            if (Math.random() < POWERUP_DROP_CHANCE) {
-              dropPower(br.x + br.w / 2, br.y + br.h / 2);
-            }
-          }
         }
       }
 
@@ -965,13 +1180,10 @@
       buildLevel(levelIndex);
       drops = [];
       spawnServeBall();
-      setPaused(true);
-      showStartOverlay(
-        `Bana ${levelIndex + 1}`,
-        `Ny bana laddad.<br>
-         Liv: <b>${lives}</b> (fylls inte på mellan banor).<br>
-         Tryck <b>Spela</b>, sen <b>klicka/tappa</b> (eller <b>SPACE</b>) för att släppa kulan.`
-      );
+      turretBullets.length = 0;
+      turretTimer = 0;
+      comboHits = 0; comboMultiplier = 1; comboTimer = 0;
+      showUpgradeDraft();
     }
 
     updateUI();
@@ -1395,7 +1607,15 @@
     ctx.fillRect(b.x+5,b.y+b.h-7,Math.max(0,b.w-10),3);
     ctx.strokeStyle=metal?"rgba(196,220,232,.38)":"rgba(255,253,239,.18)";
     ctx.lineWidth=1;ctx.strokeRect(b.x+3.5,b.y+3.5,b.w-7,b.h-9);
-    if(metal) {
+    if (b.mystery) {
+      // A recognisable mystery tile that still belongs to the arcade's palette.
+      ctx.fillStyle = "#59386c";
+      roundRect(ctx,b.x+1,b.y,b.w-2,b.h-3,r);ctx.fill();
+      ctx.fillStyle="#f9c5ff";
+      ctx.font = `700 ${Math.max(12,Math.min(21,b.h-2))}px "Pixelify Sans", Arial`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("?",b.x+b.w/2,b.y+b.h/2-1);
+    } else if(metal) {
       ctx.fillStyle="#1f334b";
       for(let i=0;i<3;i++)ctx.fillRect(b.x+b.w*(.28+i*.22)-2,b.y+b.h*.34,4,Math.max(2,b.h*.28));
       ctx.fillStyle="#bad2dd";
@@ -1486,6 +1706,45 @@
       }
       ctx.restore();
     }
+  }
+
+  function drawRogueliteWeapons() {
+    ctx.save();
+    if (runUpgrades.turret) {
+      for(const side of [0,1]) {
+        const x = paddle.x+(side ? paddle.w-8 : 8);
+        const y = paddle.y-4;
+        ctx.shadowColor="#a0f0ff";ctx.shadowBlur=8;
+        ctx.fillStyle="#294961";ctx.fillRect(x-6,y-7,12,10);
+        ctx.fillStyle="#82dff1";ctx.fillRect(x-3,y-12,6,10);
+        ctx.shadowBlur=0;
+      }
+      for(const bullet of turretBullets) {
+        ctx.shadowColor="#f8b885";ctx.shadowBlur=10;
+        ctx.fillStyle="#ffe1aa";ctx.fillRect(bullet.x-2,bullet.y-9,4,12);
+      }
+    }
+    if (runUpgrades.satellite) {
+      ctx.shadowColor="#bca0ff";ctx.shadowBlur=12;
+      for(const ball of balls) {
+        if(ball.stuck) continue;
+        for(let i=0;i<runUpgrades.satellite;i++) {
+          const p=satelliteLocation(ball,i);
+          ctx.fillStyle="#d3adff";
+          ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fill();
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawEventFeedback() {
+    if(!eventFeedback || performance.now() >= eventFeedback.until) return;
+    ctx.save();ctx.font='700 18px "Pixelify Sans",Arial';
+    ctx.textAlign="center";ctx.fillStyle=eventFeedback.color;
+    ctx.shadowColor="#081929";ctx.shadowBlur=8;
+    ctx.fillText(eventFeedback.label,W/2,Math.max(115,H*.43));
+    ctx.restore();
   }
 
   function drawDrops() {
@@ -1709,8 +1968,10 @@
     drawStickyAim();
     drawPaddle();
     drawBalls();
+    drawRogueliteWeapons();
     drawParticles();
     drawCheatFeedback();
+    drawEventFeedback();
 
     if (balls.some(b=>b.stuck) && !paused && !gameOver) {
       ctx.save();
