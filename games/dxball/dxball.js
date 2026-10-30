@@ -166,6 +166,13 @@
   let usingMouse = false;
   let touchActive = false;
 
+  // Sticky aiming – radians from straight up. Normal serves are unchanged.
+  const AIM_LIMIT = 1.28; // 73 degrees to either side, enough to bank off the walls.
+  const AIM_STEP = .075;
+  const AIM_LAUNCH_SPEED = 510;
+  let stickyAimAngle = 0;
+  let stickyTouch = null;
+
   // Paddle
   const paddle = {
     x: 0, y: 0,
@@ -178,7 +185,7 @@
   // Balls
   const balls = [];
   function makeBall(x, y, vx, vy, r=8) {
-    return { x, y, vx, vy, r, pierce:false, sticky:false, stuck:false };
+    return { x, y, vx, vy, r, pierce:false, sticky:false, stuck:false, aiming:false };
   }
 
   // Bricks / drops
@@ -198,6 +205,52 @@
   ];
 
   function anyBallStuck() { return balls.some(b => b.stuck); }
+  function isStickyAiming() {
+    return running && !paused && !modalOpen && !gameOver &&
+      balls.some(b => b.stuck && b.aiming);
+  }
+
+  function adjustStickyAim(delta) {
+    stickyAimAngle = clamp(stickyAimAngle + delta, -AIM_LIMIT, AIM_LIMIT);
+  }
+
+  // Deliberately undisclosed in the UI. Typed anywhere while actively playing.
+  const CHEAT_CODES = {
+    sticky: "sticky",
+    wide: "wide",
+    bigball: "bigball",
+    slow: "slow",
+    multiball: "multiball",
+    drill: "pierce"
+  };
+  let cheatBuffer = "";
+  let cheatLastKeyAt = 0;
+  let cheatFeedback = null;
+
+  function handleHiddenCheat(e) {
+    if (!running || paused || gameOver || modalOpen ||
+        e.repeat || e.ctrlKey || e.altKey || e.metaKey ||
+        e.target?.closest?.("input,textarea,select,[contenteditable]")) return;
+    const key = e.key.toLowerCase();
+    if (!/^[a-z]$/.test(key)) {
+      cheatBuffer = "";
+      return;
+    }
+    const now = performance.now();
+    if (now - cheatLastKeyAt > 1350) cheatBuffer = "";
+    cheatLastKeyAt = now;
+    cheatBuffer = (cheatBuffer + key).slice(-16);
+
+    for (const [code, id] of Object.entries(CHEAT_CODES)) {
+      if (!cheatBuffer.endsWith(code)) continue;
+      cheatBuffer = "";
+      applyPower(id);
+      const def = POWER_DEFS.find(p => p.id === id);
+      cheatFeedback = { label: (def?.label || id).toUpperCase(), until: now + 1750 };
+      burst(paddle.x + paddle.w / 2, paddle.y - 12, def?.color || "#fff", 16);
+      break;
+    }
+  }
 
   function powersLabel() {
     const active = [];
@@ -392,17 +445,27 @@
     const b = makeBall(W/2, paddle.y - 14, 0, 0, 8);
     b.sticky = powers.sticky > 0;
     b.stuck = true;
+    b.aiming = b.sticky;
+    stickyAimAngle = 0;
     balls.push(b);
   }
 
   function launchStuckBalls() {
     for (const b of balls) {
-      if (b.stuck) {
-        const dir = (Math.random() < 0.5 ? -1 : 1);
+      if (!b.stuck) continue;
+      if (b.aiming) {
+        // The launched velocity exactly matches the displayed aim line.
+        b.vx = Math.sin(stickyAimAngle) * AIM_LAUNCH_SPEED;
+        b.vy = -Math.cos(stickyAimAngle) * AIM_LAUNCH_SPEED;
+      } else {
+        // Preserve the original random trajectory for ordinary serves.
+        const dir = Math.random() < .5 ? -1 : 1;
         b.vx = dir * rand(120, 220);
         b.vy = -rand(420, 520);
-        b.stuck = false;
       }
+      b.stuck = false;
+      b.aiming = false;
+      b.trail = [];
     }
   }
 
@@ -415,6 +478,10 @@
     score = 0;
 
     for (const k in powers) powers[k] = 0;
+    stickyAimAngle = 0;
+    stickyTouch = null;
+    cheatBuffer = "";
+    cheatFeedback = null;
     particles.length = 0;
 
     drops = [];
@@ -507,7 +574,14 @@
   // --- Keyboard ---
   window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
+    handleHiddenCheat(e);
     if (["arrowleft","arrowright"," "].includes(k)) e.preventDefault();
+
+    if (isStickyAiming() && (k === "q" || k === "e")) {
+      if (!e.repeat) adjustStickyAim(k === "q" ? -AIM_STEP : AIM_STEP);
+      e.preventDefault();
+      return;
+    }
 
     if (["arrowleft","arrowright","a","d"].includes(k)) {
       paddle.targetX = null;
@@ -553,6 +627,12 @@
     if (usingMouse && !isPointerLocked()) paddle.targetX = null;
   });
 
+  canvas.addEventListener("wheel", e => {
+    if (!isStickyAiming()) return;
+    e.preventDefault();
+    if (e.deltaY !== 0) adjustStickyAim((e.deltaY > 0 ? 1 : -1) * AIM_STEP);
+  }, { passive: false });
+
   canvas.addEventListener("mousedown", (e) => {
     usingMouse = true;
     canvas.focus({ preventScroll: true });
@@ -568,19 +648,39 @@
     touchActive = true;
     usingMouse = false;
     canvas.focus({ preventScroll: true });
-
     const t = e.changedTouches[0];
     setPointerTarget(t.clientX);
 
+    // Sticky only: dragging aims; a tap releases on touchend.
+    // Normal gameplay keeps its original touchstart-to-launch behavior.
+    if (isStickyAiming()) {
+      stickyTouch = { x: t.clientX, angle: stickyAimAngle, moved: false };
+      return;
+    }
     primaryAction();
   }, { passive: false });
 
   canvas.addEventListener("touchmove", (e) => {
     const t = e.changedTouches[0];
     setPointerTarget(t.clientX);
+    if (stickyTouch && isStickyAiming()) {
+      const dx = t.clientX - stickyTouch.x;
+      if (Math.abs(dx) > 10) stickyTouch.moved = true;
+      stickyAimAngle = clamp(stickyTouch.angle + dx / Math.max(120, W * .55),
+        -AIM_LIMIT, AIM_LIMIT);
+    }
   }, { passive: false });
 
-  canvas.addEventListener("touchend", () => { touchActive = false; });
+  canvas.addEventListener("touchend", () => {
+    touchActive = false;
+    if (stickyTouch && !stickyTouch.moved && isStickyAiming()) primaryAction();
+    stickyTouch = null;
+  });
+
+  canvas.addEventListener("touchcancel", () => {
+    touchActive = false;
+    stickyTouch = null;
+  });
 
   // Buttons
   btnPlay.addEventListener("click", () => {
@@ -734,8 +834,14 @@
         b.vx = Math.cos(angle) * baseSpeed + spin * 260;
         b.vy = Math.sin(angle) * baseSpeed;
 
-        if (b.sticky) b.stuck = true;
-        else speedUp(b, 12);
+        if (b.sticky) {
+          b.stuck = true;
+          b.aiming = true;
+          b.vx = 0;
+          b.vy = 0;
+          b.trail = [];
+          stickyAimAngle = 0;
+        } else speedUp(b, 12);
       }
 
       // Bricks
@@ -1383,6 +1489,138 @@
     ctx.restore();
   }
 
+
+  // Trace the intended launch path in the same arena used by ball physics.
+  // Preview stops at the first brick (including unbreakable ones), with up to
+  // three wall rebounds before that. The line is a guide, not a physics override.
+  function rayDistanceToBrick(x, y, dx, dy, brick, r) {
+    const minX = brick.x - r, maxX = brick.x + brick.w + r;
+    const minY = brick.y - r, maxY = brick.y + brick.h + r;
+    let tMin = -Infinity, tMax = Infinity;
+
+    if (Math.abs(dx) < 1e-8) {
+      if (x < minX || x > maxX) return Infinity;
+    } else {
+      const a = (minX - x) / dx, b = (maxX - x) / dx;
+      tMin = Math.max(tMin, Math.min(a, b));
+      tMax = Math.min(tMax, Math.max(a, b));
+    }
+    if (Math.abs(dy) < 1e-8) {
+      if (y < minY || y > maxY) return Infinity;
+    } else {
+      const a = (minY - y) / dy, b = (maxY - y) / dy;
+      tMin = Math.max(tMin, Math.min(a, b));
+      tMax = Math.min(tMax, Math.max(a, b));
+    }
+    return tMax >= Math.max(tMin, 0) && tMin > 0.01 ? tMin : Infinity;
+  }
+
+  function traceStickyAim(ball) {
+    const r = ball.r;
+    const left = 10 + r, right = W - 10 - r, top = 10 + r;
+    const bottom = paddle.y - r - 1;
+    const points = [{ x: ball.x, y: ball.y }];
+    const bounces = [];
+    let x = ball.x, y = ball.y;
+    let dx = Math.sin(stickyAimAngle), dy = -Math.cos(stickyAimAngle);
+    let remaining = Math.max(W, H) * 3;
+
+    for (let bounce = 0; bounce <= 3 && remaining > 1; bounce++) {
+      let distance = remaining;
+      let wall = null;
+
+      if (dx < -1e-8) {
+        const t = (left - x) / dx;
+        if (t > .001 && t < distance) { distance = t; wall = "side"; }
+      } else if (dx > 1e-8) {
+        const t = (right - x) / dx;
+        if (t > .001 && t < distance) { distance = t; wall = "side"; }
+      }
+      if (dy < -1e-8) {
+        const t = (top - y) / dy;
+        if (t > .001 && t < distance) { distance = t; wall = "top"; }
+      } else if (dy > 1e-8) {
+        const t = (bottom - y) / dy;
+        if (t > .001 && t < distance) { distance = t; wall = "bottom"; }
+      }
+
+      let brickHit = false;
+      for (const brick of bricks) {
+        if (brick.hp <= 0) continue;
+        const t = rayDistanceToBrick(x, y, dx, dy, brick, r);
+        if (t < distance) {
+          distance = t;
+          brickHit = true;
+          wall = null;
+        }
+      }
+
+      x += dx * distance;
+      y += dy * distance;
+      points.push({ x, y });
+      remaining -= distance;
+
+      if (brickHit || !wall || wall === "bottom") break;
+      bounces.push({ x, y });
+      if (wall === "side") dx = -dx;
+      else dy = -dy;
+    }
+    return { points, bounces };
+  }
+
+  function drawStickyAim() {
+    if (paused || gameOver || modalOpen) return;
+    const ball = balls.find(b => b.stuck && b.aiming);
+    if (!ball) return;
+
+    const path = traceStickyAim(ball);
+    ctx.save();
+    ctx.lineWidth = 2.4;
+    ctx.lineJoin = "round";
+    ctx.setLineDash([4, 8]);
+    ctx.strokeStyle = "rgba(147,251,237,.85)";
+    ctx.shadowColor = "#7ff9ed";
+    ctx.shadowBlur = 9;
+    ctx.beginPath();
+    for (let i = 0; i < path.points.length; i++) {
+      const p = path.points[i];
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
+
+    for (const p of path.bounces) {
+      ctx.strokeStyle = "rgba(255,208,154,.9)";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.stroke();
+    }
+    const target = path.points[path.points.length - 1];
+    ctx.strokeStyle = "#a8fff0";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(target.x, target.y, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(target.x - 13, target.y); ctx.lineTo(target.x - 5, target.y);
+    ctx.moveTo(target.x + 5, target.y); ctx.lineTo(target.x + 13, target.y);
+    ctx.moveTo(target.x, target.y - 13); ctx.lineTo(target.x, target.y - 5);
+    ctx.moveTo(target.x, target.y + 5); ctx.lineTo(target.x, target.y + 13);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawCheatFeedback() {
+    if (!cheatFeedback || performance.now() > cheatFeedback.until) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = '700 17px "Pixelify Sans", Arial, sans-serif';
+    ctx.fillStyle = "#ffd69e";
+    ctx.shadowColor = "#151e36";
+    ctx.shadowBlur = 8;
+    ctx.fillText("✦ " + cheatFeedback.label + " ✦", W / 2, Math.max(112, H * .53));
+    ctx.restore();
+  }
+
   function draw() {
     drawAtmosphere();
 
@@ -1398,15 +1636,23 @@
 
     for(const b of bricks)if(b.hp>0)drawBrick(b);
     drawDrops();
+    drawStickyAim();
     drawPaddle();
     drawBalls();
     drawParticles();
+    drawCheatFeedback();
 
     if (balls.some(b=>b.stuck) && !paused && !gameOver) {
       ctx.save();
       ctx.fillStyle="#f7d5ac";ctx.globalAlpha=.75+.20*Math.sin(sceneTime*4);
       ctx.textAlign="center";ctx.font='700 13px "Pixelify Sans",Arial,sans-serif';
-      ctx.fillText("KLICKA / SPACE FÖR ATT SKJUTA",W*.5,Math.max(86,paddle.y-45));
+      const aiming = balls.some(b => b.stuck && b.aiming);
+      const hint = aiming
+        ? (matchMedia("(pointer: coarse)").matches
+          ? "DRA FÖR ATT SIKTA · TRYCK FÖR ATT SKJUTA"
+          : "Q / E ELLER MUSHJUL: SIKTA · KLICKA / SPACE: SKJUT")
+        : "KLICKA / SPACE FÖR ATT SKJUTA";
+      ctx.fillText(hint, W*.5, Math.max(86,paddle.y-45));
       ctx.restore();
     }
   }
