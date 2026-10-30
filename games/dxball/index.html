@@ -24,6 +24,8 @@ permalink: /games/dxball/
       <button id="btnPause" class="dx-pause-button" type="button" aria-label="Pausa spelet"><span aria-hidden="true">Ⅱ</span><span class="dx-pause-text">PAUS</span></button>
     </div>
 
+    <div class="dx-combo-readout"><span id="uiComboHits">COMBO</span><strong id="uiCombo">×1</strong></div>
+    <div class="dx-build-readout"><span>RUN BUILD</span><strong id="uiBuild">INGA UPPGRADERINGAR</strong></div>
     <div class="dxhud-bottom">
       <div class="dx-progress-card">
         <div class="dx-progress-label"><span>LEVEL CLEAR</span><strong><span id="uiRemaining">0</span> KVAR</strong></div>
@@ -47,6 +49,7 @@ permalink: /games/dxball/
           <span class="dxtag"><span class="dot dot-y"></span> 2 träffar</span>
           <span class="dxtag"><span class="dot dot-r"></span> 3 träffar</span>
           <span class="dxtag"><span class="dot dot-ind"></span> Obrytbar</span>
+          <span class="dxtag"><span class="dot dot-mystery"></span> Mystery</span>
         </div>
         <p class="dx-controls-note">A/D · PILAR · MUS · TOUCH <span> / </span> ESC/P PAUS</p>
       </div>
@@ -62,6 +65,16 @@ permalink: /games/dxball/
           <button id="btnRestart2" class="dxbtn dxbtn-secondary" type="button">↻ BÖRJA OM</button>
         </div>
         <p class="dx-controls-note">ESC / P FORTSÄTT</p>
+      </div>
+    </div>
+
+    <div id="upgradeOverlay" class="dxhud-upgrade hidden" role="dialog" aria-modal="true" aria-label="Välj uppgradering">
+      <div class="dx-upgrade-panel">
+        <span class="dx-eyebrow">✦ BALL / EVOLUTION ✦</span>
+        <h2>VÄLJ DIN UPPGRADERING</h2>
+        <p>Bana <strong id="upgradeNextLevel">2</strong> väntar. Välj en permanent fördel för resten av din spelomgång.</p>
+        <div id="upgradeOptions" class="dx-upgrade-options"></div>
+        <small class="dx-upgrade-footnote">Slumpmässiga powerups fortsätter droppa som vanligt.</small>
       </div>
     </div>
 
