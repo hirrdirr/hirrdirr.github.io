@@ -19,7 +19,7 @@ section: games
     <div class="section-heading"><h2 id="games-heading">Välj ditt spel</h2><span>3 spel att spela nu</span></div>
     <div class="game-showcase">
       <article class="hub-game hub-featured">
-        <img src="/assets/artwork/home/core-defense.webp" width="1200" height="475" alt="Försvarstorn skyddar en energikärna mot gobliner">
+        {% include game_artwork.html name="core-defense" description="Försvarstorn skyddar en energikärna mot gobliner" %}
         <div class="hub-game-copy">
           <p class="section-kicker">STRATEGI / TOWER DEFENSE</p>
           <h3>Core Defense</h3>
@@ -28,16 +28,16 @@ section: games
         </div>
       </article>
       <article class="hub-game hub-compact">
-        <img src="/assets/artwork/home/dodge-drift.webp" width="1200" height="476" alt="En lysande boll manövrerar mellan asteroider">
+        {% include game_artwork.html name="dodge-drift" description="En lysande boll manövrerar mellan asteroider" %}
         <div class="hub-game-copy"><p class="section-kicker">ARKAD / ÖVERLEVNAD</p><h3>Dodge &amp; Drift</h3><p>Styr bollen, undvik asteroider och överlev så länge du kan.</p><a class="section-button section-button-secondary" href="/games/dnd/" aria-label="Spela Dodge &amp; Drift">Spela nu <span aria-hidden="true">↗</span></a></div>
       </article>
       <article class="hub-game hub-compact">
-        <img src="/assets/artwork/home/ball.webp" width="1200" height="475" alt="En boll och paddel slår sönder färgglada block">
+        {% include game_artwork.html name="ball" description="En boll och paddel slår sönder färgglada block" %}
         <div class="hub-game-copy"><p class="section-kicker">ARKAD / BRICK BREAKER</p><h3>Ball</h3><p>Håll bollen i spel, slå sönder blocken och ta dig vidare till nästa bana.</p><a class="section-button section-button-secondary" href="/games/dxball/" aria-label="Spela Ball">Spela nu <span aria-hidden="true">↗</span></a></div>
       </article>
     </div>
     <article class="hub-coming" aria-labelledby="coming-title">
-      <img src="/assets/artwork/home/idle-guild.webp" width="960" height="380" loading="lazy" alt="Ett japanskt äventyrsgille i pixelart">
+      {% include game_artwork.html name="idle-guild" description="Ett japanskt äventyrsgille i pixelart" %}
       <div><span class="section-tag">COMING SOON</span><h3 id="coming-title">Idle Guild</h3><p>Ett nytt äventyr växer fram. Spelet är under utveckling.</p></div>
       <span class="coming-status">Kommer snart</span>
     </article>
