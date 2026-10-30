@@ -177,3 +177,85 @@ body.dxball-noscr{overflow:hidden;overscroll-behavior:none;touch-action:none;}
   .dx-upgrade-choice .dx-upgrade-glyph{font-size:22px;}
   .dx-upgrade-footnote{margin-top:8px;}
 }
+
+
+/* Ball drop guide: the exact pickup glyphs, names and effects. Available
+   on the start screen and (collapsed) in pause without covering gameplay. */
+.dx-power-guide {
+  margin:11px 0 0;
+  border-top:1px solid rgba(179,208,233,.20);
+  padding-top:10px;
+  text-align:left;
+  color:#d8e5f1;
+}
+.dx-power-guide > summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  cursor:pointer;
+  list-style:none;
+  padding:4px 2px 7px;
+  color:#ffcc9d;
+  font:800 11px/1.3 Arial,sans-serif;
+  letter-spacing:1.05px;
+}
+.dx-power-guide > summary::-webkit-details-marker {display:none}
+.dx-power-guide > summary::after {content:"▾";margin-left:auto;font-size:14px;color:#d4a9ff}
+.dx-power-guide[open] > summary::after {content:"▴"}
+.dx-power-guide > summary span {
+  color:#b1c8dc;
+  font-weight:600;
+  font-size:10px;
+  letter-spacing:0;
+  margin-left:auto;
+}
+.dx-power-guide > summary:focus-visible {
+  outline:2px solid #a5e5fa;
+  outline-offset:3px;
+  border-radius:4px;
+}
+.dx-power-guide-items {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px 9px;
+  padding:3px 0 2px;
+}
+.dx-power-guide-entry {
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:5px 6px;
+  border:1px solid rgba(116,156,183,.27);
+  border-radius:5px;
+  background:rgba(6,22,41,.52);
+}
+.dx-power-guide-glyph {
+  display:grid;
+  flex:none;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border:1px solid var(--power-color);
+  border-radius:50%;
+  color:var(--power-color);
+  font:700 15px/1 Arial,sans-serif;
+  background:#13263c;
+  box-shadow:0 0 8px color-mix(in srgb,var(--power-color) 22%,transparent);
+}
+.dx-power-guide-copy {
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+.dx-power-guide-copy strong {font:700 10px/1.2 Arial,sans-serif;color:#f2e5d5}
+.dx-power-guide-copy small {font:10px/1.25 Arial,sans-serif;color:#bacfe0}
+@media (max-width:420px) {
+  .dx-power-guide-items {grid-template-columns:1fr;gap:4px}
+}
+@media (max-height:520px) {
+  .dx-power-guide-entry {padding:3px 5px}
+  .dx-power-guide-glyph {width:21px;height:21px;font-size:13px}
+}
