@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-10-29",
+  "digest_date": "2026-10-30",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "Kritisk sårbarhet i Google Brotli",
-      "url": "https://www.cert.se/2026/10/kritisk-sarbarhet-i-google-brotli.html"
+      "title": "NCSC – CERT-SE veckobrev v.44",
+      "url": "https://www.cert.se/2026/10/ncsc-cert-se-veckobrev-v44.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "Windows 11 KB5127936 update released with 41 changes and fixes",
-      "url": "https://www.bleepingcomputer.com/news/microsoft/windows-11-kb5127936-update-released-with-41-changes-and-fixes/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/29/Windows-11-logo.jpg"
+      "title": "Microsoft finally fixes VPN issues caused by September updates",
+      "url": "https://www.bleepingcomputer.com/news/microsoft/microsoft-finally-fixes-vpn-issues-caused-by-september-updates/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/29/Windows_headpic.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Have an older iPhone or iPad? Apple has a security update for you",
-      "url": "https://www.malwarebytes.com/blog/bugs/2026/10/have-an-older-iphone-or-ipad-apple-has-a-security-update-for-you",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2024/10/Apple-logo-1.png"
+      "title": "Hackers steal and publish data on 41,000 Homeland Security workers",
+      "url": "https://www.malwarebytes.com/blog/data-breaches/2026/10/hackers-steal-and-publish-data-on-41000-homeland-security-workers",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/department-of-homeland-security-logo.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "Deploying a Local Ghidra Server for Your Malware Analysis Lab, (Thu, Oct 29th)",
-      "url": "https://isc.sans.edu/diary/rss/33470"
+      "title": "ISC Stormcast For Friday, October 30th, 2026 https://isc.sans.edu/podcastdetail/10158, (Fri, Oct 30th)",
+      "url": "https://isc.sans.edu/diary/rss/33472"
     }
   ]
 }
