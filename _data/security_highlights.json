@@ -1,5 +1,5 @@
 {
-  "digest_date": "2026-10-30",
+  "digest_date": "2026-10-31",
   "articles": [
     {
       "source": "CERT-SE",
@@ -8,20 +8,20 @@
     },
     {
       "source": "BleepingComputer",
-      "title": "Microsoft finally fixes VPN issues caused by September updates",
-      "url": "https://www.bleepingcomputer.com/news/microsoft/microsoft-finally-fixes-vpn-issues-caused-by-september-updates/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/29/Windows_headpic.jpg"
+      "title": "Critical Linux kernel flaw allows remote root attacks on MPTCP servers",
+      "url": "https://www.bleepingcomputer.com/news/security/critical-linux-kernel-flaw-allows-remote-root-attacks-on-mptcp-servers/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/29/Linux.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Hackers steal and publish data on 41,000 Homeland Security workers",
-      "url": "https://www.malwarebytes.com/blog/data-breaches/2026/10/hackers-steal-and-publish-data-on-41000-homeland-security-workers",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/department-of-homeland-security-logo.jpg"
+      "title": "Fake PDF and search tools hijacked searches for 13.4 million Chrome users",
+      "url": "https://www.malwarebytes.com/blog/news/2026/10/fake-pdf-and-search-tools-hijacked-searches-for-13-4-million-chrome-users",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Friday, October 30th, 2026 https://isc.sans.edu/podcastdetail/10158, (Fri, Oct 30th)",
-      "url": "https://isc.sans.edu/diary/rss/33472"
+      "title": "Wireshark 5.0.0rc1 Release, (Sat, Oct 31st)",
+      "url": "https://isc.sans.edu/diary/rss/33476"
     }
   ]
 }
