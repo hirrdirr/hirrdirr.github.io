@@ -1,27 +1,28 @@
 {
-  "digest_date": "2026-10-31",
+  "digest_date": "2026-11-01",
   "articles": [
     {
-      "source": "CERT-SE",
-      "title": "NCSC – CERT-SE veckobrev v.44",
-      "url": "https://www.cert.se/2026/10/ncsc-cert-se-veckobrev-v44.html"
-    },
-    {
       "source": "BleepingComputer",
-      "title": "Critical Linux kernel flaw allows remote root attacks on MPTCP servers",
-      "url": "https://www.bleepingcomputer.com/news/security/critical-linux-kernel-flaw-allows-remote-root-attacks-on-mptcp-servers/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/29/Linux.jpg"
-    },
-    {
-      "source": "Malwarebytes",
-      "title": "Fake PDF and search tools hijacked searches for 13.4 million Chrome users",
-      "url": "https://www.malwarebytes.com/blog/news/2026/10/fake-pdf-and-search-tools-hijacked-searches-for-13-4-million-chrome-users",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
+      "title": "Northflank security breach leads to abuse of customers' AI API keys",
+      "url": "https://www.bleepingcomputer.com/news/security/northflank-security-breach-leads-to-abuse-of-customers-ai-api-keys/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/31/northflank-header.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "Wireshark 5.0.0rc1 Release, (Sat, Oct 31st)",
-      "url": "https://isc.sans.edu/diary/rss/33476"
+      "title": "OneNote File Extraction, (Sun, Nov 1st)",
+      "url": "https://isc.sans.edu/diary/rss/33478"
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "New Android SMS of Death exploit can remotely crash unpatched phones",
+      "url": "https://www.bleepingcomputer.com/news/security/new-android-sms-of-death-exploit-can-remotely-crash-unpatched-phones/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2024/01/31/image_(2).jpg"
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "Reddit to lock content behind logins to fight scrapers",
+      "url": "https://www.bleepingcomputer.com/news/security/reddit-to-lock-content-behind-logins-to-fight-scrapers/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/30/reddit.jpg"
     }
   ]
 }
