@@ -1,28 +1,28 @@
 {
-  "digest_date": "2026-11-01",
+  "digest_date": "2026-11-02",
   "articles": [
     {
       "source": "BleepingComputer",
-      "title": "Northflank security breach leads to abuse of customers' AI API keys",
-      "url": "https://www.bleepingcomputer.com/news/security/northflank-security-breach-leads-to-abuse-of-customers-ai-api-keys/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/31/northflank-header.jpg"
+      "title": "BTCPay Server warns of hot wallet thefts targeting outdated instances",
+      "url": "https://www.bleepingcomputer.com/news/security/btcpay-server-warns-of-hot-wallet-thefts-targeting-outdated-instances/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/08/Bitcoin-cryptocurrency.jpg"
+    },
+    {
+      "source": "Malwarebytes",
+      "title": "5 stars for sale: Inside the underground fake review trade",
+      "url": "https://www.malwarebytes.com/blog/threat-intel/2026/11/5-stars-for-sale-inside-the-underground-fake-review-trade",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/fake-review-ecosystem.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "OneNote File Extraction, (Sun, Nov 1st)",
-      "url": "https://isc.sans.edu/diary/rss/33478"
+      "title": "Mutipath TCP: Use and Detection, (Mon, Nov 2nd)",
+      "url": "https://isc.sans.edu/diary/rss/33482"
     },
     {
-      "source": "BleepingComputer",
-      "title": "New Android SMS of Death exploit can remotely crash unpatched phones",
-      "url": "https://www.bleepingcomputer.com/news/security/new-android-sms-of-death-exploit-can-remotely-crash-unpatched-phones/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2024/01/31/image_(2).jpg"
-    },
-    {
-      "source": "BleepingComputer",
-      "title": "Reddit to lock content behind logins to fight scrapers",
-      "url": "https://www.bleepingcomputer.com/news/security/reddit-to-lock-content-behind-logins-to-fight-scrapers/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/30/reddit.jpg"
+      "source": "Google Threat Intelligence",
+      "title": "Shutting the Door on the XCPE Botnet",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/",
+      "image": "https://storage.googleapis.com/gweb-cloudblog-publish/images/03_ThreatIntelligenceWebsiteBannerIdeas_BA.max-2600x2600.png"
     }
   ]
 }
