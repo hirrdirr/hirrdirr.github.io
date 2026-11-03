@@ -1,28 +1,27 @@
 {
-  "digest_date": "2026-11-02",
+  "digest_date": "2026-11-03",
   "articles": [
     {
+      "source": "CERT-SE",
+      "title": "Cyberangrepp mot uppkopplade frys- och kylsystem",
+      "url": "https://www.cert.se/2026/11/cyberangrepp-mot-uppkopplade-frys-och-kylsystem.html"
+    },
+    {
       "source": "BleepingComputer",
-      "title": "BTCPay Server warns of hot wallet thefts targeting outdated instances",
-      "url": "https://www.bleepingcomputer.com/news/security/btcpay-server-warns-of-hot-wallet-thefts-targeting-outdated-instances/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/08/Bitcoin-cryptocurrency.jpg"
+      "title": "Police seizes over 100 servers in investment scam crackdown",
+      "url": "https://www.bleepingcomputer.com/news/security/police-seizes-over-100-servers-in-investment-scam-crackdown/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/03/Police-headpic.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "5 stars for sale: Inside the underground fake review trade",
-      "url": "https://www.malwarebytes.com/blog/threat-intel/2026/11/5-stars-for-sale-inside-the-underground-fake-review-trade",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/fake-review-ecosystem.jpg"
+      "title": "Hackers put porn on public billboards and claim it was “far too easy”",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/hackers-put-porn-on-public-billboards-and-claim-it-was-far-too-easy",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/billboards-egypt.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "Mutipath TCP: Use and Detection, (Mon, Nov 2nd)",
-      "url": "https://isc.sans.edu/diary/rss/33482"
-    },
-    {
-      "source": "Google Threat Intelligence",
-      "title": "Shutting the Door on the XCPE Botnet",
-      "url": "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/",
-      "image": "https://storage.googleapis.com/gweb-cloudblog-publish/images/03_ThreatIntelligenceWebsiteBannerIdeas_BA.max-2600x2600.png"
+      "title": "ISC Stormcast For Tuesday, November 3rd, 2026 https://isc.sans.edu/podcastdetail/10162, (Tue, Nov 3rd)",
+      "url": "https://isc.sans.edu/diary/rss/33484"
     }
   ]
 }
