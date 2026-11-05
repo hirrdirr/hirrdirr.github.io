@@ -1,0 +1,32 @@
+name: Discover validation
+
+on:
+  pull_request:
+    paths:
+      - 'discover/**'
+      - 'assets/discover/**'
+      - 'assets/data/discover/**'
+      - 'tools/discover_releases.py'
+      - 'tests/test_discover_releases.py'
+      - '_layouts/default.html'
+      - '.github/workflows/discover-releases.yml'
+      - '.github/workflows/discover-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Test release normalization
+        run: python -m unittest discover -s tests -p 'test_discover_releases.py'
+      - name: Validate frontend syntax
+        run: node --check assets/discover/discover.js
+      - name: Validate cached data format
+        run: python -m json.tool assets/data/discover/releases.json > /dev/null
