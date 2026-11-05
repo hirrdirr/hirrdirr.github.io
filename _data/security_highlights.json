@@ -1,28 +1,28 @@
 {
-  "digest_date": "2026-11-04",
+  "digest_date": "2026-11-05",
   "articles": [
     {
       "source": "BleepingComputer",
-      "title": "US charges two Canadians accused of hacking US universities",
-      "url": "https://www.bleepingcomputer.com/news/security/us-charges-two-canadians-accused-of-hacking-us-universities/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/04/Hackers-room.jpg"
+      "title": "GhostMap Android flaw lets malicious app trigger persistent boot loop",
+      "url": "https://www.bleepingcomputer.com/news/security/ghostmap-android-flaw-lets-malicious-app-trigger-persistent-boot-loop/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/14/android.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Chrome 157 fixes 213 security issues, including 7 critical flaws",
-      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/chrome-157-fixes-213-security-issues-including-7-critical-flaws",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
+      "title": "Vizio, Samsung smart TVs seem to ignore tracking opt outs",
+      "url": "https://www.malwarebytes.com/blog/news/2026/11/vizio-samsung-smart-tvs-seem-to-ignore-tracking-opt-outs",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/eyes.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "The Classics Return: Vulnerable E-Mail Scripts, (Wed, Nov 4th)",
-      "url": "https://isc.sans.edu/diary/rss/33488"
+      "title": "ISC Stormcast For Thursday, November 5th, 2026 https://isc.sans.edu/podcastdetail/10166, (Thu, Nov 5th)",
+      "url": "https://isc.sans.edu/diary/rss/33490"
     },
     {
       "source": "BleepingComputer",
-      "title": "CISA flags WordPress RCE flaw as actively exploited in attacks",
-      "url": "https://www.bleepingcomputer.com/news/security/cisa-flags-wordpress-rce-flaw-as-actively-exploited-in-attacks/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/04/WordPress.jpg"
+      "title": "Vercel rolls out new protection against stolen session cookie attacks",
+      "url": "https://www.bleepingcomputer.com/news/security/vercel-rolls-out-new-protection-against-stolen-session-cookie-attacks/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/04/vercel.jpg"
     }
   ]
 }
