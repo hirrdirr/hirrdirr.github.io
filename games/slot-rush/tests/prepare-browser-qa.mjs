@@ -13,11 +13,11 @@ const dist=path.join(output,'dist');fs.mkdirSync(path.join(output,'.openai'),{re
 fs.writeFileSync(path.join(output,'.openai/hosting.json'),JSON.stringify({static:{directory:'dist'}}));
 for(const variant of ['baseline','game','mobile']){
  const dir=path.join(dist,variant);fs.mkdirSync(dir,{recursive:true});
- for(const name of ['index.html','scenery.js']){
+ for(const name of ['index.html','scenery.js',...(variant==='baseline'?[]:['audio.js'])]){
   let source=variant==='baseline'?execFileSync('git',['show',`${ref}:games/slot-rush/${name}`],{cwd:repo,encoding:'utf8'}):fs.readFileSync(path.join(tests,'..',name),'utf8');
   if(name==='index.html'&&variant!=='mobile')source=source.replace('<script src="scenery.js','<script src="../instrument.js"></script>\n<script src="scenery.js');
   fs.writeFileSync(path.join(dir,name),source);
  }
 }
-for(const [source,target] of [['browser.html','index.html'],['responsive.html','responsive.html'],['instrument.js','instrument.js']])fs.copyFileSync(path.join(tests,source),path.join(dist,target));
+for(const [source,target] of [['browser.html','index.html'],['responsive.html','responsive.html'],['instrument.js','instrument.js'],['audio-browser.html','audio-browser.html']])fs.copyFileSync(path.join(tests,source),path.join(dist,target));
 console.log(`QA site ready at ${output}`);

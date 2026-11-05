@@ -17,3 +17,4 @@ jobs:
           node-version: '24'
       - run: node --test games/slot-rush/tests/*.test.mjs
       - run: node --check games/slot-rush/scenery.js
+      - run: node --check games/slot-rush/audio.js

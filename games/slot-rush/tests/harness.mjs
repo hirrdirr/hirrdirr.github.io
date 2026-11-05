@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
-export function loadGame({html,storage=new Map(),width=960,dpr=1,failStorage=false}={}){
+export function loadGame({html,storage=new Map(),width=960,dpr=1,failStorage=false,sound}={}){
  html??=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const counts={},elements=new Map(),events={},pending=new Map();let raf=0;
  const context=new Proxy({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})}, {get(o,k){if(k in o)return o[k];return (...args)=>{counts[k]=(counts[k]||0)+1;};}});
@@ -16,7 +16,8 @@ export function loadGame({html,storage=new Map(),width=960,dpr=1,failStorage=fal
  }
  const document={hidden:false,getElementById:element,createElement:()=>element('canvas'+elements.size),addEventListener:(k,f)=>events[k]=f};
  const sandbox={document,console,Math,Map,Set,ResizeObserver:class{observe(){}},localStorage:{getItem:k=>storage.get(k)??null,setItem(k,v){if(failStorage)throw Error('quota');storage.set(k,v);}},requestAnimationFrame(f){pending.set(++raf,f);return raf;},cancelAnimationFrame:id=>pending.delete(id)};
- sandbox.SlotRushScenery={draw:()=>context.drawImage()};sandbox.window=sandbox;sandbox.devicePixelRatio=dpr;sandbox.matchMedia=()=>({matches:false});sandbox.addEventListener=(k,f)=>events[k]=f;
+ if(sound)sandbox.SlotRushAudio={create:()=>sound};
+ sandbox.SlotRushScenery={draw:()=>context.drawImage()};sandbox.window=sandbox;sandbox.devicePixelRatio=dpr;sandbox.matchMedia=()=>({matches:false});sandbox.addEventListener=(k,f)=>{const prior=events[k];events[k]=prior?e=>{prior(e);f(e);}:f;};
  vm.createContext(sandbox);vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],sandbox);
  return {api:sandbox.slotRushDebug,elements,events,document,counts,storage,frame(now){const callbacks=[...pending.values()];pending.clear();callbacks.forEach(f=>f(now));},pending,context,sandbox};
 }
