@@ -9,15 +9,15 @@
 ## Connect real IGDB data
 
 1. Register an application with Twitch Developer Console and obtain a **Client ID** and **Client Secret**, following https://api-docs.igdb.com/#authentication.
-2. In GitHub repository Settings → Secrets and variables → Actions, create repository secrets \`IGDB_CLIENT_ID\` and \`IGDB_CLIENT_SECRET\`. Do NOT put the secret in files or browser JavaScript.
+2. In GitHub repository Settings → Secrets and variables → Actions, create repository secrets `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`. Do NOT put the secret in files or browser JavaScript.
 3. On GitHub Actions, run the **Discover PC releases** workflow manually once. The workflow then refreshes at 07:27 UTC daily. If the API fails, the last good JSON remains intact.
 4. Verify the workflow logs, then open /discover/ directly. The placeholder remains intentionally empty until authenticated data is generated.
 
-IGDB PC/Windows platform ID = 6. Dates are fetched from platform-specific release_date entries and preserved as UTC dates. The generated cache covers the two prior weeks, current week and five upcoming weeks. Only eligible categories are displayed; game additions and duplicates are filtered. Names, genres, images and links remain credited to IGDB.
+IGDB PC/Windows platform ID = 6. Dates are fetched from platform-specific release_date entries and preserved as UTC dates. The generated cache covers the two prior weeks, current week and five upcoming weeks. Only eligible game types are displayed; game additions and duplicates are filtered. Names, genres, images and links remain credited to IGDB.
 
 ## Offline tests
 
-\`\`\`sh
+```sh
 python -m unittest discover -s tests -p 'test_discover_releases.py'
 node --check assets/discover/discover.js
-\`\`\`
+```
