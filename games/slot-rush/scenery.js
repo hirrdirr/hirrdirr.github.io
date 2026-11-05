@@ -1,4 +1,4 @@
-/* Slot Rush illustrated scenery – v0.2.0
+/* Slot Rush illustrated scenery – v0.3.0
    Hand-composed trackside environments with baked organic material textures.
    Everything stays beneath the gameplay rails, never in front of the car.
    Assets are generated once per chosen map, not re-painted every frame. */
@@ -380,16 +380,18 @@ function animated(g,index,time,reduce){
  }
  g.restore();
 }
-let cacheMap=-1,cache=null;
+const scenes=new Map(),CACHE_LIMIT=3;
 function getScene(index){
- if(cache&&cacheMap===index)return cache;
+ if(scenes.has(index)){const scene=scenes.get(index);scenes.delete(index);scenes.set(index,scene);return scene;}
  if(!root.document||typeof root.document.createElement!=='function')return null;
  const canvas=root.document.createElement('canvas');canvas.width=W;canvas.height=H;
  const g=canvas.getContext('2d');if(!g||typeof g.createImageData!=='function')return null;
  const theme=THEMES[index],rnd=random(index*41+2718);
  materialLayer(g,theme,index);
  decorateStatic(g,index,theme,rnd);
- cacheMap=index;cache=canvas;return cache;
+ scenes.set(index,canvas);
+ if(scenes.size>CACHE_LIMIT){const key=scenes.keys().next().value;const old=scenes.get(key);old.width=old.height=0;scenes.delete(key);}
+ return canvas;
 }
 function draw(ctx,index,time,reducedMotion){
  const map=clamp(index|0,0,THEMES.length-1),scene=getScene(map);
@@ -397,5 +399,5 @@ function draw(ctx,index,time,reducedMotion){
  else{ctx.fillStyle='#29372e';ctx.fillRect(0,0,W,H);}
  animated(ctx,map,time,!!reducedMotion);
 }
-root.SlotRushScenery={draw,THEMES,reset(){cacheMap=-1;cache=null;}};
+root.SlotRushScenery={draw,THEMES,reset(){for(const scene of scenes.values())scene.width=scene.height=0;scenes.clear();}};
 })(window);

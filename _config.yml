@@ -8,3 +8,5 @@ exclude:
   - games/td/tests
   - games/td/vite.config.js
   - games/td/README.md
+  - games/slot-rush/tests
+  - games/slot-rush/REVIEW.md
