@@ -23,11 +23,11 @@ class TestDiscoverReleases(unittest.TestCase):
             {"game": 4, "date": timestamp(end)},
         ]
         games = {
-            1: {"id": 1, "name": "Alpha", "category": 0, "rating": 88.456, "rating_count": 19,
+            1: {"id": 1, "name": "Alpha", "game_type": 0, "rating": 88.456, "rating_count": 19,
                 "genres": [{"name": "Indie"}], "cover": {"image_id": "co123"}, "slug": "alpha"},
-            2: {"id": 2, "name": "DLC", "category": 1},
-            3: {"id": 3, "name": "Version", "category": 0, "version_parent": 1},
-            4: {"id": 4, "name": "Outside", "category": 0},
+            2: {"id": 2, "name": "DLC", "game_type": 1},
+            3: {"id": 3, "name": "Version", "game_type": 0, "version_parent": 1},
+            4: {"id": 4, "name": "Outside", "game_type": 0},
         }
         output = build(rows, games, start, end)
         self.assertEqual(len(output["games"]), 1)
@@ -40,7 +40,7 @@ class TestDiscoverReleases(unittest.TestCase):
         end = dt.date(2026, 11, 9)
         ts = int(dt.datetime(2026, 11, 5, tzinfo=dt.timezone.utc).timestamp())
         out = build([{"game": 1, "date": ts}, {"game": 2, "date": ts}],
-                    {1: {"name": "A", "category": 0}, 2: {"category": 0}}, start, end)
+                    {1: {"name": "A", "game_type": 0}, 2: {"game_type": 0}}, start, end)
         self.assertIsNone(out["games"][0]["rating"])
         self.assertEqual(out["games"][0]["rating_count"], 0)
         self.assertEqual(len(out["games"]), 1)
