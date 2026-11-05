@@ -41,3 +41,16 @@ Measurement results are recorded in the pull request. Times measure synchronous 
 ## Remaining limits
 
 No physical integrated-GPU laptop, iPhone/Android touch device or Safari was available. Browser viewport tests and pointer-event tests do not substitute for those devices. The existing simulation clock and 60 ms catch-up clamp are unchanged, so severe stalls still slow simulation time. Existing sampled ghosts yield interpolated sector reference times, displayed to hundredths of a second.
+
+
+## v0.4.0 — electric slot-car audio
+
+- A dependency-free Web Audio module synthesizes a two-layer electric motor and filtered rail/friction noise. Speed, throttle release, displayed lateral load and crash stress control the mix; the ghost remains silent.
+- Countdown tones fire once per displayed number/GO transition. Plastic impact, re-slot, lap and finish cues come from the actual game events. A personal best gets a higher final note. No physics, records or track geometry changed.
+- The master volume starts at 35%, uses a perceptual gain curve, and has a separate mute button. Both preferences persist under `slotrush.audio.v1`, independent of records. The range supports keyboard input without triggering throttle or restart.
+- Audio initializes only after user activation, including touch clicks. Unsupported/failed devices leave the game playable. Pause, hidden tabs, map changes and restarts cancel old effects. Idle/muted contexts suspend; the finish cue gets time to decay before suspension.
+- Three continuous sources are reused; one-shot voices are bounded and disconnected after playback. A seeded noise buffer avoids altering the physics random stream. There are no audio downloads or third-party assets.
+
+Validation: 18 Node tests cover existing 20 track/lane race completions plus audio lifecycle, cue counts, saved settings, silent ghosts, keyboard isolation and bounded nodes. Chromium rendered 11 actual Web Audio signal cases (motor speeds, corner load, effects, mute and pause); all passed signal/decay/clipping checks. At 100% volume the largest tested absolute peak was 0.505, below clipping. Browser UI checks verified saved volume/mute after reload, active and suspended contexts, and no horizontal overflow at 320 px. Physical mobile audio devices/Safari and subjective speaker/headphone balance were not tested.
+
+Run `node games/slot-rush/tests/prepare-browser-qa.mjs /absolute/preview` and open `audio-browser.html` in that preview for the reproducible browser signal checks. Test pages remain excluded from the public Jekyll build.

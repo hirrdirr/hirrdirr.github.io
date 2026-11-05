@@ -253,11 +253,15 @@
     .metric:nth-child(2){border-left:0}.metric:nth-child(2),.metric:nth-child(3),.metric:nth-child(4){border-top:1px solid #384238}
     .metric>span{font-size:9px}.metric>strong{font-size:18px}
   }
+  .audio-controls{display:grid;grid-template-columns:100px auto minmax(0,1fr) 4ch;max-width:360px;align-items:center;gap:8px;margin:10px 0;color:#c6d1c6;font-size:11px}
+  .audio-controls label{font-weight:800;letter-spacing:.06em}.audio-controls input{width:100%;min-width:0;min-height:32px;accent-color:#ffc97e;cursor:pointer}
+  .audio-controls input:focus-visible{outline:2px solid #ffc97e;outline-offset:3px;border-radius:4px}
+  .audio-controls output{width:4ch;font-variant-numeric:tabular-nums}.audio-controls button{min-width:100px}
 </style>
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.3.0</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.4.0</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -286,6 +290,10 @@
 <br><button type="button" class="action secondary" id="help">SÅ FUNKAR DET</button></div></div>
   </div>
   <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button type="button" class="control" id="change-map">▤ BYT BANA</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
+  <div class="audio-controls" role="group" aria-label="Ljudinställningar">
+    <button type="button" class="control" id="sound-toggle" aria-pressed="true">LJUD: PÅ</button>
+    <label for="sound-volume">VOLYM</label><input id="sound-volume" type="range" min="0" max="100" step="1" value="35" aria-valuetext="35 procent"><output id="sound-level" for="sound-volume">35%</output>
+  </div>
   <section class="pit-wall" aria-label="Sektortider mot personbästa">
     <div class="split-grid"><div class="split" id="sector-0"><span id="sector-label-0">SEKTOR 1</span><strong id="sector-time-0">—</strong><small id="sector-delta-0">Väntar på start</small></div><div class="split" id="sector-1"><span id="sector-label-1">SEKTOR 2</span><strong id="sector-time-1">—</strong><small id="sector-delta-1">Väntar på start</small></div><div class="split" id="sector-2"><span id="sector-label-2">SEKTOR 3</span><strong id="sector-time-2">—</strong><small id="sector-delta-2">Väntar på start</small></div></div>
     <p class="pit-message" id="pit-message" role="status" aria-live="polite">Tre sektorer. Hitta tiden, kurva för kurva.</p>
@@ -295,10 +303,30 @@
   <div class="foot"><span>* Hastighet i spelvärlden, inte verklig skala. <strong>Tidig spelversion under utveckling.</strong></span><span>Två fysiska körskenor · separata rekord och ghosts.</span></div>
 </div>
 <script src="scenery.js?v=0.3.0"></script>
+<script src="audio.js?v=0.4.0"></script>
 <script>
 (()=>{'use strict';
 const W=960,H=600,canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const $=id=>document.getElementById(id);
+const sound=window.SlotRushAudio?.create();
+let countdownSound=3;
+function refreshSound(){
+ const settings=sound?.settings(),available=Boolean(settings?.supported),on=available&&!settings.muted&&settings.volume>0;
+ $('sound-toggle').disabled=!available;$('sound-volume').disabled=!available;
+ $('sound-toggle').textContent=available?(on?'LJUD: PÅ':'LJUD: AV'):'LJUD SAKNAS';
+ $('sound-toggle').setAttribute('aria-pressed',String(on));
+ const value=Math.round((settings?.volume??.35)*100);
+ $('sound-volume').value=String(value);$('sound-volume').setAttribute('aria-valuetext',value+' procent'+(settings?.muted?' · avstängt':''));$('sound-level').textContent=value+'%';
+}
+function unlockSound(){sound?.unlock();refreshSound();}
+// Trusted user gestures satisfy browser autoplay restrictions, including touch and keyboard.
+window.addEventListener('pointerdown',unlockSound,{capture:true});
+// Touch browsers may grant activation only on release/click; assistive clicks work too.
+window.addEventListener('click',unlockSound,{capture:true});
+window.addEventListener('keydown',e=>{if(!e.repeat)unlockSound();},{capture:true});
+$('sound-toggle').addEventListener('click',()=>{sound?.setMuted(!sound.settings().muted&&sound.settings().volume>0);refreshSound();});
+$('sound-volume').addEventListener('input',e=>{sound?.unlock();sound?.setVolume(Number(e.target.value)/100);refreshSound();});
+refreshSound();
 
 const MAPS=[
  {id:'rookie',name:'Rookie Circuit',tag:'Balans',scale:1,colors:['#3d393a','#292c31','#222932'],points:[[288,469],[480,473],[666,469],[756,442],[810,385],[828,328],[799,270],[742,251],[692,275],[640,309],[579,310],[523,269],[473,218],[420,197],[344,211],[266,244],[215,300],[205,365],[235,421]]},
@@ -490,7 +518,7 @@ function changeMap(){
 }
 function showMapSelect(){
  if(!['menu','finished','map-select','lane-select','racing','countdown','crashed','paused'].includes(state))return;
- state='map-select';mapConfirmed=false;laneConfirmed=false;
+ sound?.stop();state='map-select';mapConfirmed=false;laneConfirmed=false;
  showOverlay('TRACK SELECTION','VÄLJ BANA','Välj en bana för att fortsätta till spårvalet.','VÄLJ BANA',false);
  $('overlay').classList.add('choosing-map');$('play').disabled=true;
  paintMapCards();refreshSetup();
@@ -552,7 +580,7 @@ function hud(){
 function showOverlay(label,title,body,btn,help=true){$('countdown').classList.remove('visible');$('overlay').classList.remove('choosing-lane','choosing-map');$('play').disabled=false;$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');invalidate();}
 function hideOverlay(){$('overlay').classList.add('hidden');$('overlay').classList.remove('choosing-lane','choosing-map');invalidate();}
 function showMainMenu(){
- state='menu';laneConfirmed=false;
+ sound?.stop();state='menu';laneConfirmed=false;
  showOverlay('SLOT RUSH • TIME ATTACK',MAPS[activeMap].name.toUpperCase(),
   'En klassisk bilbana. En gaspedal. Tre varv.<br>Välj skena före start, och kör så snabbt som möjligt utan att spåra ur.',
   'STARTA LOPP');
@@ -580,11 +608,11 @@ function start(){
  completed=0;crashes=0;crash=null;crashT=0;respawnT=0;gas=false;
  ghostFrames=records[activeLane]?.frames||null;ghostCursor=0;runFrames=[];lastFrameTime=-1;
  storageFailed=false;clearInputs();resetSplits();resetFrameClock();
- state='countdown';countT=3.4;recordFrame(true);hideOverlay();refreshSetup();hud();
+ state='countdown';countT=3.4;countdownSound=3;sound?.begin();sound?.cue('count',3);recordFrame(true);hideOverlay();refreshSetup();hud();
 }
 function finish(){
  recordFrame(true);state='finished';setGas(false);
- const isBest=!best||time<best;
+ const isBest=!best||time<best;sound?.cue('finish',isBest);
  if(isBest){
   best=time;const record={schema:1,time:+time.toFixed(3),frames:runFrames};
   records[activeLane]=record;
@@ -603,15 +631,15 @@ function finish(){
 }
 function togglePause(){
  if(state==='racing'||state==='crashed'||state==='countdown'){
-  const from=state;state='paused';window._resumeState=from;clearInputs();$('countdown').classList.remove('visible');
+  sound?.stop();const from=state;state='paused';window._resumeState=from;clearInputs();$('countdown').classList.remove('visible');
   showOverlay('RACE PAUSED','PAUS','Tidtagningen är stoppad. Tryck ESC för att fortsätta.','FORTSÄTT');
- }else if(state==='paused'){state=window._resumeState||'racing';resetFrameClock();hideOverlay();syncGas();}
+ }else if(state==='paused'){sound?.begin();state=window._resumeState||'racing';resetFrameClock();hideOverlay();syncGas();}
  refreshSetup();
 }
-function doCrash(p){$('pit-message').textContent='För hög kurvbelastning. Släpp gasen tidigare här nästa varv.';state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
-function tick(dt){gameClock+=dt;if(state==='countdown'){countT-=dt;$('countdown').classList.add('visible');$('countdown').textContent=countT>.4?Math.ceil(countT-.4):'GO!';if(countT<=0){state='racing';$('countdown').classList.remove('visible');syncGas();}return;}
+function doCrash(p){sound?.cue('crash');$('pit-message').textContent='För hög kurvbelastning. Släpp gasen tidigare här nästa varv.';state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
+function tick(dt){gameClock+=dt;if(state==='countdown'){countT-=dt;$('countdown').classList.add('visible');const count=countT>.4?Math.ceil(countT-.4):0;$('countdown').textContent=count||'GO!';if(count!==countdownSound){countdownSound=count;sound?.cue('count',count);}if(countT<=0){state='racing';$('countdown').classList.remove('visible');syncGas();}return;}
 $('countdown').classList.remove('visible');if(state!=='racing'&&state!=='crashed')return;time+=dt;
-if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';syncGas();recordFrame(true);}else recordFrame();return;}
+if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';sound?.cue('respawn');syncGas();recordFrame(true);}else recordFrame();return;}
 const acceleration=gas?ACCEL*(1-.31*(speed/MAX_SPEED)):-COAST;
  speed=Math.max(0,Math.min(MAX_SPEED,speed+acceleration*dt));
  const current=laneAt(distance),ratio=speed*speed*Math.abs(current.k)/LAT_LIMIT;
@@ -624,7 +652,7 @@ const acceleration=gas?ACCEL*(1-.31*(speed/MAX_SPEED)):-COAST;
  loadDisplay+=(ratio-loadDisplay)*Math.min(1,dt*8);
  const before=distance;distance+=speed*dt;updateSplits(before,distance,time-dt,time);respawnT=Math.max(0,respawnT-dt);
 recordFrame();
-while(completed<3&&distance>=(completed+1)*lapLength()){lapTimes.push(time-lapStart);lapStart=time;completed++;if(completed===3){finish();break;}}
+while(completed<3&&distance>=(completed+1)*lapLength()){lapTimes.push(time-lapStart);lapStart=time;completed++;if(completed<3)sound?.cue('lap');if(completed===3){finish();break;}}
 }
 function basePath(g,offset){g.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)g.moveTo(x,y);else g.lineTo(x,y);}g.closePath()}
 function strokePath(g,offset,width,color){basePath(g,offset);g.lineCap='round';g.lineJoin='round';g.lineWidth=width;g.strokeStyle=color;g.stroke()}
@@ -973,6 +1001,7 @@ function frame(now){
  const elapsed=now-lastDraw;
  if(needsRender||elapsed>=FRAME_MS-.1){
   lastDraw=needsRender?now:lastDraw+Math.max(1,Math.floor((elapsed+.1)/FRAME_MS))*FRAME_MS;
+  sound?.update(state==='racing'?speed:0,gas,loadDisplay,stress);
   render();needsRender=false;
   if(!running||now-lastHud>=50){hud();lastHud=now;}
  }
@@ -987,10 +1016,10 @@ function clearInputs(){heldKeys.clear();heldStage=false;heldPedal=false;setGas(f
 function setGas(on){gas=!!on&&state==='racing';$('pedal').classList.toggle('pressed',gas)}
 // Inputs are a logical OR (single throttle), never additive or multiplicative.
 function syncGas(){setGas(Boolean(heldKeys.size>0||heldStage||heldPedal))}
-window.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target?.tagName==='BUTTON'&&e.target!==$('pedal'))return;if(['Space','KeyW','Escape','KeyR'].includes(e.code))e.preventDefault();if(e.code==='Escape'){if(!e.repeat)togglePause();return}if(e.code==='KeyR'){if(!e.repeat&&['racing','crashed','paused','countdown','finished'].includes(state))start();return}if(e.code==='Space'||e.code==='KeyW'){heldKeys.add(e.code);syncGas()}});
+window.addEventListener('keydown',e=>{if(e.target?.tagName==='INPUT'&&e.code!=='Escape')return;if(e.code==='Space'&&e.target?.tagName==='BUTTON'&&e.target!==$('pedal'))return;if(['Space','KeyW','Escape','KeyR'].includes(e.code))e.preventDefault();if(e.code==='Escape'){if(!e.repeat)togglePause();return}if(e.code==='KeyR'){if(!e.repeat&&['racing','crashed','paused','countdown','finished'].includes(state))start();return}if(e.code==='Space'||e.code==='KeyW'){heldKeys.add(e.code);syncGas()}});
 window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='KeyW'){heldKeys.delete(e.code);syncGas()}});window.addEventListener('blur',()=>{clearInputs();if(['racing','crashed','countdown'].includes(state))togglePause()});
 document.addEventListener('visibilitychange',()=>{
- if(document.hidden){clearInputs();if(['racing','crashed','countdown'].includes(state))togglePause();cancelAnimationFrame(rafId);rafId=0;resetFrameClock();}
+ if(document.hidden){sound?.stop();clearInputs();if(['racing','crashed','countdown'].includes(state))togglePause();cancelAnimationFrame(rafId);rafId=0;resetFrameClock();}
  else invalidate();
 });
 const stage=$('stage'),pedal=$('pedal');stage.addEventListener('pointerdown',e=>{if(e.target===canvas&&['racing','countdown','crashed'].includes(state)){heldStage=true;syncGas();stage.setPointerCapture(e.pointerId);}});stage.addEventListener('pointerup',()=>{heldStage=false;syncGas()});stage.addEventListener('pointercancel',()=>{heldStage=false;syncGas()});stage.addEventListener('lostpointercapture',()=>{heldStage=false;syncGas()});
@@ -1010,9 +1039,10 @@ $('restart').addEventListener('click',()=>{
  if(['racing','crashed','paused','countdown','finished'].includes(state))start();
  else showMapSelect();
 });
-$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre sektorer per varv visar var du vinner eller tappar tid mot samma varv i ditt personbästa. Rena varv räknas i resultatet.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
+$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre sektorer per varv visar var du vinner eller tappar tid mot samma varv i ditt personbästa. Rena varv räknas i resultatet.<br>Ljudet följer bilens fart och kurvbelastning. Justera volymen eller stäng av ljudet med reglaget under banan.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
 refreshSetup();resetSplits();hud();invalidate();
 window.slotRushDebug={
+ getAudioState:()=>sound?.status(),
  getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,
   curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,time,completed,crashes,
   activeMap,mapCount:MAPS.length,activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
