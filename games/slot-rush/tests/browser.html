@@ -1,0 +1,38 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Slot Rush QA</title><style>body{font:15px system-ui;background:#121715;color:#eee}button{padding:12px;margin:6px}iframe{display:block;border:0;width:1000px;height:1150px}pre{white-space:pre-wrap}#mobile{width:390px}</style></head><body><h1>Slot Rush · browser validation</h1><button id="run">Run all maps + benchmark</button><button id="mobile-run">Check 390px layout</button><pre id="results">Ready</pre><iframe id="before" src="baseline/index.html"></iframe><iframe id="after" src="game/index.html"></iframe><iframe id="mobile" src="mobile/index.html"></iframe><script>
+const result=document.getElementById('results');
+const next=()=>Promise.resolve();
+function select(w,map,lane){const d=w.slotRushDebug;d.changeMap();d.chooseMap(map);d.showLaneSelect();d.chooseLane(lane);d.confirmRace();for(let i=0;i<410;i++)d.tick(1/120);}
+function runRace(w){const d=w.slotRushDebug;for(let n=0;n<36000;n++){
+ const s=d.getState();if(s.state==='finished')return s;
+ let k=0;for(let x=0;x<=100;x+=10)k=Math.max(k,Math.abs(d.laneAt(s.distance+x).k));
+ d.setGas(s.speed<Math.min(280,Math.sqrt(590*.72/(k||.0001))));d.tick(1/120);
+}throw Error('race timeout');}
+let benchmarkClock=1000;
+function benchmark(w){const d=w.slotRushDebug;select(w,0,0);let now=benchmarkClock;for(let i=0;i<30;i++)w.QA.pump(now+=1000/60);
+ w.QA.reset();const costs=[];for(let i=0;i<180;i++){d.setGas(true);const t=performance.now();w.QA.pump(now+=1000/60);costs.push(performance.now()-t);}
+ costs.sort((a,b)=>a-b);const racing={state:d.getState().state,speed:d.getState().speed,crashes:d.getState().crashes,medianMs:costs[90],meanMs:costs.reduce((a,b)=>a+b,0)/costs.length,p95Ms:costs[171],ops:{...w.QA.ops}};
+ w.document.getElementById('pause').click();w.QA.pump(now+=1000/60);w.QA.reset();
+ for(let i=0;i<120;i++)w.QA.pump(now+=1000/60);
+ benchmarkClock=now+100;return {racing,pausedOps:{...w.QA.ops},pendingFrames:w.QA.queue.size,canvas:[w.document.getElementById('game').width,w.document.getElementById('game').height]};}
+document.getElementById('run').onclick=async()=>{try{
+ const old=document.getElementById('before').contentWindow,updated=document.getElementById('after').contentWindow;
+ result.textContent='Running…';let cases=[];
+ for(let map=0;map<10;map++)for(let lane=0;lane<2;lane++){
+  select(updated,map,lane);const s=runRace(updated);updated.QA.pump(10000+map*100+lane*17);
+  if(s.completed!==3||s.crashes||s.sectorTimes.length!==9)throw Error('invalid race '+map+'/'+lane);
+  cases.push({map,lane,time:s.time,splits:s.sectorTimes.length});await next();
+ }
+ // Same pre-recorded geometry and inputs produce identical physics and lap times.
+ const parity=[];for(let map=0;map<10;map++)for(let lane=0;lane<2;lane++){
+  select(old,map,lane);const s=runRace(old);const expected=cases[map*2+lane];
+  if(Math.abs(s.time-expected.time)>1e-8)throw Error('physics changed '+map+'/'+lane);parity.push(true);await next();
+ }
+ const benchmarks=[];for(let i=0;i<3;i++){benchmarks.push({before:benchmark(old),after:benchmark(updated)});await next();}
+ const errors=[...old.QA.errors,...updated.QA.errors];if(errors.length)throw Error(errors.join(';'));
+ result.textContent=JSON.stringify({passed:cases.length,physicsParity:parity.length,cases,benchmarks,errors},null,2);
+ }catch(e){result.textContent='FAIL '+e.stack;}};
+document.getElementById('mobile-run').onclick=()=>{
+ const w=document.getElementById('mobile').contentWindow;w.document.getElementById('play').click();
+ const widths={viewport:w.innerWidth,document:w.document.documentElement.scrollWidth,stage:w.document.getElementById('stage').getBoundingClientRect().width,cards:w.document.querySelectorAll('[data-map]').length};
+ result.textContent=JSON.stringify(widths);};
+</script></body></html>

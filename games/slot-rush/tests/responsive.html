@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Slot Rush responsive QA</title><style>body{font:14px system-ui;background:#111613;color:#eee;margin:8px}button{padding:9px}iframe{display:block;width:390px;height:850px;border:1px solid #889988}pre{white-space:pre-wrap}</style></head><body><button id="small">320 px</button><button id="phone">390 px</button><button id="tablet">768 px</button><button id="inspect">Inspect layout</button><button id="run">Run complete race</button><pre id="results">390px viewport</pre><iframe id="phone-game" src="game/index.html"></iframe><script>
+const f=document.getElementById('phone-game'),out=document.getElementById('results');let now=1000;
+for(const [id,width] of [['small',320],['phone',390],['tablet',768]])document.getElementById(id).onclick=()=>{f.style.width=width+'px';out.textContent=width+'px viewport';};
+function inspect(){const w=f.contentWindow,d=w.document;w.QA.pump(now+=100);out.textContent=JSON.stringify({viewport:w.innerWidth,pageWidth:d.documentElement.scrollWidth,canvasWidth:d.querySelector('canvas').width,cards:d.querySelectorAll('[data-map]').length,overflow:[...d.querySelectorAll('.metric,.split')].filter(e=>e.scrollWidth>e.clientWidth).map(e=>e.textContent),errors:w.QA.errors});}
+document.getElementById('inspect').onclick=inspect;
+document.getElementById('run').onclick=()=>{const w=f.contentWindow,d=w.slotRushDebug;d.changeMap();d.chooseMap(5);d.showLaneSelect();d.chooseLane(1);d.start();for(let i=0;i<410;i++)d.tick(1/120);
+for(let n=0;n<36000;n++){const s=d.getState();if(s.state==='finished')break;let k=0;for(let x=0;x<=100;x+=10)k=Math.max(k,Math.abs(d.laneAt(s.distance+x).k));d.setGas(s.speed<Math.min(280,Math.sqrt(590*.72/(k||.0001))));d.tick(1/120);}w.QA.pump(now+=100);inspect();};
+// Keep this QA iframe paintable while UI controls are exercised, without running game time.
+f.onload=()=>{f.contentWindow.QA.pump(now+=100);};
+f.addEventListener('load',()=>f.contentDocument.addEventListener('click',()=>setTimeout(()=>f.contentWindow.QA.pump(now+=100),0)));
+</script></body></html>

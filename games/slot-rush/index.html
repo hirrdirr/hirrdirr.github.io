@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#131b22">
 <meta name="robots" content="noindex, nofollow">
-<title>Slot Rush — Rookie Circuit | hirrdirr</title>
+<title>Slot Rush — Time Attack | hirrdirr</title>
 <style>
   :root{color-scheme:dark;--bg:#0c1117;--panel:#19232c;--panel2:#202c34;--fg:#f3f1e8;--muted:#a5b0bb;--amber:#f7b463;--line:#34424b;--red:#fa765f}
   *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#2d3940,#0c1117 72%);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
@@ -234,15 +234,34 @@
   @media(prefers-reduced-motion:reduce){
     .control,#ghost-toggle,.lane-button,.map-card,.action,.pedal{transition:none}
   }
+  /* Pit wall: readable outside the canvas, including on narrow phones. */
+  .pit-wall{display:flex;align-items:center;gap:14px;margin:12px 0 0;padding:11px 14px;border:1px solid #3b483c;border-radius:10px;background:#1a211d}
+  .split-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:1}
+  .split{border-left:3px solid #536452;padding:3px 9px;min-width:0}
+  .split span{display:block;font-size:9px;letter-spacing:.1em;color:#b7c3b6}
+  .split strong{display:block;font-size:18px;font-variant-numeric:tabular-nums;margin:3px 0}
+  .split small{display:block;color:#b7c3b6;font-size:10px;font-variant-numeric:tabular-nums}
+  .split[data-tone="ahead"]{border-color:#8bd9b4}.split[data-tone="ahead"] small{color:#a6e8c7}
+  .split[data-tone="behind"]{border-color:#edb479}.split[data-tone="behind"] small{color:#f3c48c}
+  .pit-message{width:33%;margin:0;color:#e0d4b8;font-size:12px;line-height:1.5}
+  .split-legend{color:#a5b6a7;font-size:10px;margin:6px 3px 0}
+  .stage{touch-action:pan-y}#game{touch-action:none}
+  @media(max-width:650px){.pit-wall{display:block;padding:9px}.pit-message{width:auto;margin-top:10px;font-size:11px}.split{padding:2px 6px}.split strong{font-size:16px}.split small{font-size:9px}}
+  @media(max-width:650px){
+    .dash{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"time time best" "laps speed crashes"}
+    .metric:nth-child(1){grid-area:time}.metric:nth-child(2){grid-area:laps}.metric:nth-child(3){grid-area:speed}.metric:nth-child(4){grid-area:crashes}.metric:nth-child(5){grid-area:best}
+    .metric:nth-child(2){border-left:0}.metric:nth-child(2),.metric:nth-child(3),.metric:nth-child(4){border-top:1px solid #384238}
+    .metric>span{font-size:9px}.metric>strong{font-size:18px}
+  }
 </style>
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.2.0</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.3.0</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
-    <div class="metric"><span>Hastighet</span><strong id="speed">0<span class="unit">km/h*</span></strong></div>
+    <div class="metric"><span>Hastighet</span><strong id="speed"><span id="speed-value">0</span><span class="unit">km/h*</span></strong></div>
     <div class="metric"><span>Krascher</span><strong id="crashes">0</strong></div>
     <div class="metric"><span>Personbästa</span><strong id="best">--:--</strong></div>
   </section>
@@ -267,9 +286,15 @@
 <br><button type="button" class="action secondary" id="help">SÅ FUNKAR DET</button></div></div>
   </div>
   <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button type="button" class="control" id="change-map">▤ BYT BANA</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
+  <section class="pit-wall" aria-label="Sektortider mot personbästa">
+    <div class="split-grid"><div class="split" id="sector-0"><span id="sector-label-0">SEKTOR 1</span><strong id="sector-time-0">—</strong><small id="sector-delta-0">Väntar på start</small></div><div class="split" id="sector-1"><span id="sector-label-1">SEKTOR 2</span><strong id="sector-time-1">—</strong><small id="sector-delta-1">Väntar på start</small></div><div class="split" id="sector-2"><span id="sector-label-2">SEKTOR 3</span><strong id="sector-time-2">—</strong><small id="sector-delta-2">Väntar på start</small></div></div>
+    <p class="pit-message" id="pit-message" role="status" aria-live="polite">Tre sektorer. Hitta tiden, kurva för kurva.</p>
+  </section>
+  <p class="split-legend">Sektortid jämförs med samma varv i din personbästa ghost. − snabbare · + långsammare.</p>
+
   <div class="foot"><span>* Hastighet i spelvärlden, inte verklig skala. <strong>Tidig spelversion under utveckling.</strong></span><span>Två fysiska körskenor · separata rekord och ghosts.</span></div>
 </div>
-<script src="scenery.js"></script>
+<script src="scenery.js?v=0.3.0"></script>
 <script>
 (()=>{'use strict';
 const W=960,H=600,canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
@@ -373,7 +398,8 @@ function readRecord(i,mapIndex=activeMap){
   if(!r||r.schema!==1||!Number.isFinite(r.time)||r.time<=0||
     !Array.isArray(r.frames)||r.frames.length<2||r.frames.length>9000)return null;
   if(!r.frames.every(f=>Array.isArray(f)&&f.length===6&&
-    f.slice(0,4).every(Number.isFinite)&&f[0]>=0&&Number.isFinite(f[5])))return null;
+    f.slice(0,4).every(Number.isFinite)&&f[0]>=0&&[0,1].includes(f[4])&&Number.isFinite(f[5])&&f[5]>=0))return null;
+  if(r.frames.some((f,i)=>i>0&&f[0]<r.frames[i-1][0]))return null;
   if(r.frames[0][0]!==0||Math.abs(r.frames.at(-1)[0]-r.time)>.1)return null;
   return r;
  }catch(e){return null;}
@@ -382,6 +408,54 @@ let records=[readRecord(0),readRecord(1)];
 let best=records[activeLane]?.time||0,ghostEnabled=true;
 try{ghostEnabled=localStorage.getItem('slotrush.rookie.ghost.enabled')!=='false';}catch(e){}
 let ghostFrames=null,ghostCursor=0,runFrames=[],lastFrameTime=-1;
+let sectorTimes=[],referenceSplits=[],sectorStart=0,lastLapCrashes=0,cleanLaps=0,storageFailed=false;
+// First forward crossings only: a crash can send the car backwards across a gate.
+// Derive reference timing from existing schema-1 ghosts; old records stay valid.
+function splitTimes(frames,length){
+ const splits=[];
+ if(!frames)return splits;
+ for(let i=1;i<frames.length&&splits.length<9;i++){
+  const a=frames[i-1],b=frames[i];
+  if(b[5]<=a[5])continue;
+  let gate=(splits.length+1)*length/3;
+  while(splits.length<9&&a[5]<gate&&b[5]>=gate){
+   splits.push(a[0]+(b[0]-a[0])*(gate-a[5])/(b[5]-a[5]));
+   gate=(splits.length+1)*length/3;
+  }
+ }
+ return splits;
+}
+function resetSplits(){
+ sectorTimes=[];sectorStart=0;lastLapCrashes=0;cleanLaps=0;
+ referenceSplits=splitTimes(records[activeLane]?.frames,lapLength());
+ for(let i=0;i<3;i++){
+  $('sector-'+i).dataset.tone='';$('sector-time-'+i).textContent='—';$('sector-label-'+i).textContent='SEKTOR '+(i+1);
+  $('sector-delta-'+i).textContent='Väntar på start';
+ }
+ $('pit-message').textContent=best?'Jaga din ghost. Varje sektor räknas.':'Sätt ditt första rekord på '+laneLabel()+'.';
+}
+function updateSplits(before,after,beforeTime,afterTime){
+ while(sectorTimes.length<9){
+  const n=sectorTimes.length,gate=(n+1)*lapLength()/3;
+  if(after<gate||after<=before)break;
+  const stamp=beforeTime+(afterTime-beforeTime)*Math.max(0,Math.min(1,(gate-before)/(after-before)));
+  const duration=stamp-sectorStart,ref=referenceSplits[n],prior=n?referenceSplits[n-1]:0;
+  sectorTimes.push(stamp);sectorStart=stamp;
+  const i=n%3,delta=Number.isFinite(ref)&&Number.isFinite(prior)?Math.round((duration-(ref-prior))*100)/100:null;
+  $('sector-label-'+i).textContent='VARV '+(Math.floor(n/3)+1)+' · S'+(i+1);
+  $('sector-time-'+i).textContent=duration.toFixed(2)+' s';
+  $('sector-delta-'+i).textContent=delta===null?'Första referens':(delta===0?'±':delta<0?'−':'+')+Math.abs(delta).toFixed(2)+' s mot PB';
+  $('sector-'+i).dataset.tone=delta===null||delta===0?'':delta<0?'ahead':'behind';
+  if(i===2){
+   const clean=crashes===lastLapCrashes;if(clean)cleanLaps++;
+   $('pit-message').textContent='Varv '+(Math.floor(n/3)+1)+' klart · '+(clean?'rent varv!':(crashes-lastLapCrashes)+' urspårningar')+' · '+(stamp-(sectorTimes[n-3]||0)).toFixed(2)+' s';
+   lastLapCrashes=crashes;
+  }else{
+   $('pit-message').textContent='Varv '+(Math.floor(n/3)+1)+' · sektor '+(i+1)+(delta===null?' klar':delta===0?' i nivå med PB':delta<0?' snabbare än PB':' · tid att hämta till nästa försök');
+  }
+ }
+}
+
 let laneConfirmed=false,mapConfirmed=false;
 function laneLabel(i=activeLane){return i===0?'SPÅR A':'SPÅR B';}
 function miniMap(index){const points=sampleTrackPoints(index,8);let d='';for(const p of points)d+=(d?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)+' ';return '<svg viewBox="75 85 815 480" aria-hidden="true"><path class="mini-base" d="'+d+'Z"/><path class="mini-slot" d="'+d+'Z"/></svg>';}
@@ -403,7 +477,8 @@ function chooseMap(i){
  $('track-number').textContent=String(i+1).padStart(2,'0');
  $('venue-label').textContent=VENUES[i].label;
  $('play').disabled=false;$('play').textContent='VÄLJ SPÅR';
- paintMapCards();refreshSetup();hud();return true;
+ canvas.setAttribute('aria-label',MAPS[i].name+' med två bilskenor och spelbar bil');
+ resetSplits();paintMapCards();refreshSetup();hud();invalidate();return true;
 }
 function changeMap(){
  // Changing map abandons the current run without saving an unfinished ghost.
@@ -411,7 +486,7 @@ function changeMap(){
  crash=null;crashT=0;respawnT=0;distance=0;speed=0;stress=0;loadDisplay=0;
  time=0;lapStart=0;lapTimes=[];completed=0;crashes=0;
  runFrames=[];lastFrameTime=-1;ghostFrames=null;ghostCursor=0;
- showMapSelect();
+ resetSplits();showMapSelect();
 }
 function showMapSelect(){
  if(!['menu','finished','map-select','lane-select','racing','countdown','crashed','paused'].includes(state))return;
@@ -443,11 +518,12 @@ function chooseLane(i){
  distance=0;speed=0;stress=0;loadDisplay=0;ghostFrames=null;
  $('play').disabled=false;
  $('play').textContent='KÖR '+laneLabel(i);
- refreshSetup();hud();
+ resetSplits();refreshSetup();hud();invalidate();
  return true;
 }
 function recordFrame(force=false){
- if(runFrames.length>=8500||(!force&&time-lastFrameTime<.05))return;
+ if(!force&&time-lastFrameTime<.05)return;
+ if(runFrames.length>=8500)runFrames=runFrames.filter((f,i)=>i%2===0);
  const p=state==='crashed'&&crash?crash:laneAt(distance);
  const row=[+time.toFixed(3),+p.x.toFixed(2),+p.y.toFixed(2),+p.theta.toFixed(4),
   state==='crashed'?1:0,+distance.toFixed(2)];
@@ -468,9 +544,13 @@ function ghostPose(){
  const MAX_SPEED=337, ACCEL=390, COAST=475, LAT_LIMIT=590;
  function curveRatio(){const p=laneAt(distance);return speed*speed*Math.abs(p.k)/LAT_LIMIT;}
 function format(s){const m=Math.floor(s/60),sec=Math.floor(s%60),cs=Math.floor((s*100)%100);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cs).padStart(2,'0')}`}
-function hud(){ $('time').textContent=format(time);$('laps').textContent=`${Math.min(3,completed+1)} / 3`; $('speed').innerHTML=`${Math.round(speed*.75)}<span class="unit">km/h*</span>`;$('crashes').textContent=crashes;$('best').textContent=best?format(best):'--:--';}
-function showOverlay(label,title,body,btn,help=true){$('overlay').classList.remove('choosing-lane','choosing-map');$('play').disabled=false;$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');}
-function hideOverlay(){$('overlay').classList.add('hidden');$('overlay').classList.remove('choosing-lane','choosing-map');}
+const hudNodes=Object.fromEntries(['time','laps','speed-value','crashes','best'].map(id=>[id,$(id)]));
+function hud(){
+ const values={time:format(time),laps:Math.min(3,completed+1)+' / 3','speed-value':String(Math.round(speed*.75)),crashes:String(crashes),best:best?format(best):'--:--'};
+ for(const [id,value] of Object.entries(values))if(hudNodes[id].textContent!==value)hudNodes[id].textContent=value;
+}
+function showOverlay(label,title,body,btn,help=true){$('countdown').classList.remove('visible');$('overlay').classList.remove('choosing-lane','choosing-map');$('play').disabled=false;$('ovlabel').textContent=label;$('ovtitle').innerHTML=title;$('ovbody').innerHTML=body;$('play').textContent=btn;$('help').style.display=help?'inline-block':'none';$('overlay').classList.remove('hidden');invalidate();}
+function hideOverlay(){$('overlay').classList.add('hidden');$('overlay').classList.remove('choosing-lane','choosing-map');invalidate();}
 function showMainMenu(){
  state='menu';laneConfirmed=false;
  showOverlay('SLOT RUSH • TIME ATTACK',MAPS[activeMap].name.toUpperCase(),
@@ -492,21 +572,23 @@ function confirmRace(){
  if(state==='paused'){togglePause();return;}
  if(state==='lane-select'){if(laneConfirmed)start();return;}
  if(state==='map-select'){if(mapConfirmed)showLaneSelect();return;}
- if(state==='menu'||state==='finished')showMapSelect();
+ if(state==='finished'){start();return;}
+ if(state==='menu')showMapSelect();
 }
 function start(){
  distance=0;speed=0;stress=0;loadDisplay=0;time=0;lapStart=0;lapTimes=[];
  completed=0;crashes=0;crash=null;crashT=0;respawnT=0;gas=false;
  ghostFrames=records[activeLane]?.frames||null;ghostCursor=0;runFrames=[];lastFrameTime=-1;
+ storageFailed=false;clearInputs();resetSplits();resetFrameClock();
  state='countdown';countT=3.4;recordFrame(true);hideOverlay();refreshSetup();hud();
 }
 function finish(){
- recordFrame(true);state='finished';gas=false;
+ recordFrame(true);state='finished';setGas(false);
  const isBest=!best||time<best;
  if(isBest){
   best=time;const record={schema:1,time:+time.toFixed(3),frames:runFrames};
   records[activeLane]=record;
-  try{localStorage.setItem(recordKey(activeMap,activeLane),JSON.stringify(record));}catch(e){}
+  try{localStorage.setItem(recordKey(activeMap,activeLane),JSON.stringify(record));}catch(e){storageFailed=true;}
  }
  refreshSetup();const fast=Math.min(...lapTimes);
  showOverlay(isBest?'★ NEW PERSONAL BEST':'RACE COMPLETE',
@@ -514,23 +596,25 @@ function finish(){
   'Spår: <b>'+laneLabel()+'</b> &nbsp;·&nbsp; Totaltid: <b>'+format(time)+
   '</b><br>Snabbaste varv: <b>'+format(fast)+'</b> &nbsp;·&nbsp; Krascher: <b>'+crashes+
   '</b><br>Varvtider: '+lapTimes.map(format).join(' / ')+
-  '<br><small>Tryck Kör igen för att välja spår och jaga din ghost.</small>',
-  'KÖR IGEN');
+  '<br>Rena varv: <b>'+cleanLaps+' / 3</b>'+
+  (storageFailed?'<br><small>Rekordet finns i denna session, men kunde inte sparas på enheten.</small>':'')+
+  '<br><small>Kör igen på samma bana och spår, eller använd Byt bana.</small>',
+  'KÖR IGEN · '+laneLabel());
 }
 function togglePause(){
  if(state==='racing'||state==='crashed'||state==='countdown'){
-  const from=state;state='paused';window._resumeState=from;gas=false;
+  const from=state;state='paused';window._resumeState=from;clearInputs();$('countdown').classList.remove('visible');
   showOverlay('RACE PAUSED','PAUS','Tidtagningen är stoppad. Tryck ESC för att fortsätta.','FORTSÄTT');
- }else if(state==='paused'){state=window._resumeState||'racing';hideOverlay();syncGas();}
+ }else if(state==='paused'){state=window._resumeState||'racing';resetFrameClock();hideOverlay();syncGas();}
  refreshSetup();
 }
-function doCrash(p){state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
+function doCrash(p){$('pit-message').textContent='För hög kurvbelastning. Släpp gasen tidigare här nästa varv.';state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
 function tick(dt){gameClock+=dt;if(state==='countdown'){countT-=dt;$('countdown').classList.add('visible');$('countdown').textContent=countT>.4?Math.ceil(countT-.4):'GO!';if(countT<=0){state='racing';$('countdown').classList.remove('visible');syncGas();}return;}
 $('countdown').classList.remove('visible');if(state!=='racing'&&state!=='crashed')return;time+=dt;
 if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';syncGas();recordFrame(true);}else recordFrame();return;}
 const acceleration=gas?ACCEL*(1-.31*(speed/MAX_SPEED)):-COAST;
  speed=Math.max(0,Math.min(MAX_SPEED,speed+acceleration*dt));
- const current=laneAt(distance),ratio=curveRatio();
+ const current=laneAt(distance),ratio=speed*speed*Math.abs(current.k)/LAT_LIMIT;
  // Continuous overload is dangerous, but a brief overshoot can be rescued by
  // lifting off. No instant crash from an isolated curvature spike.
  if(ratio>1.05){stress+=Math.pow(ratio-1.05,1.2)*2.2*dt;}
@@ -538,12 +622,12 @@ const acceleration=gas?ACCEL*(1-.31*(speed/MAX_SPEED)):-COAST;
  stress=Math.max(0,Math.min(1,stress));
  if(stress>=.82){doCrash(current);return;}
  loadDisplay+=(ratio-loadDisplay)*Math.min(1,dt*8);
- distance+=speed*dt;respawnT=Math.max(0,respawnT-dt);
+ const before=distance;distance+=speed*dt;updateSplits(before,distance,time-dt,time);respawnT=Math.max(0,respawnT-dt);
 recordFrame();
 while(completed<3&&distance>=(completed+1)*lapLength()){lapTimes.push(time-lapStart);lapStart=time;completed++;if(completed===3){finish();break;}}
 }
-function basePath(offset){ctx.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath()}
-function strokePath(offset,width,color){basePath(offset);ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=width;ctx.strokeStyle=color;ctx.stroke()}
+function basePath(g,offset){g.beginPath();for(let i=0;i<pts.length;i++){let p=pts[i];let x=p.x-Math.sin(p.theta)*offset,y=p.y+Math.cos(p.theta)*offset;if(!i)g.moveTo(x,y);else g.lineTo(x,y);}g.closePath()}
+function strokePath(g,offset,width,color){basePath(g,offset);g.lineCap='round';g.lineJoin='round';g.lineWidth=width;g.strokeStyle=color;g.stroke()}
 
 
 /*
@@ -780,22 +864,16 @@ function venueDecor(){
 }
 
 function board(){if(window.SlotRushScenery)window.SlotRushScenery.draw(ctx,activeMap,gameClock,venueReducedMotion);else venueDecor();}
-function drawTrack(){ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=7;ctx.shadowOffsetY=5;strokePath(0,104*roadScale,'#080e13');ctx.restore();
-strokePath(0,105*roadScale,'#101713');strokePath(0,97*roadScale,'#414640');strokePath(0,91*roadScale,'#64695f');strokePath(0,84*roadScale,'#343c34');
+function drawTrack(g){g.save();g.shadowColor='#000';g.shadowBlur=7;g.shadowOffsetY=5;strokePath(g,0,104*roadScale,'#080e13');g.restore();
+strokePath(g,0,105*roadScale,'#101713');strokePath(g,0,97*roadScale,'#414640');strokePath(g,0,91*roadScale,'#64695f');strokePath(g,0,84*roadScale,'#343c34');
 // Two shallow outer-edge lips.
-strokePath(-43*roadScale,2*roadScale,'#a0a29c');strokePath(43*roadScale,2*roadScale,'#a0a29c');strokePath(-40*roadScale,2*roadScale,'#242729');strokePath(40*roadScale,2*roadScale,'#242729');
+strokePath(g,-43*roadScale,2*roadScale,'#a0a29c');strokePath(g,43*roadScale,2*roadScale,'#a0a29c');strokePath(g,-40*roadScale,2*roadScale,'#242729');strokePath(g,40*roadScale,2*roadScale,'#242729');
 // Plastic injection seams across track every ~88 world units.
-for(let d=0;d<L;d+=84){const p=at(d);let nx=-Math.sin(p.theta),ny=Math.cos(p.theta);ctx.strokeStyle='#151b20a5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-nx*41,p.y-ny*41);ctx.lineTo(p.x+nx*41,p.y+ny*41);ctx.stroke();ctx.strokeStyle='#929a9b38';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(p.x-nx*39+Math.cos(p.theta)*3,p.y-ny*39+Math.sin(p.theta)*3);ctx.lineTo(p.x+nx*39+Math.cos(p.theta)*3,p.y+ny*39+Math.sin(p.theta)*3);ctx.stroke();}
+for(let d=0;d<L;d+=84){const p=at(d);let nx=-Math.sin(p.theta),ny=Math.cos(p.theta);g.strokeStyle='#151b20a5';g.lineWidth=2;g.beginPath();g.moveTo(p.x-nx*41*roadScale,p.y-ny*41*roadScale);g.lineTo(p.x+nx*41*roadScale,p.y+ny*41*roadScale);g.stroke();g.strokeStyle='#929a9b38';g.lineWidth=.7;g.beginPath();g.moveTo(p.x-nx*39*roadScale+Math.cos(p.theta)*3,p.y-ny*39*roadScale+Math.sin(p.theta)*3);g.lineTo(p.x+nx*39*roadScale+Math.cos(p.theta)*3,p.y+ny*39*roadScale+Math.sin(p.theta)*3);g.stroke();}
 // Lane-separated slots; each slot has paired conductor contacts, with a central guide groove.
-for(const lane of [-22*roadScale,22*roadScale]){strokePath(lane,17*roadScale,'#252b2d');strokePath(lane-9*roadScale,3.4*roadScale,'#b9bab2');strokePath(lane+9*roadScale,3.4*roadScale,'#b9bab2');strokePath(lane-9*roadScale,1*roadScale,'#eeeece88');strokePath(lane+9*roadScale,1*roadScale,'#eeeece88');strokePath(lane,8*roadScale,'#080c0e');strokePath(lane,2.2*roadScale,'#16191b');}
- // Mark the chosen rail on the visible track while selecting the start lane.
- if(state==='lane-select'&&laneConfirmed){
-  ctx.save();ctx.globalAlpha=.64;ctx.shadowColor='#ffce91';ctx.shadowBlur=4;
-  strokePath(laneTracks[activeLane].offset,2.8,'#ffcd82');
-  ctx.restore();
- }
+for(const lane of [-22*roadScale,22*roadScale]){strokePath(g,lane,17*roadScale,'#252b2d');strokePath(g,lane-9*roadScale,3.4*roadScale,'#b9bab2');strokePath(g,lane+9*roadScale,3.4*roadScale,'#b9bab2');strokePath(g,lane-9*roadScale,1*roadScale,'#eeeece88');strokePath(g,lane+9*roadScale,1*roadScale,'#eeeece88');strokePath(g,lane,8*roadScale,'#080c0e');strokePath(g,lane,2.2*roadScale,'#16191b');}
 // Reflective segmented start/finish stripe across the plastic between rails.
-const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos(start.theta),ty=Math.sin(start.theta);for(let u=-42*roadScale;u<42*roadScale;u+=9*roadScale){for(let f=0;f<2;f++){ctx.fillStyle=((Math.floor((u+42)/9)+f)%2)?'#ded8c7':'#20282d';let cx=start.x+nx*(u+4)+tx*(f*6),cy=start.y+ny*(u+4)+ty*(f*6);ctx.save();ctx.translate(cx,cy);ctx.rotate(start.theta);ctx.fillRect(-3,-4,6,8);ctx.restore();}}
+const start=at(8),nx=-Math.sin(start.theta),ny=Math.cos(start.theta),tx=Math.cos(start.theta),ty=Math.sin(start.theta);for(let u=-42*roadScale;u<42*roadScale;u+=9*roadScale){for(let f=0;f<2;f++){g.fillStyle=((Math.round((u+42*roadScale)/(9*roadScale))+f)%2)?'#ded8c7':'#20282d';let cx=start.x+nx*(u+4*roadScale)+tx*(f*6*roadScale),cy=start.y+ny*(u+4*roadScale)+ty*(f*6*roadScale);g.save();g.translate(cx,cy);g.rotate(start.theta);g.fillRect(-3*roadScale,-4*roadScale,6*roadScale,8*roadScale);g.restore();}}
 // No decorative numbered markers: track geometry and car stay in focus.
 }
 function carShape(x,y,heading,shadow=true,ghost=false){ctx.save();ctx.translate(x,y);ctx.rotate(heading+Math.PI/2);if(ghost)ctx.globalAlpha=.48;
@@ -831,8 +909,8 @@ function drawSpeedCues(p){
  }
  ctx.restore();
 }
-function drawCar(){let p=laneAt(distance);if(state==='crashed'&&crash){ctx.save();ctx.shadowColor='#f1c3a777';ctx.shadowBlur=25;for(let i=0;i<5;i++){const a=crashT*25+i*2.4,rad=(crashT*80+i*8);ctx.fillStyle=`rgba(238,211,160,${Math.max(0,.35-crashT*.29)})`;ctx.beginPath();ctx.arc(crash.x+Math.cos(a)*rad*.25,crash.y+Math.sin(a)*rad*.25,6+i*1.5,0,7);ctx.fill();}ctx.restore();carShape(crash.x,crash.y,crash.theta,true);return;}
-if(state==='racing'||state==='paused'||state==='finished'||state==='countdown'){if(respawnT>0&&Math.floor(respawnT*12)%2===0)return;const wobble=stress>.06?Math.min(7.5,(stress-.06)*11)*Math.sin(gameClock*20):0;drawSpeedCues(p);carShape(p.x-Math.sin(p.theta)*wobble,p.y+Math.cos(p.theta)*wobble,p.theta,true);}
+function drawCar(){let p=laneAt(distance);if((state==='crashed'||state==='paused'&&window._resumeState==='crashed')&&crash){ctx.save();ctx.shadowColor='#f1c3a777';ctx.shadowBlur=25;for(let i=0;i<5;i++){const a=crashT*25+i*2.4,rad=(crashT*80+i*8);ctx.fillStyle=`rgba(238,211,160,${Math.max(0,.35-crashT*.29)})`;ctx.beginPath();ctx.arc(crash.x+Math.cos(a)*rad*.25,crash.y+Math.sin(a)*rad*.25,6+i*1.5,0,7);ctx.fill();}ctx.restore();carShape(crash.x,crash.y,crash.theta,true);return;}
+if(state==='racing'||state==='paused'||state==='finished'||state==='countdown'){if(respawnT>0&&Math.floor(respawnT*12)%2===0)return;const wobble=!venueReducedMotion&&stress>.06?Math.min(7.5,(stress-.06)*11)*Math.sin(gameClock*20):0;drawSpeedCues(p);carShape(p.x-Math.sin(p.theta)*wobble,p.y+Math.cos(p.theta)*wobble,p.theta,true);}
 else carShape(p.x,p.y,p.theta,true);
 }
 function drawHUD(){
@@ -853,54 +931,94 @@ function drawHUD(){
 if(state==='racing'&&respawnT>0){ctx.textAlign='center';ctx.fillStyle='#fff5d4';ctx.font='900 14px system-ui';ctx.fillText('TILLBAKA PÅ SPÅRET',480,105);}
 }
 
+// The road is static; keep its expensive strokes/shadows out of the frame loop.
+const trackLayer=document.createElement('canvas');
+let trackCacheMap=-1,canvasSizeDirty=true,needsRender=true,rafId=0;
+let last=0,acc=0,lastDraw=0,lastHud=0;
+const FRAME_MS=1000/60;
+function resetFrameClock(){last=0;acc=0;lastDraw=0;}
+function invalidate(){needsRender=true;if(!rafId&&!document.hidden)rafId=requestAnimationFrame(frame);}
 function prepareCanvas(){
- // Canvas uses a 960x600 game coordinate system, but renders at native device
- // pixel density so text, rails and decals remain sharp on high-DPI screens.
- const rect=typeof canvas.getBoundingClientRect==='function'
-  ?canvas.getBoundingClientRect():null;
- const cssWidth=(rect&&rect.width)||canvas.clientWidth||W;
- const dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
- const physicalWidth=Math.max(1,Math.round(cssWidth*dpr));
- const physicalHeight=Math.max(1,Math.round(physicalWidth*H/W));
- if(canvas.width!==physicalWidth||canvas.height!==physicalHeight){
-  canvas.width=physicalWidth;canvas.height=physicalHeight;
- }
- ctx.setTransform(physicalWidth/W,0,0,physicalHeight/H,0,0);
+ if(!canvasSizeDirty)return;
+ canvasSizeDirty=false;
+ const cssWidth=canvas.getBoundingClientRect().width||W;
+ // Up to 2x native detail, with a 1920x1200 ceiling for large/high-DPI laptops.
+ const width=Math.max(1,Math.min(1920,Math.round(cssWidth*Math.min(2,window.devicePixelRatio||1))));
+ const height=Math.max(1,Math.round(width*H/W));
+ if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;trackCacheMap=-1;}
+ ctx.setTransform(width/W,0,0,height/H,0,0);
 }
-function render(){prepareCanvas();board();drawTrack();drawGhost();drawCar();drawHUD();}
-let last=0,acc=0;function frame(now){if(!last)last=now;const dt=Math.min(.06,(now-last)/1000);last=now;acc+=dt;let i=0;while(acc>=1/120&&i++<8){tick(1/120);acc-=1/120;}render();hud();requestAnimationFrame(frame);}
+function cachedTrack(){
+ if(trackCacheMap!==activeMap||trackLayer.width!==canvas.width||trackLayer.height!==canvas.height){
+  trackLayer.width=canvas.width;trackLayer.height=canvas.height;
+  const g=trackLayer.getContext('2d');g.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);
+  drawTrack(g);trackCacheMap=activeMap;
+ }
+ ctx.drawImage(trackLayer,0,0,W,H);
+ if(state==='lane-select'&&laneConfirmed){
+  ctx.save();ctx.globalAlpha=.64;ctx.shadowColor='#ffce91';ctx.shadowBlur=4;
+  strokePath(ctx,laneTracks[activeLane].offset,2.8,'#ffcd82');ctx.restore();
+ }
+}
+function render(){prepareCanvas();board();cachedTrack();drawGhost();drawCar();drawHUD();}
+function frame(now){
+ rafId=0;if(document.hidden)return;
+ const running=['racing','crashed','countdown'].includes(state);
+ if(running){
+  if(!last)last=now;
+  acc+=Math.min(.06,(now-last)/1000);last=now;
+  let steps=0;while(acc>=1/120&&steps++<8){tick(1/120);acc-=1/120;}
+ }else{last=0;acc=0;}
+ // Physics remains 120 Hz. Rendering is capped at 60 Hz on fast displays.
+ const elapsed=now-lastDraw;
+ if(needsRender||elapsed>=FRAME_MS-.1){
+  lastDraw=needsRender?now:lastDraw+Math.max(1,Math.floor((elapsed+.1)/FRAME_MS))*FRAME_MS;
+  render();needsRender=false;
+  if(!running||now-lastHud>=50){hud();lastHud=now;}
+ }
+ if(['racing','crashed','countdown'].includes(state))rafId=requestAnimationFrame(frame);
+ else hud();
+}
+function resized(){canvasSizeDirty=true;invalidate();}
+if(typeof ResizeObserver==='function')new ResizeObserver(resized).observe(canvas);
+window.addEventListener('resize',resized);
 let heldKeys=new Set(),heldStage=false,heldPedal=false;
+function clearInputs(){heldKeys.clear();heldStage=false;heldPedal=false;setGas(false);}
 function setGas(on){gas=!!on&&state==='racing';$('pedal').classList.toggle('pressed',gas)}
 // Inputs are a logical OR (single throttle), never additive or multiplicative.
 function syncGas(){setGas(Boolean(heldKeys.size>0||heldStage||heldPedal))}
-window.addEventListener('keydown',e=>{if(['Space','KeyW','Escape','KeyR'].includes(e.code))e.preventDefault();if(e.code==='Escape'){togglePause();return}if(e.code==='KeyR'){if(['racing','crashed','paused','countdown'].includes(state))start();return}if(e.code==='Space'||e.code==='KeyW'){heldKeys.add(e.code);syncGas()}});
-window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='KeyW'){heldKeys.delete(e.code);syncGas()}});window.addEventListener('blur',()=>{heldKeys.clear();heldStage=false;heldPedal=false;setGas(false);if(['racing','crashed','countdown'].includes(state))togglePause()});
-const stage=$('stage'),pedal=$('pedal');stage.addEventListener('pointerdown',e=>{if(e.target===canvas&&state==='racing'){heldStage=true;syncGas();stage.setPointerCapture(e.pointerId);}});stage.addEventListener('pointerup',()=>{heldStage=false;syncGas()});stage.addEventListener('pointercancel',()=>{heldStage=false;syncGas()});stage.addEventListener('lostpointercapture',()=>{heldStage=false;syncGas()});
+window.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target?.tagName==='BUTTON'&&e.target!==$('pedal'))return;if(['Space','KeyW','Escape','KeyR'].includes(e.code))e.preventDefault();if(e.code==='Escape'){if(!e.repeat)togglePause();return}if(e.code==='KeyR'){if(!e.repeat&&['racing','crashed','paused','countdown','finished'].includes(state))start();return}if(e.code==='Space'||e.code==='KeyW'){heldKeys.add(e.code);syncGas()}});
+window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='KeyW'){heldKeys.delete(e.code);syncGas()}});window.addEventListener('blur',()=>{clearInputs();if(['racing','crashed','countdown'].includes(state))togglePause()});
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){clearInputs();if(['racing','crashed','countdown'].includes(state))togglePause();cancelAnimationFrame(rafId);rafId=0;resetFrameClock();}
+ else invalidate();
+});
+const stage=$('stage'),pedal=$('pedal');stage.addEventListener('pointerdown',e=>{if(e.target===canvas&&['racing','countdown','crashed'].includes(state)){heldStage=true;syncGas();stage.setPointerCapture(e.pointerId);}});stage.addEventListener('pointerup',()=>{heldStage=false;syncGas()});stage.addEventListener('pointercancel',()=>{heldStage=false;syncGas()});stage.addEventListener('lostpointercapture',()=>{heldStage=false;syncGas()});
 pedal.addEventListener('pointerdown',e=>{e.preventDefault();heldPedal=true;syncGas();pedal.setPointerCapture(e.pointerId)});pedal.addEventListener('pointerup',()=>{heldPedal=false;syncGas()});pedal.addEventListener('pointercancel',()=>{heldPedal=false;syncGas()});pedal.addEventListener('lostpointercapture',()=>{heldPedal=false;syncGas()});
 $('lane-a').addEventListener('click',()=>chooseLane(0));
 $('lane-b').addEventListener('click',()=>chooseLane(1));
 $('ghost-toggle').addEventListener('click',()=>{
  ghostEnabled=!ghostEnabled;
  try{localStorage.setItem('slotrush.rookie.ghost.enabled',String(ghostEnabled));}catch(e){}
- refreshSetup();
+ refreshSetup();invalidate();
 });
 $('map-grid').addEventListener('click',event=>{const b=event.target.closest('[data-map]');if(b)chooseMap(Number(b.dataset.map));});
 $('lane-back').addEventListener('click',()=>state==='lane-select'?showMapSelect():showMainMenu());
 $('change-map').addEventListener('click',changeMap);
 $('pause').addEventListener('click',togglePause);
 $('restart').addEventListener('click',()=>{
- if(['racing','crashed','paused','countdown'].includes(state))start();
+ if(['racing','crashed','paused','countdown','finished'].includes(state))start();
  else showMapSelect();
 });
-$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
-refreshSetup();hud();requestAnimationFrame(frame);
+$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre sektorer per varv visar var du vinner eller tappar tid mot samma varv i ditt personbästa. Rena varv räknas i resultatet.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
+refreshSetup();resetSplits();hud();invalidate();
 window.slotRushDebug={
  getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,
   curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,time,completed,crashes,
   activeMap,mapCount:MAPS.length,activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
-  best,recordFrames:runFrames.length,ghostFrames:ghostFrames?.length||0,
+  best,sectorTimes:sectorTimes.slice(),referenceSplits:referenceSplits.slice(),cleanLaps,storageFailed,recordFrames:runFrames.length,ghostFrames:ghostFrames?.length||0,
   ghostPosition:ghostPose(),laneConfirmed,lapTimes,waypoints:WAYPOINTS}),
- start,tick,at,laneAt,chooseLane,chooseMap,showMapSelect,changeMap,setGas,showLaneSelect,confirmRace
+ start,tick,at,laneAt,splitTimes,chooseLane,chooseMap,showMapSelect,changeMap,setGas,showLaneSelect,confirmRace
  ,getGeometry:()=>({roadScale,centerline:pts.map(p=>({x:p.x,y:p.y})),lanes:laneTracks.map(l=>l.pts.map(p=>({x:p.x,y:p.y,k:p.k})))})
 };
 })();
