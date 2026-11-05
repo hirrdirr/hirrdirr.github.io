@@ -1,0 +1,81 @@
+---
+layout: default
+title: Game Discovery • hirrdirr
+section: discover
+unlisted: true
+sitemap: false
+---
+<div class="section-page discover-page">
+  <section class="discover-hero" aria-labelledby="discover-title">
+    <div class="discover-hero-copy">
+      <p class="section-kicker">HIRRDIRR / GAME DISCOVERY / EXPERIMENTAL</p>
+      <h1 id="discover-title">Discover<span class="pixel-period">.</span></h1>
+      <p class="discover-lead">Your next favorite game is out there.</p>
+      <p class="discover-intro">En radar för nya PC-spel. Upptäck vad som släpps den här veckan, bläddra mellan veckor och hitta något nytt att spela.</p>
+      <div class="discover-hero-tags" aria-label="Information om sidan">
+        <span><i data-lucide="monitor" aria-hidden="true"></i> PC / Windows</span>
+        <span><i data-lucide="calendar-days" aria-hidden="true"></i> Uppdateras dagligen när datakällan är ansluten</span>
+      </div>
+    </div>
+    <div class="discover-hero-art" aria-hidden="true">
+      <div class="discover-art-orbit discover-art-orbit-one"></div>
+      <div class="discover-art-orbit discover-art-orbit-two"></div>
+      <div class="discover-art-core"><i data-lucide="radar"></i></div>
+      <span class="discover-art-dot discover-art-dot-one"></span>
+      <span class="discover-art-dot discover-art-dot-two"></span>
+      <span class="discover-art-caption">SIGNAL / PC / 001</span>
+    </div>
+  </section>
+
+  <section class="discover-radar" aria-labelledby="radar-title">
+    <div class="discover-section-top">
+      <div>
+        <p class="section-kicker">01 / RELEASE RADAR</p>
+        <h2 id="radar-title">Nya spel<span class="pixel-period">.</span></h2>
+      </div>
+      <p class="discover-section-description">Vecka för vecka – med datum, genre och IGDB-betyg när tillräckligt många röstat.</p>
+    </div>
+
+    <div class="discover-controls">
+      <div class="discover-week-picker" aria-label="Välj vecka">
+        <button id="discover-prev" type="button" aria-label="Föregående vecka"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+        <div class="discover-week-label">
+          <strong id="discover-week">Den här veckan</strong>
+          <span id="discover-week-range">–</span>
+        </div>
+        <button id="discover-next" type="button" aria-label="Nästa vecka"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <div class="discover-filters">
+        <label class="discover-field">Sök den här veckan
+          <input id="discover-query" type="search" placeholder="Spelnamn..." autocomplete="off">
+        </label>
+        <label class="discover-field">Genre
+          <select id="discover-genre"><option value="">Alla genrer</option></select>
+        </label>
+        <label class="discover-field">Sortera
+          <select id="discover-sort">
+            <option value="date">Releasedatum</option>
+            <option value="rating">Högsta betyg</option>
+            <option value="name">Namn A–Ö</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="discover-status-row">
+      <p id="discover-status" role="status" aria-live="polite">Läser speldata...</p>
+      <span id="discover-count" aria-live="polite"></span>
+    </div>
+    <div id="discover-games" class="discover-game-grid" aria-label="Spelsläpp för vald vecka"></div>
+    <div id="discover-empty" class="discover-empty" hidden>
+      <i data-lucide="search-x" aria-hidden="true"></i>
+      <h3 id="discover-empty-title">Inga spel hittades</h3>
+      <p id="discover-empty-text">Prova en annan vecka eller ett annat filter.</p>
+    </div>
+  </section>
+
+  <footer class="discover-footer">
+    <p>Speldata: <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>. Betyg på 100-gradig skala omräknas till 1–5 och visas endast när underlaget är tillräckligt. Releasedatum kan variera mellan regioner.</p>
+    <p>Detta är en tidig, olistad förhandsversion av Game Discovery. Katalog och personliga recensioner byggs i senare etapper.</p>
+  </footer>
+</div>

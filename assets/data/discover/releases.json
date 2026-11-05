@@ -1,0 +1,10 @@
+{
+  "source": "IGDB",
+  "generated_at": null,
+  "window_start": null,
+  "window_end": null,
+  "platforms": [
+    {"id": 6, "name": "PC (Windows)"}
+  ],
+  "games": []
+}
