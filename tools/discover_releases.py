@@ -84,7 +84,7 @@ def game_records(ids: set[int], *, client_id: str, auth: str):
     for start in range(0, len(ordered), 250):
         subset = ordered[start:start + 250]
         body = (
-            "fields name,slug,cover.image_id,genres.name,rating,rating_count,category,version_parent; "
+            "fields name,slug,cover.image_id,genres.name,rating,rating_count,game_type,version_parent; "
             "where id = (" + ",".join(map(str, subset)) + "); limit 500;"
         )
         games = query("games", body, client_id=client_id, auth=auth)
@@ -113,7 +113,7 @@ def build(rows: list[dict], games: dict[int, dict], start: dt.date, end: dt.date
     for game_id, day in dates.items():
         game = games.get(game_id, {})
         # Keep main games and standalone expansions, not DLC, bundles, ports or editions.
-        if game.get("category") not in (0, 8, 9, 10, 11) or game.get("version_parent"):
+        if game.get("game_type") not in (0, 8, 9, 10) or game.get("version_parent"):
             continue
         name = game.get("name")
         if not isinstance(name, str) or not name.strip():
