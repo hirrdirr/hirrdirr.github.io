@@ -94,3 +94,9 @@
 .discover-explore-teaser .section-button { flex-shrink:0; }
 .discover-explore-teaser + .discover-footer { margin-top:0; }
 @media(max-width:740px) { .discover-explore-teaser { align-items:flex-start; flex-direction:column; } }
+
+.discover-demo-banner { display:flex; gap:15px; align-items:flex-start; border:1px solid var(--canvas-accent); border-radius:13px; background:var(--canvas-soft); padding:16px 20px; margin-top:20px; color:var(--canvas-text); font-size:13px; line-height:1.6; }
+.discover-demo-banner strong { color:var(--canvas-accent); font-size:12px; letter-spacing:.12em; white-space:nowrap; }
+.discover-demo-banner[hidden] { display:none; }
+.discover-card-detail { color:var(--canvas-accent)!important; text-decoration:underline; text-underline-offset:4px; font-size:13px; }
+@media(max-width:500px){ .discover-demo-banner { flex-direction:column; gap:5px; } }
