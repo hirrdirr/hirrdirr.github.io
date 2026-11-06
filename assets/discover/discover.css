@@ -150,3 +150,38 @@
  .discover-release-day-list .discover-card h3 { font-size:20px; }
  .discover-release-day-list .discover-card-bottom { gap:5px 14px; }
 }
+
+
+/* Week calendar: days flow horizontally, while releases stack vertically inside a day. */
+.discover-day-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 0 12px; }
+.discover-day-toolbar[hidden] { display:none; }
+.discover-day-toolbar p { font-size:12px; color:var(--canvas-muted); line-height:1.5; }
+.discover-day-arrows { display:flex; gap:7px; flex-shrink:0; }
+.discover-day-arrows button { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; border:1px solid var(--canvas-line); background:var(--canvas-soft); color:var(--canvas-text); cursor:pointer; }
+.discover-day-arrows button:hover:not(:disabled) { border-color:var(--canvas-accent); }
+.discover-day-arrows button:disabled { opacity:.3; cursor:default; }
+.discover-day-arrows svg { width:17px; height:17px; }
+.discover-day-timeline { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,calc((100% - 4*14px)/5)); grid-template-columns:none; gap:14px; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scroll-snap-type:x proximity; scrollbar-width:thin; scrollbar-color:var(--canvas-accent) transparent; padding:3px 1px 20px; align-items:stretch; }
+.discover-day-timeline:focus-visible { outline:2px solid var(--canvas-accent); outline-offset:2px; }
+.discover-day-timeline .discover-release-day { min-width:0; scroll-snap-align:start; border:1px solid var(--canvas-line); border-radius:14px; padding:12px 10px; background:var(--canvas-soft); }
+.discover-day-timeline .discover-release-day-heading { display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:0 0 11px; border-bottom:1px solid var(--canvas-line); }
+.discover-day-timeline .discover-release-day-heading h3 { font:600 clamp(24px,2vw,34px)/1.1 'Pixelify Sans',monospace; }
+.discover-day-timeline .discover-day-count { font-size:11px; }
+.discover-day-timeline .discover-release-day-list { display:flex; flex-direction:column; gap:9px; padding-top:10px; }
+.discover-day-timeline .discover-release-day-list .discover-card { display:grid; grid-template-columns:56px minmax(0,1fr); align-items:start; gap:9px; padding:0 0 10px; border-bottom:1px solid var(--canvas-line); }
+.discover-day-timeline .discover-release-day-list .discover-card:last-child { border-bottom:0; padding-bottom:0; }
+.discover-day-timeline .discover-release-day-list .discover-cover { width:56px; aspect-ratio:4/5; border-radius:5px; }
+.discover-day-timeline .discover-release-day-list .discover-card-main { gap:5px; min-width:0; }
+.discover-day-timeline .discover-release-day-list .discover-card h3 { font:600 16px/1.15 'Pixelify Sans',monospace; }
+.discover-day-timeline .discover-release-day-list .discover-card-meta { font-size:10px; }
+.discover-day-timeline .discover-release-day-list .discover-date { display:none; }
+.discover-day-timeline .discover-release-day-list .discover-card-genres { font-size:11px; line-height:1.3; }
+.discover-day-timeline .discover-release-day-list .discover-rating { font-size:12px; }
+.discover-day-timeline .discover-release-day-list .discover-card-bottom { justify-content:flex-start; align-items:flex-start; flex-direction:column; gap:5px; }
+.discover-day-timeline .discover-release-day-list :is(.discover-card-detail,.discover-card-link) { font-size:11px; line-height:1.2; }
+.discover-day-timeline .discover-release-day-list .discover-price { font-size:12px; padding:0; }
+.discover-day-empty { padding:10px 0 12px; color:var(--canvas-muted); font-size:12px; line-height:1.5; }
+@media(max-width:1300px) { .discover-day-timeline { grid-auto-columns:minmax(0,calc((100% - 3*14px)/4)); } }
+@media(max-width:960px) { .discover-day-timeline { grid-auto-columns:minmax(0,calc((100% - 2*14px)/3)); } }
+@media(max-width:700px) { .discover-day-timeline { grid-auto-columns:minmax(0,calc((100% - 14px)/2)); } }
+@media(max-width:470px) { .discover-day-timeline { grid-auto-columns:minmax(205px,86%); } }

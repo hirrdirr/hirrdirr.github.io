@@ -1,4 +1,4 @@
-import {groupReleasesByDate,releaseDateLabel} from "./release-groups.mjs";
+import {releaseWeekColumns,releaseDateLabel} from "./release-groups.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,gameLink} from "./game-data.mjs";
 /* Release Radar: consumes cached data only; never exposes API credentials. */
@@ -24,6 +24,9 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
   const count = $("discover-count");
   const viewList = $("discover-view-list");
   const viewGrid = $("discover-view-grid");
+  const dayToolbar = $("discover-day-toolbar");
+  const daysLeft = $("discover-days-left");
+  const daysRight = $("discover-days-right");
   let view = "list";
   const fmtShort = new Intl.DateTimeFormat("sv-SE", { day:"numeric", month:"short", timeZone:"UTC" });
   const forcedDemo = new URLSearchParams(location.search).get("demo") === "1";
@@ -158,25 +161,31 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const filtered = weekGames.filter((g) => (!q || g.name.toLocaleLowerCase("sv-SE").includes(q)) &&
       (!genre || (Array.isArray(g.genres) && g.genres.includes(genre))));
     if (view === "list") {
-      const days=groupReleasesByDate(filtered,{sort:sortSelect.value});
+      const columns=releaseWeekColumns(filtered,start,{sort:sortSelect.value});
       const fragment=document.createDocumentFragment();
-      for (const day of days) {
+      for (const day of columns) {
         const section=elt("section","discover-release-day");
         const heading=elt("div","discover-release-day-heading");
         const title=elt("h3","",releaseDateLabel(day.date));
         title.id="discover-date-"+day.date;
         heading.append(title);
-        heading.append(elt("span","discover-day-count",day.games.length+" "+(day.games.length===1?"spel":"spel")));
+        heading.append(elt("span","discover-day-count",day.games.length+" spel"));
         section.setAttribute("aria-labelledby",title.id);
         section.append(heading);
         const list=elt("div","discover-release-day-list");
-        for (const game of day.games) list.append(card(game));
+        if(!day.games.length){
+          list.append(elt("p","discover-day-empty","Inga spelsläpp"));
+        } else {
+          for(const game of day.games)list.append(card(game));
+        }
         section.append(list);
         fragment.append(section);
       }
       results.className="discover-day-timeline";
-      results.setAttribute("aria-label","Spelsläpp grupperade efter releasedatum");
+      results.setAttribute("aria-label","Veckodagar från måndag till söndag med spelsläpp under varje dag");
       results.replaceChildren(fragment);
+      dayToolbar.hidden=false;
+      updateDayArrows();
     } else {
       if (sortSelect.value==="rating") filtered.sort((a,b)=>(Number.isFinite(b.rating)?b.rating:-1)-(Number.isFinite(a.rating)?a.rating:-1) || a.date.localeCompare(b.date));
       else if(sortSelect.value==="name") filtered.sort((a,b)=>a.name.localeCompare(b.name,"sv"));
@@ -186,6 +195,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
       results.className="discover-game-grid";
       results.setAttribute("aria-label","Spelsläpp i kompakt rutnät");
       results.replaceChildren(fragment);
+      dayToolbar.hidden=true;
     }
     count.textContent = filtered.length + " av " + weekGames.length + " spel";
     empty.hidden = filtered.length>0;
@@ -203,21 +213,38 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
     return Math.ceil((((d-yearStart)/dayMS)+1)/7);
   }
+  function updateDayArrows() {
+    if(view!=="list")return;
+    daysLeft.disabled=results.scrollLeft<=1;
+    daysRight.disabled=results.scrollLeft+results.clientWidth>=results.scrollWidth-2;
+  }
+  function scrollDays(direction) {
+    const column=results.querySelector(".discover-release-day");
+    if(!column)return;
+    const width=column.getBoundingClientRect().width+14;
+    results.scrollBy({left:width*direction,behavior:"smooth"});
+  }
   function setView(next) {
     view=next;
     viewList.setAttribute("aria-pressed",String(view==="list"));
     viewGrid.setAttribute("aria-pressed",String(view==="grid"));
     try { localStorage.setItem("hirrdirr_discover_release_view_v1",view); } catch {}
     render();
+    results.scrollLeft=0;
+    updateDayArrows();
   }
   function bind() {
-    prev.addEventListener("click",()=>{offset--; render();});
-    next.addEventListener("click",()=>{offset++; render();});
+    prev.addEventListener("click",()=>{offset--; render();results.scrollLeft=0;updateDayArrows();});
+    next.addEventListener("click",()=>{offset++; render();results.scrollLeft=0;updateDayArrows();});
     search.addEventListener("input",render);
     genreSelect.addEventListener("change",render);
     sortSelect.addEventListener("change",render);
     viewList.addEventListener("click",()=>setView("list"));
     viewGrid.addEventListener("click",()=>setView("grid"));
+    daysLeft.addEventListener("click",()=>scrollDays(-1));
+    daysRight.addEventListener("click",()=>scrollDays(1));
+    results.addEventListener("scroll",updateDayArrows,{passive:true});
+    window.addEventListener("resize",updateDayArrows);
   }
   async function init() {
     try {

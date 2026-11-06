@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {groupReleasesByDate,releaseDateLabel} from "../assets/discover/release-groups.mjs";
+import {groupReleasesByDate,releaseWeekColumns,releaseDateLabel} from "../assets/discover/release-groups.mjs";
 import {makeDemoReleases} from "../assets/discover/game-data.mjs";
 
 const input=[
@@ -37,4 +37,25 @@ test("demo includes four fictional releases on the same day",()=>{
   const groups=groupReleasesByDate(data.games);
   assert.ok(groups.some(day=>day.games.length>=4));
   assert.ok(data.games.every(g=>g.name.startsWith("DEMO: ")));
+});
+
+test("seven weekday columns flow Monday to Sunday, with releases stacked within matching day",()=>{
+  const days=releaseWeekColumns(input,"2026-11-02");
+  assert.equal(days.length,7);
+  assert.deepEqual(days.map(d=>d.date),["2026-11-02","2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08"]);
+  assert.deepEqual(days.map(d=>d.games.length),[2,2,0,0,0,0,0]);
+  assert.deepEqual(days[0].games.map(g=>g.name),["Alpha","Zulu"]);
+});
+test("weekday columns preserve same-day groups even after rating sort",()=>{
+  const days=releaseWeekColumns(input,"2026-11-02",{sort:"rating"});
+  assert.equal(days[0].games[0].id,4);
+  assert.equal(days[1].games[0].id,3);
+});
+test("rejects a start date that is not Monday",()=>{
+  assert.throws(()=>releaseWeekColumns(input,"2026-11-03"),RangeError);
+});
+test("four releases appear stacked in Monday demo column",()=>{
+  const data=makeDemoReleases(new Date("2026-11-06T08:00:00Z"));
+  const days=releaseWeekColumns(data.games,"2026-11-02");
+  assert.ok(days[0].games.length>=4);
 });
