@@ -8,7 +8,7 @@ const valid={price:{amount:249,currency:"SEK",shop:"Steam",checked_at:"2026-11-0
 test("formatted current Swedish price only when a separately sourced snapshot exists",()=>{
   const p=displayPrice(valid,{now});
   assert.equal(p.shop,"Steam");
-  assert.equal(p.text,"249 kr");
+  assert.equal(p.text,"249,00 kr");
   assert.equal(p.label,"Butikspris");
 });
 test("unconfigured IGDB and demo catalogs do not invent current prices",()=>{
