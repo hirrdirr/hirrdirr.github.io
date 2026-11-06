@@ -1,3 +1,4 @@
+import {makeWishlistButton,bindWishlistLink,loadWishlist} from "./wishlist-ui.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,demoCatalog,gameLink} from "./game-data.mjs";
 import {scoreFor} from "./explore-core.mjs";
@@ -67,7 +68,9 @@ async function init(){
   const result=await loadDiscoveryData({forceDemo:forcedDemo});
   const isDemo=result.demo;
   const games=isDemo?demoCatalog():result.data.games;
-  const game=games.find(g=>g.id===id);
+  let game=games.find(g=>g.id===id);
+  // A bookmarked game remains viewable after its release leaves the rolling cache.
+  if(!game)game=loadWishlist().find(g=>g.id===id&&g.demo===isDemo)||null;
   $("detail-back").href="/discover/explore/"+(isDemo?"?demo=1":"");
   $("detail-radar").href="/discover/"+(isDemo?"?demo=1":"");
   $("detail-mode").textContent=isDemo
@@ -79,6 +82,8 @@ async function init(){
     return;
   }
   $("detail-content").hidden=false;
+  bindWishlistLink($("detail-wishlist-link"));
+  $("detail-wishlist-control").append(makeWishlistButton(game,isDemo));
   document.title=game.name+" • Game Discovery • hirrdirr";
   buildCover(game);
   $("detail-name").textContent=game.name;
