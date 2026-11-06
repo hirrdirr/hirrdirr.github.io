@@ -119,3 +119,34 @@
 @media (max-width:1050px) { .discover-game-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:740px) { .discover-game-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:440px) { .discover-game-grid { grid-template-columns:1fr; } .discover-cover { aspect-ratio:16/10; } }
+
+
+/* Steam-inspired date-first release list. The original compact grid remains optional. */
+.discover-view-switch { display:inline-flex; gap:4px; padding:4px; align-self:end; border:1px solid var(--canvas-line); border-radius:14px; }
+.discover-view-switch button { display:inline-flex; gap:7px; align-items:center; justify-content:center; min-height:38px; padding:7px 13px; border:0; border-radius:10px; background:transparent; color:var(--canvas-muted); font-size:13px; font-weight:650; cursor:pointer; }
+.discover-view-switch button[aria-pressed="true"] { background:var(--canvas-accent); color:var(--canvas-bg); }
+.discover-view-switch button:hover:not([aria-pressed="true"]) { color:var(--canvas-text); background:var(--canvas-soft); }
+.discover-view-switch svg { width:16px; height:16px; }
+.discover-day-timeline { display:flex; flex-direction:column; gap:clamp(28px,3vw,48px); }
+.discover-release-day { min-width:0; }
+.discover-release-day-heading { display:flex; align-items:baseline; gap:16px; padding:0 0 12px; border-bottom:1px solid var(--canvas-line); }
+.discover-release-day-heading h3 { font:600 clamp(26px,2.7vw,42px)/1.12 'Pixelify Sans',monospace; color:var(--canvas-text); }
+.discover-day-count { color:var(--canvas-muted); font-size:12px; white-space:nowrap; }
+.discover-release-day-list { display:flex; flex-direction:column; }
+.discover-release-day-list .discover-card { display:grid; grid-template-columns:clamp(94px,11vw,155px) minmax(0,1fr); align-items:center; gap:clamp(16px,2.8vw,40px); padding:17px 0; border-bottom:1px solid var(--canvas-line); }
+.discover-release-day-list .discover-cover { width:100%; aspect-ratio:4/4; }
+.discover-release-day-list .discover-card-main { gap:7px; }
+.discover-release-day-list .discover-card h3 { font:600 clamp(21px,2vw,32px)/1.13 'Pixelify Sans',monospace; }
+.discover-release-day-list .discover-card-bottom { justify-content:flex-start; gap:12px 24px; padding-top:3px; }
+.discover-release-day-list .discover-card-meta { font-size:11px; }
+.discover-release-day-list .discover-card-genres { min-height:0; }
+@media(max-width:740px) {
+ .discover-view-switch { width:fit-content; }
+ .discover-release-day-list .discover-card { grid-template-columns:clamp(86px,20vw,122px) minmax(0,1fr); gap:16px; }
+}
+@media(max-width:440px) {
+ .discover-release-day-list .discover-card { grid-template-columns:90px minmax(0,1fr); gap:12px; padding:15px 0; }
+ .discover-release-day-list .discover-cover { aspect-ratio:4/5; }
+ .discover-release-day-list .discover-card h3 { font-size:20px; }
+ .discover-release-day-list .discover-card-bottom { gap:5px 14px; }
+}
