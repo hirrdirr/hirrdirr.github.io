@@ -1,28 +1,27 @@
 {
-  "digest_date": "2026-11-05",
+  "digest_date": "2026-11-06",
   "articles": [
     {
+      "source": "CERT-SE",
+      "title": "NCSC – CERT-SE veckobrev v.45",
+      "url": "https://www.cert.se/2026/11/ncsc-cert-se-veckobrev-v45.html"
+    },
+    {
       "source": "BleepingComputer",
-      "title": "GhostMap Android flaw lets malicious app trigger persistent boot loop",
-      "url": "https://www.bleepingcomputer.com/news/security/ghostmap-android-flaw-lets-malicious-app-trigger-persistent-boot-loop/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/14/android.jpg"
+      "title": "D-Link warns of multiple zero-days in DGS-3130 Series switches",
+      "url": "https://www.bleepingcomputer.com/news/security/d-link-warns-of-multiple-zero-days-in-dgs-3130-series-switches/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/06/D-Link-logo.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Vizio, Samsung smart TVs seem to ignore tracking opt outs",
-      "url": "https://www.malwarebytes.com/blog/news/2026/11/vizio-samsung-smart-tvs-seem-to-ignore-tracking-opt-outs",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/eyes.png"
+      "title": "Attacks on supermarket and blood storage systems prompt US warning",
+      "url": "https://www.malwarebytes.com/blog/news/2026/11/attacks-on-supermarket-and-blood-storage-systems-prompt-us-warning",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/french-supermarket.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Thursday, November 5th, 2026 https://isc.sans.edu/podcastdetail/10166, (Thu, Nov 5th)",
-      "url": "https://isc.sans.edu/diary/rss/33490"
-    },
-    {
-      "source": "BleepingComputer",
-      "title": "Vercel rolls out new protection against stolen session cookie attacks",
-      "url": "https://www.bleepingcomputer.com/news/security/vercel-rolls-out-new-protection-against-stolen-session-cookie-attacks/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/04/vercel.jpg"
+      "title": "ISC Stormcast For Friday, November 6th, 2026 https://isc.sans.edu/podcastdetail/10168, (Fri, Nov 6th)",
+      "url": "https://isc.sans.edu/diary/rss/33494"
     }
   ]
 }
