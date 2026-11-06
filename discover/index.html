@@ -74,8 +74,19 @@ sitemap: false
     </div>
   </section>
 
+  <section class="discover-explore-teaser" aria-labelledby="discover-explore-title">
+    <div><p class="section-kicker">02 / EXPLORE GAMES</p>
+      <h2 id="discover-explore-title">Hitta nästa favorit<span class="pixel-period">.</span></h2>
+      <p>Testa den nya PC-spelkatalogens sökning, genrefilter och personliga betyg, innan vi ansluter hela databasen.</p></div>
+    <a id="discover-explore-link" class="section-button section-button-secondary" href="/discover/explore/">Utforska katalogen ↗</a>
+  </section>
+  <script>
+    if (new URLSearchParams(location.search).get("demo") === "1") {
+      document.getElementById("discover-explore-link").href="/discover/explore/?demo=1";
+    }
+  </script>
   <footer class="discover-footer">
     <p>Speldata: <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>. Betyg på 100-gradig skala omräknas till 1–5 och visas endast när underlaget är tillräckligt. Releasedatum kan variera mellan regioner.</p>
-    <p>Detta är en tidig, olistad förhandsversion av Game Discovery. Katalog och personliga recensioner byggs i senare etapper.</p>
+    <p>Detta är en tidig, olistad förhandsversion av Game Discovery. Katalogen finns som förhandsversion. Publika recensioner kommer senare.</p>
   </footer>
 </div>

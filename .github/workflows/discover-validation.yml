@@ -5,6 +5,7 @@ on:
     paths:
       - 'discover/**'
       - 'assets/discover/**'
+      - 'tests/discover-explore.test.mjs'
       - 'assets/data/discover/**'
       - 'tools/discover_releases.py'
       - 'tests/test_discover_releases.py'
@@ -27,6 +28,9 @@ jobs:
       - name: Test release normalization
         run: python -m unittest discover -s tests -p 'test_discover_releases.py'
       - name: Validate frontend syntax
-        run: node --check assets/discover/discover.js
+        run: |
+          node --check assets/discover/discover.js
+          node --check assets/discover/explore.js
+          node --test tests/discover-explore.test.mjs
       - name: Validate cached data format
         run: python -m json.tool assets/data/discover/releases.json > /dev/null

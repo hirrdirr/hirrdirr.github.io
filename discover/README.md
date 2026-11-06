@@ -4,7 +4,10 @@
 - Design preview with **fictitious example games**: https://hirrdirr.se/discover/?demo=1
 - The page deliberately has no links from the homepage or main navigation, is marked noindex, and is excluded from the sitemap. This is *unlisted*, not password protected.
 - Phase 1 includes PC/Windows weekly releases, genre filters, week navigation, text search, cover art, ratings where available, responsive UI, and theme support.
-- Phase 2 (complete catalog) and Phase 3 (author reviews) are not part of this release.
+- Limited Explore preview: https://hirrdirr.se/discover/explore/ – uses the Release Radar cache, NOT a full game catalog.
+- Fictional Explore design demo: https://hirrdirr.se/discover/explore/?demo=1 – 13 clearly marked fictional games for search, genre, rating and sorting tests.
+- Private 1–5 star TEST ratings use localStorage in your browser only; they are not public and do not sync across devices.
+- Complete server-side game search and public authenticated reviews will be implemented in subsequent stages.
 
 ## Connect real IGDB data
 
@@ -20,4 +23,6 @@ IGDB PC/Windows platform ID = 6. Dates are fetched from platform-specific releas
 ```sh
 python -m unittest discover -s tests -p 'test_discover_releases.py'
 node --check assets/discover/discover.js
+node --check assets/discover/explore.js
+node --test tests/discover-explore.test.mjs
 ```
