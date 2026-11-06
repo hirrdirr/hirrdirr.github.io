@@ -86,3 +86,11 @@
   .discover-card { border-bottom:1px solid var(--discover-edge); padding-bottom:26px; }
 }
 @media(prefers-reduced-motion:reduce) { .discover-art-orbit { animation:none; } }
+
+.discover-explore-teaser { display:flex; justify-content:space-between; align-items:center; gap:24px; padding:clamp(48px,6vw,98px) 0; border-top:1px solid var(--canvas-line); margin-top:clamp(50px,6vw,95px); }
+.discover-explore-teaser > div { max-width:64ch; }
+.discover-explore-teaser h2 { font:600 clamp(36px,4vw,66px)/1.1 'Pixelify Sans',monospace; margin:14px 0 18px; }
+.discover-explore-teaser p:not(.section-kicker) { font-size:15px; line-height:1.7; }
+.discover-explore-teaser .section-button { flex-shrink:0; }
+.discover-explore-teaser + .discover-footer { margin-top:0; }
+@media(max-width:740px) { .discover-explore-teaser { align-items:flex-start; flex-direction:column; } }
