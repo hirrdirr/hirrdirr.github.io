@@ -1,28 +1,29 @@
 <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Slot Rush audio QA</title>
 <style>body{background:#171f1b;color:#eef3eb;font:15px system-ui;margin:20px}button,a{padding:10px;margin:4px}a{color:#ffc97e}iframe{display:block;border:1px solid #556;width:100%;height:850px}pre{white-space:pre-wrap}#results{max-height:180px;overflow:auto}button{cursor:pointer}</style>
-<h1>Slot Rush audio QA</h1><button id="render">Render audio checks</button><button id="phone">320 px layout</button><button id="desktop">Desktop layout</button><a href="mobile/index.html">Open game</a>
+<h1>Slot Rush audio QA</h1><button id="render">Render audio checks</button><button id="phone">320 px layout</button><button id="desktop">Desktop layout</button><button id="warning">Show stability warning</button><button id="derail">Show derailment</button><a href="mobile/index.html">Open game</a>
 <pre id="results">Ready</pre><pre id="state">Waiting for game</pre><iframe title="Slot Rush" src="mobile/index.html"></iframe>
 <script src="mobile/audio.js"></script>
 <script>
 const frame=document.querySelector('iframe'),results=document.querySelector('#results');
 document.querySelector('#phone').onclick=()=>frame.style.width='320px';
 document.querySelector('#desktop').onclick=()=>frame.style.width='100%';
-setInterval(()=>{try{const w=frame.contentWindow,s=w.slotRushDebug;document.querySelector('#state').textContent=JSON.stringify({race:s?.getState().state,audio:s?.getAudioState(),overflow:w.document.documentElement.scrollWidth>w.document.documentElement.clientWidth},null,2);}catch(e){}},250);
+setInterval(()=>{try{const w=frame.contentWindow,s=w.slotRushDebug;document.querySelector('#state').textContent=JSON.stringify({race:s?.getState().state,stability:s?.getState().stability,audio:s?.getAudioState(),overflow:w.document.documentElement.scrollWidth>w.document.documentElement.clientWidth},null,2);}catch(e){}},250);
 document.querySelector('#render').onclick=async()=>{
  results.textContent='Rendering…';const Audio=window.AudioContext,storage=localStorage.getItem('slotrush.audio.v1'),rows=[];
  try{
-  for(const name of ['slow','fast','loaded','count','crash','respawn','lap','finish','record','muted','paused']){
+  for(const name of ['slow','fast','coasting','loaded','count','crash','crash-fast','respawn','lap','finish','record','muted','paused']){
    const context=new OfflineAudioContext(1,48000,24000);
    window.AudioContext=class{constructor(){return new Proxy(context,{get(target,key){if(key==='state')return 'running';if(key==='resume'||key==='suspend'||key==='close')return ()=>Promise.resolve();const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;}});}};
    const sound=SlotRushAudio.create();sound.setVolume(1);sound.unlock();sound.begin();
-   if(['slow','fast','loaded','muted','paused'].includes(name))sound.update(name==='slow'?60:280,true,name==='loaded'?1.6:.2,name==='loaded'?.7:0);
+   if(['slow','fast','coasting','loaded','muted','paused'].includes(name))sound.update(name==='slow'?60:280,name!=='coasting',name==='loaded'?1.6:.2,name==='loaded'?.7:0);
+   else if(name==='crash'||name==='crash-fast')sound.cue('crash',name==='crash'?100:337);
    else if(name==='count')sound.cue('count',0);
    else sound.cue(name==='record'?'finish':name,name==='record');
    if(name==='muted')sound.setMuted(true);if(name==='paused')sound.stop();
    const buffer=await context.startRendering(),data=buffer.getChannelData(0);
    let squares=0,peak=0,tail=0,crossings=0;
    for(let i=0;i<data.length;i++){squares+=data[i]*data[i];peak=Math.max(peak,Math.abs(data[i]));if(i>36000)tail=Math.max(tail,Math.abs(data[i]));if(i>12000&&i<24000&&data[i]>=0&&data[i-1]<0)crossings++;}
-   const rms=Math.sqrt(squares/data.length),silent=['muted','paused'].includes(name),continuous=['slow','fast','loaded'].includes(name);
+   const rms=Math.sqrt(squares/data.length),silent=['muted','paused'].includes(name),continuous=['slow','fast','coasting','loaded'].includes(name);
    const pass=Number.isFinite(rms)&&peak<.99&&(silent?rms<.00001:rms>.0001)&&(continuous||tail<.0001);
    rows.push({name,pass,rms:+rms.toFixed(5),peak:+peak.toFixed(4),tail:+tail.toFixed(6),crossings});sound.stop();
   }
@@ -30,4 +31,14 @@ document.querySelector('#render').onclick=async()=>{
   results.textContent=JSON.stringify({passed:rows.every(r=>r.pass)&&fast.crossings>slow.crossings,rows},null,2);
  }catch(e){results.textContent=e.stack;}finally{window.AudioContext=Audio;if(storage===null)localStorage.removeItem('slotrush.audio.v1');else localStorage.setItem('slotrush.audio.v1',storage);}
 };
+async function showStability(derail){
+ await new Promise(resolve=>{frame.onload=resolve;frame.src='game/index.html';});
+ const w=frame.contentWindow,g=w.slotRushDebug;
+ g.changeMap();g.chooseMap(0);g.showLaneSelect();g.chooseLane(0);g.confirmRace();
+ for(let i=0;i<410;i++)g.tick(1/120);
+ for(let i=0;i<6000;i++){g.setGas(true);g.tick(1/120);const s=g.getState();if(derail?s.state==='crashed':s.stability.tone==='danger')break;}
+ w.QA.pump(1000);
+}
+document.querySelector('#warning').onclick=()=>showStability(false);
+document.querySelector('#derail').onclick=()=>showStability(true);
 </script>

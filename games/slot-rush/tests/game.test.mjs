@@ -83,3 +83,20 @@ test('leaving countdown removes its overlay even when the menu stops the frame l
  assert.ok(g.elements.get('countdown').classList.contains('visible'));
  g.api.changeMap();g.frame(1000);assert.equal(g.elements.get('countdown').classList.contains('visible'),false);assert.equal(g.pending.size,0);
 });
+
+test('stability warns on actual accumulated stress, recovers on release and shows derailment through pause',()=>{
+ const g=loadGame();select(g);assert.equal(g.api.getState().stability.percent,100);
+ for(let i=0;i<6000&&g.api.getState().stability.tone!=='warning';i++){g.api.setGas(true);g.api.tick(1/120);}
+ assert.equal(g.api.getState().stability.label,'BÖRJAR SLÄPPA');
+ g.api.setGas(false);for(let i=0;i<120;i++)g.api.tick(1/120);
+ assert.equal(g.api.getState().state,'racing');assert.equal(g.api.getState().stability.percent,100);
+ for(let i=0;i<6000&&g.api.getState().stability.tone!=='danger';i++){g.api.setGas(true);g.api.tick(1/120);}
+ assert.equal(g.api.getState().state,'racing');assert.equal(g.api.getState().stability.label,'SLÄPP GASEN');
+ for(let i=0;i<600&&g.api.getState().state!=='crashed';i++){g.api.setGas(true);g.api.tick(1/120);}
+ assert.equal(g.api.getState().stability.percent,0);assert.equal(g.api.getState().stability.label,'URSPÅRAD');
+ g.frame(1000);assert.equal(g.elements.get('stability-meter')['aria-valuenow'],'0');assert.equal(g.elements.get('stability').dataset.tone,'danger');
+ g.elements.get('pause').click();g.frame(1017);assert.equal(g.api.getState().stability.percent,0);assert.equal(g.elements.get('stability-state').textContent,'PAUS');
+ g.elements.get('pause').click();for(let i=0;i<140;i++)g.api.tick(1/120);
+ assert.equal(g.api.getState().stability.percent,100);assert.equal(g.api.getState().state,'racing');
+ g.api.changeMap();g.frame(3000);assert.equal(g.elements.get('stability-value').textContent,'100%');assert.equal(g.elements.get('stability-state').textContent,'REDO');
+});
