@@ -66,12 +66,15 @@ function buildCover(game){
 }
 async function init(){
   const result=await loadDiscoveryData({forceDemo:forcedDemo});
-  const isDemo=result.demo;
+  let isDemo=result.demo;
   const games=isDemo?demoCatalog():result.data.games;
   let game=games.find(g=>g.id===id);
   let fromWishlist=false;
-  // A bookmarked game remains viewable after its release leaves the rolling cache.
-  if(!game){game=loadWishlist().find(g=>g.id===id&&g.demo===isDemo)||null;fromWishlist=Boolean(game);}
+  // Saved real entries remain browsable if the live cache rotates or IGDB is offline.
+  if(!game){
+    const saved=loadWishlist().find(g=>g.id===id && (forcedDemo?g.demo:!g.demo));
+    if(saved){game=saved;fromWishlist=true;isDemo=saved.demo;}
+  }
   $("detail-back").href="/discover/explore/"+(isDemo?"?demo=1":"");
   $("detail-radar").href="/discover/"+(isDemo?"?demo=1":"");
   $("detail-mode").textContent=isDemo
