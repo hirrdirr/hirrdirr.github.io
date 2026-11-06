@@ -185,3 +185,11 @@
 @media(max-width:960px) { .discover-day-timeline { grid-auto-columns:minmax(0,calc((100% - 2*14px)/3)); } }
 @media(max-width:700px) { .discover-day-timeline { grid-auto-columns:minmax(0,calc((100% - 14px)/2)); } }
 @media(max-width:470px) { .discover-day-timeline { grid-auto-columns:minmax(205px,86%); } }
+
+/* Shared wishlist controls on unlisted Discover, Explore, and Game pages. */
+.discover-wishlist-toggle { border:1px solid var(--canvas-line); border-radius:20px; background:transparent; color:var(--canvas-text); cursor:pointer; padding:6px 11px; font:600 12px/1.25 system-ui,sans-serif; white-space:nowrap; }
+.discover-wishlist-toggle:hover { border-color:var(--canvas-accent); background:var(--canvas-soft); }
+.discover-wishlist-toggle[aria-pressed="true"] { color:var(--canvas-accent); border-color:var(--canvas-accent); }
+.discover-wishlist-compact { padding:5px 8px; font-size:11px; }
+.discover-wishlist-link { display:inline-flex; align-items:center; width:fit-content; color:var(--canvas-accent)!important; border:1px solid var(--canvas-line); border-radius:30px; padding:10px 15px; min-height:42px; font-size:13px; text-decoration:none!important; white-space:nowrap; }
+.discover-wishlist-link:hover { background:var(--canvas-soft); }
