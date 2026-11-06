@@ -28,19 +28,38 @@ export function watchWishlist(callback){
   return ()=>{window.removeEventListener(eventName,onChange);window.removeEventListener("storage",onChange);};
 }
 export function wishlistHref(){return "/discover/wishlist/";}
+/* One shared refresh listener: avoids leaking listeners every time cards rerender. */
+let sharedListenerAttached=false;
+function synchronizeRenderedButtons(){
+  const items=loadWishlist();
+  const keys=new Set(items.map(item=>wishlistKey(item.id,item.demo)));
+  for(const button of document.querySelectorAll(".discover-wishlist-toggle[data-wishlist-key]")){
+    const saved=keys.has(button.dataset.wishlistKey);
+    const gameName=button.dataset.wishlistName||"spelet";
+    button.setAttribute("aria-pressed",String(saved));
+    button.setAttribute("aria-label",(saved?"Ta bort ":"Spara ")+gameName+(saved?" från":" till")+" önskelistan");
+    button.textContent=saved?"♥ Sparat":"♡ Spara";
+    button.title=saved?"Ta bort från önskelistan":"Spara till önskelistan";
+  }
+}
 export function makeWishlistButton(game,demo=false,{compact=false}={}){
   const button=document.createElement("button");
   button.type="button";
   button.className="discover-wishlist-toggle"+(compact?" discover-wishlist-compact":"");
+  button.dataset.wishlistKey=wishlistKey(game.id,demo)||"";
+  button.dataset.wishlistName=game.name;
+  if(!sharedListenerAttached){
+    watchWishlist(synchronizeRenderedButtons);
+    sharedListenerAttached=true;
+  }
   const sync=()=>{
     const saved=hasWish(game.id,demo);
-    button.setAttribute("aria-pressed",saved?"true":"false");
+    button.setAttribute("aria-pressed",String(saved));
     button.setAttribute("aria-label",(saved?"Ta bort ":"Spara ")+game.name+(saved?" från":" till")+" önskelistan");
     button.textContent=saved?"♥ Sparat":"♡ Spara";
     button.title=saved?"Ta bort från önskelistan":"Spara till önskelistan";
   };
   sync();
-  watchWishlist(sync);
   button.addEventListener("click",()=>{
     const outcome=changeWish(game,demo);
     if(!outcome.ok) {
@@ -53,8 +72,7 @@ export function makeWishlistButton(game,demo=false,{compact=false}={}){
 export function bindWishlistLink(anchor){
   if(!anchor)return;
   const sync=items=>{
-    const count=items.length;
-    anchor.textContent="♡ Önskelista"+(count?" ("+count+")":"");
+    anchor.textContent="♡ Önskelista"+(items.length?" ("+items.length+")":"");
   };
   sync(loadWishlist());
   watchWishlist(sync);
