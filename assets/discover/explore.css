@@ -45,3 +45,5 @@
 .explore-footer a { color:var(--canvas-accent); text-decoration:underline; }
 @media(max-width:950px) { .explore-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } .explore-game { grid-template-columns:115px minmax(0,1fr); } .explore-own { grid-column:2; } }
 @media(max-width:640px) { .explore-filters { grid-template-columns:1fr; } .explore-notice { align-items:flex-start; flex-wrap:wrap; } .explore-game { grid-template-columns:92px minmax(0,1fr); gap:16px; } .explore-own { grid-column:1/-1; } .explore-stars button { width:40px; } .explore-footer { grid-template-columns:1fr; } }
+
+.explore-info .explore-price { color:var(--canvas-accent); font-size:13px; font-weight:600; }
