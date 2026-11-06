@@ -1,3 +1,4 @@
+import {makeWishlistButton,bindWishlistLink} from "./wishlist-ui.mjs";
 import {releaseWeekColumns,releaseDateLabel} from "./release-groups.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,gameLink} from "./game-data.mjs";
@@ -126,6 +127,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     details.href=gameLink(game.id,demo);
     details.setAttribute("aria-label","Visa detaljer för "+game.name);
     bottom.append(details);
+    bottom.append(makeWishlistButton(game,demo,{compact:true}));
     if (!demo && typeof game.slug === "string" && /^[a-z0-9-]+$/.test(game.slug)) {
       const a = elt("a","discover-card-link","Se på IGDB ↗");
       a.href = "https://www.igdb.com/games/" + encodeURIComponent(game.slug);
@@ -257,6 +259,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const result=await loadDiscoveryData({forceDemo:forcedDemo});
     demo=result.demo;
     data=result.data;
+    bindWishlistLink($("discover-wishlist-link"));
     const banner=$("discover-demo-banner");
     banner.hidden=!demo;
     $("discover-explore-link").href="/discover/explore/"+(demo?"?demo=1":"");

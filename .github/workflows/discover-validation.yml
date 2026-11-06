@@ -9,6 +9,7 @@ on:
       - 'tests/discover-data.test.mjs'
       - 'tests/discover-price.test.mjs'
       - 'tests/discover-release-groups.test.mjs'
+      - 'tests/discover-wishlist.test.mjs'
       - 'assets/data/discover/**'
       - 'tools/discover_releases.py'
       - 'tests/test_discover_releases.py'
@@ -38,6 +39,9 @@ jobs:
           node --test tests/discover-data.test.mjs
           node --test tests/discover-price.test.mjs
           node --test tests/discover-release-groups.test.mjs
+          node --test tests/discover-wishlist.test.mjs
+          node --check assets/discover/wishlist-ui.mjs
+          node --check assets/discover/wishlist.js
           node --test tests/discover-explore.test.mjs
       - name: Validate cached data format
         run: python -m json.tool assets/data/discover/releases.json > /dev/null

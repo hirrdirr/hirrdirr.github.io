@@ -1,3 +1,4 @@
+import {makeWishlistButton,bindWishlistLink,loadWishlist} from "./wishlist-ui.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,demoCatalog,gameLink} from "./game-data.mjs";
 import {scoreFor} from "./explore-core.mjs";
@@ -65,9 +66,15 @@ function buildCover(game){
 }
 async function init(){
   const result=await loadDiscoveryData({forceDemo:forcedDemo});
-  const isDemo=result.demo;
+  let isDemo=result.demo;
   const games=isDemo?demoCatalog():result.data.games;
-  const game=games.find(g=>g.id===id);
+  let game=games.find(g=>g.id===id);
+  let fromWishlist=false;
+  // Saved real entries remain browsable if the live cache rotates or IGDB is offline.
+  if(!game){
+    const saved=loadWishlist().find(g=>g.id===id && (forcedDemo?g.demo:!g.demo));
+    if(saved){game=saved;fromWishlist=true;isDemo=saved.demo;}
+  }
   $("detail-back").href="/discover/explore/"+(isDemo?"?demo=1":"");
   $("detail-radar").href="/discover/"+(isDemo?"?demo=1":"");
   $("detail-mode").textContent=isDemo
@@ -79,6 +86,9 @@ async function init(){
     return;
   }
   $("detail-content").hidden=false;
+  if(fromWishlist) $("detail-mode").textContent=isDemo ? "DEMOSPEL · Sparad lokal spelinformation." : "Sparad spelinformation · Uppgifterna kan vara inaktuella; aktuella priser och betyg visas inte.";
+  bindWishlistLink($("detail-wishlist-link"));
+  $("detail-wishlist-control").append(makeWishlistButton(game,isDemo));
   document.title=game.name+" • Game Discovery • hirrdirr";
   buildCover(game);
   $("detail-name").textContent=game.name;
@@ -86,10 +96,10 @@ async function init(){
     ? game.summary : "Ingen spelbeskrivning finns tillgänglig i den hämtade datan ännu.";
   $("detail-date").textContent=fmt.format(new Date(game.date+"T12:00:00Z"));
   $("detail-genres").textContent=Array.isArray(game.genres)&&game.genres.length?game.genres.join(" · "):"Ej angivet";
-  const score=scoreFor(game);
+  const score=fromWishlist?null:scoreFor(game);
   $("detail-score").textContent=score===null?"Ej betygsatt":"★ "+score.toLocaleString("sv-SE",{minimumFractionDigits:1,maximumFractionDigits:1})+"/5";
   $("detail-votes").textContent=score===null?"Saknar minst fem giltiga röster":game.rating_count+" röster hos IGDB · omräknat till 1–5";
-  const price=displayPrice(game,{demo:isDemo});
+  const price=fromWishlist?null:displayPrice(game,{demo:isDemo});
   if(price){
     const priceRow=$("detail-price");
     priceRow.hidden=false;
