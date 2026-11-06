@@ -1,3 +1,4 @@
+import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,gameLink} from "./game-data.mjs";
 /* Release Radar: consumes cached data only; never exposes API credentials. */
 (() => {
@@ -125,6 +126,13 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
       a.rel="noopener noreferrer";
       a.setAttribute("aria-label","Läs om " + game.name + " på IGDB (ny flik)");
       bottom.append(a);
+    }
+    const price=displayPrice(game,{demo});
+    if(price){
+      const priceRow=elt("div","discover-price");
+      priceRow.append(elt("span","",price.text),elt("small","",price.label+" · "+price.shop));
+      if(price.discount) priceRow.append(elt("span","discover-discount","−"+price.discount+"%"));
+      main.append(priceRow);
     }
     main.append(bottom);
     article.append(main);
