@@ -1,3 +1,4 @@
+import {displayPrice} from "./price.mjs";
 import {scoreFor,genresFor,filterGames} from "./explore-core.mjs";
 import {demoCatalog,loadDiscoveryData,gameLink} from "./game-data.mjs";
 const $=id=>document.getElementById(id);
@@ -33,6 +34,9 @@ if(document.querySelector(".explore-page")){
     const score=scoreFor(g);
     const n=e("p","explore-score",score===null?"IGDB · Inget betyg ännu":"★ IGDB "+score.toLocaleString("sv-SE",{minimumFractionDigits:1,maximumFractionDigits:1})+"/5");
     if(score!==null)n.title=g.rating_count+" användarbetyg hos IGDB";info.append(n);
+    const price=displayPrice(g,{demo});
+    if(price) info.append(e("p","explore-price",price.text+" · "+price.label+" · "+price.shop+(price.discount?" · −"+price.discount+"%":"")));
+
     const details=e("a","explore-igdb","Visa speldetaljer ↗");
     details.href=gameLink(g.id,demo);
     info.append(details);
