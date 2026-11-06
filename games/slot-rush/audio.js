@@ -3,7 +3,8 @@
 (()=>{'use strict';
 const KEY='slotrush.audio.v1',clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 window.SlotRushAudio={create(){
- let volume=.35,muted=false,ctx=null,master,motorGain,whineGain,railGain,motor,whine,railFilter,noise;
+ let volume=.35,muted=false,ctx=null,master,motorGain,whineGain,railGain,brushGain,rippleGain;
+ let motor,whine,ripple,motorFilter,railFilter,brushFilter,noise,motorWave;
  let active=false,suspendTimer=0,unlocked=false,failed=false,cueSerial=0;
  const voices=new Set(),supported=Boolean(window.AudioContext||window.webkitAudioContext);
  try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved){if(Number.isFinite(saved.volume))volume=clamp(saved.volume,0,1);muted=saved.muted===true;}}catch(e){}
@@ -23,13 +24,22 @@ window.SlotRushAudio={create(){
   // Deterministic noise avoids consuming the game's random stream (crash spin).
   noise=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const data=noise.getChannelData(0);let seed=7283;
   for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=seed/2147483648-1;}
-  function tone(type){const source=ctx.createOscillator(),gain=ctx.createGain();source.type=type;gain.gain.value=0;source.connect(gain);gain.connect(limiter);source.start();return {source,gain};}
-  ({source:motor,gain:motorGain}=tone('triangle'));
-  ({source:whine,gain:whineGain}=tone('sine'));
+  // Uneven commutator harmonics, gear mesh and brush noise give the small DC
+  // motor a mechanical buzz instead of two clean, musical oscillator tones.
+  motorWave=ctx.createPeriodicWave(new Float32Array(13),new Float32Array([0,1,.26,.52,.16,.32,.10,.20,.07,.12,.04,.08,.025]));
+  motorFilter=ctx.createBiquadFilter();motorFilter.type='lowpass';motorFilter.Q.value=.65;motorFilter.connect(limiter);
+  function tone(type,destination){const source=ctx.createOscillator(),gain=ctx.createGain();source.type=type;gain.gain.value=0;source.connect(gain);gain.connect(destination);source.start();return {source,gain};}
+  ({source:motor,gain:motorGain}=tone('triangle',motorFilter));motor.setPeriodicWave(motorWave);
+  ({source:whine,gain:whineGain}=tone('triangle',motorFilter));
+  // Small torque ripple roughens the buzz; it stops with the motor, including mute.
+  ({source:ripple,gain:rippleGain}=tone('sine',motorGain.gain));
   const rail=ctx.createBufferSource();rail.buffer=noise;rail.loop=true;
   railFilter=ctx.createBiquadFilter();railFilter.type='bandpass';railFilter.frequency.value=1200;railFilter.Q.value=.7;
   railGain=ctx.createGain();railGain.gain.value=0;
   rail.connect(railFilter);railFilter.connect(railGain);railGain.connect(limiter);rail.start();
+  brushFilter=ctx.createBiquadFilter();brushFilter.type='bandpass';brushFilter.Q.value=.65;
+  brushGain=ctx.createGain();brushGain.gain.value=0;
+  rail.connect(brushFilter);brushFilter.connect(brushGain);brushGain.connect(limiter);
   return limiter;
  }
  let bus;
@@ -43,16 +53,22 @@ window.SlotRushAudio={create(){
   for(const voice of voices){try{voice.source.stop();}catch(e){}voice.source.disconnect();voice.gain.disconnect();if(voice.filter)voice.filter.disconnect();}
   voices.clear();
  }
- function silence(){if(!ctx)return;smooth(motorGain.gain,0,.012);smooth(whineGain.gain,0,.012);smooth(railGain.gain,0,.012);}
+ function silence(){if(!ctx)return;smooth(motorGain.gain,0,.012);smooth(whineGain.gain,0,.012);smooth(railGain.gain,0,.012);smooth(brushGain.gain,0,.012);smooth(rippleGain.gain,0,.012);}
  function stop(){cueSerial++;active=false;silence();stopVoices();suspendLater();}
  function begin(){stop();active=true;if(unlocked)unlock();}
  function update(speed,gas,load,stress){
   if(!ctx||ctx.state!=='running'||!active||!audible())return;
   const v=clamp(speed/337,0,1),moving=clamp(speed/22,0,1),grip=clamp((load-.65)/1.1,0,1);
-  smooth(motor.frequency,90+v*440+(gas?28:0),.055);
-  smooth(whine.frequency,260+v*1180+(gas?60:0),.055);
-  smooth(motorGain.gain,moving*(.12+v*.07)*(gas?1:.55));
-  smooth(whineGain.gain,moving*(.025+v*.035)*(gas?1:.5));
+  const rpm=75+v*275+(gas?18:0),power=gas?1:.46;
+  smooth(motor.frequency,rpm,.045);
+  smooth(whine.frequency,rpm*3.17,.045);
+  smooth(motorFilter.frequency,900+v*2100+(gas?250:0),.06);
+  smooth(motorGain.gain,moving*(.19+v*.08)*power);
+  smooth(whineGain.gain,moving*(.025+v*.022)*power);
+  smooth(ripple.frequency,18+v*91,.05);
+  smooth(rippleGain.gain,moving*.032*power);
+  smooth(brushFilter.frequency,1200+v*2200,.06);
+  smooth(brushGain.gain,moving*(.038+v*.045)*power);
   smooth(railFilter.frequency,900+v*900+clamp(stress,0,1)*650,.06);
   smooth(railGain.gain,moving*(.016+grip*.095+clamp(stress,0,1)*.10),.025);
  }
@@ -76,8 +92,16 @@ window.SlotRushAudio={create(){
    ctx.resume().then(()=>{if(serial===cueSerial&&active&&ctx.state==='running')cue(name,value);}).catch(()=>{});return;
   }
   if(name==='count'){note(value===0?1046.5:523.25,value===0?.24:.10,.22);}
-  else if(name==='crash'){silence();note(2400,.20,.52,0,280,'sine',true);note(145,.16,.28,0,48,'triangle');note(1700,.10,.20,.09,400,'sine',true);}
-  else if(name==='respawn'){note(460,.09,.13);note(690,.12,.13,.08);}
+  else if(name==='crash'){
+   silence();const impact=.7+.3*clamp((Number.isFinite(value)?value:240)/337,0,1);
+   // Guide pin snaps free, chassis hits plastic, then skids/tumbles to rest.
+   note(4600,.12,.78*impact,0,800,'sine',true);
+   note(210,.075,.32*impact,0,90,'triangle');
+   note(350+impact*650,.26,.11,0,65,'triangle');
+   note(2200,.38,.24*impact,.025,260,'sine',true);
+   for(let i=0;i<3;i++)note(2800-i*600,.055,.28*impact*Math.pow(.58,i),.10+i*.11,650,'sine',true);
+  }
+  else if(name==='respawn'){note(2100,.055,.22,0,700,'sine',true);note(170,.08,.11,.035,110,'triangle');}
   else if(name==='lap'){note(660,.11,.13);note(880,.14,.13,.10);}
   else if(name==='finish'){
    stop();if(!audible())return;

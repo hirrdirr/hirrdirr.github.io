@@ -257,11 +257,17 @@
   .audio-controls label{font-weight:800;letter-spacing:.06em}.audio-controls input{width:100%;min-width:0;min-height:32px;accent-color:#ffc97e;cursor:pointer}
   .audio-controls input:focus-visible{outline:2px solid #ffc97e;outline-offset:3px;border-radius:4px}
   .audio-controls output{width:4ch;font-variant-numeric:tabular-nums}.audio-controls button{min-width:100px}
+  .stability{--grip:#8bd9b4;display:grid;grid-template-columns:auto minmax(55px,1fr) auto;align-items:center;gap:12px;padding:10px 12px;margin-top:9px;border:1px solid #3b483c;border-radius:8px;background:#1a211d}
+  .stability-title{font-size:10px;letter-spacing:.07em;color:#b7c3b6}.stability-title strong{display:block;font-size:16px;letter-spacing:0;color:var(--grip);font-variant-numeric:tabular-nums}
+  .stability-track{height:9px;background:#101713;border-radius:5px;overflow:hidden}.stability-fill{height:100%;background:var(--grip);transform-origin:left;transform:scaleX(1)}
+  .stability-state{min-width:112px;text-align:right;font-size:11px;font-weight:900;color:var(--grip)}
+  .stability[data-tone="warning"]{--grip:#f0c17f}.stability[data-tone="danger"]{--grip:#ffa492}
+  @media(max-width:650px){.stability{gap:8px;padding:8px}.stability-title{font-size:9px}.stability-title strong{font-size:14px}.stability-state{min-width:90px;font-size:10px}}
 </style>
 </head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.4.0</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
+  <header><div class="brand"><div class="brandmark">SR</div><div><h1>Slot Rush</h1><small>TOY RACER // PROTOTYPE <span id="game-version">v0.4.1</span></small></div></div><div class="chip">TRACK <b id="track-number">01</b> &nbsp;•&nbsp; <span id="track-name">ROOKIE CIRCUIT</span> &nbsp;•&nbsp; <b>2-LANE DESIGN</b><span class="venue-label" id="venue-label">GARAGE</span></div></header>
   <section class="dash" aria-label="Kördata">
     <div class="metric focus"><span>Loppets tid</span><strong id="time">00:00.00</strong></div>
     <div class="metric"><span>Varv</span><strong id="laps">1 / 3</strong></div>
@@ -288,6 +294,11 @@
 </div><button type="button" class="action" id="play">STARTA LOPP</button>
 <button type="button" class="action secondary lane-back" id="lane-back">TILLBAKA</button>
 <br><button type="button" class="action secondary" id="help">SÅ FUNKAR DET</button></div></div>
+  </div>
+  <div class="stability" id="stability" data-tone="stable">
+    <div class="stability-title">STABILITET<strong id="stability-value">100%</strong></div>
+    <div class="stability-track" id="stability-meter" role="meter" aria-label="Stabilitet – marginal till urspårning" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="stability-fill" id="stability-fill"></div></div>
+    <span class="stability-state" id="stability-state">REDO</span>
   </div>
   <div class="under"><div class="instructions">Håll <kbd>SPACE</kbd> / <kbd>W</kbd> / <kbd>MUS</kbd> för gas &nbsp; • &nbsp; Släpp för att bromsa naturligt &nbsp; • &nbsp; <kbd>ESC</kbd> för paus</div><div class="controls"><button class="control" id="pause">Ⅱ PAUS</button><button class="control" id="restart">↻ STARTA OM</button><button type="button" class="control" id="change-map">▤ BYT BANA</button><button class="pedal" id="pedal">● HÅLL FÖR GAS</button></div></div>
   <div class="audio-controls" role="group" aria-label="Ljudinställningar">
@@ -573,7 +584,23 @@ function ghostPose(){
  function curveRatio(){const p=laneAt(distance);return speed*speed*Math.abs(p.k)/LAT_LIMIT;}
 function format(s){const m=Math.floor(s/60),sec=Math.floor(s%60),cs=Math.floor((s*100)%100);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cs).padStart(2,'0')}`}
 const hudNodes=Object.fromEntries(['time','laps','speed-value','crashes','best'].map(id=>[id,$(id)]));
+// Stress is the same accumulated instability that actually causes derailment.
+// Side load alone can recover before the car loses its guide pin.
+function stabilityStatus(){
+ const derailed=state==='crashed'||state==='paused'&&window._resumeState==='crashed';
+ const risk=derailed?1:Math.max(0,Math.min(1,stress/.82));
+ return {percent:Math.round((1-risk)*100),tone:risk>=.5?'danger':risk>=.12?'warning':'stable',
+  label:state==='paused'?'PAUS':derailed?'URSPÅRAD':state==='finished'?'LOPP KLART':state!=='racing'?'REDO':risk>=.5?'SLÄPP GASEN':risk>=.12?'BÖRJAR SLÄPPA':'STABIL'};
+}
+function updateStability(){
+ const s=stabilityStatus(),value=String(s.percent);
+ if($('stability-value').textContent!==value+'%'){
+  $('stability-value').textContent=value+'%';$('stability-meter').setAttribute('aria-valuenow',value);$('stability-fill').style.transform='scaleX('+s.percent/100+')';
+ }
+ if($('stability-state').textContent!==s.label){$('stability-state').textContent=s.label;$('stability').dataset.tone=s.tone;}
+}
 function hud(){
+ updateStability();
  const values={time:format(time),laps:Math.min(3,completed+1)+' / 3','speed-value':String(Math.round(speed*.75)),crashes:String(crashes),best:best?format(best):'--:--'};
  for(const [id,value] of Object.entries(values))if(hudNodes[id].textContent!==value)hudNodes[id].textContent=value;
 }
@@ -636,7 +663,7 @@ function togglePause(){
  }else if(state==='paused'){sound?.begin();state=window._resumeState||'racing';resetFrameClock();hideOverlay();syncGas();}
  refreshSetup();
 }
-function doCrash(p){sound?.cue('crash');$('pit-message').textContent='För hög kurvbelastning. Släpp gasen tidigare här nästa varv.';state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
+function doCrash(p){sound?.cue('crash',speed);$('pit-message').textContent='För hög kurvbelastning. Släpp gasen tidigare här nästa varv.';state='crashed';gas=false;crashes++;crashT=0;const side=p.k>=0?-1:1;crash={x:p.x,y:p.y,theta:p.theta,vx:Math.cos(p.theta)*speed*.67-Math.sin(p.theta)*speed*.55*side,vy:Math.sin(p.theta)*speed*.67+Math.cos(p.theta)*speed*.55*side,spin:(side*.11)+Math.random()*.1};speed=0;stress=0;recordFrame(true);}
 function tick(dt){gameClock+=dt;if(state==='countdown'){countT-=dt;$('countdown').classList.add('visible');const count=countT>.4?Math.ceil(countT-.4):0;$('countdown').textContent=count||'GO!';if(count!==countdownSound){countdownSound=count;sound?.cue('count',count);}if(countT<=0){state='racing';$('countdown').classList.remove('visible');syncGas();}return;}
 $('countdown').classList.remove('visible');if(state!=='racing'&&state!=='crashed')return;time+=dt;
 if(state==='crashed'){crashT+=dt;if(crash){crash.x+=crash.vx*dt;crash.y+=crash.vy*dt;crash.theta+=crash.spin*(dt*60);crash.vx*=Math.pow(.965,dt*60);crash.vy*=Math.pow(.965,dt*60);}if(crashT>1.08){distance=Math.max(0,distance-104);speed=41;crash=null;respawnT=.6;state='racing';sound?.cue('respawn');syncGas();recordFrame(true);}else recordFrame();return;}
@@ -942,19 +969,6 @@ if(state==='racing'||state==='paused'||state==='finished'||state==='countdown'){
 else carShape(p.x,p.y,p.theta,true);
 }
 function drawHUD(){
- // Only measured lateral load, no speculative braking commands.
- // 1.05 is the exact threshold at which crash stress begins building.
- const load=loadDisplay,x=45,y=536,limit=1.05,scale=1.6;
- ctx.textAlign='left';ctx.fillStyle='#b9c3c5';ctx.font='800 11px system-ui';
- ctx.fillText('SIDOBELASTNING',x,y);
- ctx.fillStyle='#101820';ctx.beginPath();ctx.roundRect(x,y+11,130,9,4);ctx.fill();
- ctx.fillStyle=load>limit?'#e76f5e':load>=.85?'#efc575':'#69c6a1';
- ctx.beginPath();ctx.roundRect(x,y+11,130*Math.min(1,Math.max(0,load/scale)),9,4);ctx.fill();
- // Mark the load threshold used by the crash physics.
- ctx.strokeStyle='#d4d4ce';ctx.lineWidth=1.5;ctx.beginPath();
- const notch=x+130*limit/scale;ctx.moveTo(notch,y+9);ctx.lineTo(notch,y+22);ctx.stroke();
- ctx.fillStyle='#d9e0df';ctx.font='800 10px system-ui';
- ctx.fillText(load>limit?'ÖVER GRÄNSEN':load>=.85?'HÖG BELASTNING':'STABIL',x+140,y+19);
  if(state==='crashed'){ctx.save();ctx.textAlign='center';ctx.font='1000 47px system-ui';ctx.fillStyle='#ffbea0';ctx.shadowColor='#2d0f0d';ctx.shadowBlur=19;ctx.fillText('URSPÅRNING!',480,115);ctx.font='800 14px system-ui';ctx.fillStyle='#f8dfd4';ctx.fillText('Bilen återställs automatiskt',480,141);ctx.restore();}
 if(state==='racing'&&respawnT>0){ctx.textAlign='center';ctx.fillStyle='#fff5d4';ctx.font='900 14px system-ui';ctx.fillText('TILLBAKA PÅ SPÅRET',480,105);}
 }
@@ -1039,12 +1053,12 @@ $('restart').addEventListener('click',()=>{
  if(['racing','crashed','paused','countdown','finished'].includes(state))start();
  else showMapSelect();
 });
-$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Mätaren:</b> visar aktuell sidobelastning, inte en uppmaning att bromsa. När gränsen överskrids byggs instabilitet upp, och bilen börjar skaka. Släpp gasen för att återfå greppet innan den spårar ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre sektorer per varv visar var du vinner eller tappar tid mot samma varv i ditt personbästa. Rena varv räknas i resultatet.<br>Ljudet följer bilens fart och kurvbelastning. Justera volymen eller stäng av ljudet med reglaget under banan.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
+$('play').addEventListener('click',confirmRace);$('help').addEventListener('click',()=>showOverlay('KÖRINSTRUKTION','SÅ SPELAR DU',`<b>SPACE, W, mus eller gaspedal:</b> håll nere för att gasa.<br>Släpp inför kurvor. Kurvbelastningen ökar med fart och minskande kurvradie.<br><b>Stabilitet:</b> visar marginalen till urspårning. För hög fart genom en kurva tömmer mätaren. Gult betyder att bilen börjar släppa; vid rött behöver du släppa gasen. När belastningen minskar återhämtas stabiliteten. Vid 0% spårar bilen ur.<br>Välj först bana, därefter SPÅR A eller B och sedan Kör. Under loppet kan du trycka Byt bana utan sidomladdning. Spåren har olika längd och kurvradier.<br>GHOST visar ditt snabbaste sparade trevarvslopp för samma spår, inklusive krascher. Rekord sparas separat per spår.<br>Tre sektorer per varv visar var du vinner eller tappar tid mot samma varv i ditt personbästa. Rena varv räknas i resultatet.<br>Ljudet följer bilens fart och kurvbelastning. Justera volymen eller stäng av ljudet med reglaget under banan.<br>Tre varv. Kortaste totaltiden på ditt spår vinner.`,'JAG ÄR REDO',false));
 refreshSetup();resetSplits();hud();invalidate();
 window.slotRushDebug={
  getAudioState:()=>sound?.status(),
  getState:()=>({version:$('game-version').textContent,state,gas,distance,speed,stress,
-  curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,time,completed,crashes,
+  curveLoad:curveRatio(),curveLoadDisplay:loadDisplay,stability:stabilityStatus(),time,completed,crashes,
   activeMap,mapCount:MAPS.length,activeLane,laneLengths:laneTracks.map(p=>p.total),trackLength:lapLength(),
   best,sectorTimes:sectorTimes.slice(),referenceSplits:referenceSplits.slice(),cleanLaps,storageFailed,recordFrames:runFrames.length,ghostFrames:ghostFrames?.length||0,
   ghostPosition:ghostPose(),laneConfirmed,lapTimes,waypoints:WAYPOINTS}),

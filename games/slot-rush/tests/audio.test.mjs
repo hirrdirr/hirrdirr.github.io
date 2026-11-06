@@ -7,12 +7,13 @@ const source=fs.readFileSync(new URL('../audio.js',import.meta.url),'utf8');
 function audioHarness({storage=new Map(),supported=true,broken=false,blocked=false}={}){
  const contexts=[],timers=new Map();let timer=0;
  class Param{value=0;setTargetAtTime(v){this.value=v;}setValueAtTime(v){this.value=v;}linearRampToValueAtTime(v){this.value=v;}exponentialRampToValueAtTime(v){this.value=v;}}
- class Node{gain=new Param();frequency=new Param();Q=new Param();threshold=new Param();knee=new Param();ratio=new Param();attack=new Param();release=new Param();connect(){return this;}disconnect(){this.disconnected=true;}start(t){this.started=t??0;}stop(t){this.stopped=t??0;}}
+ class Node{gain=new Param();frequency=new Param();Q=new Param();threshold=new Param();knee=new Param();ratio=new Param();attack=new Param();release=new Param();connections=[];connect(target){this.connections.push(target);return target;}setPeriodicWave(wave){this.wave=wave;}disconnect(){this.disconnected=true;}start(t){this.started=t??0;}stop(t){this.stopped=t??0;}}
  class Context{
   currentTime=0;sampleRate=8000;state='suspended';destination=new Node();nodes=[];
   constructor(){if(broken)throw Error('device unavailable');contexts.push(this);}
   node(kind){const n=new Node();n.kind=kind;this.nodes.push(n);return n;}
   createGain(){return this.node('gain');}createOscillator(){return this.node('oscillator');}createBufferSource(){return this.node('noise');}createDynamicsCompressor(){return this.node('compressor');}createBiquadFilter(){return this.node('filter');}
+  createPeriodicWave(real,imag){return {real,imag};}
   createBuffer(ch,n){return {getChannelData:()=>new Float32Array(n)};}
   resume(){if(!blocked)this.state='running';return Promise.resolve();}suspend(){this.state='suspended';return Promise.resolve();}close(){this.state='closed';return Promise.resolve();}
  }
@@ -31,15 +32,17 @@ test('audio is lazy, has a modest default volume, and persists mute/volume indep
 });
 test('motor pitch follows speed/throttle, friction follows load, and updates reuse the graph',()=>{
  const h=audioHarness();h.audio.unlock();h.audio.begin();const c=h.contexts[0],initial=c.nodes.length;
- const motors=c.nodes.filter(n=>n.kind==='oscillator'),gains=c.nodes.filter(n=>n.kind==='gain');
- h.audio.update(60,true,.2,0);const low=motors[0].frequency.value,quiet=gains.at(-1).gain.value;
- h.audio.update(240,true,1.5,.6);assert.ok(motors[0].frequency.value>low);assert.ok(gains.at(-1).gain.value>quiet);
+ const motors=c.nodes.filter(n=>n.kind==='oscillator'),railGain=c.nodes.find(n=>n.kind==='filter'&&n.type==='bandpass').connections[0];
+ assert.ok(motors[0].wave.imag.filter(v=>v>0).length>8,'motor has multiple commutator harmonics');
+ h.audio.update(60,true,.2,0);const low=motors[0].frequency.value,quiet=railGain.gain.value;
+ h.audio.update(240,true,1.5,.6);assert.ok(motors[0].frequency.value>low);assert.ok(railGain.gain.value>quiet);
+ const stressed=railGain.gain.value;h.audio.update(240,true,.2,0);assert.ok(railGain.gain.value<stressed);
  const powered=motors[0].frequency.value;h.audio.update(240,false,1.5,.6);assert.ok(motors[0].frequency.value<powered);
  for(let i=0;i<5000;i++)h.audio.update(220,i%2,1.2,.1);
- assert.equal(c.nodes.length,initial);h.audio.update(0,false,0,0);assert.equal(gains.at(-1).gain.value,0);
+ assert.equal(c.nodes.length,initial);h.audio.update(0,false,0,0);assert.equal(railGain.gain.value,0);
 });
 test('pause/menu/mute cancel effects, suspend the device, and resume cancels pending suspension',()=>{
- const h=audioHarness();h.audio.unlock();h.audio.begin();h.audio.cue('crash');assert.equal(h.audio.status().voices,3);
+ const h=audioHarness();h.audio.unlock();h.audio.begin();h.audio.cue('crash');assert.equal(h.audio.status().voices,7);
  h.audio.stop();assert.equal(h.audio.status().voices,0);h.idle();assert.equal(h.audio.status().context,'suspended');
  h.audio.begin();assert.equal(h.audio.status().context,'running');h.audio.stop();h.audio.begin();h.idle();assert.equal(h.audio.status().context,'running');
  h.audio.cue('finish',true);assert.equal(h.audio.status().voices,4);assert.equal(h.audio.status().active,false);
