@@ -4,6 +4,7 @@
 - Design preview with **fictitious example games**: https://hirrdirr.se/discover/?demo=1
 - The page deliberately has no links from the homepage or main navigation, is marked noindex, and is excluded from the sitemap. This is *unlisted*, not password protected.
 - Phase 1 includes PC/Windows weekly releases, genre filters, week navigation, text search, cover art, ratings where available, responsive UI, and theme support.
+- Release Radar defaults to a **date-grouped timeline**: each day has one Swedish weekday/date heading and every game released on that date appears as a stacked row below it (even when there are 4+). Dates remain chronological; sorting affects the games within each day. The switch also retains the compact grid view; the visitor's choice is saved locally.
 - Limited Explore preview: https://hirrdirr.se/discover/explore/ – uses the Release Radar cache, NOT a full game catalog.
 - Fictional Explore design demo: https://hirrdirr.se/discover/explore/?demo=1 – 13 clearly marked fictional games for search, genre, rating and sorting tests.
 - Private 1–5 star TEST ratings use localStorage in your browser only; they are not public and do not sync across devices.
@@ -36,5 +37,6 @@ node --check assets/discover/explore.js
 node --check assets/discover/game-detail.js
 node --test tests/discover-data.test.mjs
 node --test tests/discover-price.test.mjs
+node --test tests/discover-release-groups.test.mjs
 node --test tests/discover-explore.test.mjs
 ```

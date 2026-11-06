@@ -45,6 +45,10 @@ sitemap: false
         </div>
         <button id="discover-next" type="button" aria-label="Nästa vecka"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
       </div>
+      <div class="discover-view-switch" role="group" aria-label="Visa spelsläpp som lista eller rutnät">
+        <button type="button" id="discover-view-list" aria-pressed="true" title="Spel grupperade efter releasedag"><i data-lucide="list" aria-hidden="true"></i> Datumlista</button>
+        <button type="button" id="discover-view-grid" aria-pressed="false" title="Kompakt rutnätsvy"><i data-lucide="layout-grid" aria-hidden="true"></i> Rutnät</button>
+      </div>
       <div class="discover-filters">
         <label class="discover-field">Sök den här veckan
           <input id="discover-query" type="search" placeholder="Spelnamn..." autocomplete="off">
@@ -67,7 +71,7 @@ sitemap: false
       <p id="discover-status" role="status" aria-live="polite">Läser speldata...</p>
       <span id="discover-count" aria-live="polite"></span>
     </div>
-    <div id="discover-games" class="discover-game-grid" aria-label="Spelsläpp för vald vecka"></div>
+    <div id="discover-games" class="discover-day-timeline" aria-label="Spelsläpp grupperade efter releasedatum"></div>
     <div id="discover-empty" class="discover-empty" hidden>
       <i data-lucide="search-x" aria-hidden="true"></i>
       <h3 id="discover-empty-title">Inga spel hittades</h3>

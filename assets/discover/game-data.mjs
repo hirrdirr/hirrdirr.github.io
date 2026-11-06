@@ -21,6 +21,12 @@ export function makeDemoReleases(now=new Date()){
     games:[
       {id:910001,name:"DEMO: Starbound Trails",date:day(0),genres:["Äventyr","Indie"],rating:82,rating_count:143,slug:"",cover_id:null,
         summary:"En påhittad berättelse om en ensam utforskare som söker vägen mellan avlägsna stjärnsystem."},
+      {id:910008,name:"DEMO: Moonlit Mechanics",date:day(0),genres:["Simulation","Pussel"],rating:86,rating_count:78,slug:"",cover_id:null,
+        summary:"Ett påhittat pusselspel om mekaniska verkstäder och märkliga uppfinningar."},
+      {id:910009,name:"DEMO: Emberline",date:day(0),genres:["Action","Indie"],rating:74,rating_count:42,slug:"",cover_id:null,
+        summary:"Ett fiktivt actionäventyr genom en värld av glödande ruiner."},
+      {id:910010,name:"DEMO: Wanderwood",date:day(0),genres:["Äventyr","RPG"],rating:null,rating_count:0,slug:"",cover_id:null,
+        summary:"Ett påhittat rollspel i en skog där varje väg leder till en ny berättelse."},
       {id:910002,name:"DEMO: Hollow Skies",date:day(2),genres:["Action","RPG"],rating:91,rating_count:65,slug:"",cover_id:null,
         summary:"Ett fiktivt action-RPG där svävande städer och förlorade minnen står i centrum."},
       {id:910003,name:"DEMO: Little Circuit",date:day(4),genres:["Strategi","Simulation"],rating:null,rating_count:0,slug:"",cover_id:null,
