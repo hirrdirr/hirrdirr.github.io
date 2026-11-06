@@ -32,3 +32,17 @@ export function releaseDateLabel(iso){
   return weekday.slice(0,1).toLocaleUpperCase("sv-SE")+weekday.slice(1).replace(/\.$/,"")+
     " "+d.getUTCDate()+"/"+(d.getUTCMonth()+1);
 }
+
+/* Seven side-by-side weekday columns, including days without releases. */
+export function releaseWeekColumns(games, weekStart, options={}) {
+  const monday=typeof weekStart==="string"
+    ? new Date(weekStart+"T00:00:00Z") : new Date(weekStart);
+  if(!Number.isFinite(monday.getTime()) || monday.getUTCDay()!==1)
+    throw new RangeError("Expected a valid Monday for release-week columns");
+  const groups=new Map(groupReleasesByDate(games,options).map(day=>[day.date,day.games]));
+  return Array.from({length:7},(_,index)=>{
+    const day=new Date(monday.getTime()+index*86400000);
+    const date=day.toISOString().slice(0,10);
+    return {date,games:groups.get(date)||[]};
+  });
+}
