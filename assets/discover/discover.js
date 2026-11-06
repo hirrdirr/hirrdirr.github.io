@@ -1,3 +1,4 @@
+import {groupReleasesByDate,releaseDateLabel} from "./release-groups.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,gameLink} from "./game-data.mjs";
 /* Release Radar: consumes cached data only; never exposes API credentials. */
@@ -21,6 +22,9 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
   const emptyText = $("discover-empty-text");
   const status = $("discover-status");
   const count = $("discover-count");
+  const viewList = $("discover-view-list");
+  const viewGrid = $("discover-view-grid");
+  let view = "list";
   const fmtShort = new Intl.DateTimeFormat("sv-SE", { day:"numeric", month:"short", timeZone:"UTC" });
   const forcedDemo = new URLSearchParams(location.search).get("demo") === "1";
   let demo = forcedDemo;
@@ -153,13 +157,36 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const genre = genreSelect.value;
     const filtered = weekGames.filter((g) => (!q || g.name.toLocaleLowerCase("sv-SE").includes(q)) &&
       (!genre || (Array.isArray(g.genres) && g.genres.includes(genre))));
-    if (sortSelect.value==="rating") filtered.sort((a,b)=>(Number.isFinite(b.rating)?b.rating:-1)-(Number.isFinite(a.rating)?a.rating:-1) || a.date.localeCompare(b.date));
-    else if(sortSelect.value==="name") filtered.sort((a,b)=>a.name.localeCompare(b.name,"sv"));
-    else filtered.sort((a,b)=>a.date.localeCompare(b.date) || a.name.localeCompare(b.name,"sv"));
-    results.replaceChildren();
-    const fragment = document.createDocumentFragment();
-    filtered.forEach((g)=>fragment.append(card(g)));
-    results.append(fragment);
+    if (view === "list") {
+      const days=groupReleasesByDate(filtered,{sort:sortSelect.value});
+      const fragment=document.createDocumentFragment();
+      for (const day of days) {
+        const section=elt("section","discover-release-day");
+        const heading=elt("div","discover-release-day-heading");
+        const title=elt("h3","",releaseDateLabel(day.date));
+        title.id="discover-date-"+day.date;
+        heading.append(title);
+        heading.append(elt("span","discover-day-count",day.games.length+" "+(day.games.length===1?"spel":"spel")));
+        section.setAttribute("aria-labelledby",title.id);
+        section.append(heading);
+        const list=elt("div","discover-release-day-list");
+        for (const game of day.games) list.append(card(game));
+        section.append(list);
+        fragment.append(section);
+      }
+      results.className="discover-day-timeline";
+      results.setAttribute("aria-label","Spelsläpp grupperade efter releasedatum");
+      results.replaceChildren(fragment);
+    } else {
+      if (sortSelect.value==="rating") filtered.sort((a,b)=>(Number.isFinite(b.rating)?b.rating:-1)-(Number.isFinite(a.rating)?a.rating:-1) || a.date.localeCompare(b.date));
+      else if(sortSelect.value==="name") filtered.sort((a,b)=>a.name.localeCompare(b.name,"sv"));
+      else filtered.sort((a,b)=>a.date.localeCompare(b.date) || a.name.localeCompare(b.name,"sv"));
+      const fragment=document.createDocumentFragment();
+      for(const game of filtered)fragment.append(card(game));
+      results.className="discover-game-grid";
+      results.setAttribute("aria-label","Spelsläpp i kompakt rutnät");
+      results.replaceChildren(fragment);
+    }
     count.textContent = filtered.length + " av " + weekGames.length + " spel";
     empty.hidden = filtered.length>0;
     if (!data || !data.generated_at) {
@@ -176,14 +203,29 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
     return Math.ceil((((d-yearStart)/dayMS)+1)/7);
   }
+  function setView(next) {
+    view=next;
+    viewList.setAttribute("aria-pressed",String(view==="list"));
+    viewGrid.setAttribute("aria-pressed",String(view==="grid"));
+    try { localStorage.setItem("hirrdirr_discover_release_view_v1",view); } catch {}
+    render();
+  }
   function bind() {
     prev.addEventListener("click",()=>{offset--; render();});
     next.addEventListener("click",()=>{offset++; render();});
     search.addEventListener("input",render);
     genreSelect.addEventListener("change",render);
     sortSelect.addEventListener("change",render);
+    viewList.addEventListener("click",()=>setView("list"));
+    viewGrid.addEventListener("click",()=>setView("grid"));
   }
   async function init() {
+    try {
+      const saved=localStorage.getItem("hirrdirr_discover_release_view_v1");
+      if(saved==="grid")view="grid";
+    }catch{}
+    viewList.setAttribute("aria-pressed",String(view==="list"));
+    viewGrid.setAttribute("aria-pressed",String(view==="grid"));
     bind();
     const result=await loadDiscoveryData({forceDemo:forcedDemo});
     demo=result.demo;
