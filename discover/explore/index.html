@@ -1,0 +1,48 @@
+---
+layout: default
+title: Explore Games • hirrdirr
+section: discover
+discover_view: explore
+unlisted: true
+sitemap: false
+---
+<div class="section-page explore-page">
+  <header class="explore-header">
+    <a id="explore-back" class="explore-back" href="/discover/">← Till Release Radar</a>
+    <p class="section-kicker">HIRRDIRR / GAME DISCOVERY / 02</p>
+    <h1>Explore<span class="pixel-period">.</span></h1>
+    <p class="explore-lead">Ditt nästa favoritspel väntar någonstans.</p>
+    <p>Upptäck PC-spel, sortera och sätt dina egna testbetyg. Katalogen är under utveckling.</p>
+  </header>
+
+  <aside class="explore-notice">
+    <i data-lucide="info" aria-hidden="true"></i>
+    <div><strong id="explore-mode-title">Spelkatalog under utveckling</strong>
+      <p id="explore-mode-description">Den här förhandsversionen visar endast spel ur Release Radar när datan finns.</p></div>
+    <a id="explore-mode-link" href="?demo=1">Prova demo ↗</a>
+  </aside>
+
+  <section aria-labelledby="explore-title" class="explore-catalog">
+    <div class="explore-section-head">
+      <div><p class="section-kicker">PC / SPELARKIV</p><h2 id="explore-title">Hitta ett spel<span class="pixel-period">.</span></h2></div>
+      <p>Betygen du sätter här är privata testbetyg som sparas lokalt i webbläsaren.</p>
+    </div>
+    <div class="explore-filters">
+      <label>Sök spelnamn<input id="explore-search" type="search" placeholder="Vilket spel söker du?" autocomplete="off"></label>
+      <label>Genre<select id="explore-genre"><option value="">Alla genrer</option></select></label>
+      <label>Minsta IGDB-betyg<select id="explore-min"><option value="0">Alla betyg</option><option value="3">3+ av 5</option><option value="4">4+ av 5</option><option value="4.5">4,5+ av 5</option></select></label>
+      <label>Sortera<select id="explore-sort"><option value="rating">Högsta betyg</option><option value="date">Nyaste släpp</option><option value="name">Namn A–Ö</option></select></label>
+    </div>
+    <div class="explore-status-line">
+      <p id="explore-status" role="status" aria-live="polite">Läser speldata...</p>
+      <button type="button" id="explore-reset">Rensa filter</button>
+    </div>
+    <div id="explore-results" class="explore-results" aria-label="Spelresultat"></div>
+    <div id="explore-empty" class="explore-empty" hidden><h3>Inga spel hittades</h3><p id="explore-empty-text">Prova en annan sökning.</p></div>
+    <button type="button" id="explore-more" class="explore-more" hidden>Visa fler spel ↓</button>
+  </section>
+  <footer class="explore-footer">
+    <p>Communitybetyg från <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> visas omräknade till 1–5 och bara med tillräckligt många röster.</p>
+    <p>Olistad förhandsversion. Spelkatalogen är ännu inte komplett. Personliga betyg syns bara för dig på den här enheten, inte för andra besökare.</p>
+  </footer>
+</div>
