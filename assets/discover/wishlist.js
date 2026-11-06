@@ -1,9 +1,11 @@
+import {makeGameCover} from "./game-cover.mjs";
 import {wishlistSort} from "./wishlist-core.mjs";
-import {loadWishlist,watchWishlist,changeWish} from "./wishlist-ui.mjs";
+import {bindWishlistLink,loadWishlist,watchWishlist,changeWish} from "./wishlist-ui.mjs";
 import {gameLink} from "./game-data.mjs";
 const $=id=>document.getElementById(id);
 const root=document.querySelector(".discover-wishlist-page");
 if(root){
+  bindWishlistLink($("discover-wishlist-link"));
   const search=$("wishlist-search"),mode=$("wishlist-mode"),sort=$("wishlist-sort");
   const results=$("wishlist-results"),empty=$("wishlist-empty");
   const fmt=new Intl.DateTimeFormat("sv-SE",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});
@@ -21,13 +23,7 @@ if(root){
     const fragment=document.createDocumentFragment();
     for(const game of filtered){
       const row=element("article","wishlist-game");
-      const art=element("div","wishlist-cover");
-      art.append(element("span","wishlist-art-fallback","◈"));
-      if(game.cover_id){
-        const img=element("img");img.src="https://images.igdb.com/igdb/image/upload/t_cover_big/"+game.cover_id+".jpg";
-        img.alt="Omslag till "+game.name;img.loading="lazy";img.decoding="async";
-        img.addEventListener("error",()=>img.remove(),{once:true});art.append(img);
-      }
+      const art=makeGameCover(game,{demo:game.demo,className:"wishlist-cover"});
       row.append(art);
       const main=element("div","wishlist-main");
       main.append(element("p","wishlist-game-type",game.demo?"DEMOSPEL · FIKTIVT":"PC / WINDOWS"));
@@ -44,7 +40,10 @@ if(root){
         const result=changeWish(game,game.demo);
         if(!result.ok)remove.textContent="Kunde inte uppdatera";
       });
-      actions.append(remove);main.append(actions);row.append(main);fragment.append(row);
+      const open=element("a","section-button section-button-secondary","Visa spelet ↗");
+      open.href=gameLink(game.id,game.demo);
+      open.setAttribute("aria-label","Visa detaljer för "+game.name);
+      actions.append(open,remove);row.append(main,actions);fragment.append(row);
     }
     results.replaceChildren(fragment);
   }

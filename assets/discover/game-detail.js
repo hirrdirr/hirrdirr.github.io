@@ -1,4 +1,5 @@
-import {makeWishlistButton,bindWishlistLink,loadWishlist} from "./wishlist-ui.mjs";
+import {makeGameCover} from "./game-cover.mjs";
+import {setDiscoveryNavigation,makeWishlistButton,bindWishlistLink,loadWishlist} from "./wishlist-ui.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,demoCatalog,gameLink} from "./game-data.mjs";
 import {scoreFor} from "./explore-core.mjs";
@@ -52,18 +53,6 @@ function buildStars(){
     holder.append(b);
   }
 }
-function buildCover(game){
-  const holder=$("detail-cover");
-  holder.append(el("span","detail-placeholder","◈"));
-  if(typeof game.cover_id==="string" && /^[a-zA-Z0-9_]+$/.test(game.cover_id)){
-    const img=el("img");
-    img.alt="Omslag till "+game.name;
-    img.src="https://images.igdb.com/igdb/image/upload/t_cover_big/"+game.cover_id+".jpg";
-    img.decoding="async";
-    img.addEventListener("error",()=>img.remove(),{once:true});
-    holder.append(img);
-  }
-}
 async function init(){
   const result=await loadDiscoveryData({forceDemo:forcedDemo});
   let isDemo=result.demo;
@@ -75,6 +64,7 @@ async function init(){
     const saved=loadWishlist().find(g=>g.id===id && (forcedDemo?g.demo:!g.demo));
     if(saved){game=saved;fromWishlist=true;isDemo=saved.demo;}
   }
+  setDiscoveryNavigation(isDemo);
   $("detail-back").href="/discover/explore/"+(isDemo?"?demo=1":"");
   $("detail-radar").href="/discover/"+(isDemo?"?demo=1":"");
   $("detail-mode").textContent=isDemo
@@ -90,7 +80,9 @@ async function init(){
   bindWishlistLink($("detail-wishlist-link"));
   $("detail-wishlist-control").append(makeWishlistButton(game,isDemo));
   document.title=game.name+" • Game Discovery • hirrdirr";
-  buildCover(game);
+  const cover=makeGameCover(game,{demo:isDemo,className:"detail-cover",eager:true});
+  cover.id="detail-cover";
+  $("detail-cover").replaceWith(cover);
   $("detail-name").textContent=game.name;
   $("detail-summary").textContent=typeof game.summary==="string" && game.summary.trim()
     ? game.summary : "Ingen spelbeskrivning finns tillgänglig i den hämtade datan ännu.";

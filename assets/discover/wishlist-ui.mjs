@@ -77,3 +77,11 @@ export function bindWishlistLink(anchor){
   sync(loadWishlist());
   watchWishlist(sync);
 }
+
+/* Keep an explicitly selected demo when moving between Discovery sections. */
+export function setDiscoveryNavigation(demo){
+  for(const link of document.querySelectorAll('.discovery-nav a')){
+    const path=new URL(link.href,location.href).pathname;
+    if(path==='/discover/' || path==='/discover/explore/')link.href=path+(demo?'?demo=1':'');
+  }
+}

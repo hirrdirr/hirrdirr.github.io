@@ -1,4 +1,5 @@
-import {makeWishlistButton,bindWishlistLink} from "./wishlist-ui.mjs";
+import {makeGameCover} from "./game-cover.mjs";
+import {setDiscoveryNavigation,makeWishlistButton,bindWishlistLink} from "./wishlist-ui.mjs";
 import {releaseWeekColumns,releaseDateLabel} from "./release-groups.mjs";
 import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,gameLink} from "./game-data.mjs";
@@ -95,26 +96,17 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
   }
   function card(game) {
     const article = elt("article","discover-card");
-    const cover = elt("div","discover-cover");
-    const fallback = elt("span","discover-cover-fallback","◈");
-    fallback.setAttribute("aria-hidden","true");
-    cover.append(fallback);
-    if (typeof game.cover_id === "string" && /^[A-Za-z0-9_]+$/.test(game.cover_id)) {
-      const img = document.createElement("img");
-      img.src = "https://images.igdb.com/igdb/image/upload/t_cover_big/" + game.cover_id + ".jpg";
-      img.alt = "Omslag till " + game.name;
-      img.loading="lazy";
-      img.decoding="async";
-      img.addEventListener("error", () => img.remove(), { once:true });
-      cover.append(img);
-    }
+    const cover = makeGameCover(game,{demo,className:"discover-cover"});
     article.append(cover);
     const main = elt("div","discover-card-main");
     const meta = elt("div","discover-card-meta");
     meta.append(elt("span","discover-date",labelDate(game.date)));
     meta.append(elt("span","", "PC / Windows"));
     main.append(meta);
-    main.append(elt("h3","",game.name));
+    const title=elt("h3");
+    const titleLink=elt("a","discovery-game-title",game.name);
+    titleLink.href=gameLink(game.id,demo);
+    title.append(titleLink);main.append(title);
     const genres = Array.isArray(game.genres) ? game.genres.slice(0,3) : [];
     main.append(elt("p","discover-card-genres",genres.length ? genres.join(" · ") : "Genre ej angiven"));
     const bottom = elt("div","discover-card-bottom");
@@ -168,15 +160,26 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
       for (const day of columns) {
         const section=elt("section","discover-release-day");
         const heading=elt("div","discover-release-day-heading");
-        const title=elt("h3","",releaseDateLabel(day.date));
+        const title=elt("h3");
+        const label=releaseDateLabel(day.date);
+        title.append(elt("span","",label.split(" ")[0]));
+        const date=elt("time","",label.split(" ")[1]);
+        date.dateTime=day.date;
+        title.append(date);
+        const today=day.date===iso(swedishToday());
+        section.classList.toggle("is-today",today);
+        if(today)date.setAttribute("aria-current","date");
         title.id="discover-date-"+day.date;
+        title.setAttribute("aria-label",label);
         heading.append(title);
-        heading.append(elt("span","discover-day-count",day.games.length+" spel"));
+        heading.append(elt("span","discover-day-count",(today?"Idag · ":"")+day.games.length+" spel"));
         section.setAttribute("aria-labelledby",title.id);
         section.append(heading);
         const list=elt("div","discover-release-day-list");
         if(!day.games.length){
-          list.append(elt("p","discover-day-empty","Inga spelsläpp"));
+          const quiet=elt("p","discover-day-empty",q||genre?"Inga träffar":"Inga spelsläpp");
+          quiet.append(elt("small","",q||genre?"Prova ett annat filter":"En lugn dag på radarn"));
+          list.append(quiet);
         } else {
           for(const game of day.games)list.append(card(game));
         }
@@ -184,6 +187,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
         fragment.append(section);
       }
       results.className="discover-day-timeline";
+      results.setAttribute("aria-describedby","discover-day-hint");
       results.setAttribute("aria-label","Veckodagar från måndag till söndag med spelsläpp under varje dag");
       results.replaceChildren(fragment);
       dayToolbar.hidden=false;
@@ -195,13 +199,17 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
       const fragment=document.createDocumentFragment();
       for(const game of filtered)fragment.append(card(game));
       results.className="discover-game-grid";
+      results.removeAttribute("aria-describedby");
       results.setAttribute("aria-label","Spelsläpp i kompakt rutnät");
       results.replaceChildren(fragment);
       dayToolbar.hidden=true;
     }
     count.textContent = filtered.length + " av " + weekGames.length + " spel";
     empty.hidden = filtered.length>0;
-    if (!data || !data.generated_at) {
+    if (weekGames.length && (q || genre) && !filtered.length) {
+      emptyTitle.textContent = "Inga spel matchar filtren";
+      emptyText.textContent = "Prova en annan sökning eller välj alla genrer.";
+    } else if (!data || !data.generated_at) {
       emptyTitle.textContent = demo ? "Inga demosläpp den här veckan" : "Speldatan är inte aktiverad ännu";
       emptyText.textContent = demo ? "Välj en annan vecka eller rensa sökningen." : "För att hämta riktiga releaser behöver IGDB-nycklarna konfigureras i GitHub Actions. Testa ?demo=1 för en fiktiv designförhandsvisning.";
     } else {
@@ -224,7 +232,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const column=results.querySelector(".discover-release-day");
     if(!column)return;
     const width=column.getBoundingClientRect().width+14;
-    results.scrollBy({left:width*direction,behavior:"smooth"});
+    results.scrollBy({left:width*direction,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
   }
   function setView(next) {
     view=next;
@@ -259,6 +267,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
     const result=await loadDiscoveryData({forceDemo:forcedDemo});
     demo=result.demo;
     data=result.data;
+    setDiscoveryNavigation(demo);
     bindWishlistLink($("discover-wishlist-link"));
     const banner=$("discover-demo-banner");
     banner.hidden=!demo;

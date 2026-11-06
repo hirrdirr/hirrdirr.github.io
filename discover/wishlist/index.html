@@ -6,16 +6,16 @@ discover_view: wishlist
 unlisted: true
 sitemap: false
 ---
-<div class="section-page discover-wishlist-page">
-  <header class="wishlist-header">
-    <nav class="wishlist-breadcrumb" aria-label="Game Discovery">
-      <a href="/discover/">← Release Radar</a>
-      <a href="/discover/explore/">Explore Games ↗</a>
-    </nav>
+<div class="section-page discovery-shell discover-wishlist-page">
+  {% include discovery_nav.html %}
+  <header class="wishlist-header discovery-masthead">
+    <div class="discovery-header-copy">
     <p class="section-kicker">HIRRDIRR / GAME DISCOVERY / 03</p>
     <h1>Wishlist<span class="pixel-period">.</span></h1>
     <p class="wishlist-lead">Spelen du vill hålla koll på.</p>
     <p>Spara spel från Release Radar eller Explore. De stannar här i din webbläsare även när releaseveckan passerat.</p>
+    </div>
+    <div class="discovery-header-art" aria-hidden="true"></div>
   </header>
   <aside class="wishlist-privacy">
     <i data-lucide="bookmark" aria-hidden="true"></i>

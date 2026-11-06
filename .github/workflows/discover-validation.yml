@@ -14,6 +14,7 @@ on:
       - 'tools/discover_releases.py'
       - 'tests/test_discover_releases.py'
       - '_layouts/default.html'
+      - '_includes/discovery_nav.html'
       - '.github/workflows/discover-releases.yml'
       - '.github/workflows/discover-validation.yml'
   workflow_dispatch:
@@ -33,6 +34,7 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_discover_releases.py'
       - name: Validate frontend syntax
         run: |
+          node --check assets/discover/game-cover.mjs
           node --check assets/discover/discover.js
           node --check assets/discover/explore.js
           node --check assets/discover/game-detail.js

@@ -1,4 +1,5 @@
-import {makeWishlistButton,bindWishlistLink} from "./wishlist-ui.mjs";
+import {makeGameCover} from "./game-cover.mjs";
+import {setDiscoveryNavigation,makeWishlistButton,bindWishlistLink} from "./wishlist-ui.mjs";
 import {displayPrice} from "./price.mjs";
 import {scoreFor,genresFor,filterGames} from "./explore-core.mjs";
 import {demoCatalog,loadDiscoveryData,gameLink} from "./game-data.mjs";
@@ -21,16 +22,12 @@ if(document.querySelector(".explore-page")){
   }
   function card(g){
     const article=e("article","explore-game");
-    const cover=e("div","explore-cover");cover.append(e("span","","◈"));
-    if(typeof g.cover_id==="string"&&/^[a-zA-Z0-9_]+$/.test(g.cover_id)){
-      const img=e("img");img.alt="Omslag till "+g.name;img.loading="lazy";img.decoding="async";
-      img.src="https://images.igdb.com/igdb/image/upload/t_cover_big/"+g.cover_id+".jpg";
-      img.addEventListener("error",()=>img.remove(),{once:true});cover.append(img);
-    }
+    const cover=makeGameCover(g,{demo,className:"explore-cover"});
     article.append(cover);
     const info=e("div","explore-info");
     info.append(e("p","explore-meta",fmt.format(new Date(g.date+"T12:00:00Z"))+" / PC"));
-    info.append(e("h3","",g.name));
+    const title=e("h3"),titleLink=e("a","discovery-game-title",g.name);
+    titleLink.href=gameLink(g.id,demo);title.append(titleLink);info.append(title);
     info.append(e("p","",Array.isArray(g.genres)&&g.genres.length?g.genres.slice(0,3).join(" · "):"Ingen genre angiven"));
     const score=scoreFor(g);
     const n=e("p","explore-score",score===null?"IGDB · Inget betyg ännu":"★ IGDB "+score.toLocaleString("sv-SE",{minimumFractionDigits:1,maximumFractionDigits:1})+"/5");
@@ -40,8 +37,9 @@ if(document.querySelector(".explore-page")){
 
     const details=e("a","explore-igdb","Visa speldetaljer ↗");
     details.href=gameLink(g.id,demo);
-    info.append(details);
-    info.append(makeWishlistButton(g,demo));
+    const actions=e("div","explore-actions");
+    actions.append(makeWishlistButton(g,demo),details);
+    info.append(actions);
     if(!demo && typeof g.slug==="string" && /^[a-z0-9-]+$/.test(g.slug)){
       const link=e("a","explore-igdb","Se spelet på IGDB ↗");
       link.href="https://www.igdb.com/games/"+encodeURIComponent(g.slug);
@@ -92,6 +90,7 @@ if(document.querySelector(".explore-page")){
     bindWishlistLink($("explore-wishlist-link"));
     const result=await loadDiscoveryData({forceDemo:forcedDemo});
     demo=result.demo;
+    setDiscoveryNavigation(demo);
     all=demo?demoCatalog():result.data.games;
     key=demo?"hirrdirr_explore_demo_ratings_v1":"hirrdirr_explore_draft_ratings_v1";
     restoreRatings();

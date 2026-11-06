@@ -6,7 +6,7 @@
 - Phase 1 includes PC/Windows weekly releases, genre filters, week navigation, text search, cover art, ratings where available, responsive UI, and theme support.
 - Release Radar defaults to a **horizontal weekly calendar**: Monday through Sunday flow left-to-right in day columns, including days without releases; all games for each date stack vertically inside their corresponding column. The calendar scrolls sideways when seven days do not fit. Sorting applies within a day only. The optional compact grid view and local view preference remain.
 - Limited Explore preview: https://hirrdirr.se/discover/explore/ – uses the Release Radar cache, NOT a full game catalog.
-- Fictional Explore design demo: https://hirrdirr.se/discover/explore/?demo=1 – 13 clearly marked fictional games for search, genre, rating and sorting tests.
+- Fictional Explore design demo: https://hirrdirr.se/discover/explore/?demo=1 – 23 clearly marked fictional games for search, genre, rating and sorting tests.
 - Private 1–5 star TEST ratings use localStorage in your browser only; they are not public and do not sync across devices.
 - The Discover and Explore pages automatically show **clearly labeled fictional demo games** when real cached IGDB data is missing or invalid. Query `?demo=1` still forces a demo even after IGDB is connected.
 - Each game links to `/discover/game/?id=...` with a matching demo query parameter if needed. Game detail pages show cover, summary, release info and community rating, plus a local review draft with stars/status/text. Drafts are saved only on the current browser/device; this is NOT an authenticated or public reviews system.
@@ -42,3 +42,11 @@ node --test tests/discover-release-groups.test.mjs
 node --test tests/discover-wishlist.test.mjs
 node --test tests/discover-explore.test.mjs
 ```
+
+## Visual presentation
+
+- All four unlisted pages share `assets/discover/ui.css` and the internal `discovery_nav.html` include. This navigation exists only inside Discover; the main site navigation is unchanged.
+- Theme-aware Hirrdirr scenery, consistent controls, visible keyboard focus, quiet information panels, and reduced-motion support preserve the site identity.
+- The week calendar keeps Monday–Sunday horizontally, with stacked games, a current-day accent, and distinct empty-day/filter states. The compact grid and its saved preference remain available.
+- Explore uses two columns of cover-led cards on wide screens; Wishlist uses collection rows; game details separate the cover/metadata/community score from the private review form.
+- `game-cover.mjs` shares real IGDB cover loading and safe missing-cover fallbacks. Demo illustrations reuse existing Hirrdirr scenery, are explicitly marked as demo, and follow dark/light mode. They are never substituted as real game artwork.

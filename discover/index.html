@@ -5,10 +5,11 @@ section: discover
 unlisted: true
 sitemap: false
 ---
-<div class="section-page discover-page">
-  <section class="discover-hero" aria-labelledby="discover-title">
-    <div class="discover-hero-copy">
-      <p class="section-kicker">HIRRDIRR / GAME DISCOVERY / EXPERIMENTAL</p>
+<div class="section-page discovery-shell discover-page">
+  {% include discovery_nav.html %}
+  <section class="discover-hero discovery-masthead" aria-labelledby="discover-title">
+    <div class="discover-hero-copy discovery-header-copy">
+      <p class="section-kicker">PC / NYA VÄRLDAR ATT UPPTÄCKA</p>
       <h1 id="discover-title">Discover<span class="pixel-period">.</span></h1>
       <p class="discover-lead">Your next favorite game is out there.</p>
       <p class="discover-intro">En radar för nya PC-spel. Upptäck vad som släpps den här veckan, bläddra mellan veckor och hitta något nytt att spela.</p>
@@ -17,14 +18,7 @@ sitemap: false
         <span><i data-lucide="calendar-days" aria-hidden="true"></i> Uppdateras dagligen när datakällan är ansluten</span>
       </div>
     </div>
-    <div class="discover-hero-art" aria-hidden="true">
-      <div class="discover-art-orbit discover-art-orbit-one"></div>
-      <div class="discover-art-orbit discover-art-orbit-two"></div>
-      <div class="discover-art-core"><i data-lucide="radar"></i></div>
-      <span class="discover-art-dot discover-art-dot-one"></span>
-      <span class="discover-art-dot discover-art-dot-two"></span>
-      <span class="discover-art-caption">SIGNAL / PC / 001</span>
-    </div>
+    <div class="discovery-header-art" aria-hidden="true"></div>
   </section>
 
   <section class="discover-radar" aria-labelledby="radar-title">
@@ -49,7 +43,6 @@ sitemap: false
         <button type="button" id="discover-view-list" aria-pressed="true" title="Veckodagar horisontellt med spel staplade under varje datum"><i data-lucide="columns-3" aria-hidden="true"></i> Veckovy</button>
         <button type="button" id="discover-view-grid" aria-pressed="false" title="Kompakt rutnätsvy"><i data-lucide="layout-grid" aria-hidden="true"></i> Rutnät</button>
       </div>
-      <a class="discover-wishlist-link" id="discover-wishlist-link" href="/discover/wishlist/">♡ Önskelista</a>
       <div class="discover-filters">
         <label class="discover-field">Sök den här veckan
           <input id="discover-query" type="search" placeholder="Spelnamn..." autocomplete="off">
