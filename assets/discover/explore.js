@@ -1,3 +1,4 @@
+import {makeWishlistButton,bindWishlistLink} from "./wishlist-ui.mjs";
 import {displayPrice} from "./price.mjs";
 import {scoreFor,genresFor,filterGames} from "./explore-core.mjs";
 import {demoCatalog,loadDiscoveryData,gameLink} from "./game-data.mjs";
@@ -40,6 +41,7 @@ if(document.querySelector(".explore-page")){
     const details=e("a","explore-igdb","Visa speldetaljer ↗");
     details.href=gameLink(g.id,demo);
     info.append(details);
+    info.append(makeWishlistButton(g,demo));
     if(!demo && typeof g.slug==="string" && /^[a-z0-9-]+$/.test(g.slug)){
       const link=e("a","explore-igdb","Se spelet på IGDB ↗");
       link.href="https://www.igdb.com/games/"+encodeURIComponent(g.slug);
@@ -87,6 +89,7 @@ if(document.querySelector(".explore-page")){
     genresFor(all).forEach(x=>genre.add(new Option(x,x)));
   }
   async function init(){
+    bindWishlistLink($("explore-wishlist-link"));
     const result=await loadDiscoveryData({forceDemo:forcedDemo});
     demo=result.demo;
     all=demo?demoCatalog():result.data.games;
