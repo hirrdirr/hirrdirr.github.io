@@ -1,0 +1,46 @@
+/* Private unlisted wishlist, coherent with the open-shell Hirrdirr UI. */
+.discover-wishlist-page [hidden] { display:none!important; }
+.wishlist-header { padding:28px 0 clamp(36px,5vw,85px); display:flex; flex-direction:column; align-items:flex-start; gap:18px; }
+.wishlist-breadcrumb { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:10px; }
+.wishlist-breadcrumb a { color:var(--canvas-accent); min-height:40px; display:inline-flex; align-items:center; font-size:13px; }
+.wishlist-lead { font-size:clamp(24px,2.8vw,42px); color:var(--canvas-text); font-weight:650; letter-spacing:-.025em; }
+.wishlist-header > p:last-child { max-width:60ch; font-size:15px; line-height:1.7; }
+.wishlist-privacy { display:flex; gap:16px; padding:20px 24px; border:1px solid var(--canvas-line); border-radius:14px; background:var(--canvas-soft); }
+.wishlist-privacy > svg { color:var(--canvas-accent); width:24px; height:24px; flex:none; }
+.wishlist-privacy strong { font-size:14px; }
+.wishlist-privacy p { color:var(--canvas-muted); font-size:13px; line-height:1.6; margin-top:6px; }
+.wishlist-collection { padding-top:clamp(54px,7vw,105px); }
+.wishlist-collection-heading { display:flex; align-items:end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:25px; }
+.wishlist-collection-heading h2 { font:600 clamp(42px,4.5vw,75px)/1 'Pixelify Sans',monospace; margin-top:10px; }
+.wishlist-collection-heading > p { font-size:13px; color:var(--canvas-muted); }
+.wishlist-controls { display:grid; grid-template-columns:2fr 1fr 1fr; gap:14px; border-block:1px solid var(--canvas-line); padding:20px 0; }
+.wishlist-controls label { display:flex; flex-direction:column; gap:7px; color:var(--canvas-muted); font-size:12px; }
+.wishlist-controls :is(input,select) { min-height:46px; border:1px solid var(--canvas-line); border-radius:9px; background:var(--canvas-soft); color:var(--canvas-text); padding:10px 12px; width:100%; font:14px system-ui,sans-serif; }
+.wishlist-game { display:grid; grid-template-columns:100px minmax(0,1fr); gap:22px; border-bottom:1px solid var(--canvas-line); padding:20px 0; align-items:center; }
+.wishlist-cover { position:relative; display:grid; place-items:center; aspect-ratio:4/5; background:var(--canvas-soft); border:1px solid var(--canvas-line); overflow:hidden; }
+.wishlist-cover img { position:absolute; inset:0; height:100%; width:100%; object-fit:cover; }
+.wishlist-art-fallback { font:600 50px/1 'Pixelify Sans',monospace; color:var(--canvas-accent); opacity:.45; }
+.wishlist-main { display:flex; flex-direction:column; align-items:flex-start; gap:9px; min-width:0; }
+.wishlist-game-type { color:var(--canvas-accent); font-size:11px; font-weight:650; letter-spacing:.12em; }
+.wishlist-main h3 { font-size:clamp(21px,2.3vw,32px); overflow-wrap:anywhere; }
+.wishlist-game-link { color:var(--canvas-text); text-decoration:none; }
+.wishlist-game-link:hover { color:var(--canvas-accent); text-decoration:underline; }
+.wishlist-game-genres,.wishlist-game-date { font-size:13px; color:var(--canvas-muted); }
+.wishlist-remove { border:1px solid var(--canvas-line); border-radius:30px; color:var(--canvas-accent); background:transparent; padding:9px 13px; cursor:pointer; font-size:13px; }
+.wishlist-remove:hover { background:var(--canvas-soft); }
+.wishlist-empty { padding:80px 10px; text-align:center; }
+.wishlist-empty > svg { width:32px; height:32px; color:var(--canvas-accent); margin-bottom:20px; }
+.wishlist-empty h3 { font-size:26px; margin-bottom:13px; }
+.wishlist-empty p { font-size:14px; }
+.wishlist-explore-link { display:inline-block; margin-top:20px; color:var(--canvas-accent); text-decoration:underline; }
+.discover-wishlist-toggle { border:1px solid var(--canvas-line); border-radius:20px; background:transparent; color:var(--canvas-text); cursor:pointer; padding:6px 11px; font:600 12px/1.25 system-ui,sans-serif; white-space:nowrap; }
+.discover-wishlist-toggle:hover { border-color:var(--canvas-accent); background:var(--canvas-soft); }
+.discover-wishlist-toggle[aria-pressed="true"] { color:var(--canvas-accent); border-color:var(--canvas-accent); }
+.discover-wishlist-compact { padding:5px 8px; font-size:11px; }
+.discover-wishlist-link { display:inline-flex; align-items:center; color:var(--canvas-accent)!important; border:1px solid var(--canvas-line); border-radius:30px; padding:10px 15px; min-height:42px; font-size:13px; text-decoration:none!important; white-space:nowrap; }
+.discover-wishlist-link:hover { background:var(--canvas-soft); }
+@media(max-width:650px) {
+ .wishlist-controls { grid-template-columns:1fr; }
+ .wishlist-game { grid-template-columns:76px minmax(0,1fr); gap:14px; }
+ .wishlist-privacy { padding:16px; }
+}
