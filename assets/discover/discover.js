@@ -1,3 +1,4 @@
+import {loadDiscoveryData,gameLink} from "./game-data.mjs";
 /* Release Radar: consumes cached data only; never exposes API credentials. */
 (() => {
   "use strict";
@@ -20,7 +21,8 @@
   const status = $("discover-status");
   const count = $("discover-count");
   const fmtShort = new Intl.DateTimeFormat("sv-SE", { day:"numeric", month:"short", timeZone:"UTC" });
-  const demo = new URLSearchParams(location.search).get("demo") === "1";
+  const forcedDemo = new URLSearchParams(location.search).get("demo") === "1";
+  let demo = forcedDemo;
   let data = null;
   let offset = 0;
 
@@ -110,8 +112,12 @@
     const hasRating = Number.isFinite(game.rating) && game.rating>=0 && game.rating<=100 && game.rating_count>=5;
     const score = hasRating ? (game.rating/20).toLocaleString("sv-SE",{minimumFractionDigits:1,maximumFractionDigits:1}) : null;
     const rating = elt("span",hasRating ? "discover-rating":"discover-unrated", hasRating ? "★ " + score + "/5" : "Inget betyg ännu");
-    if (hasRating) rating.setAttribute("aria-label","IGDB-betyg " + score + " av 5");
+    if (hasRating) rating.setAttribute("aria-label",(demo?"Fiktivt demobetyg ":"IGDB-betyg ") + score + " av 5");
     bottom.append(rating);
+    const details = elt("a","discover-card-detail","Speldetaljer ↗");
+    details.href=gameLink(game.id,demo);
+    details.setAttribute("aria-label","Visa detaljer för "+game.name);
+    bottom.append(details);
     if (!demo && typeof game.slug === "string" && /^[a-z0-9-]+$/.test(game.slug)) {
       const a = elt("a","discover-card-link","Se på IGDB ↗");
       a.href = "https://www.igdb.com/games/" + encodeURIComponent(game.slug);
@@ -171,30 +177,23 @@
   }
   async function init() {
     bind();
-    if (demo) {
-      data=sample();
-      status.textContent="DEMOLÄGE – alla spel och betyg på sidan är fiktiva.";
-      render();
-      return;
-    }
-    try {
-      const response=await fetch("/assets/data/discover/releases.json",{cache:"no-cache"});
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      const json=await response.json();
-      if (!json || !Array.isArray(json.games)) throw new Error("Ogiltigt dataformat");
-      data={...json,games:json.games.filter(validGame)};
-      if (json.generated_at) {
-        const stamp=new Date(json.generated_at);
-        const stale = !Number.isFinite(stamp.getTime()) || Date.now()-stamp.getTime()>3*dayMS;
-        status.textContent=stale ? "Speldata kan vara inaktuell – senaste hämtning: " + stamp.toLocaleDateString("sv-SE") :
-          "Speldata från IGDB · uppdaterad " + stamp.toLocaleDateString("sv-SE");
-      } else {
-        status.textContent="IGDB-anslutning väntar på konfiguration.";
-      }
-    } catch (err) {
-      data={games:[],generated_at:null,window_start:null,window_end:null};
-      status.textContent="Speldata kunde inte hämtas just nu.";
-      console.warn("Game Discovery:",err);
+    const result=await loadDiscoveryData({forceDemo:forcedDemo});
+    demo=result.demo;
+    data=result.data;
+    const banner=$("discover-demo-banner");
+    banner.hidden=!demo;
+    $("discover-explore-link").href="/discover/explore/"+(demo?"?demo=1":"");
+    if(demo){
+      status.textContent=result.reason==="forced"
+        ? "DEMOLÄGE (manuellt valt) – fiktiva spelsläpp och betyg."
+        : "DEMOLÄGE (automatiskt) – fiktiva spelsläpp tills IGDB är anslutet.";
+      $("discover-section-description").textContent="Prova veckonavigering, genrer och spelens detaljvyer med tydligt märkta fiktiva exempel.";
+    } else {
+      const stamp=new Date(data.generated_at);
+      const stale=!Number.isFinite(stamp.getTime())||Date.now()-stamp.getTime()>3*dayMS;
+      status.textContent=stale
+        ? "IGDB-data kan vara inaktuell – hämtad "+(Number.isFinite(stamp.getTime())?stamp.toLocaleDateString("sv-SE"):"okänt datum")
+        : "Speldata från IGDB · hämtad "+stamp.toLocaleDateString("sv-SE");
     }
     render();
   }
