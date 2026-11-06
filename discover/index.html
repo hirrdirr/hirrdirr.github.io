@@ -45,8 +45,8 @@ sitemap: false
         </div>
         <button id="discover-next" type="button" aria-label="Nästa vecka"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
       </div>
-      <div class="discover-view-switch" role="group" aria-label="Visa spelsläpp som lista eller rutnät">
-        <button type="button" id="discover-view-list" aria-pressed="true" title="Spel grupperade efter releasedag"><i data-lucide="list" aria-hidden="true"></i> Datumlista</button>
+      <div class="discover-view-switch" role="group" aria-label="Visa spelsläpp som veckokolumner eller rutnät">
+        <button type="button" id="discover-view-list" aria-pressed="true" title="Veckodagar horisontellt med spel staplade under varje datum"><i data-lucide="columns-3" aria-hidden="true"></i> Veckovy</button>
         <button type="button" id="discover-view-grid" aria-pressed="false" title="Kompakt rutnätsvy"><i data-lucide="layout-grid" aria-hidden="true"></i> Rutnät</button>
       </div>
       <div class="discover-filters">
@@ -71,7 +71,14 @@ sitemap: false
       <p id="discover-status" role="status" aria-live="polite">Läser speldata...</p>
       <span id="discover-count" aria-live="polite"></span>
     </div>
-    <div id="discover-games" class="discover-day-timeline" aria-label="Spelsläpp grupperade efter releasedatum"></div>
+    <div id="discover-day-toolbar" class="discover-day-toolbar">
+      <p id="discover-day-hint">Veckans dagar visas från vänster till höger. Bläddra i sidled för att se hela veckan.</p>
+      <div class="discover-day-arrows" aria-label="Bläddra mellan veckodagar">
+        <button type="button" id="discover-days-left" aria-label="Bläddra till föregående dag" title="Föregående dag"><i data-lucide="arrow-left" aria-hidden="true"></i></button>
+        <button type="button" id="discover-days-right" aria-label="Bläddra till nästa dag" title="Nästa dag"><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div id="discover-games" class="discover-day-timeline" role="region" tabindex="0" aria-describedby="discover-day-hint" aria-label="Veckodagar med spelsläpp i horisontella kolumner"></div>
     <div id="discover-empty" class="discover-empty" hidden>
       <i data-lucide="search-x" aria-hidden="true"></i>
       <h3 id="discover-empty-title">Inga spel hittades</h3>
