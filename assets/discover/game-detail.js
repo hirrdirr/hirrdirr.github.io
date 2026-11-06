@@ -69,8 +69,9 @@ async function init(){
   const isDemo=result.demo;
   const games=isDemo?demoCatalog():result.data.games;
   let game=games.find(g=>g.id===id);
+  let fromWishlist=false;
   // A bookmarked game remains viewable after its release leaves the rolling cache.
-  if(!game)game=loadWishlist().find(g=>g.id===id&&g.demo===isDemo)||null;
+  if(!game){game=loadWishlist().find(g=>g.id===id&&g.demo===isDemo)||null;fromWishlist=Boolean(game);}
   $("detail-back").href="/discover/explore/"+(isDemo?"?demo=1":"");
   $("detail-radar").href="/discover/"+(isDemo?"?demo=1":"");
   $("detail-mode").textContent=isDemo
@@ -82,6 +83,7 @@ async function init(){
     return;
   }
   $("detail-content").hidden=false;
+  if(fromWishlist) $("detail-mode").textContent=isDemo ? "DEMOSPEL · Sparad lokal spelinformation." : "Sparad spelinformation · Uppgifterna kan vara inaktuella; aktuella priser och betyg visas inte.";
   bindWishlistLink($("detail-wishlist-link"));
   $("detail-wishlist-control").append(makeWishlistButton(game,isDemo));
   document.title=game.name+" • Game Discovery • hirrdirr";
@@ -91,10 +93,10 @@ async function init(){
     ? game.summary : "Ingen spelbeskrivning finns tillgänglig i den hämtade datan ännu.";
   $("detail-date").textContent=fmt.format(new Date(game.date+"T12:00:00Z"));
   $("detail-genres").textContent=Array.isArray(game.genres)&&game.genres.length?game.genres.join(" · "):"Ej angivet";
-  const score=scoreFor(game);
+  const score=fromWishlist?null:scoreFor(game);
   $("detail-score").textContent=score===null?"Ej betygsatt":"★ "+score.toLocaleString("sv-SE",{minimumFractionDigits:1,maximumFractionDigits:1})+"/5";
   $("detail-votes").textContent=score===null?"Saknar minst fem giltiga röster":game.rating_count+" röster hos IGDB · omräknat till 1–5";
-  const price=displayPrice(game,{demo:isDemo});
+  const price=fromWishlist?null:displayPrice(game,{demo:isDemo});
   if(price){
     const priceRow=$("detail-price");
     priceRow.hidden=false;
