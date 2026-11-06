@@ -6,7 +6,7 @@ import {loadGame,select,drive} from './harness.mjs';
 const source=fs.readFileSync(new URL('../audio.js',import.meta.url),'utf8');
 function audioHarness({storage=new Map(),supported=true,broken=false,blocked=false}={}){
  const contexts=[],timers=new Map();let timer=0;
- class Param{value=0;setTargetAtTime(v){this.value=v;}setValueAtTime(v){this.value=v;}linearRampToValueAtTime(v){this.value=v;}exponentialRampToValueAtTime(v){this.value=v;}}
+ class Param{value=0;cancelScheduledValues(t){this.cancelled=t;}setTargetAtTime(v){this.value=v;}setValueAtTime(v){this.value=v;}linearRampToValueAtTime(v){this.value=v;}exponentialRampToValueAtTime(v){this.value=v;}}
  class Node{gain=new Param();frequency=new Param();Q=new Param();threshold=new Param();knee=new Param();ratio=new Param();attack=new Param();release=new Param();connections=[];connect(target){this.connections.push(target);return target;}setPeriodicWave(wave){this.wave=wave;}disconnect(){this.disconnected=true;}start(t){this.started=t??0;}stop(t){this.stopped=t??0;}}
  class Context{
   currentTime=0;sampleRate=8000;state='suspended';destination=new Node();nodes=[];
@@ -20,7 +20,7 @@ function audioHarness({storage=new Map(),supported=true,broken=false,blocked=fal
  const sandbox={console,Math,Set,Float32Array,localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},setTimeout:f=>{timers.set(++timer,f);return timer;},clearTimeout:id=>timers.delete(id)};
  sandbox.window=sandbox;if(supported)sandbox.AudioContext=Context;
  vm.runInNewContext(source,sandbox);const audio=sandbox.SlotRushAudio.create();
- return {audio,contexts,timers,storage,idle(){const q=[...timers.values()];timers.clear();q.forEach(f=>f());}};
+ return {audio,contexts,timers,storage,advance(time){const c=contexts[0];c.currentTime=time;for(const n of c.nodes)if(n.onended&&!n.disconnected&&n.stopped<=time)n.onended();},idle(){const q=[...timers.values()];timers.clear();q.forEach(f=>f());}};
 }
 test('audio is lazy, has a modest default volume, and persists mute/volume independently of records',()=>{
  const h=audioHarness();assert.equal(h.contexts.length,0);assert.equal(h.audio.settings().volume,.35);
@@ -35,11 +35,45 @@ test('motor pitch follows speed/throttle, friction follows load, and updates reu
  const motors=c.nodes.filter(n=>n.kind==='oscillator'),railGain=c.nodes.find(n=>n.kind==='filter'&&n.type==='bandpass').connections[0];
  assert.ok(motors[0].wave.imag.filter(v=>v>0).length>8,'motor has multiple commutator harmonics');
  h.audio.update(60,true,.2,0);const low=motors[0].frequency.value,quiet=railGain.gain.value;
- h.audio.update(240,true,1.5,.6);assert.ok(motors[0].frequency.value>low);assert.ok(railGain.gain.value>quiet);
+ h.audio.update(240,true,1.5,.1);assert.ok(motors[0].frequency.value>low);assert.ok(railGain.gain.value>quiet);
  const stressed=railGain.gain.value;h.audio.update(240,true,.2,0);assert.ok(railGain.gain.value<stressed);
- const powered=motors[0].frequency.value;h.audio.update(240,false,1.5,.6);assert.ok(motors[0].frequency.value<powered);
+ const powered=motors[0].frequency.value;h.audio.update(240,false,1.5,.1);assert.ok(motors[0].frequency.value<powered);
  for(let i=0;i<5000;i++)h.audio.update(220,i%2,1.2,.1);
  assert.equal(c.nodes.length,initial);h.audio.update(0,false,0,0);assert.equal(railGain.gain.value,0);
+});
+test('stability pulses follow accumulated stress, accelerate with risk, and never catch up in a burst',()=>{
+ const h=audioHarness();h.audio.unlock();h.audio.begin();const c=h.contexts[0],initial=c.nodes.length;
+ const update=risk=>h.audio.update(240,true,2,risk*.82),pulses=()=>c.nodes.filter(n=>n.kind==='oscillator'&&n.onended);
+ update(0);update(.17);assert.equal(c.nodes.length,initial,'lateral load alone does not trigger the warning');
+ update(.2);assert.equal(pulses().length,1);assert.equal(pulses()[0].started,0);
+ h.advance(.15);update(.2);assert.equal(pulses().length,1);
+ update(.9);assert.equal(pulses().length,2,'rising risk shortens the interval immediately');
+ h.advance(.31);update(.9);assert.equal(pulses().length,3);
+ h.advance(5);update(.9);assert.equal(pulses().length,4,'only one pulse after a long frame');
+ for(let i=0;i<100;i++)update(.9);assert.equal(pulses().length,4,'no per-frame allocation');
+ h.advance(5.16);update(.1);assert.equal(pulses().length,4,'hysteresis keeps the longer low-risk cadence');
+ h.advance(5.35);update(.1);assert.equal(pulses().length,5);
+ update(.07);assert.equal(pulses().at(-1).connections[0].gain.cancelled,5.35);
+ h.advance(5.38);assert.equal(h.audio.status().voices,0,'recovery releases the current pulse');
+ update(.1);assert.equal(pulses().length,5,'does not restart until risk crosses the upper threshold');
+ update(.2);assert.equal(pulses().length,6,'a fresh slide warns immediately');
+});
+test('stability warnings stop on crash, pause, mute, restart and zero speed without cutting unrelated cues',()=>{
+ for(const action of ['crash','pause','mute','zero','restart']){
+  const h=audioHarness();h.audio.unlock();h.audio.begin();h.audio.update(250,true,2,.7);
+  const pulse=h.contexts[0].nodes.find(n=>n.onended);assert.ok(pulse);
+  if(action==='crash')h.audio.cue('crash',250);
+  if(action==='pause')h.audio.stop();
+  if(action==='mute')h.audio.setMuted(true);
+  if(action==='zero')h.audio.update(0,false,0,0);
+  if(action==='restart')h.audio.begin();
+  assert.ok(pulse.stopped<=.02,action);h.advance(.03);assert.ok(pulse.disconnected,action);
+  if(action==='pause'||action==='mute')h.audio.update(250,true,2,.7);
+  assert.equal(h.audio.status().voices,action==='crash'?7:0,action);
+ }
+ const h=audioHarness();h.audio.unlock();h.audio.begin();h.audio.cue('lap');h.audio.update(250,true,2,.7);h.audio.update(250,false,0,0);h.advance(.03);
+ assert.equal(h.audio.status().voices,2,'recovering leaves both lap notes intact');
+ for(let i=1;i<=3600;i++){h.advance(i/60);h.audio.update(250,true,2,.7);assert.ok(h.audio.status().voices<=3,'live voices stay bounded during a minute of warnings');}
 });
 test('pause/menu/mute cancel effects, suspend the device, and resume cancels pending suspension',()=>{
  const h=audioHarness();h.audio.unlock();h.audio.begin();h.audio.cue('crash');assert.equal(h.audio.status().voices,7);

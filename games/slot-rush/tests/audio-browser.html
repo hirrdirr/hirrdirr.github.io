@@ -11,21 +11,29 @@ setInterval(()=>{try{const w=frame.contentWindow,s=w.slotRushDebug;document.quer
 document.querySelector('#render').onclick=async()=>{
  results.textContent='Rendering…';const Audio=window.AudioContext,storage=localStorage.getItem('slotrush.audio.v1'),rows=[];
  try{
-  for(const name of ['slow','fast','coasting','loaded','count','crash','crash-fast','respawn','lap','finish','record','muted','paused']){
+  for(const name of ['slow','fast','coasting','loaded','count','crash','crash-fast','respawn','lap','finish','record','muted','paused','warning','warning-danger','warning-recovery','warning-muted','warning-paused']){
    const context=new OfflineAudioContext(1,48000,24000);
-   window.AudioContext=class{constructor(){return new Proxy(context,{get(target,key){if(key==='state')return 'running';if(key==='resume'||key==='suspend'||key==='close')return ()=>Promise.resolve();const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;}});}};
+   let oscillators=0;const pulseTimes=[],warning=name.startsWith('warning');
+   window.AudioContext=class{constructor(){return new Proxy(context,{get(target,key){if(key==='state')return 'running';if(key==='resume'||key==='suspend'||key==='close')return ()=>Promise.resolve();if(key==='createOscillator')return ()=>{if(++oscillators>3)pulseTimes.push(+target.currentTime.toFixed(3));return target.createOscillator();};const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;}});}};
    const sound=SlotRushAudio.create();sound.setVolume(1);sound.unlock();sound.begin();
-   if(['slow','fast','coasting','loaded','muted','paused'].includes(name))sound.update(name==='slow'?60:280,name!=='coasting',name==='loaded'?1.6:.2,name==='loaded'?.7:0);
+   if(warning){
+    const update=()=>sound.update(280,true,.2,(name==='warning'?.2:name==='warning-recovery'&&context.currentTime>=.35?0:.9)*.82);
+    update();
+    // Real audio-clock updates, including recovery while a pulse is sounding.
+    for(let step=1;step<120;step++)context.suspend(step/60).then(()=>{update();context.resume();});
+   }
+   else if(['slow','fast','coasting','loaded','muted','paused'].includes(name))sound.update(name==='slow'?60:280,name!=='coasting',name==='loaded'?1.6:.2,name==='loaded'?.7:0);
    else if(name==='crash'||name==='crash-fast')sound.cue('crash',name==='crash'?100:337);
    else if(name==='count')sound.cue('count',0);
    else sound.cue(name==='record'?'finish':name,name==='record');
-   if(name==='muted')sound.setMuted(true);if(name==='paused')sound.stop();
+   if(name==='muted'||name==='warning-muted')sound.setMuted(true);if(name==='paused'||name==='warning-paused')sound.stop();
    const buffer=await context.startRendering(),data=buffer.getChannelData(0);
    let squares=0,peak=0,tail=0,crossings=0;
    for(let i=0;i<data.length;i++){squares+=data[i]*data[i];peak=Math.max(peak,Math.abs(data[i]));if(i>36000)tail=Math.max(tail,Math.abs(data[i]));if(i>12000&&i<24000&&data[i]>=0&&data[i-1]<0)crossings++;}
-   const rms=Math.sqrt(squares/data.length),silent=['muted','paused'].includes(name),continuous=['slow','fast','coasting','loaded'].includes(name);
-   const pass=Number.isFinite(rms)&&peak<.99&&(silent?rms<.00001:rms>.0001)&&(continuous||tail<.0001);
-   rows.push({name,pass,rms:+rms.toFixed(5),peak:+peak.toFixed(4),tail:+tail.toFixed(6),crossings});sound.stop();
+   const rms=Math.sqrt(squares/data.length),silent=['muted','paused','warning-muted','warning-paused'].includes(name),continuous=!silent&&(warning||['slow','fast','coasting','loaded'].includes(name));
+   const warningPass=!warning||(name==='warning'?pulseTimes.length>=6:name==='warning-danger'?pulseTimes.length>=12:name==='warning-recovery'?pulseTimes.length>=2&&pulseTimes.every(t=>t<.35):pulseTimes.length===1);
+   const pass=warningPass&&Number.isFinite(rms)&&peak<.99&&(silent?rms<.00001:rms>.0001)&&(continuous||tail<.0001);
+   rows.push({name,pass,rms:+rms.toFixed(5),peak:+peak.toFixed(4),tail:+tail.toFixed(6),crossings,...(warning?{pulseTimes}:{})});sound.stop();
   }
   const slow=rows.find(r=>r.name==='slow'),fast=rows.find(r=>r.name==='fast');
   results.textContent=JSON.stringify({passed:rows.every(r=>r.pass)&&fast.crossings>slow.crossings,rows},null,2);

@@ -6,6 +6,7 @@ window.SlotRushAudio={create(){
  let volume=.35,muted=false,ctx=null,master,motorGain,whineGain,railGain,brushGain,rippleGain;
  let motor,whine,ripple,motorFilter,railFilter,brushFilter,noise,motorWave;
  let active=false,suspendTimer=0,unlocked=false,failed=false,cueSerial=0;
+ let warningActive=false,warningVoice=null,lastWarning=-Infinity;
  const voices=new Set(),supported=Boolean(window.AudioContext||window.webkitAudioContext);
  try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved){if(Number.isFinite(saved.volume))volume=clamp(saved.volume,0,1);muted=saved.muted===true;}}catch(e){}
  const audible=()=>supported&&!failed&&!muted&&volume>0;
@@ -53,7 +54,15 @@ window.SlotRushAudio={create(){
   for(const voice of voices){try{voice.source.stop();}catch(e){}voice.source.disconnect();voice.gain.disconnect();if(voice.filter)voice.filter.disconnect();}
   voices.clear();
  }
- function silence(){if(!ctx)return;smooth(motorGain.gain,0,.012);smooth(whineGain.gain,0,.012);smooth(railGain.gain,0,.012);smooth(brushGain.gain,0,.012);smooth(rippleGain.gain,0,.012);}
+ function resetWarning(){
+  warningActive=false;lastWarning=-Infinity;
+  if(warningVoice){
+   // Release the current pulse promptly without a hard cut or cancelling lap cues.
+   warningVoice.gain.gain.cancelScheduledValues(ctx.currentTime);
+   smooth(warningVoice.gain.gain,0,.004);warningVoice.source.stop(ctx.currentTime+.02);warningVoice=null;
+  }
+ }
+ function silence(){resetWarning();if(!ctx)return;smooth(motorGain.gain,0,.012);smooth(whineGain.gain,0,.012);smooth(railGain.gain,0,.012);smooth(brushGain.gain,0,.012);smooth(rippleGain.gain,0,.012);}
  function stop(){cueSerial++;active=false;silence();stopVoices();suspendLater();}
  function begin(){stop();active=true;if(unlocked)unlock();}
  function update(speed,gas,load,stress){
@@ -71,6 +80,16 @@ window.SlotRushAudio={create(){
   smooth(brushGain.gain,moving*(.038+v*.045)*power);
   smooth(railFilter.frequency,900+v*900+clamp(stress,0,1)*650,.06);
   smooth(railGain.gain,moving*(.016+grip*.095+clamp(stress,0,1)*.10),.025);
+  // The same accumulated stress that derails the car at .82 drives the warning.
+  // Hysteresis avoids chatter near its threshold. Schedule only the current pulse:
+  // a stalled frame must never queue a burst of missed warnings.
+  const risk=clamp(stress/.82,0,1);
+  if(speed<=0||risk<.08){resetWarning();return;}
+  if(!warningActive&&risk<.18)return;
+  warningActive=true;
+  if(ctx.currentTime-lastWarning<.36-.24*risk)return;
+  lastWarning=ctx.currentTime;
+  warningVoice=note(1600+risk*400,.075,.18+risk*.05,0,1350+risk*400,'triangle');
  }
  // Short voices are scheduled against the audio clock; never timers per note.
  function note(freq,duration,level,delay=0,end=freq,type='sine',noiseVoice=false){
@@ -81,8 +100,9 @@ window.SlotRushAudio={create(){
   else{source.type=type;source.frequency.setValueAtTime(freq,t);source.frequency.exponentialRampToValueAtTime(end,t+duration);source.connect(gain);}
   gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(level,t+.006);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);gain.gain.setValueAtTime(0,t+duration+.01);gain.connect(bus);
   const voice={source,gain,filter};voices.add(voice);
-  source.onended=()=>{source.disconnect();gain.disconnect();if(filter)filter.disconnect();voices.delete(voice);};
+  source.onended=()=>{source.disconnect();gain.disconnect();if(filter)filter.disconnect();voices.delete(voice);if(warningVoice===voice)warningVoice=null;};
   source.start(t);source.stop(t+duration+.015);
+  return voice;
  }
  function cue(name,value){
   const serial=++cueSerial;
