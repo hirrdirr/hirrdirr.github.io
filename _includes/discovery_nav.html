@@ -1,0 +1,8 @@
+<nav class="discovery-nav" aria-label="Game Discovery">
+  <span class="discovery-nav-brand">GAME DISCOVERY <span class="discovery-preview">PREVIEW</span></span>
+  <div class="discovery-nav-links">
+    <a href="/discover/"{% if page.discover_view == 'explore' %} id="explore-back"{% endif %}{% unless page.discover_view %} aria-current="page"{% endunless %}><i data-lucide="calendar-days" aria-hidden="true"></i>Release Radar</a>
+    <a href="/discover/explore/"{% if page.discover_view == 'explore' %} aria-current="page"{% endif %}><i data-lucide="compass" aria-hidden="true"></i>Explore</a>
+    <a href="/discover/wishlist/" id="{% if page.discover_view == 'explore' %}explore{% elsif page.discover_view == 'game' %}detail{% else %}discover{% endif %}-wishlist-link"{% if page.discover_view == 'wishlist' %} aria-current="page"{% endif %}>♡ Önskelista</a>
+  </div>
+</nav>
