@@ -1,0 +1,50 @@
+---
+layout: default
+title: Önskelista • Game Discovery • hirrdirr
+section: discover
+discover_view: wishlist
+unlisted: true
+sitemap: false
+---
+<div class="section-page discover-wishlist-page">
+  <header class="wishlist-header">
+    <nav class="wishlist-breadcrumb" aria-label="Game Discovery">
+      <a href="/discover/">← Release Radar</a>
+      <a href="/discover/explore/">Explore Games ↗</a>
+    </nav>
+    <p class="section-kicker">HIRRDIRR / GAME DISCOVERY / 03</p>
+    <h1>Wishlist<span class="pixel-period">.</span></h1>
+    <p class="wishlist-lead">Spelen du vill hålla koll på.</p>
+    <p>Spara spel från Release Radar eller Explore. De stannar här i din webbläsare även när releaseveckan passerat.</p>
+  </header>
+  <aside class="wishlist-privacy">
+    <i data-lucide="bookmark" aria-hidden="true"></i>
+    <div><strong>Privat förhandsversion</strong><p>Önskelistan ligger enbart i den här webbläsaren och synkroniseras inte. Sparade speluppgifter kan bli inaktuella tills spelkatalogen och prisbevakningen är anslutna.</p></div>
+  </aside>
+  <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
+    <div class="wishlist-collection-heading">
+      <div><p class="section-kicker">DIN SAMLING</p><h2 id="wishlist-collection-title">Sparade spel<span class="pixel-period">.</span></h2></div>
+      <p id="wishlist-total" role="status" aria-live="polite">Läser önskelistan...</p>
+    </div>
+    <div class="wishlist-controls">
+      <label>Sök i önskelistan<input id="wishlist-search" type="search" placeholder="Sök spelnamn..." autocomplete="off"></label>
+      <label>Visa<select id="wishlist-mode">
+        <option value="all">Alla spel</option>
+        <option value="real">Riktiga spel</option>
+        <option value="demo">Demospel</option>
+      </select></label>
+      <label>Sortera<select id="wishlist-sort">
+        <option value="added">Senast sparade</option>
+        <option value="release">Releasedatum (nyast)</option>
+        <option value="name">Namn A–Ö</option>
+      </select></label>
+    </div>
+    <div id="wishlist-results" class="wishlist-results" aria-label="Dina sparade spel"></div>
+    <div id="wishlist-empty" class="wishlist-empty" hidden>
+      <i data-lucide="heart" aria-hidden="true"></i>
+      <h3 id="wishlist-empty-title">Din önskelista är tom</h3>
+      <p id="wishlist-empty-description">Gå till Release Radar eller Explore och spara spel som verkar intressanta.</p>
+      <a href="/discover/explore/" class="wishlist-explore-link">Utforska spel ↗</a>
+    </div>
+  </section>
+</div>
