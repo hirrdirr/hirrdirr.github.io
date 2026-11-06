@@ -11,6 +11,13 @@
 - Each game links to `/discover/game/?id=...` with a matching demo query parameter if needed. Game detail pages show cover, summary, release info and community rating, plus a local review draft with stars/status/text. Drafts are saved only on the current browser/device; this is NOT an authenticated or public reviews system.
 - Complete server-side game search and public authenticated reviews will be implemented in subsequent stages.
 
+## Compact release cards and optional game prices
+
+- Release Radar now shows 5 compact cards on wide screens, 4 on desktop, 3 on smaller desktop/tablets and 2 on medium-width phones; narrow phones show one.
+- IGDB **does not supply current store prices**. The optional price field is deliberately empty until a licensed/authorized price source is integrated. Do not confuse IGDB ratings with shop pricing.
+- The UI supports optional `price: { amount: 249, currency: "SEK", shop: "Steam", checked_at: "2026-11-06T08:00:00Z", discount_percent: 10 }` on a game record. `amount` is in SEK major units. It is shown only when the timestamp is valid and at most 48 hours old.
+- This does **not** retrieve live prices. Implement a dedicated price updater with correct game-to-store matching, API permissions, regional/currency handling, and caching before displaying real prices. Do not put API keys into the browser.
+
 ## Connect real IGDB data
 
 1. Register an application with Twitch Developer Console and obtain a **Client ID** and **Client Secret**, following https://api-docs.igdb.com/#authentication.
@@ -28,5 +35,6 @@ node --check assets/discover/discover.js
 node --check assets/discover/explore.js
 node --check assets/discover/game-detail.js
 node --test tests/discover-data.test.mjs
+node --test tests/discover-price.test.mjs
 node --test tests/discover-explore.test.mjs
 ```
