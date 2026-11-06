@@ -10,6 +10,7 @@
 - Private 1–5 star TEST ratings use localStorage in your browser only; they are not public and do not sync across devices.
 - The Discover and Explore pages automatically show **clearly labeled fictional demo games** when real cached IGDB data is missing or invalid. Query `?demo=1` still forces a demo even after IGDB is connected.
 - Each game links to `/discover/game/?id=...` with a matching demo query parameter if needed. Game detail pages show cover, summary, release info and community rating, plus a local review draft with stars/status/text. Drafts are saved only on the current browser/device; this is NOT an authenticated or public reviews system.
+- Private wishlist preview: https://hirrdirr.se/discover/wishlist/ — save or remove any game from Release Radar, Explore, and Game Details, and filter/search/sort the saved entries. The wishlist is local to the current browser (`localStorage`) and does not require an account. Saved title/cover/genre/date snapshots remain accessible after a release leaves the rolling cache. Demo entries are explicitly marked and kept distinct from real IGDB IDs. No notification or automatic price tracking is enabled.
 - Complete server-side game search and public authenticated reviews will be implemented in subsequent stages.
 
 ## Compact release cards and optional game prices
@@ -38,5 +39,6 @@ node --check assets/discover/game-detail.js
 node --test tests/discover-data.test.mjs
 node --test tests/discover-price.test.mjs
 node --test tests/discover-release-groups.test.mjs
+node --test tests/discover-wishlist.test.mjs
 node --test tests/discover-explore.test.mjs
 ```
