@@ -1,3 +1,4 @@
+import {displayPrice} from "./price.mjs";
 import {loadDiscoveryData,demoCatalog,gameLink} from "./game-data.mjs";
 import {scoreFor} from "./explore-core.mjs";
 
@@ -88,6 +89,14 @@ async function init(){
   const score=scoreFor(game);
   $("detail-score").textContent=score===null?"Ej betygsatt":"★ "+score.toLocaleString("sv-SE",{minimumFractionDigits:1,maximumFractionDigits:1})+"/5";
   $("detail-votes").textContent=score===null?"Saknar minst fem giltiga röster":game.rating_count+" röster hos IGDB · omräknat till 1–5";
+  const price=displayPrice(game,{demo:isDemo});
+  if(price){
+    const priceRow=$("detail-price");
+    priceRow.hidden=false;
+    $("detail-price-value").textContent=price.text+(price.discount?" · −"+price.discount+"%":"");
+    $("detail-price-shop").textContent=price.label+" · "+price.shop;
+  }
+
   if(!isDemo && typeof game.slug==="string" && /^[a-z0-9-]+$/.test(game.slug)){
     const link=$("detail-igdb");
     link.href="https://www.igdb.com/games/"+encodeURIComponent(game.slug);

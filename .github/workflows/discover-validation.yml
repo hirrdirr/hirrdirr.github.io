@@ -7,6 +7,7 @@ on:
       - 'assets/discover/**'
       - 'tests/discover-explore.test.mjs'
       - 'tests/discover-data.test.mjs'
+      - 'tests/discover-price.test.mjs'
       - 'assets/data/discover/**'
       - 'tools/discover_releases.py'
       - 'tests/test_discover_releases.py'
@@ -34,6 +35,7 @@ jobs:
           node --check assets/discover/explore.js
           node --check assets/discover/game-detail.js
           node --test tests/discover-data.test.mjs
+          node --test tests/discover-price.test.mjs
           node --test tests/discover-explore.test.mjs
       - name: Validate cached data format
         run: python -m json.tool assets/data/discover/releases.json > /dev/null
