@@ -1,0 +1,72 @@
+---
+layout: default
+title: Speldetaljer • Game Discovery • hirrdirr
+section: discover
+discover_view: game
+unlisted: true
+sitemap: false
+---
+<div class="section-page discover-detail-page">
+  <nav class="detail-navigation" aria-label="Tillbaka">
+    <a id="detail-back" href="/discover/explore/">← Till Explore Games</a>
+    <a id="detail-radar" href="/discover/">Release Radar ↗</a>
+  </nav>
+  <div id="detail-mode" class="detail-mode" role="status" aria-live="polite">Laddar spelinformation...</div>
+  <div id="detail-error" class="detail-error" hidden>
+    <h1>Spelet hittades inte<span class="pixel-period">.</span></h1>
+    <p>Det valda spelet finns inte i den tillgängliga katalogen. Testa att öppna det från Release Radar eller Explore.</p>
+    <a class="section-button section-button-secondary" href="/discover/explore/">Tillbaka till spelkatalogen ↗</a>
+  </div>
+  <article id="detail-content" class="detail-content" hidden>
+    <header class="detail-hero">
+      <div class="detail-cover" id="detail-cover" aria-label="Omslag"></div>
+      <div class="detail-heading">
+        <p class="section-kicker">HIRRDIRR / GAME DISCOVERY / PC</p>
+        <h1 id="detail-name"></h1>
+        <p id="detail-summary" class="detail-summary"></p>
+        <div class="detail-facts">
+          <div><span>Releasedatum</span><strong id="detail-date"></strong></div>
+          <div><span>Plattform</span><strong>PC / Windows</strong></div>
+          <div><span>Genrer</span><strong id="detail-genres"></strong></div>
+        </div>
+        <div class="detail-community">
+          <div><span>Communitybetyg</span><strong id="detail-score"></strong><small id="detail-votes"></small></div>
+          <a id="detail-igdb" href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer" hidden>Öppna på IGDB ↗</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="detail-review" aria-labelledby="detail-review-title">
+      <div class="detail-review-heading">
+        <p class="section-kicker">DIN SPELLOGG / LOKAL FÖRHANDSVERSION</p>
+        <h2 id="detail-review-title">Ditt omdöme<span class="pixel-period">.</span></h2>
+        <p>Testa att ge spelet betyg och skriva en recension. Allt sparas bara i den här webbläsaren och publiceras inte.</p>
+      </div>
+      <form id="detail-review-form" class="detail-review-form">
+        <fieldset class="detail-stars">
+          <legend>Ditt betyg</legend>
+          <div id="detail-star-buttons" class="detail-star-buttons" role="group" aria-label="Stjärnbetyg från ett till fem"></div>
+          <p id="detail-star-label" class="detail-form-hint">Inget betyg valt</p>
+        </fieldset>
+        <label class="detail-form-label" for="detail-playing">Spelstatus
+          <select id="detail-playing">
+            <option value="not-played">Inte spelat</option>
+            <option value="playing">Spelar just nu</option>
+            <option value="completed">Avklarat</option>
+            <option value="paused">Pausat</option>
+            <option value="dropped">Avslutat i förtid</option>
+          </select>
+        </label>
+        <label class="detail-form-label detail-notes" for="detail-notes">Din recension
+          <textarea id="detail-notes" rows="5" maxlength="2500" placeholder="Vad tyckte du om spelet? Vad var bäst, och vad kunde varit bättre?"></textarea>
+          <span class="detail-form-hint">Max 2 500 tecken · aldrig offentligt i denna version</span>
+        </label>
+        <div class="detail-form-actions">
+          <button type="submit" class="section-button">Spara lokalt</button>
+          <button type="button" id="detail-delete" class="detail-delete">Radera mitt utkast</button>
+        </div>
+        <p id="detail-save-status" class="detail-save-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </article>
+</div>

@@ -33,7 +33,7 @@ sitemap: false
         <p class="section-kicker">01 / RELEASE RADAR</p>
         <h2 id="radar-title">Nya spel<span class="pixel-period">.</span></h2>
       </div>
-      <p class="discover-section-description">Vecka för vecka – med datum, genre och IGDB-betyg när tillräckligt många röstat.</p>
+      <p id="discover-section-description" class="discover-section-description">Vecka för vecka – med datum, genre och IGDB-betyg när tillräckligt många röstat.</p>
     </div>
 
     <div class="discover-controls">
@@ -62,6 +62,7 @@ sitemap: false
       </div>
     </div>
 
+    <div id="discover-demo-banner" class="discover-demo-banner" hidden><strong>DEMOLÄGE</strong><span>Alla spel och betyg här är fiktiva. Riktiga spelsläpp visas automatiskt när IGDB är anslutet.</span></div>
     <div class="discover-status-row">
       <p id="discover-status" role="status" aria-live="polite">Läser speldata...</p>
       <span id="discover-count" aria-live="polite"></span>
@@ -80,11 +81,6 @@ sitemap: false
       <p>Testa den nya PC-spelkatalogens sökning, genrefilter och personliga betyg, innan vi ansluter hela databasen.</p></div>
     <a id="discover-explore-link" class="section-button section-button-secondary" href="/discover/explore/">Utforska katalogen ↗</a>
   </section>
-  <script>
-    if (new URLSearchParams(location.search).get("demo") === "1") {
-      document.getElementById("discover-explore-link").href="/discover/explore/?demo=1";
-    }
-  </script>
   <footer class="discover-footer">
     <p>Speldata: <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>. Betyg på 100-gradig skala omräknas till 1–5 och visas endast när underlaget är tillräckligt. Releasedatum kan variera mellan regioner.</p>
     <p>Detta är en tidig, olistad förhandsversion av Game Discovery. Katalogen finns som förhandsversion. Publika recensioner kommer senare.</p>

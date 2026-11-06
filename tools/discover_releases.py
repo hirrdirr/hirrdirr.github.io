@@ -84,7 +84,7 @@ def game_records(ids: set[int], *, client_id: str, auth: str):
     for start in range(0, len(ordered), 250):
         subset = ordered[start:start + 250]
         body = (
-            "fields name,slug,cover.image_id,genres.name,rating,rating_count,game_type,version_parent; "
+            "fields name,slug,cover.image_id,genres.name,rating,rating_count,summary,game_type,version_parent; "
             "where id = (" + ",".join(map(str, subset)) + "); limit 500;"
         )
         games = query("games", body, client_id=client_id, auth=auth)
@@ -130,6 +130,7 @@ def build(rows: list[dict], games: dict[int, dict], start: dt.date, end: dt.date
             "id": game_id,
             "name": name.strip(),
             "slug": game.get("slug") if isinstance(game.get("slug"), str) else "",
+            "summary": game.get("summary", "")[:2000] if isinstance(game.get("summary"), str) else "",
             "date": day.isoformat(),
             "cover_id": cover.get("image_id") if isinstance(cover, dict) else None,
             "genres": genres,
