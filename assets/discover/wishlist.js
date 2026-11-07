@@ -23,7 +23,7 @@ if(root){
     const fragment=document.createDocumentFragment();
     for(const game of filtered){
       const row=element("article","wishlist-game");
-      const art=makeGameCover(game,{demo:game.demo,className:"wishlist-cover"});
+      const art=makeGameCover(game,{className:"wishlist-cover"});
       row.append(art);
       const main=element("div","wishlist-main");
       main.append(element("p","wishlist-game-type",game.demo?"DEMOSPEL · FIKTIVT":"PC / WINDOWS"));
