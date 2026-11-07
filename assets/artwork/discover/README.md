@@ -13,4 +13,3 @@ Use case: stylized-concept. Asset type: hero/banner illustration for Hirrdirr Ga
 ## Day edit prompt
 
 Use case: lighting-weather. Edit this Game Discovery hero illustration into its DAY / LIGHT-MODE companion. Preserve the exact composition, pixel-art style, objects, monitor radar, three fantasy/sci-fi/racing portal worlds, controller, proportions and framing. Change only the lighting and palette of the observatory and outer backdrop: softly sunlit pale warm stone, warm ivory off-white outer background #f3eee4, natural oak desk, sage foliage, daylight through a pale blue observatory dome. Keep the three portal worlds recognizable and colorful. Reduce lamp glow for daylight, retain crisp readable radar green on its dark monitor. Gentle warm daylight shadows, airy natural materials. Smooth pale edges suitable for fading into a cream webpage. No text, logos or additional objects.
-
