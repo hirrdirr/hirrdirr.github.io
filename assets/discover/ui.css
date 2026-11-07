@@ -69,17 +69,10 @@ body.light .discovery-shell {
 .discovery-shell :is(.discover-card, .explore-game, .wishlist-game):is(:hover, :focus-within) { border-color: color-mix(in srgb, var(--canvas-accent) 65%, var(--canvas-line)); background: var(--discovery-raised); }
 .discovery-shell .discovery-game-title { color: var(--canvas-text); text-decoration: none; }
 .discovery-shell .discovery-game-title:hover { color: var(--canvas-accent); }
-.discovery-cover { --cover-scene: url('/assets/artwork/home/station-dark.webp'); position: relative; display: grid; place-items: center; isolation: isolate; overflow: hidden; aspect-ratio: 4/5; border: 1px solid var(--discovery-line); border-radius: 9px; background: var(--discovery-tint); }
-.discovery-cover[data-scene='1'] { --cover-scene: url('/assets/artwork/home/garden-dark.webp'); }
-.discovery-cover[data-scene='2'] { --cover-scene: url('/assets/artwork/home/hero-dark.webp'); }
-body.light .discovery-cover { --cover-scene: url('/assets/artwork/home/station-light.webp'); }
-body.light .discovery-cover[data-scene='1'] { --cover-scene: url('/assets/artwork/home/garden-light.webp'); }
-body.light .discovery-cover[data-scene='2'] { --cover-scene: url('/assets/artwork/home/hero-light.webp'); }
+.discovery-cover { position: relative; display: grid; place-items: center; isolation: isolate; overflow: hidden; aspect-ratio: 4/5; border: 1px solid var(--discovery-line); border-radius: 9px; background: var(--discovery-tint); }
 .discovery-cover-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: end; align-items: flex-start; gap: 8px; padding: 16px; background: repeating-linear-gradient(0deg, transparent 0 23px, color-mix(in srgb, var(--canvas-accent) 7%, transparent) 23px 24px), radial-gradient(ellipse at 70% 20%, color-mix(in srgb, var(--canvas-accent) 22%, transparent), transparent 65%); }
 .discovery-cover-fallback strong { font: 600 clamp(30px, 3vw, 52px)/1 'Pixelify Sans', monospace; color: var(--canvas-accent); }
 .discovery-cover-fallback small { font: 600 9px/1.4 Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--canvas-muted); overflow-wrap: anywhere; }
-.discovery-cover.is-demo .discovery-cover-fallback { background: linear-gradient(transparent 25%, #10151de6), var(--cover-scene) center / cover; }
-.discovery-cover.is-demo .discovery-cover-fallback :is(strong, small) { color: #f4efe3; }
 .discovery-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
 .discovery-shell :is(.discover-footer, .explore-footer) { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--discovery-line); }
 .discovery-shell :is(.discover-footer, .explore-footer) p { font-size: 11px; line-height: 1.8; }

@@ -80,7 +80,7 @@ async function init(){
   bindWishlistLink($("detail-wishlist-link"));
   $("detail-wishlist-control").append(makeWishlistButton(game,isDemo));
   document.title=game.name+" • Game Discovery • hirrdirr";
-  const cover=makeGameCover(game,{demo:isDemo,className:"detail-cover",eager:true});
+  const cover=makeGameCover(game,{className:"detail-cover",eager:true});
   cover.id="detail-cover";
   $("detail-cover").replaceWith(cover);
   $("detail-name").textContent=game.name;

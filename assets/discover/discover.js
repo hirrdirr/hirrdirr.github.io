@@ -96,7 +96,7 @@ import {loadDiscoveryData,gameLink} from "./game-data.mjs";
   }
   function card(game) {
     const article = elt("article","discover-card");
-    const cover = makeGameCover(game,{demo,className:"discover-cover"});
+    const cover = makeGameCover(game,{className:"discover-cover"});
     article.append(cover);
     const main = elt("div","discover-card-main");
     const meta = elt("div","discover-card-meta");

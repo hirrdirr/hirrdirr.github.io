@@ -49,4 +49,5 @@ node --test tests/discover-explore.test.mjs
 - Theme-aware Hirrdirr scenery, consistent controls, visible keyboard focus, quiet information panels, and reduced-motion support preserve the site identity.
 - The week calendar keeps Monday–Sunday horizontally, with stacked games, a current-day accent, and distinct empty-day/filter states. The compact grid and its saved preference remain available.
 - Explore uses two columns of cover-led cards on wide screens; Wishlist uses collection rows; game details separate the cover/metadata/community score from the private review form.
-- `game-cover.mjs` shares real IGDB cover loading and safe missing-cover fallbacks. Demo illustrations reuse existing Hirrdirr scenery, are explicitly marked as demo, and follow dark/light mode. They are never substituted as real game artwork.
+- The Release Radar banner has dedicated day/night pixel artwork of a game discovery observatory, stored in `assets/artwork/discover/`. It is page decoration, never a game cover.
+- `game-cover.mjs` only loads artwork from a valid data-provided IGDB `cover_id`. Missing or failed covers, including all demo titles, use a theme-aware neutral placeholder with title initials and “Omslag saknas”. No per-title images or scenery assignments are hardcoded.

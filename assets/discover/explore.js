@@ -22,7 +22,7 @@ if(document.querySelector(".explore-page")){
   }
   function card(g){
     const article=e("article","explore-game");
-    const cover=makeGameCover(g,{demo,className:"explore-cover"});
+    const cover=makeGameCover(g,{className:"explore-cover"});
     article.append(cover);
     const info=e("div","explore-info");
     info.append(e("p","explore-meta",fmt.format(new Date(g.date+"T12:00:00Z"))+" / PC"));
