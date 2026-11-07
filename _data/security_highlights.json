@@ -1,5 +1,5 @@
 {
-  "digest_date": "2026-11-06",
+  "digest_date": "2026-11-07",
   "articles": [
     {
       "source": "CERT-SE",
@@ -8,15 +8,15 @@
     },
     {
       "source": "BleepingComputer",
-      "title": "D-Link warns of multiple zero-days in DGS-3130 Series switches",
-      "url": "https://www.bleepingcomputer.com/news/security/d-link-warns-of-multiple-zero-days-in-dgs-3130-series-switches/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/06/D-Link-logo.jpg"
+      "title": "SonicWall warns of new SSL-VPN MFA bypass flaw exploited in attacks",
+      "url": "https://www.bleepingcomputer.com/news/security/sonicwall-warns-of-new-ssl-vpn-mfa-bypass-flaw-exploited-in-attacks/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2025/05/08/SonicWall.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Attacks on supermarket and blood storage systems prompt US warning",
-      "url": "https://www.malwarebytes.com/blog/news/2026/11/attacks-on-supermarket-and-blood-storage-systems-prompt-us-warning",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/french-supermarket.jpg"
+      "title": "Big Tech sues over California plan to limit kids’ scrolling",
+      "url": "https://www.malwarebytes.com/blog/news/2026/11/big-tech-sues-over-california-plan-to-limit-kids-scrolling",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/children_online.png"
     },
     {
       "source": "SANS ISC Diary",
