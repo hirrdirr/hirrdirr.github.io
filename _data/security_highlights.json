@@ -1,27 +1,17 @@
 {
-  "digest_date": "2026-11-07",
+  "digest_date": "2026-11-08",
   "articles": [
     {
-      "source": "CERT-SE",
-      "title": "NCSC – CERT-SE veckobrev v.45",
-      "url": "https://www.cert.se/2026/11/ncsc-cert-se-veckobrev-v45.html"
+      "source": "BleepingComputer",
+      "title": "Hackers pull off $133 million French bank heist via service provider",
+      "url": "https://www.bleepingcomputer.com/news/security/hackers-pull-off-133-million-french-bank-heist-via-service-provider/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/06/financial-theft.jpg"
     },
     {
       "source": "BleepingComputer",
-      "title": "SonicWall warns of new SSL-VPN MFA bypass flaw exploited in attacks",
-      "url": "https://www.bleepingcomputer.com/news/security/sonicwall-warns-of-new-ssl-vpn-mfa-bypass-flaw-exploited-in-attacks/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2025/05/08/SonicWall.jpg"
-    },
-    {
-      "source": "Malwarebytes",
-      "title": "Big Tech sues over California plan to limit kids’ scrolling",
-      "url": "https://www.malwarebytes.com/blog/news/2026/11/big-tech-sues-over-california-plan-to-limit-kids-scrolling",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/children_online.png"
-    },
-    {
-      "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Friday, November 6th, 2026 https://isc.sans.edu/podcastdetail/10168, (Fri, Nov 6th)",
-      "url": "https://isc.sans.edu/diary/rss/33494"
+      "title": "CTM360 Exposes Fake Gift Card Scams Exploiting Trusted Brands",
+      "url": "https://www.bleepingcomputer.com/news/security/ctm360-exposes-fake-gift-card-scams-exploiting-trusted-brands/",
+      "image": "https://www.bleepstatic.com/content/posts/2026/11/06/ctm360-gift-card-scam.jpg"
     }
   ]
 }
