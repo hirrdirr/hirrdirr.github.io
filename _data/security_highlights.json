@@ -1,17 +1,28 @@
 {
-  "digest_date": "2026-11-08",
+  "digest_date": "2026-11-09",
   "articles": [
     {
       "source": "BleepingComputer",
-      "title": "Hackers pull off $133 million French bank heist via service provider",
-      "url": "https://www.bleepingcomputer.com/news/security/hackers-pull-off-133-million-french-bank-heist-via-service-provider/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/06/financial-theft.jpg"
+      "title": "The Biggest Threat to Your GRC Job Isn’t AI. It’s Ignoring AI.",
+      "url": "https://www.bleepingcomputer.com/news/security/the-biggest-threat-to-your-grc-job-isnt-ai-its-ignoring-ai/",
+      "image": "https://www.bleepstatic.com/content/posts/2026/11/09/dont-dumb-down-your-ai.jpg"
+    },
+    {
+      "source": "Malwarebytes",
+      "title": "13.3 million people’s medical data exposed; companies pay $300,000",
+      "url": "https://www.malwarebytes.com/blog/news/2026/11/13-3-million-peoples-medical-data-exposed-companies-pay-300000",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2025/07/Healthcare-Data-Searchbox.jpg"
+    },
+    {
+      "source": "SANS ISC Diary",
+      "title": "ISC Stormcast For Monday, November 9th, 2026 https://isc.sans.edu/podcastdetail/10170, (Mon, Nov 9th)",
+      "url": "https://isc.sans.edu/diary/rss/33500"
     },
     {
       "source": "BleepingComputer",
-      "title": "CTM360 Exposes Fake Gift Card Scams Exploiting Trusted Brands",
-      "url": "https://www.bleepingcomputer.com/news/security/ctm360-exposes-fake-gift-card-scams-exploiting-trusted-brands/",
-      "image": "https://www.bleepstatic.com/content/posts/2026/11/06/ctm360-gift-card-scam.jpg"
+      "title": "FBI agent stole $2.5 million in crypto from hackers under investigation",
+      "url": "https://www.bleepingcomputer.com/news/security/fbi-agent-stole-25-million-in-crypto-from-hackers-fraud-victims/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/09/Cryptocurrency_headpic.jpg"
     }
   ]
 }
