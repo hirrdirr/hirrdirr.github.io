@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+  <symbol id="sword" viewBox="0 0 32 32">
+    <path d="M23 2h7v7L13 26l-7-7z" fill="#173c3d"/><path d="M24 4h4v4L12 24l-4-4z" fill="#bad2ce"/><path d="M25 4h3v2L10 24l-2-2z" fill="#edf0d2"/><path d="M5 15l12 12-3 3L2 18z" fill="#d4b572"/><path d="M8 23l3 3-5 5H2v-4z" fill="#9d7051"/><path d="M2 27h4v4H2z" fill="#e0bf7a"/>
+  </symbol>
+  <symbol id="armor" viewBox="0 0 32 32">
+    <path d="M11 3h10l9 7-4 9-4-2v13H10V17l-4 2-4-9z" fill="#183a34"/><path d="M11 5h10l7 6-3 5-5-3v14H12V13l-5 3-3-5z" fill="#73a68a"/><path d="M13 5h6l-3 5z" fill="#d1c6a1"/><path d="M12 19h8v4h-8z" fill="#755c3f"/><path d="M14 19h4v4h-4z" fill="#d6b96c"/><path d="M6 10h4v3H6zM20 10h4v3h-4z" fill="#afd0a3"/>
+  </symbol>
+  <symbol id="potion" viewBox="0 0 32 32">
+    <path d="M12 2h8v8l6 6v12l-4 3H10l-4-3V16l6-6z" fill="#25403b"/><path d="M13 6h6v6l5 5v10l-3 2H11l-3-2V17l5-5z" fill="#d4d5bb"/><path d="M10 18h12v8l-2 1h-8l-2-1z" fill="#c87970"/><path d="M11 18h4v7h-4z" fill="#e8ab91"/><path d="M12 2h8v4h-8z" fill="#ad8b53"/><path d="M13 12h3v4h-3z" fill="#fff0cb"/>
+  </symbol>
+  <symbol id="charm" viewBox="0 0 32 32">
+    <path d="M10 2h12v3H10zM7 5h3v8H7zM22 5h3v8h-3zM10 13h12v3H10z" fill="#b49b61"/><path d="M16 12l12 10-12 10L4 22z" fill="#315f5b"/><path d="M16 15l8 7-8 7-8-7z" fill="#7fd5bc"/><path d="M16 15v14l-8-7z" fill="#c1ebd0"/><path d="M15 18h3v6h-3z" fill="#f5ecc5"/>
+  </symbol>
+  <symbol id="amber" viewBox="0 0 32 32">
+    <path d="M11 3h10l9 11-4 13-14 4L2 19z" fill="#4f4933"/><path d="M12 5h8l7 10-3 10-11 3-8-10z" fill="#bd8b47"/><path d="M12 5l4 8-4 9-7-4z" fill="#eed48a"/><path d="M16 13l11 2-3 10-12-3z" fill="#d7a45a"/><path d="M14 11h5v3h-2v6h-3z" fill="#916b3d"/>
+  </symbol>
+  <symbol id="burst" viewBox="0 0 32 32">
+    <path d="M14 1h4v7h-4zM14 24h4v7h-4zM1 14h7v4H1zM24 14h7v4h-7z" fill="#b8cba1"/><path d="M16 7l9 9-9 9-9-9z" fill="#739776"/><path d="M16 10l6 6-6 6-6-6z" fill="#eddea5"/><path d="M5 5h4v4H5zM23 23h4v4h-4zM23 5h4v4h-4zM5 23h4v4H5z" fill="#708b69"/>
+  </symbol>
+  <symbol id="dodge" viewBox="0 0 32 32">
+    <path d="M18 3h9l-4 14 6 5v6H13l-4-5 7-9z" fill="#264b40"/><path d="M19 5h6l-4 13 6 5v3H14l-3-3 7-8z" fill="#c4ae74"/><path d="M19 5h4l-3 12h-4z" fill="#e1d3a1"/><path d="M13 23h14v3H13z" fill="#715b40"/><path d="M2 8h10v2H2zM5 14h7v2H5zM1 20h6v2H1z" fill="#a9bf9b"/>
+  </symbol>
+</svg>

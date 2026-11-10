@@ -236,3 +236,9 @@ body.light .news-page { --section-scene: url('/assets/artwork/sections/news-ligh
   .news-brief { grid-template-columns: 90px minmax(0, 1fr); }
   .section-button { gap: 20px; font-size: 14px; }
 }
+
+/* Realm has its own theme pair and does not change the existing game showcase. */
+.realm-hub { display: grid; grid-template-columns: minmax(240px, 1.15fr) minmax(0, 1fr); align-items: center; gap: clamp(28px, 5vw, 112px); margin-top: var(--section-gap); padding-top: 36px; border-top: 1px solid var(--section-line); }
+.realm-hub > .game-artwork { aspect-ratio: 2.1; }
+.realm-hub h3 { font: 600 clamp(32px, 3vw, 58px)/1.1 'Pixelify Sans', monospace; }
+@media (max-width: 760px) { .realm-hub { grid-template-columns: 1fr; gap: 24px; } }

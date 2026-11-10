@@ -8,7 +8,8 @@
     "test:balance": "node games/td/tests/balance.mjs",
     "test:traps-balance": "node games/td/tests/spike-balance.mjs",
     "dev": "vite --config games/td/vite.config.js --host 0.0.0.0 --port 4173 --strictPort",
-    "install:ci": "npm ci"
+    "install:ci": "npm ci",
+    "test:realm": "node --test games/realm/tests/*.test.mjs"
   },
   "devDependencies": {
     "vite": "7.3.1"
