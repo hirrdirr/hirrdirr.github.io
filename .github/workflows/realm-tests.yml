@@ -1,0 +1,21 @@
+name: Project Realm checks
+on:
+  pull_request:
+    paths: ['games/realm/**', '.github/workflows/realm-tests.yml']
+  push:
+    branches: [main]
+    paths: ['games/realm/**', '.github/workflows/realm-tests.yml']
+permissions:
+  contents: read
+jobs:
+  realm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check JavaScript syntax
+        run: find games/realm/js -name '*.js' -exec node --check {} \;
+      - name: Test world, combat, quests and save recovery
+        run: node --test games/realm/tests/*.test.mjs

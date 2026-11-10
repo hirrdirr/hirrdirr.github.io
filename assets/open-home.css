@@ -261,3 +261,12 @@ body.light .home-open .home-hero h1 { filter: brightness(.2); }
   .home-social { padding-top: 140px; }
   .home-social h2 { font-size: 56px; }
 }
+
+/* Project Realm: isolated addition; existing game layouts stay intact. */
+.home-realm-launch { display: grid; grid-template-columns: minmax(180px, 30%) 1fr auto; align-items: center; gap: 32px; margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--home-line); }
+.home-realm-art { display: block; aspect-ratio: 2.3; background: url('/games/realm/assets/cover.webp') center 55% / cover; border-radius: 4px; }
+body.light .home-realm-art { background-image: url('/games/realm/assets/cover-light.webp'); }
+.home-realm-launch h3 { margin: 9px 0; font-size: clamp(25px, 2.5vw, 40px); }
+.home-realm-launch p:not([class]) { max-width: 48ch; font-size: 15px; line-height: 1.6; }
+.home-realm-launch:hover h3 { color: var(--home-accent); }
+@media (max-width: 590px) { .home-realm-launch { grid-template-columns: 1fr; gap: 20px; } .home-realm-launch .home-row-arrow { display: none; } }
