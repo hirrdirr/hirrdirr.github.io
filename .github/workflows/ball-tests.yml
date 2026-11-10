@@ -1,0 +1,19 @@
+name: Ball checks
+on:
+  pull_request:
+    paths: ['games/dxball/**', '.github/workflows/ball-tests.yml']
+  push:
+    branches: [main]
+    paths: ['games/dxball/**', '.github/workflows/ball-tests.yml']
+permissions:
+  contents: read
+jobs:
+  game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check games/dxball/dxball.js
+      - run: node --test games/dxball/tests/*.test.mjs
