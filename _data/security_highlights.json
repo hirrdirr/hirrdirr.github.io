@@ -1,28 +1,28 @@
 {
-  "digest_date": "2026-11-09",
+  "digest_date": "2026-11-10",
   "articles": [
     {
       "source": "BleepingComputer",
-      "title": "The Biggest Threat to Your GRC Job Isn’t AI. It’s Ignoring AI.",
-      "url": "https://www.bleepingcomputer.com/news/security/the-biggest-threat-to-your-grc-job-isnt-ai-its-ignoring-ai/",
-      "image": "https://www.bleepstatic.com/content/posts/2026/11/09/dont-dumb-down-your-ai.jpg"
+      "title": "SAP patches ICM2SHELL and PROXYGATE maximum severity flaws",
+      "url": "https://www.bleepingcomputer.com/news/security/sap-patches-four-maximum-severity-security-vulnerabilities/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/10/SAP.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "13.3 million people’s medical data exposed; companies pay $300,000",
-      "url": "https://www.malwarebytes.com/blog/news/2026/11/13-3-million-peoples-medical-data-exposed-companies-pay-300000",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2025/07/Healthcare-Data-Searchbox.jpg"
+      "title": "Update Chrome now to fix a flaw attackers are exploiting",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/update-chrome-now-to-fix-a-flaw-attackers-are-exploiting",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Monday, November 9th, 2026 https://isc.sans.edu/podcastdetail/10170, (Mon, Nov 9th)",
-      "url": "https://isc.sans.edu/diary/rss/33500"
+      "title": "Apple Patches Everyting: November 2026 Edition, (Tue, Nov 10th)",
+      "url": "https://isc.sans.edu/diary/rss/33506"
     },
     {
       "source": "BleepingComputer",
-      "title": "FBI agent stole $2.5 million in crypto from hackers under investigation",
-      "url": "https://www.bleepingcomputer.com/news/security/fbi-agent-stole-25-million-in-crypto-from-hackers-fraud-victims/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/09/Cryptocurrency_headpic.jpg"
+      "title": "Hackers now exploit critical Barracuda ESG flaws to gain root access",
+      "url": "https://www.bleepingcomputer.com/news/security/hackers-exploit-barracuda-email-security-gateway-flaws-to-get-root-access/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/10/Barracuda.jpg"
     }
   ]
 }
