@@ -3,7 +3,7 @@ import { SaveStore, serialize, deserialize } from './save.js';
 import { Renderer } from './renderer.js';
 import { UI } from './ui.js';
 import { AudioBus } from './audio.js';
-import { ITEMS, QUESTS } from './data.js';
+import { ITEMS, QUESTS, NPCS } from './data.js';
 const $=id=>document.getElementById(id);
 // Storage can throw even when merely accessing window.localStorage.
 let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('storage blocked');},setItem(){throw Error('storage blocked');}};}
@@ -32,14 +32,19 @@ function processEvents() {
     else if(event.type==='item')ui.toast('+'+event.quantity+' '+ITEMS[event.id].name);
     else if(event.type==='level')ui.toast('Nivå '+event.level+'! Din hälsa och attack har ökat.');
     else if(event.type==='questAccepted')ui.toast('Nytt uppdrag · '+QUESTS[event.id].name);
-    else if(event.type==='questReady')ui.toast('Uppdrag klart · Återvänd till byn');
-    else if(event.type==='questDone'){ui.toast('Uppdrag slutfört · '+QUESTS[event.id].name);if(event.id==='beacon')ui.toast('Kapitel 01 avklarat. Ljuset har återvänt!');}
+    else if(event.type==='questReady')ui.toast('Uppdrag klart · Återvänd till '+NPCS.find(n=>n.id===QUESTS[event.id].npc).name);
+    else if(event.type==='questDone'){ui.toast('Uppdrag slutfört · '+QUESTS[event.id].name);if(event.id==='beacon')ui.toast('Kapitel 01 avklarat. Signe väntar öster om bron!');if(event.id==='heart')ui.toast('Kapitel 02 avklarat. Myren andas igen!');}
     else if(event.type==='discovery')ui.toast('Upptäckt: '+event.name+' · +12 XP');
     else if(event.type==='equip')ui.toast(ITEMS[event.id].name+' utrustad');
     else if(event.type==='beacon')ui.toast('Fyren lyser igen. Återvänd till Elin!');
+    else if(event.type==='rune')ui.toast('Runsten läst · +18 XP');
+    else if(event.type==='seal')ui.toast('Sigillet är återställt. Återvänd till Signe!');
+    else if(event.type==='checkpoint')ui.toast('Full hälsa · Återkomstplats: '+event.name);
+    else if(event.type==='specialized')ui.toast('Din nya inriktning är vald.');
+    else if(event.type==='salvage')ui.toast(ITEMS[event.id].name+' finns redan i väskan · +'+event.gold+' guld');
     else if(event.type==='death'){save();ui.open('death');}
     else if(event.type==='respawn'){renderer.resetCamera();ui.view=null;ui.panel.close();}
-    if(['questAccepted','questDone','equip','item','respawn','beacon'].includes(event.type))save();
+    if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','specialized','salvage','kill'].includes(event.type))save();
   }
 }
 function dispatch(input) {
@@ -101,7 +106,11 @@ window.addEventListener('keydown',event=>{
     if(!event.repeat&&['KeyI','KeyC','KeyJ','KeyP'].includes(event.code)){event.preventDefault();ui.close();}
     return;
   }
-  if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab'].includes(event.code)&&event.code!=='Tab')event.preventDefault();
+  if(event.code==='Tab') {
+    if(document.activeElement===$('world')){event.preventDefault();if(!event.repeat&&!focusPaused)dispatch({type:'target'});}
+    return;
+  }
+  if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.code))event.preventDefault();
   if(focusPaused)return;
   keys.add(event.code);audio.unlock();
   if(event.repeat)return;
@@ -112,7 +121,13 @@ window.addEventListener('keydown',event=>{
 });
 window.addEventListener('keyup',event=>keys.delete(event.code));
 document.querySelectorAll('[data-command]').forEach(b=>b.addEventListener('click',()=>{if(!ui.isOpen&&!focusPaused){dispatch({type:b.dataset.command});$('world').focus({preventScroll:true});}}));
-$('world').addEventListener('pointerdown',event=>{if(event.button===0&&!ui.isOpen&&!focusPaused){$('world').focus({preventScroll:true});dispatch({type:'attack'});}});
+$('world').addEventListener('pointerdown',event=>{
+  if(event.button!==0||ui.isOpen||focusPaused)return;
+  const canvas=$('world'),rect=canvas.getBoundingClientRect();
+  const x=(event.clientX-rect.left)/rect.width*canvas.width+renderer.camera.x,y=(event.clientY-rect.top)/rect.height*canvas.height+renderer.camera.y;
+  const target=state.enemies.filter(e=>e.hp>0&&Math.abs(e.x-x)<32&&y>e.y-65&&y<e.y+12).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];
+  canvas.focus({preventScroll:true});if(target)dispatch({type:'target',id:target.id});dispatch({type:'attack'});
+});
 $('pause-button').addEventListener('click',()=>ui.open('settings'));
 window.addEventListener('blur',()=>{if(started&&!ui.isOpen){focusPaused=true;$('focus-overlay').hidden=false;}pause();save();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){focusPaused=started;$('focus-overlay').hidden=!started;pause();save();}});

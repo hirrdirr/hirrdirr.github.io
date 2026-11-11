@@ -7,6 +7,11 @@ to step(state, input, fixedDelta). The simulation mutates game state and emits
 bounded events; rendering, DOM menus, audio and persistence consume that state.
 The simulation and content modules do not import browser APIs.
 
+In v0.2, enemy-ai.js owns intent, windup, pounce, projectile and eruption rules.
+The renderer reads their directions and timers to show the same attacks the
+simulation resolves. Damage stays in the rules layer. Collision candidates use
+a 128-pixel cell index; tests compare it with a full scan of the authored world.
+
 The renderer reads local state directly. This is a useful starting boundary,
 not a finished multiplayer SDK. A server needs its own trusted command
 validation, player/entity ownership and connection lifecycle.
@@ -54,8 +59,9 @@ management, parties, instancing and economy rules based on observed needs.
 Current enemy steering is collision-aware movement, not full pathfinding.
 Do not promise MMO-scale concurrency from this prototype.
 
-Before adding many enemies, replace linear obstacle queries with a spatial
-index and profile replication. Introduce worker processes only when needed.
+Before adding many more enemies, profile the existing collision index and
+line-of-sight checks alongside replication. Introduce worker processes only
+when needed.
 
 ## Desktop distribution
 
@@ -67,7 +73,7 @@ and rule tests provide reusable specifications.
 
 ## Useful next single-player work
 
-Expand authored scenery and animated sprite directions, add a second zone and
-quest chain, improve item comparisons, add configurable keybindings, and test
-on lower-powered Windows laptops. Keep each increment complete and playable
+Expand authored scenery and animated sprite directions, add configurable
+keybindings, improve navigation around complex obstacles, and test on
+lower-powered Windows laptops. Keep each increment complete and playable
 before starting networking.

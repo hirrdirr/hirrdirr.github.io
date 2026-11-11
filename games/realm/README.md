@@ -1,9 +1,33 @@
-# Project Realm — Lyktdalen, v0.1.0
+# Project Realm — Lyktdalen, v0.2.0
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## First chapter
+## Gameplay Evolution
+
+Continue an existing journey or start in Lyktdalen. After completing Elin's
+beacon quest, visit **Signe in Vandrarlägret**, east of the bridge. Follow the
+southern trail into **Glödmyren** to read three runestones, face ranged
+glödvingar, defeat **Myrhjärtat** and restore the old sluice's seal.
+
+- Two new linked quests, a safe camp/checkpoint and a fourth exploration cache.
+- Wolves telegraph directional pounces; glödvingar aim and fire travelling
+  projectiles; Myrhjärtat marks eruptions that remain where announced.
+  Below half health the boss marks a second eruption.
+- Every third connected sword hit deals 35% more damage. Lantern Strike
+  interrupts normal enemies; boss attacks still require avoidance.
+- Target selection and intent/health information, clearer hit effects and
+  directional sword animation. Attacks and projectiles respect obstacles.
+- Seven new item definitions, enemy-specific weighted loot and automatic gold
+  conversion for duplicate equipment drops. Equipment comparisons show the
+  actual change to health, damage, protection, attack rate, movement and dodge.
+- At level 3, choose Glödvandrare (+3 attack) or Rotväktare (+24 health,
+  +2 defense). Switch freely in either safe area.
+- Version 2 saves preserve pending loot, cooldowns, runes, specialization and
+  checkpoints. Existing saves migrate with an untouched versioned backup.
+- Spatially indexed collision queries and bounded projectiles/eruption markers.
+
+## Existing first chapter
 
 - A connected 1920 × 1280 world: safe village, mossy trail, river crossing,
   forest and ancient beacon.
@@ -15,10 +39,10 @@ Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 - Sword attack, Lantern Strike, dodge and potions. Attacks face the nearest
   target within melee range; the area attack hits all nearby enemies.
 - XP, levels (cap 20), three equipment slots, item information, loot and gold.
-  Eight item definitions with stable IDs and three rarities.
+  Stable item IDs and three rarities.
 - Three one-time exploration caches. Herbs collected before accepting Mira's
   quest still count; early boss exploration cannot strand the final quest.
-- Death returns the player to the village without losing progression.
+- Death returns the player to the last rested lantern without losing progression.
 - Synthesized effects, volume control, 30/60 FPS selection, pause,
   reduced-motion support and a minimap.
 - Local autosave, backup recovery and JSON export/import.
@@ -33,6 +57,7 @@ players, accounts, shared economy, interiors, character classes or backend.
 | --- | --- |
 | WASD / arrow keys | Move |
 | Space / left click on world | Sword attack |
+| Tab with the world focused / click an enemy | Select target; melee prioritizes it when in reach |
 | Q | Lantern Strike; 5-second cooldown |
 | Shift | Dodge in the current movement/facing direction |
 | R | Healing potion; 8-second cooldown |
@@ -79,7 +104,8 @@ rendering engine later without rewriting the content and rule modules.
 | js/data.js | Stable item, enemy, NPC and quest definitions |
 | js/world.js | Terrain, placements, safe zone, collision and world queries |
 | js/simulation.js | State, actions, combat, AI, progression and fixed ticks |
-| js/save.js | Save DTO, validation, v0 migration and persistence adapter |
+| js/enemy-ai.js | Enemy intents, pounces, projectiles and eruption rules |
+| js/save.js | Save DTO, validation, v0/v1 migration and persistence adapter |
 | js/art.js | Original pixel sprites, rasterized once |
 | js/renderer.js | Cached ground, culled sprites, camera, effects and minimap |
 | js/ui.js | DOM dialogs, inventory, quests and HUD |
@@ -88,13 +114,14 @@ rendering engine later without rewriting the content and rule modules.
 
 ## Saves
 
-The primary key is **hirrdirr.realm.save**, with version **1**. The JSON envelope
+The primary key is **hirrdirr.realm.save**, with version **2**. The JSON envelope
 has version, savedAt and data fields. The DTO contains the player, equipment,
 inventory, quests, permanent world flags, discoveries, collected herbs, opened
-caches, play time and the simulation RNG seed.
+caches, play time and the simulation RNG seed. It also stores specialization,
+the selected checkpoint, read runestones, cooldowns and uncollected drops.
 
-Transient enemies, drops, particles and cooldowns are intentionally not saved.
-Normal enemies reset on load; permanent boss defeat persists. This first release
+Transient enemies, projectiles, eruption markers, combos and particles are not saved.
+Normal enemies reset on load; permanent boss defeat persists. This release
 does not promise exact encounter continuation or resistance to offline save editing.
 
 Autosave runs every 15 seconds during play, on important progression events,
@@ -108,7 +135,10 @@ when possible. Future versions and unrecoverable corruption block automatic
 overwriting and show a visible warning. The player can export the temporary
 journey or explicitly confirm a new journey/import. Files above 256 KiB are
 rejected, IDs are whitelisted, values are bounded, and invalid positions fall
-back to the village. The recognized v0 envelope is migrated.
+back to the chosen checkpoint. Recognized v0/v1 envelopes are migrated. Before
+autosaving an older journey, its original is retained under .v0 or .v1. If that
+backup cannot be stored, play remains available but automatic overwriting is
+blocked and the player is prompted to export their progress.
 
 ## Performance
 

@@ -44,7 +44,7 @@ function tree(variant) {
   g.fillStyle = '#493f31'; g.fillRect(49, 88, 16, 46);
   g.fillStyle = '#82664a'; g.fillRect(51, 91, 5, 41);
   g.fillStyle = '#343b2d'; g.fillRect(44, 129, 29, 5);
-  const tones = variant === 1 ? ['#153d37','#205145','#2e6751','#4e8260'] : ['#153e3c','#215950','#31745e','#55936e'];
+  const tones = variant === 3 ? ['#403e35','#765342','#a66b48','#d69a60'] : variant === 1 ? ['#153d37','#205145','#2e6751','#4e8260'] : ['#153e3c','#215950','#31745e','#55936e'];
   for (let n = 0; n < 3; n++) {
     const y = 14 + n * 27, w = 22 + n * 13, cx = 56;
     polygon(g, [[cx,y],[cx+8,y+12],[cx+w-7,y+28],[cx+w,y+34],[cx+w-5,y+40],[cx+w+7,y+46],[cx+12,y+50],[cx,y+47],[cx-18,y+51],[cx-w-8,y+45],[cx-w+2,y+34],[cx-w+10,y+27]], tones[0]);
@@ -91,6 +91,37 @@ function house(color) {
   return c;
 }
 function monster(type, frame) {
+  if (type === 'wisp') {
+    const c = canvas(58, 58), g = c.getContext('2d'), lift = frame === 1 ? -7 : frame === 2 ? 4 : 0;
+    for (const side of [-1, 1]) {
+      g.save(); g.translate(29, 28); g.scale(side, 1);
+      polygon(g, [[2,0],[18,-19+lift],[25,-15+lift],[23,1],[13,11],[3,9]], '#4b393e');
+      polygon(g, [[5,0],[18,-14+lift],[21,-12+lift],[18,0],[11,7],[5,6]], '#c47654');
+      polygon(g, [[7,0],[17,-8+lift],[16,0],[11,4]], '#f1bf75');
+      g.fillStyle='#8e4e48';g.fillRect(7,10,9,6);g.fillStyle='#e1a66b';g.fillRect(10,11,3,3);
+      g.restore();
+    }
+    polygon(g, [[29,15],[35,24],[33,39],[29,46],[25,38],[24,24]], '#543d42');
+    g.fillStyle='#edaa67';g.fillRect(27,23,5,14);g.fillStyle='#fff0b5';g.fillRect(28,24,3,7);
+    g.fillStyle='#f4d2a3';g.fillRect(23,16,3,4);g.fillRect(33,16,3,4);
+    return c;
+  }
+  if (type === 'ancient') {
+    const c = canvas(88, 96), g = c.getContext('2d');
+    polygon(g, [[14,31],[27,14],[60,14],[74,31],[81,66],[68,80],[22,80],[8,65]], '#303c3c');
+    polygon(g, [[22,31],[31,20],[58,20],[68,34],[69,66],[57,76],[26,68]], '#66716b');
+    polygon(g, [[25,32],[33,22],[45,22],[39,37],[26,48]], '#939784');
+    g.fillStyle='#394c47';g.fillRect(4,44,17,32);g.fillRect(68,43,17,33);
+    g.fillStyle='#7e8474';g.fillRect(5,45,8,20);g.fillRect(70,44,7,22);
+    g.fillStyle='#293b39';g.fillRect(24,76,15,13+frame);g.fillRect(54,75,15,15-frame);
+    polygon(g, [[43,34],[57,47],[53,63],[43,71],[33,59],[32,45]], '#603f3b');
+    polygon(g, [[43,39],[51,47],[48,59],[43,64],[38,57],[37,47]], '#de9459');
+    g.fillStyle=frame===1?'#fff3b4':'#f5cc85';g.fillRect(41,45,5,12);
+    g.fillStyle='#edb76d';g.fillRect(28,29,9,3);g.fillRect(53,29,9,3);g.fillRect(24,55,5,13);g.fillRect(59,57,4,12);
+    polygon(g, [[29,20],[19,9],[22,4],[34,14],[42,4],[48,7],[45,17],[62,6],[68,10],[61,23]], '#7e6751');
+    g.fillStyle='#c19a64';g.fillRect(25,9,5,4);g.fillRect(57,13,8,3);
+    return c;
+  }
   if (type === 'sprout') return pixelSprite([
     '   vL    Lv     ','    lL  Ll      ','     vllv       ','    vvvvvv      ','   vllllllv     ',
     '  vlLLllLLlv    ','  vlowllwolv    ','  vllwllwllv    ','   vllllllv     ','    vlllv       ',
@@ -130,6 +161,26 @@ function prop(kind) {
     polygon(g,[[31,62],[19,55],[16,45],[28,49],[34,61],[41,46],[49,43],[45,57]],'#74a86e');
     g.fillStyle='#9dd9b2';g.fillRect(27,37,9,9);g.fillRect(23,41,17,4);
     g.fillStyle='#d3ecbc';g.fillRect(29,39,4,5);
+  } else if (kind === 'rune' || kind === 'runeRead') {
+    polygon(g, [[14,69],[18,25],[27,13],[44,17],[50,35],[48,71]], '#344b47');
+    polygon(g, [[20,64],[23,27],[30,19],[41,22],[43,64]], '#7b8a78');
+    g.fillStyle='#a9ae8e';g.fillRect(24,28,4,27);
+    g.strokeStyle=kind==='runeRead'?'#b9e4c8':'#edba78';g.lineWidth=3;g.beginPath();
+    g.moveTo(33,28);g.lineTo(33,54);g.moveTo(26,35);g.lineTo(39,44);g.moveTo(39,32);g.lineTo(27,47);g.stroke();
+    g.fillStyle='#49634c';g.fillRect(11,66,43,7);g.fillStyle='#c99569';g.fillRect(17,67,4,3);
+  } else if (kind === 'seal' || kind === 'sealLit') {
+    polygon(g, [[5,59],[18,46],[46,46],[60,59],[48,73],[16,73]], '#354e49');
+    polygon(g, [[11,59],[21,50],[43,50],[54,59],[45,68],[19,68]], '#7e8972');
+    g.strokeStyle=kind==='sealLit'?'#a0e1b7':'#e3a16b';g.lineWidth=3;
+    g.strokeRect(25,53,15,12);g.beginPath();g.moveTo(16,58);g.lineTo(49,64);g.moveTo(21,66);g.lineTo(45,53);g.stroke();
+    g.fillStyle=kind==='sealLit'?'#d4f5bf':'#f7c783';g.fillRect(30,57,5,5);
+  } else if (kind === 'gate') {
+    g.fillStyle='#304744';g.fillRect(5,13,14,60);g.fillRect(46,13,14,60);g.fillRect(9,9,46,14);
+    g.fillStyle='#788372';g.fillRect(7,15,9,53);g.fillRect(48,15,9,53);g.fillRect(10,11,44,7);
+    g.fillStyle='#b4ac84';g.fillRect(7,25,10,3);g.fillRect(48,45,10,3);
+    g.fillStyle='#715c45';g.fillRect(18,31,28,5);g.fillRect(18,54,28,5);
+    g.fillStyle='#8e7450';for(let x=20;x<46;x+=7)g.fillRect(x,25,3,45);
+    g.fillStyle='#415e48';g.fillRect(2,68,22,5);g.fillRect(41,66,22,7);
   } else if (kind === 'sign') {
     g.fillStyle='#5b4b34';g.fillRect(29,42,6,29);
     g.fillStyle='#bd935c';g.fillRect(10,31,44,20);
@@ -157,9 +208,9 @@ export function makeArt() {
     art[id] = [0,1,2].map(f=>pixelSprite(person,colors,f));
     art[id+'Back'] = [0,1,2].map(f=>pixelSprite(person,colors,f,true));
   }
-  for (const id of ['sprout','wolf','warden']) art[id]=[0,1,2].map(f=>monster(id,f));
-  art.trees = [0,1,2].map(tree);
+  for (const id of ['sprout','wolf','warden','wisp','ancient']) art[id]=[0,1,2].map(f=>monster(id,f));
+  art.trees = [0,1,2,3].map(tree);
   art.houseRed=house('red'); art.houseBlue=house('blue');
-  for (const id of ['rock','fire','chest','chestOpen','beacon','beaconLit','herb','sign']) art[id]=prop(id);
+  for (const id of ['rock','fire','chest','chestOpen','beacon','beaconLit','herb','sign','rune','runeRead','seal','sealLit','gate']) art[id]=prop(id);
   return art;
 }

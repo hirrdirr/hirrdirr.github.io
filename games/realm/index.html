@@ -14,12 +14,12 @@
   <div class="realm-shell">
     <header class="realm-header">
       <a href="/games/" class="back-link" aria-label="Tillbaka till Hirrdirrs spel">← <strong>hirrdirr</strong><span>/ spel</span></a>
-      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.1.0</small></div>
+      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.2.0</small></div>
       <button id="theme-button" class="icon-button" aria-label="Växla ljust eller mörkt tema" title="Växla tema">◐</button>
     </header>
     <main>
       <div class="world-heading">
-        <div><p class="eyebrow">ETT ÄVENTYR TAR SIN BÖRJAN</p><h1>Lyktdalen<span>.</span></h1></div>
+        <div><p class="eyebrow">KAPITEL 02 · GLÖDMYRENS HEMLIGHET</p><h1>Lyktdalen<span>.</span></h1></div>
         <nav aria-label="Spelmenyer" class="game-nav">
           <button data-panel="journal"><span>Uppdrag</span><kbd>J</kbd></button>
           <button data-panel="inventory"><span>Karaktär &amp; väska</span><kbd>I</kbd></button>
@@ -37,11 +37,13 @@
             <div class="meter experience" aria-label="Erfarenhet"><i id="xp-fill"></i></div>
           </div>
           <div class="zone-hud"><strong id="zone-name">Lyktdalen</strong><span id="zone-type">Trygg zon</span></div>
+          <div id="target-hud" class="target-hud" hidden><strong id="target-name"></strong><span id="target-hp"></span><div class="meter"><i id="target-fill"></i></div><small id="target-intent"></small></div>
           <button id="pause-button" class="pause-button" title="Pausa" aria-label="Pausa spelet">Ⅱ</button>
           <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
+          <div id="combo-hud" class="combo-hud" title="Tredje träffen i följd ger 35% mer skada"><span id="combo-count">◇◇◇</span><small>Huggkedja</small></div>
           <div class="hotbar" aria-label="Förmågor">
-            <button data-command="attack" title="Svärdshugg: närmaste fiende framför dig" aria-label="Svärdshugg (Space)"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>Hugg</small><i class="cooldown"></i></button>
-            <button data-command="burst" title="Lyktslag: träffar alla fiender nära dig" aria-label="Lyktslag (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lyktslag</small><i class="cooldown"></i></button>
+            <button data-command="attack" title="Hugg: valt mål inom räckhåll, annars närmaste. Tredje träffen ger +35% skada." aria-label="Svärdshugg (Space)"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>Hugg</small><i class="cooldown"></i></button>
+            <button data-command="burst" title="Lyktslag: träffar alla fiender nära dig och avbryter vanliga fienders attacker" aria-label="Lyktslag (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lyktslag</small><i class="cooldown"></i></button>
             <button data-command="dodge" title="Undanmanöver i rörelseriktningen" aria-label="Undanmanöver (Shift)"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>Undvik</small><i class="cooldown"></i></button>
             <button data-command="potion" title="Återställer 55 hälsa" aria-label="Drick läkedryck (R)"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">3 drycker</small><i class="cooldown"></i></button>
           </div>
@@ -51,12 +53,12 @@
         <aside class="journey-rail">
           <div class="rail-heading"><span class="eyebrow">DIN RESA</span><span id="gold-value">0 guld</span></div>
           <div id="quest-tracker" class="quest-tracker"></div>
-          <section class="map-section"><div class="map-title"><h2>Lyktdalen &amp; omnejd</h2><span>N ↑</span></div><canvas id="minimap" width="232" height="155" role="img" aria-label="Karta: byn i sydväst, bron i mitten och den gamla fyren i nordost"></canvas><div class="map-legend"><span>◇ Du</span><span>● Bybor</span><span>◆ Fyren</span></div></section>
+          <section class="map-section"><div class="map-title"><h2>Lyktdalen &amp; omnejd</h2><span>N ↑</span></div><canvas id="minimap" width="232" height="155" role="img" aria-label="Karta: byn i sydväst, bron i mitten och fyren i nordost och Glödmyren i sydost"></canvas><div class="map-legend"><span>◇ Du</span><span>● Bybor</span><span>◆ Runor</span><span>● Fiender</span></div></section>
           <div class="field-note"><span class="eyebrow">VANDRARENS ANTECKNING</span><p id="field-note">Alla vägar börjar med ett första steg. Elin väntar vid byns lykta.</p></div>
           <button class="rail-link" data-panel="help">Visa kontroller &amp; tips <span>↗</span></button>
         </aside>
       </div>
-      <footer class="game-footer"><div><span><kbd>W A S D</kbd> Förflytta</span><span><kbd>E</kbd> Prata / samla</span><span><kbd>SPACE</kbd> Attackera</span></div><span id="save-status" role="status">Din resa sparas på den här enheten</span></footer>
+      <footer class="game-footer"><div><span><kbd>W A S D</kbd> Förflytta</span><span><kbd>E</kbd> Prata / samla</span><span><kbd>SPACE</kbd> Attackera</span><span><kbd>TAB</kbd> Välj mål</span></div><span id="save-status" role="status">Din resa sparas på den här enheten</span></footer>
       <p class="pc-note">Designat för PC med tangentbord. Du kan öppna menyer på mindre skärmar.</p>
     </main>
     <div class="bottom-line"><span>En liten värld. Ett nytt äventyr.</span><span>Singleplayer · Lokal sparning · Tidig version</span></div>
@@ -64,8 +66,8 @@
   <dialog id="welcome" class="welcome-dialog" aria-labelledby="welcome-title">
     <div class="welcome-art"><span class="art-label">HIRRDIRR ORIGINAL</span></div>
     <div class="welcome-copy">
-      <p class="eyebrow">PROJECT REALM · KAPITEL 01</p><h2 id="welcome-title">Där lyktorna<br>fortfarande lyser.</h2>
-      <p>En by att återvända till. En skog att gå vilse i. Ett ljus som väntar på dig.</p>
+      <p class="eyebrow">PROJECT REALM · GAMEPLAY EVOLUTION</p><h2 id="welcome-title">Där lyktorna<br>fortfarande lyser.</h2>
+      <p>Bortom fyren glöder myren. Följ runorna, välj din väg och möt det som vaknat under rötterna.</p>
       <form id="start-form"><label for="character-name">Vad heter din vandrare?</label><input id="character-name" name="name" maxlength="18" autocomplete="off" placeholder="Ditt namn" value="Vandrare" required><button id="start-button" class="primary" type="submit">Börja din resa <span>→</span></button></form>
       <button id="new-from-welcome" class="text-button" hidden>Börja en ny resa</button>
       <p class="welcome-controls"><kbd>WASD</kbd> Förflytta <kbd>SPACE</kbd> Attackera <kbd>E</kbd> Prata</p>
