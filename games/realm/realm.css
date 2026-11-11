@@ -1267,3 +1267,68 @@ input,select {
   height:27px;
   display:block
 }
+
+/* Chapter two: compact target information and honest equipment comparisons. */
+.target-hud {
+  position: absolute;
+  top: 62px;
+  right: 18px;
+  width: 194px;
+  padding: 10px 12px;
+  color: #f3ecdb;
+  background: #192c29eb;
+  border: 1px solid #ae8c5f88;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.target-hud strong, .target-hud span, .target-hud small { display: block; }
+.target-hud strong { font-size: 11px; }
+.target-hud span { font-size: 9px; color: #d1c6ad; margin: 4px 0 5px; }
+.target-hud small { font-size: 9px; margin-top: 6px; color: #f0cc99; }
+.target-hud .meter i { background: #ce9877; }
+.combo-hud {
+  position: absolute;
+  bottom: 108px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fbe4ae;
+  text-align: center;
+  text-shadow: 0 1px 3px #142b26;
+  pointer-events: none;
+}
+.combo-hud span { letter-spacing: 5px; font-size: 15px; }
+.combo-hud small { display: block; font-size: 8px; letter-spacing: 1px; }
+.specialization { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line); }
+.specialization h4 { margin-bottom: 6px; font-size: 13px; }
+.specialization button {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  text-align: left;
+  padding: 9px;
+  background: var(--soft);
+}
+.specialization button[aria-pressed="true"] { border-color: var(--gold); }
+.specialization strong { display: block; font-size: 11px; margin-bottom: 5px; }
+.specialization span { color: var(--muted); font-size: 10px; line-height: 1.5; display: block; }
+.compare-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px; }
+.compare-table caption { text-align: left; font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+.compare-table th, .compare-table td { padding: 7px 3px; border-bottom: 1px solid var(--line); }
+.compare-table th { text-align: left; font-weight: 500; }
+.compare-table td { text-align: right; }
+.compare-table thead th:not(:first-child) { text-align: right; }
+.compare-table thead { color: var(--muted); }
+.stat-up { color: #abd4a3; }
+.stat-down { color: #e8ad95; }
+.light .stat-up { color: #316b37; }
+.light .stat-down { color: #9a4c32; }
+.detail-note { line-height: 1.6; }
+@media (max-width: 1150px) {
+  .target-hud { right: 10px; top: 54px; width: 166px; padding: 8px; }
+  .combo-hud { bottom: 98px; }
+}
+@media (max-width: 580px) {
+  .target-hud { top: 85px; right: 8px; width: 152px; padding: 6px; }
+  .target-hud small { font-size: 8px; }
+  .combo-hud { bottom: 91px; }
+}

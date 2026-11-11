@@ -1,3 +1,60 @@
+# v0.2.0 verification — 2026-11-11
+
+## Automated
+
+    node --test games/realm/tests/*.test.mjs
+
+**38 passed, 0 failed.** The 19 first-chapter tests remain in place. The
+19 additional checks cover:
+
+- Connected-hit combos, attack rate, target cycling and target priority.
+- Committed wolf pounces, travelling/colliding shots and sidestep avoidance.
+- Normal-enemy interrupts versus uninterrupted boss telegraphs.
+- Fixed eruption positions, the boss's second phase and attack cleanup on death.
+- Safe-camp healing, checkpoints and death/save restoration.
+- Level-3 specialization rules and their effect on actual combat statistics.
+- Both chapter-two quests through final reward, prerequisites, early exploration
+  and rejection of repeated rewards.
+- Duplicate-loot conversion and enemy-specific reward distribution.
+- A v1-shaped journey with completed chapter one, preserved original backup,
+  backup-storage failure, new-field validation, pending loot and cooldowns.
+- Collision-index equivalence to a full scan across the world.
+- A 3,600-tick, 80-ranged-enemy stress scenario with bounded projectiles,
+  eruption markers and visual effects.
+- Dodge direction during auto-aimed attacks.
+- A level-5 Myrhjärtat encounter with normal gear and potion cooldowns: multiple
+  telegraphs occur; avoidance wins with fewer hits and potions than trading hits.
+
+The original reachability check includes all added landmarks and enemy spawns.
+Production JavaScript syntax checks and git diff --check are run before commit.
+
+## Performance sample
+
+A new Node run advanced **36,000 ticks / 10 simulated minutes** with all
+**17 enemies**, repeated attacks, movement and invulnerability to keep the
+scenario running. Mean simulation time was **0.025 ms/tick**; the slowest
+3,600-tick block averaged **0.054 ms/tick** on this test host. Events were drained
+as they are by the game loop. The separate 80-enemy stress test checks bounds.
+
+These are CPU simulation measurements, not browser FPS or GPU guarantees.
+Cached terrain/sprites, the canvas resolution cap, 30/60 FPS selection and
+pausing while menus or background tabs are open remain in place.
+
+## Browser verification
+
+The phase-two Chromium pass on 2026-11-10 exercised a v0.1 journey through the
+supported import UI, continued play in the new content and retained progress
+after reload. It included rune discovery, new loot and leveling. It exposed an
+interaction/combo overlay overlap and a cramped camp exit, both fixed before
+this final pass. This supersedes the v0.1 reload limitation recorded below.
+
+A fresh 2026-11-11 smoke check covers v0.2 startup, the character panel and local
+save/reload. The complete chapter-two reward chain and boss balance are covered
+by simulation tests; a full unassisted end-to-end browser clear, independent
+listening test, Firefox and low-powered Windows hardware remain unverified.
+
+---
+
 # v0.1.0 verification — 2026-11-10
 
 ## Automated
