@@ -1,28 +1,27 @@
 {
-  "digest_date": "2026-11-10",
+  "digest_date": "2026-11-11",
   "articles": [
     {
+      "source": "CERT-SE",
+      "title": "Patchtisdag november 2026",
+      "url": "https://www.cert.se/2026/11/patchtisdag-november-2026.html"
+    },
+    {
       "source": "BleepingComputer",
-      "title": "SAP patches ICM2SHELL and PROXYGATE maximum severity flaws",
-      "url": "https://www.bleepingcomputer.com/news/security/sap-patches-four-maximum-severity-security-vulnerabilities/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/10/SAP.jpg"
+      "title": "N-able releases security hotfixes for zero-day vulnerabilities",
+      "url": "https://www.bleepingcomputer.com/news/security/n-able-releases-security-hotfixes-for-zero-day-vulnerabilities/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/10/N-able.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Update Chrome now to fix a flaw attackers are exploiting",
-      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/update-chrome-now-to-fix-a-flaw-attackers-are-exploiting",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
+      "title": "Muse sleep band users weren’t told their brain data was training AI",
+      "url": "https://www.malwarebytes.com/blog/ai/2026/11/muse-sleep-band-users-werent-told-their-brain-data-was-training-ai",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/muse-headband_d4e7e2.jpg"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "Apple Patches Everyting: November 2026 Edition, (Tue, Nov 10th)",
-      "url": "https://isc.sans.edu/diary/rss/33506"
-    },
-    {
-      "source": "BleepingComputer",
-      "title": "Hackers now exploit critical Barracuda ESG flaws to gain root access",
-      "url": "https://www.bleepingcomputer.com/news/security/hackers-exploit-barracuda-email-security-gateway-flaws-to-get-root-access/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/10/Barracuda.jpg"
+      "title": "ISC Stormcast For Wednesday, November 11th, 2026 https://isc.sans.edu/podcastdetail/10174, (Wed, Nov 11th)",
+      "url": "https://isc.sans.edu/diary/rss/33510"
     }
   ]
 }
