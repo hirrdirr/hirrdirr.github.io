@@ -1,5 +1,5 @@
 {
-  "digest_date": "2026-11-11",
+  "digest_date": "2026-11-12",
   "articles": [
     {
       "source": "CERT-SE",
@@ -8,20 +8,20 @@
     },
     {
       "source": "BleepingComputer",
-      "title": "N-able releases security hotfixes for zero-day vulnerabilities",
-      "url": "https://www.bleepingcomputer.com/news/security/n-able-releases-security-hotfixes-for-zero-day-vulnerabilities/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/10/N-able.jpg"
+      "title": "Apify rotates API tokens, prompts 2FA resets after breach",
+      "url": "https://www.bleepingcomputer.com/news/security/apify-rotates-api-tokens-prompts-2fa-resets-after-breach/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/12/Apify.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Muse sleep band users weren’t told their brain data was training AI",
-      "url": "https://www.malwarebytes.com/blog/ai/2026/11/muse-sleep-band-users-werent-told-their-brain-data-was-training-ai",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/muse-headband_d4e7e2.jpg"
+      "title": "Why scammers want you to allow push notifications",
+      "url": "https://www.malwarebytes.com/blog/mobile/2026/11/why-scammers-want-you-to-allow-notifications",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/push_not_Header.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Wednesday, November 11th, 2026 https://isc.sans.edu/podcastdetail/10174, (Wed, Nov 11th)",
-      "url": "https://isc.sans.edu/diary/rss/33510"
+      "title": "Exploit Attempts for GPUStack Authentication Bypass (CVE-2026-102895), (Thu, Nov 12th)",
+      "url": "https://isc.sans.edu/diary/rss/33514"
     }
   ]
 }
