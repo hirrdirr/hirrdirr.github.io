@@ -1441,3 +1441,19 @@ input,select {
   .hotbar button { width: 42px; flex-shrink: 1; min-width: 34px; }
   .hotbar small { font-size: 7px; }
 }
+
+/* Focused Realm 0.3.1a: confirmation is a real in-game modal, not a browser alert. */
+.realm-confirm-dialog {
+  width: min(440px, calc(100% - 32px));
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+}
+.realm-confirm-dialog h2 { font: 25px RealmSerif, Georgia, serif; margin: 8px 0 12px; }
+.realm-confirm-dialog p:not(.eyebrow) { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.realm-confirm-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.realm-confirm-actions button { min-width: 115px; }
+.talent-combat-notice { padding: 11px 14px; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); color: var(--ink); font-size: 12px; }
+.talent-combat-notice strong { color: var(--gold); font-variant-numeric: tabular-nums; }
