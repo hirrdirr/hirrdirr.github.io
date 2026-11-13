@@ -4,6 +4,7 @@ import { Renderer } from './renderer.js';
 import { UI } from './ui.js';
 import { AudioBus } from './audio.js';
 import { ITEMS, QUESTS, NPCS } from './data.js';
+import { TALENTS, availableTalentPoints } from './talents.js';
 const $=id=>document.getElementById(id);
 // Storage can throw even when merely accessing window.localStorage.
 let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('storage blocked');},setItem(){throw Error('storage blocked');}};}
@@ -25,12 +26,13 @@ function resume(){
   if(started&&!ui.isOpen&&!focusPaused&&!document.hidden&&!raf)raf=requestAnimationFrame(loop);
 }
 function processEvents() {
+  let needsSave=false;
   for(const event of state.events.splice(0)) {
     audio.play(event.type);
     if(event.type==='dialogue')ui.dialogue(event.id);
     else if(event.type==='message')ui.toast(event.text);
     else if(event.type==='item')ui.toast('+'+event.quantity+' '+ITEMS[event.id].name);
-    else if(event.type==='level')ui.toast('Nivå '+event.level+'! Din hälsa och attack har ökat.');
+    else if(event.type==='level')ui.toast('Nivå '+event.level+'! Din hälsa och attack har ökat.'+(event.level>=3?' '+availableTalentPoints(state.player)+' lediga talentpoäng · N':''));
     else if(event.type==='questAccepted')ui.toast('Nytt uppdrag · '+QUESTS[event.id].name);
     else if(event.type==='questReady')ui.toast('Uppdrag klart · Återvänd till '+NPCS.find(n=>n.id===QUESTS[event.id].npc).name);
     else if(event.type==='questDone'){ui.toast('Uppdrag slutfört · '+QUESTS[event.id].name);if(event.id==='beacon')ui.toast('Kapitel 01 avklarat. Signe väntar öster om bron!');if(event.id==='heart')ui.toast('Kapitel 02 avklarat. Myren andas igen!');}
@@ -40,12 +42,15 @@ function processEvents() {
     else if(event.type==='rune')ui.toast('Runsten läst · +18 XP');
     else if(event.type==='seal')ui.toast('Sigillet är återställt. Återvänd till Signe!');
     else if(event.type==='checkpoint')ui.toast('Full hälsa · Återkomstplats: '+event.name);
-    else if(event.type==='specialized')ui.toast('Din nya inriktning är vald.');
-    else if(event.type==='salvage')ui.toast(ITEMS[event.id].name+' finns redan i väskan · +'+event.gold+' guld');
+    else if(event.type==='talent')ui.toast(TALENTS[event.id].name+' · rank '+state.player.talents[event.id]+' inlärd');
+    else if(event.type==='respec')ui.toast('Dina talanger är återställda. '+availableTalentPoints(state.player)+' poäng att fördela.');
+    else if(event.type==='unequip')ui.toast(ITEMS[event.id].name+' avlagd');
+    else if(event.type==='trade')ui.toast(({buy:'Köpt',sell:'Sålt',buyback:'Återköpt'}[event.action])+' · '+ITEMS[event.id].name+' · '+(event.action==='sell'?'+':'−')+event.price+' guld');
     else if(event.type==='death'){save();ui.open('death');}
     else if(event.type==='respawn'){renderer.resetCamera();ui.view=null;ui.panel.close();}
-    if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','specialized','salvage','kill'].includes(event.type))save();
+    if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','talent','respec','unequip','trade','kill'].includes(event.type))needsSave=true;
   }
+  if(needsSave)save();
 }
 function dispatch(input) {
   if(!started)return;
@@ -98,12 +103,12 @@ function loop(now) {
   if(now-lastSave>15000){save();lastSave=now;}
   if(!ui.isOpen&&!focusPaused&&!document.hidden)raf=requestAnimationFrame(loop);
 }
-const shortcut={KeyQ:'burst',ShiftLeft:'dodge',ShiftRight:'dodge',KeyR:'potion',KeyE:'interact'};
+const shortcut={KeyQ:'burst',ShiftLeft:'dodge',ShiftRight:'dodge',KeyR:'potion',KeyE:'interact',Digit1:'guard',Digit2:'rush',Digit3:'bolt'};
 window.addEventListener('keydown',event=>{
   if(event.ctrlKey||event.metaKey||event.altKey||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;
   if(!started)return;
   if(ui.isOpen) {
-    if(!event.repeat&&['KeyI','KeyC','KeyJ','KeyP'].includes(event.code)){event.preventDefault();ui.close();}
+    if(!event.repeat&&['KeyI','KeyC','KeyJ','KeyN','KeyP'].includes(event.code)){event.preventDefault();ui.close();}
     return;
   }
   if(event.code==='Tab') {
@@ -117,6 +122,7 @@ window.addEventListener('keydown',event=>{
   if(shortcut[event.code])dispatch({type:shortcut[event.code]});
   else if(['KeyI','KeyC'].includes(event.code))ui.open('inventory');
   else if(event.code==='KeyJ')ui.open('journal');
+  else if(event.code==='KeyN')ui.open('talents');
   else if(['Escape','KeyP'].includes(event.code)){event.preventDefault();ui.open('settings');}
 });
 window.addEventListener('keyup',event=>keys.delete(event.code));
@@ -154,5 +160,5 @@ $('start-form').addEventListener('submit',event=>{
 });
 $('new-from-welcome').addEventListener('click',newJourney);
 if(loaded){$('character-name').value=state.player.name;$('character-name').disabled=true;$('start-button').textContent='Fortsätt resan · nivå '+state.player.level+' →';$('new-from-welcome').hidden=false;}
-if(saves.message){$('welcome-warning').textContent=saves.message;$('welcome-warning').hidden=false;warning();}
+if(saves.message||saves.notice){$('welcome-warning').textContent=saves.message||saves.notice;$('welcome-warning').hidden=false;warning();}
 renderer.render(state,0);ui.hud(renderer);$('welcome').showModal();

@@ -177,6 +177,7 @@ h1 span {
 }
 .viewport {
   position:relative;
+  width:100%;
   aspect-ratio:8/5;
   background:#334d3e;
   min-width:0;
@@ -1298,19 +1299,6 @@ input,select {
 }
 .combo-hud span { letter-spacing: 5px; font-size: 15px; }
 .combo-hud small { display: block; font-size: 8px; letter-spacing: 1px; }
-.specialization { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line); }
-.specialization h4 { margin-bottom: 6px; font-size: 13px; }
-.specialization button {
-  display: block;
-  width: 100%;
-  margin-top: 8px;
-  text-align: left;
-  padding: 9px;
-  background: var(--soft);
-}
-.specialization button[aria-pressed="true"] { border-color: var(--gold); }
-.specialization strong { display: block; font-size: 11px; margin-bottom: 5px; }
-.specialization span { color: var(--muted); font-size: 10px; line-height: 1.5; display: block; }
 .compare-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px; }
 .compare-table caption { text-align: left; font-size: 10px; color: var(--muted); margin-bottom: 8px; }
 .compare-table th, .compare-table td { padding: 7px 3px; border-bottom: 1px solid var(--line); }
@@ -1331,4 +1319,125 @@ input,select {
   .target-hud { top: 85px; right: 8px; width: 152px; padding: 6px; }
   .target-hud small { font-size: 8px; }
   .combo-hud { bottom: 91px; }
+}
+
+/* Trading and talent panels share the site's ink, parchment and lantern colors. */
+.merchant-panel { width: 960px; }
+.talents-panel { width: 1120px; }
+.panel-feedback { padding: 9px 12px; margin: -5px 0 14px; background: var(--soft); color: var(--gold); border-left: 2px solid var(--gold); font-size: 12px; }
+#panel-content .panel-hint { font-size: 11px; line-height: 1.65; }
+.trade-summary, .bag-heading, .buyback-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.trade-summary { margin-bottom: 23px; }
+.trade-summary p { font: italic 17px/1.5 RealmSerif, Georgia, serif !important; max-width: 420px; }
+.trade-summary strong { white-space: nowrap; font: 27px RealmSerif, Georgia, serif; color: var(--gold); }
+.trade-summary strong span { font: 12px system-ui, sans-serif; }
+.trade-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.trade-layout h3, .bag-heading h3 { font: 22px RealmSerif, Georgia, serif; margin-bottom: 6px; }
+.trade-bag { border-left: 1px solid var(--line); padding-left: 28px; }
+.bag-heading>span, .buyback-heading>span { font-size: 10px; color: var(--muted); }
+.stock-list { display: grid; gap: 6px; margin-top: 12px; }
+.stock-item { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; text-align: left; background: var(--soft); padding: 8px 10px; }
+.stock-icon { border-right: 1px solid var(--line); padding-right: 5px; }
+.stock-item strong { display: block; font-size: 12px; font-weight: 500; }
+.stock-item small { display: block; font-size: 9px; color: var(--muted); margin-top: 3px; }
+.stock-item b, .buyback-item b { font: 11px ui-monospace, monospace; color: var(--gold); white-space: nowrap; }
+.stock-item.selected, .buyback-item.selected { border-color: var(--gold); background: var(--bg); box-shadow: inset 3px 0 var(--gold); }
+.buyback-heading { margin: 20px 0 10px; border-top: 1px solid var(--line); padding-top: 16px; }
+.buyback-heading h4 { font-size: 12px; font-weight: 500; }
+.buyback-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.buyback-list>p { grid-column: 1/-1; }
+.buyback-item { display: flex; align-items: center; gap: 7px; text-align: left; padding: 6px; min-width: 0; }
+.buyback-item .item-icon { width: 23px; height: 23px; flex: 0 0 auto; }
+.buyback-item span { font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
+.buyback-item b { margin-left: auto; font-size: 10px; }
+.trade-detail { margin-top: 22px; padding: 20px 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px; }
+.trade-detail h3 { font: 24px RealmSerif, Georgia, serif; margin: 5px 0 7px; }
+.trade-detail p { line-height: 1.7; }
+.trade-detail .item-properties { color: var(--ink) !important; font-size: 11px !important; margin-top: 7px; }
+.trade-detail .compare-table { margin: 0; }
+.trade-actions { grid-column: 1/-1; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.gear-slot .text-button { display: block; font-size: 10px; padding-top: 5px; }
+.talent-inventory { grid-column: 1/-1; border-top: 1px solid var(--line); padding-top: 15px; margin: 10px 0; }
+.talent-inventory h4 { font-size: 13px; }
+.talent-inventory p { font-size: 11px !important; margin: 6px 0 10px; }
+.talent-inventory button { width: 100%; text-align: left; }
+.talent-inventory kbd { float: right; }
+.talent-summary { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+.talent-summary>div { display: flex; align-items: center; gap: 10px; padding-right: 22px; border-right: 1px solid var(--line); }
+.talent-summary strong { font: 40px RealmSerif, Georgia, serif; color: var(--gold); line-height: 1; }
+.talent-summary span { font-size: 11px; max-width: 45px; }
+.talent-summary p { line-height: 1.6; }
+.talent-summary small { font-size: 11px; }
+.talent-forest { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+.talent-tabs { display: none; }
+.talent-tree { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg); }
+.talent-tree header { display: flex; align-items: center; gap: 10px; padding: 15px 12px; border-bottom: 1px solid var(--line); background: var(--soft); min-height: 77px; }
+.talent-tree header>.item-icon { margin: 0; flex-shrink: 0; }
+.talent-tree header h3 { font: 20px RealmSerif, Georgia, serif; color: var(--tree-color); }
+.talent-tree header p { font-size: 9px !important; line-height: 1.4; margin-top: 4px; }
+.talent-tree header b { font: 20px RealmSerif, Georgia, serif; color: var(--tree-color); margin-left: auto; }
+.talent-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4,100px); gap: 14px 0; padding: 15px 5px; position: relative; background: radial-gradient(ellipse at top, #bda4720b, transparent 80%); }
+.talent-links { position: absolute; left: 5px; top: 15px; width: calc(100% - 10px); height: 442px; pointer-events: none; }
+.talent-links path { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.talent-links path.lit { stroke: var(--tree-color); opacity: .6; }
+.talent-node { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 0 4px; border: 0; border-radius: 4px; background: none; gap: 5px; min-width: 0; }
+.talent-node:hover { background: var(--soft); }
+.talent-icon { width: 54px; height: 54px; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--line); border-radius: 5px; position: relative; box-shadow: 0 2px 5px #0003; }
+.talent-node .item-icon { width: 36px; height: 36px; }
+.talent-icon em { position: absolute; right: -7px; bottom: -7px; background: var(--surface); color: var(--muted); border: 1px solid var(--line); padding: 1px 4px; border-radius: 3px; font: 10px ui-monospace,monospace; }
+.talent-node strong { margin-top: 4px; font-size: 11px; font-weight: 500; line-height: 1.3; background: var(--bg); padding: 1px 3px; }
+.talent-node small { color: var(--muted); font-size: 7px; letter-spacing: .5px; background: var(--bg); }
+.talent-node.locked .item-icon { opacity: .4; filter: grayscale(.8); }
+.talent-node.locked strong { color: var(--muted); }
+.talent-node.available .talent-icon { border-color: #9cbb86; }
+.talent-node.learned .talent-icon, .talent-node.maxed .talent-icon { border-color: var(--tree-color); }
+.talent-node.maxed em { color: var(--tree-color); border-color: var(--tree-color); }
+.talent-node.selected .talent-icon { outline: 1px solid var(--tree-color); outline-offset: 4px; box-shadow: 0 0 16px #dbbd7c20; }
+.talent-detail { display: grid; grid-template-columns: 1fr 245px; gap: 22px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.talent-description h3 { font: 25px RealmSerif, Georgia, serif; margin: 5px 0 8px; }
+.talent-description p { line-height: 1.65; }
+.talent-description .talent-next { color: var(--ink) !important; margin: 5px 0; }
+.talent-description .eyebrow { font-size: 9px !important; color: var(--gold) !important; }
+.talent-actions { display: grid; align-content: start; gap: 8px; }
+.talent-actions button { font-size: 12px; }
+.talent-actions p { text-align: center; }
+.buff-status { color: #f7dc9a; display: block; font-size: 9px; margin-top: 7px; }
+.light .talent-tree header h3, .light .talent-tree header b { color: var(--ink); }
+.light .talent-node.maxed em { color: var(--ink); }
+.just-learned .talent-icon { animation: talent-learn .5s ease-out; }
+@keyframes talent-learn { 50% { box-shadow: 0 0 18px var(--tree-color); transform: scale(1.09); } }
+@media (max-width: 900px) {
+  .talents-panel { padding: 18px; }
+  .talent-forest { gap: 8px; }
+  .talent-tree header { padding: 12px 8px; gap: 6px; }
+  .talent-tree header>.item-icon { width: 24px; height: 24px; }
+  .talent-tree header h3 { font-size: 17px; }
+  .talent-tree header p { font-size: 8px !important; }
+}
+@media (max-width: 680px) {
+  .talent-forest { grid-template-columns: 1fr; }
+  .talent-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .talent-tabs button { flex: 1; padding: 8px 5px; font-size: 12px; }
+  .talent-tabs button[aria-pressed="true"] { border-color: var(--gold); color: var(--ink); background: var(--soft); }
+  .talent-tree:not(.current-tree) { display: none; }
+  .talent-tree header h3 { font-size: 22px; }
+  .talent-tree header p { font-size: 11px !important; }
+  .talent-grid { max-width: 350px; margin: 0 auto; }
+  .talent-node strong { font-size: 12px; }
+  .talent-node small { font-size: 8px; }
+  .talent-detail { grid-template-columns: 1fr; gap: 15px; }
+  .talent-summary { gap: 12px; }
+  .talent-summary>div { padding-right: 12px; }
+  .talent-summary small { font-size: 10px; }
+  .trade-layout { grid-template-columns: 1fr; gap: 22px; }
+  .trade-bag { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 20px; }
+  .trade-detail { grid-template-columns: 1fr; }
+  .trade-summary p { font-size: 15px !important; }
+}
+@media (max-width: 580px) {
+  .world-heading { flex-wrap: wrap; }
+  .game-nav { flex-wrap: wrap; }
+  .hotbar { gap: 3px; padding: 4px; max-width: 98%; }
+  .hotbar button { width: 42px; flex-shrink: 1; min-width: 34px; }
+  .hotbar small { font-size: 7px; }
 }

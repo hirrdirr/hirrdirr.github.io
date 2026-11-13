@@ -1,3 +1,65 @@
+# v0.3.0 verification — 2026-11-13
+
+## Automated
+
+`node --test games/realm/tests/*.test.mjs`: **63 passed, 0 failed**.
+The earlier 38 checks remain, with obsolete specialization, duplicate-loot and
+sell-all expectations updated for the explicitly replaced behavior. The 25
+new checks exercise:
+
+- Merchant prices/stock/proximity, explicit quantities, gold limits, full bags,
+  full stacks, insufficient funds and failure without partial transfers.
+- One-copy sale, equipped/quest protection, rare confirmation, bounded buyback,
+  replay rejection, round-trip persistence and sold starter gear staying sold.
+- Atomic quest/chest item rewards and blocked loot remaining collectible.
+- Level-derived point budgets, rank caps, branch thresholds, dependencies,
+  combat/death gates, cross-branch builds and all 24 reachable talents.
+- Real damage, defense, health, haste, movement, cooldown, healing, critical,
+  combo, retaliation, rush, range and piercing effects.
+- Mira proximity, free first respec, subsequent fees, refunds and preserved
+  cooldowns; equipment/stat recomputation without stacking or free healing.
+- Offensive abilities outside safe areas and ranged hits provoking idle enemies.
+- v2 specialization migration, original backup preservation, malformed/excessive
+  allocations, over-capacity old bags and repaired buyback prices/IDs.
+- Shared item comparisons, visible prices, protected item actions and tree markup.
+
+Production JS syntax, SVG symbol references and `git diff --check` passed.
+The repository's existing Core Defense suite also passed: **93/93**.
+
+## Browser verification
+
+Chromium, 2026-11-12–13, using the supported import UI with a disposable QA save:
+
+- Opened Ivo's two-column shop, sold one of three amber, bought it back at the
+  same price, bought Runvävarens prisma, and saw immediate gold/item feedback.
+- Verified equipped weapon sale was disabled, unequipped and sold it, and saw
+  the quest-bound charm rejected with an explanation.
+- Opened the talent panel, learned multiple ranks in each branch, unlocked all
+  three active abilities and saw their buttons appear on the HUD.
+- Walked through the village and opened Mira's mentoring dialogue.
+- Confirmed a free reset returning 12 invested points, then a second reset
+  charging exactly 10 gold. Learned another rank and reloaded: gold, allocation,
+  free points and the future reset fee all remained correct.
+- Checked dark and light panels and a 390 × 820 iframe viewport. Fixed a narrow
+  canvas/aspect-ratio overflow and replaced stacked mobile trees with branch
+  tabs. Panel width fits without horizontal overflow; all seven ability buttons
+  fit within the 353-pixel game viewport. Branch switching and learning work.
+- No `/games/realm` JavaScript errors were captured in the final browser pass.
+
+The later safe-area/idle-aggro rule adjustments are covered by simulation tests.
+A full unassisted campaign clear, independent listening test, Firefox/Safari and
+low-powered Windows hardware have not been tested for this release.
+
+## Performance sample
+
+36,000 fixed ticks (10 simulated minutes), 17 enemies, a legal mixed talent
+build, movement and repeated attacks/abilities: **0.027 ms/tick** mean and
+**0.038 ms/tick** for the slowest 3,600-tick block on the test host. Events were
+drained each tick. The existing ranged-swarm/bounded-effects tests still pass.
+These are simulation CPU timings, not browser FPS or GPU guarantees.
+
+---
+
 # v0.2.0 verification — 2026-11-11
 
 ## Automated
