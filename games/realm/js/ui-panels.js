@@ -58,7 +58,7 @@ export function tradePanel(s, selection) {
 }
 export function talentPanel(s, selected, activeTree = 'guardian') {
   const p = s.player, free = availableTalentPoints(p), learned = spentTalentPoints(p);
-  let html = `<div class="talent-summary"><div><strong>${free}</strong><span>lediga poäng</span></div><p>Nivå ${p.level} · ${learned} av ${earnedTalentPoints(p.level)} poäng investerade<br><small>En poäng per nivå från nivå 3. Kombinera fritt mellan grenarna.</small></p></div>`;
+  let html = `<div class="talent-summary"><div><strong>${free}</strong><span>lediga poäng</span></div><p>Nivå ${p.level} · ${learned} av ${earnedTalentPoints(p.level)} poäng investerade<br><small>En poäng per nivå från nivå 3. Lär talanger var som helst; Mira hjälper dig att återställa poängen.</small></p></div>`;
   html += '<nav class="talent-tabs" aria-label="Talanggren">' + Object.entries(TALENT_TREES).map(([id, tree]) => `<button data-tree="${id}" aria-pressed="${id === activeTree}" title="${tree.name}">${{guardian:'Väktare',hunter:'Jägare',weaver:'Vävare'}[id]}</button>`).join('') + '</nav><div class="talent-forest">';
   for (const [treeId, tree] of Object.entries(TALENT_TREES)) {
     const nodes = Object.entries(TALENTS).filter(([, t]) => t.tree === treeId);
