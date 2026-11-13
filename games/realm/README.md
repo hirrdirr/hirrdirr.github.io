@@ -1,155 +1,165 @@
-# Project Realm — Lyktdalen, v0.2.0
+# Project Realm — Lyktdalen, v0.3.0
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## Gameplay Evolution
+## RPG Systems & World Evolution
 
-Continue an existing journey or start in Lyktdalen. After completing Elin's
-beacon quest, visit **Signe in Vandrarlägret**, east of the bridge. Follow the
-southern trail into **Glödmyren** to read three runestones, face ranged
-glödvingar, defeat **Myrhjärtat** and restore the old sluice's seal.
+**Ivo** now opens a dedicated trading window: his stock on the left, your bag
+on the right. Select an item, inspect its rarity, stats, equipment comparison
+and price, then buy or sell exactly one copy. The window stays open. The last
+eight sales can be bought back at their original sale price, including after
+reloading. There is no sell-all command or automatic conversion of equipment.
 
-- Two new linked quests, a safe camp/checkpoint and a fourth exploration cache.
-- Wolves telegraph directional pounces; glödvingar aim and fire travelling
-  projectiles; Myrhjärtat marks eruptions that remain where announced.
-  Below half health the boss marks a second eruption.
-- Every third connected sword hit deals 35% more damage. Lantern Strike
-  interrupts normal enemies; boss attacks still require avoidance.
-- Target selection and intent/health information, clearer hit effects and
-  directional sword animation. Attacks and projectiles respect obstacles.
-- Seven new item definitions, enemy-specific weighted loot and automatic gold
-  conversion for duplicate equipment drops. Equipment comparisons show the
-  actual change to health, damage, protection, attack rate, movement and dodge.
-- At level 3, choose Glödvandrare (+3 attack) or Rotväktare (+24 health,
-  +2 defense). Switch freely in either safe area.
-- Version 2 saves preserve pending loot, cooldowns, runes, specialization and
-  checkpoints. Existing saves migrate with an untouched versioned backup.
-- Spatially indexed collision queries and bounded projectiles/eruption markers.
+- Seven offers: a potion and six equipment choices, including the new Järnrot,
+  Skymningsväv and Runvävarens prisma. Protection, movement/attack rate and spell
+  damage are distinct choices; purchase prices always exceed sale prices.
+- Equipped items must be taken off first. The bound quest reward Fyrens hjärta
+  cannot be sold. Rare sales require confirmation.
+- The bag holds 16 different item stacks, each capped at 999 copies. Existing
+  overflowing saves retain their possessions. Buying existing stacks is still
+  possible when all slots are occupied. Quest/chest rewards remain unclaimed
+  if the complete reward cannot fit; nearby blocked loot stays on the ground.
+- Transaction validation checks item ownership, stock, quantity, proximity,
+  gold and capacity before moving either money or items. Stable buyback IDs
+  prevent replaying a completed buyback. Trades save immediately.
 
-## Existing first chapter
+Press **N** to open three visual talent trees, with eight talents each and
+four tiers. Icons, prerequisite lines, rank badges, tooltips and the selected
+node's current/next effect explain every investment. Desktop shows all trees;
+small screens offer branch tabs. Every talent has an implemented game effect.
 
-- A connected 1920 × 1280 world: safe village, mossy trail, river crossing,
-  forest and ancient beacon.
-- Three villagers: Elin gives a two-part quest chain, Mira heals and offers an
-  herb quest, and Ivo buys amber and sells healing potions.
-- Three enemy types, including the Rootbound Warden. Enemies wander, pursue,
-  telegraph attacks, return home and respawn when the player is far away.
-  The defeated boss stays defeated.
-- Sword attack, Lantern Strike, dodge and potions. Attacks face the nearest
-  target within melee range; the area attack hits all nearby enemies.
-- XP, levels (cap 20), three equipment slots, item information, loot and gold.
-  Stable item IDs and three rarities.
-- Three one-time exploration caches. Herbs collected before accepting Mira's
-  quest still count; early boss exploration cannot strand the final quest.
-- Death returns the player to the last rested lantern without losing progression.
-- Synthesized effects, volume control, 30/60 FPS selection, pause,
-  reduced-motion support and a minimap.
-- Local autosave, backup recovery and JSON export/import.
+| Branch | Play style | Active ability |
+| --- | --- | --- |
+| Lyktväktare | Health, defense, melee damage, potions, guarded retaliation | **1 — Lyktvärn:** temporary damage reduction |
+| Skymningsjägare | Attack rate, movement, critical hits, combos, kill healing | **2 — Skuggsprång:** a collision-aware rush and strike |
+| Runvävare | Area damage, recovery, healing, range, piercing projectiles | **3 — Glimtskott:** a travelling light projectile |
 
-This release is for a keyboard-equipped PC. The UI rearranges on narrow screens,
-but touch movement and controller input are not implemented. There are no online
-players, accounts, shared economy, interiors, character classes or backend.
+- Earn one point per level from level 3: at most 18 points at level 20.
+  A complete branch costs 15. Mix branches or specialize.
+- Deeper tiers require 3, 6 or 10 points in their own branch, alongside the
+  named prerequisite ranks. Investment is blocked during combat or death.
+- **Mira**, west of the village lantern, restores all invested points. The
+  first reset is free, subsequent resets cost 10 gold and require confirmation.
+  Resets cancel talent buffs/projectiles without refreshing cooldowns or healing.
+- The old two-choice specialization is retired. v0/v1/v2 journeys keep their
+  progress and receive their level's points unspent, with an untouched backup.
+- New abilities appear on the action bar only when learned. Guard status,
+  critical-hit feedback, projectile/rush effects and synthesized cues accompany
+  the systems. Offensive talent abilities require leaving the safe village/camp.
+- Equipment comparisons and character stats include talent effects. Unequipping
+  health gear clamps current health; equipping it again does not grant free healing.
+
+## Explore Lyktdalen and Glödmyren
+
+The connected 1920 × 1280 world includes a safe village, forest, river crossing,
+ancient beacon, camp and marsh. Start with **Elin** and **Mira**, follow the
+beacon quest, then meet **Signe** east of the bridge. Read the three marsh
+runestones, face **Myrhjärtat** and restore the sluice seal.
+
+- Five linked quests, four exploration caches, local discoveries and loot.
+- Five enemy types: ordinary melee, telegraphed wolf pounces, ranged glödvingar
+  and two bosses. Boss defeat persists; ordinary enemies eventually respawn.
+- Every third connected sword hit deals 35% extra base damage. Lyktslag
+  interrupts ordinary enemy attacks; boss telegraphs still require avoidance.
+- Select a target, read its intent and move or dodge away from warnings.
+- Death returns you to the last rested lantern with items, XP and quests intact.
+- Volume control, dark/light theme, reduced motion, minimap and 30/60 FPS options.
+
+This is a keyboard-equipped PC release. Menus adapt to narrow screens, but
+there is no touch movement or controller support. There are no online players,
+accounts, shared economy, interiors or backend. This phase expands RPG systems
+and combat styles within the existing world, rather than adding another zone.
 
 ## Controls
 
 | Input | Action |
 | --- | --- |
 | WASD / arrow keys | Move |
-| Space / left click on world | Sword attack |
-| Tab with the world focused / click an enemy | Select target; melee prioritizes it when in reach |
-| Q | Lantern Strike; 5-second cooldown |
-| Shift | Dodge in the current movement/facing direction |
-| R | Healing potion; 8-second cooldown |
-| E | Speak, gather, open, rest or light the beacon |
+| Space / left click on world | Sword attack; hold Space for a combo |
+| Tab with world focused / click enemy | Select target |
+| Q | Lyktslag / Lantern Strike |
+| Shift | Dodge in movement/facing direction |
+| R | Healing potion |
+| 1 / 2 / 3 | Learned talent abilities |
+| E | Speak, gather, open, rest or activate a landmark |
 | I / C | Character and inventory |
+| N | Talent trees |
 | J | Quest journal |
-| Esc / P | Pause and settings |
+| Esc / P | Pause/settings, or close a menu |
 
-Talk to **both Elin and Mira** before leaving the village. Follow the road east.
-The beacon is northeast, across the bridge. Enemy attack markers give time to
-move or dodge. Walk close to loot to collect it. Menus and inactive tabs pause
-the game. A pause overlay requires an explicit resume after focus loss.
+Menus pause the world. Inactive tabs and focus loss also pause; the focus
+overlay requires an explicit resume. Use one active game tab per browser profile.
 
 ## Run and test
 
-No build or installation is required for production. GitHub Pages serves the
-standalone HTML, CSS, native ES modules and WebP assets directly.
+Production requires no build or installation. GitHub Pages serves standalone
+HTML/CSS, native ES modules and WebP assets. From the repository root, run any
+static server, for example `python3 -m http.server 8000`, and open
+http://localhost:8000/games/realm/ (ES modules require HTTP).
 
-From the repository root, use any static HTTP server, for example:
-
-    python3 -m http.server 8000
-
-Open http://localhost:8000/games/realm/ (ES modules require HTTP).
-
-Run the dependency-free Node tests:
-
-    node --test games/realm/tests/*.test.mjs
-
-The dedicated GitHub Actions workflow runs these tests and syntax checks.
-See [verification.md](docs/verification.md) for the verification record.
-
-## Why Canvas and native JavaScript?
-
-This is a small 2D game on a static site. Canvas 2D, ES modules and standard DOM
-menus keep its download and deployment simple, fit the site's existing games,
-and require no runtime packages. Game rules have no browser dependencies and
-run unchanged in Node tests. A larger content scope can justify adopting a
-rendering engine later without rewriting the content and rule modules.
+Run `npm run test:realm`, or `node --test games/realm/tests/*.test.mjs`.
+The dedicated GitHub Actions workflow runs the tests and JS syntax checks.
+See [verification.md](docs/verification.md) for coverage and observed limitations.
 
 ## Source map
 
 | Module | Responsibility |
 | --- | --- |
-| js/data.js | Stable item, enemy, NPC and quest definitions |
-| js/world.js | Terrain, placements, safe zone, collision and world queries |
-| js/simulation.js | State, actions, combat, AI, progression and fixed ticks |
-| js/enemy-ai.js | Enemy intents, pounces, projectiles and eruption rules |
-| js/save.js | Save DTO, validation, v0/v1 migration and persistence adapter |
+| js/data.js | Stable item, enemy, NPC, loot and quest content |
+| js/talents.js | Talent definitions, effects, point budgets and rank validation |
+| js/inventory.js | Slot/stack capacity and complete reward preflight |
+| js/trading.js | Merchant stock, quotes, individual transactions and buyback |
+| js/world.js | Terrain, placements, safe areas and indexed collision queries |
+| js/simulation.js | Commands, player combat, progression and fixed ticks |
+| js/enemy-ai.js | Enemy intents, pounces, projectiles and eruptions |
+| js/save.js | Save DTO, validation, migrations and persistence adapter |
 | js/art.js | Original pixel sprites, rasterized once |
 | js/renderer.js | Cached ground, culled sprites, camera, effects and minimap |
-| js/ui.js | DOM dialogs, inventory, quests and HUD |
-| js/audio.js | On-demand Web Audio effects |
-| js/main.js | Input, lifecycle, fixed-step loop and adapter wiring |
+| js/ui-panels.js | Trading/talent markup and shared item comparisons |
+| js/ui.js | DOM dialogs, interaction, inventory, quests and HUD |
+| js/audio.js | Short on-demand Web Audio cues |
+| js/main.js | Input, lifecycle, fixed-step loop, events and adapter wiring |
+
+The rule/content modules have no browser dependencies and run unchanged in
+Node. See [architecture.md](docs/architecture.md) for future networking and
+desktop boundaries. No networking layer or credentials are included.
 
 ## Saves
 
-The primary key is **hirrdirr.realm.save**, with version **2**. The JSON envelope
-has version, savedAt and data fields. The DTO contains the player, equipment,
-inventory, quests, permanent world flags, discoveries, collected herbs, opened
-caches, play time and the simulation RNG seed. It also stores specialization,
-the selected checkpoint, read runestones, cooldowns and uncollected drops.
+The key remains **hirrdirr.realm.save**, now with schema version **3**. The DTO
+contains character progression, inventory/equipment, talent ranks, respec count,
+quests, permanent flags, discoveries, opened caches, herbs, runes, checkpoint,
+cooldowns, uncollected loot, buyback, elapsed time and the simulation RNG seed.
+Unspent points are derived from level and validated ranks, never trusted from JSON.
 
-Transient enemies, projectiles, eruption markers, combos and particles are not saved.
-Normal enemies reset on load; permanent boss defeat persists. This release
-does not promise exact encounter continuation or resistance to offline save editing.
+Enemies, projectiles, guard/retaliation buffs, eruption markers, combos and
+particles are transient. Normal enemies reset on load; boss defeat persists.
+This release does not promise exact encounter continuation or protection from
+intentional offline save editing.
 
-Autosave runs every 15 seconds during play, on important progression events,
-on visibility loss and page exit. Browser crashes or termination can still lose
-recent actions; export a JSON backup before clearing site data or switching PCs.
-Use one active game tab per browser profile.
+Autosave runs every 15 seconds, on progression, every successful trade/talent
+change/respec/equipment change, and on visibility loss/page exit. Progression
+events within one batch share a write. The UI warns if storage fails; export a
+JSON backup through the menu before clearing site data or changing computers.
 
-Before a successful write, the last readable save is kept under the .backup
-suffix. Unreadable raw data is retained under .recovery. A valid backup is loaded
-when possible. Future versions and unrecoverable corruption block automatic
-overwriting and show a visible warning. The player can export the temporary
-journey or explicitly confirm a new journey/import. Files above 256 KiB are
-rejected, IDs are whitelisted, values are bounded, and invalid positions fall
-back to the chosen checkpoint. Recognized v0/v1 envelopes are migrated. Before
-autosaving an older journey, its original is retained under .v0 or .v1. If that
-backup cannot be stored, play remains available but automatic overwriting is
-blocked and the player is prompted to export their progress.
+The previous readable save is retained as `.backup`; corrupted input is kept
+as `.recovery`. Future-version saves and unrecoverable corruption block automatic
+overwriting. Imports/new journeys require confirmation. Files above 256 KiB are
+rejected, IDs are whitelisted and values/positions validated. Old v0/v1/v2 saves
+get untouched `.v0`/`.v1`/`.v2` backups before autosave. If that backup cannot be
+written, the old original stays protected and the temporary journey can be exported.
+
+Version 3 never recreates sold starter equipment. Older over-capacity inventories
+are retained, invalid talent allocations are reconstructed within legal budgets,
+and saved buyback prices are validated against authored sale values.
 
 ## Performance
 
-The 60 Hz fixed simulation is independent of the selected render rate. Long
-frames are clamped to 100 ms; substepped movement prevents collider tunneling.
-The browser canvas is capped at 960 × 720 regardless of device pixel ratio.
-Static terrain uses an approximately 9.4 MiB cached canvas; sprites are cached
-at startup, offscreen objects are culled, and enemies/effects are bounded.
-HUD updates are limited to 10 Hz. Menus and focus/background pause cancel the
-animation loop. Audio only creates short-lived oscillators after user input.
-The 30 FPS setting lowers rendering work without changing the simulation.
-
-See [architecture.md](docs/architecture.md) for the multiplayer and desktop path.
-No networking layer or credentials are included in this release.
+Simulation runs at a fixed 60 Hz independently of render rate. Long frames are
+clamped to 100 ms, movement/projectiles are substepped, and the canvas is capped
+at 960 × 720 regardless of device pixel ratio. Static terrain and sprites are
+cached; offscreen sprites are culled. Player shots (6), enemy shots (32), hazards
+(12), effects (70), drops (64), events (100) and buyback (8) are bounded.
+HUD updates at most 10 times/second. Menus/background pause cancel the animation
+loop. The 30 FPS setting reduces drawing work without changing game rules.

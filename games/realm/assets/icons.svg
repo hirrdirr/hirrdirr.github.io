@@ -20,4 +20,22 @@
   <symbol id="dodge" viewBox="0 0 32 32">
     <path d="M18 3h9l-4 14 6 5v6H13l-4-5 7-9z" fill="#264b40"/><path d="M19 5h6l-4 13 6 5v3H14l-3-3 7-8z" fill="#c4ae74"/><path d="M19 5h4l-3 12h-4z" fill="#e1d3a1"/><path d="M13 23h14v3H13z" fill="#715b40"/><path d="M2 8h10v2H2zM5 14h7v2H5zM1 20h6v2H1z" fill="#a9bf9b"/>
   </symbol>
+  <symbol id="shield" viewBox="0 0 32 32"><path d="M3 5l13-4 13 4v14L16 31 3 19z" fill="#27463e"/><path d="M6 7l10-3 10 3v11L16 27 6 18z" fill="#c8ad71"/><path d="M9 9l7-2v16l-7-6z" fill="#f0dfa4"/><path d="M14 10h4v9h-4zM11 13h10v3H11z" fill="#65816d"/></symbol>
+  <symbol id="heart" viewBox="0 0 32 32"><path d="M3 5h9l4 4 4-4h9v13L16 30 3 18z" fill="#6b5145"/><path d="M5 7h6l5 5 5-5h6v10L16 27 5 17z" fill="#ca9b78"/><path d="M7 9h4v3H7zM14 13h4v10h-4zM10 16h12v4H10z" fill="#f0d2a2"/></symbol>
+  <symbol id="lantern" viewBox="0 0 32 32"><path d="M12 2h8v5h5v4h-2v14h4v4H5v-4h4V11H7V7h5z" fill="#40594a"/><path d="M12 11h8v13h-8z" fill="#d9b96f"/><path d="M15 12h3v10h-3zM14 2h4v4h-4z" fill="#fff0b6"/><path d="M7 7h18v3H7zM7 25h18v3H7z" fill="#c5a875"/></symbol>
+  <symbol id="bastion" viewBox="0 0 32 32"><path d="M3 3h5v5h5V3h6v5h5V3h5v25H3z" fill="#697e70"/><path d="M5 12h22v13H5z" fill="#b4b396"/><path d="M12 17h8v12h-8z" fill="#344e46"/><path d="M8 13h4v3H8zM20 13h4v3h-4zM14 9h4v4h-4z" fill="#edce8a"/></symbol>
+  <symbol id="counter" viewBox="0 0 32 32"><use href="#shield"/><path d="M15 7h12v8h-4v-4h-8v4H7l7-8v4h1z" fill="#fff0bd"/><path d="M16 18h9v4h-9z" fill="#86654e"/></symbol>
+  <symbol id="fang" viewBox="0 0 32 32"><path d="M3 5l9 4 4-6 4 6 9-4-2 18-11 8L5 23z" fill="#5c556e"/><path d="M6 9l8 5 2-6 2 6 8-5-3 12-7 7-7-7z" fill="#bbb0cd"/><path d="M10 16h4v3h-4zM18 16h4v3h-4z" fill="#efc678"/><path d="M13 22h6l-3 4z" fill="#443c57"/></symbol>
+  <symbol id="tempo" viewBox="0 0 32 32"><path d="M15 3h13l-8 9h8L9 30l5-15H4z" fill="#746d91"/><path d="M17 5h7l-9 10h7L12 25l5-13H9z" fill="#d9cce8"/><path d="M2 6h8v3H2zM1 18h8v3H1z" fill="#a393be"/></symbol>
+  <symbol id="eye" viewBox="0 0 32 32"><path d="M1 16l9-10h12l9 10-9 10H10z" fill="#554f6e"/><path d="M5 16l7-7h8l7 7-7 7h-8z" fill="#d5c8d9"/><path d="M13 10h7v12h-7z" fill="#89729f"/><path d="M15 12h3v8h-3z" fill="#302e4d"/><path d="M18 11h3v3h-3z" fill="#fff3d5"/></symbol>
+  <symbol id="boots" viewBox="0 0 32 32"><use href="#dodge"/></symbol>
+  <symbol id="combo" viewBox="0 0 32 32"><path d="M3 8l5-5v18l-5 5zM13 8l5-5v18l-5 5zM23 8l5-5v18l-5 5z" fill="#bcabcf"/><path d="M3 26h25v3H3z" fill="#e0bd79"/></symbol>
+  <symbol id="critical" viewBox="0 0 32 32"><path d="M16 1l4 10 11-6-6 12 6 8-12-3-3 9-4-10-11 5 6-11L2 7l10 4z" fill="#857097"/><path d="M16 7l3 8 6 1-6 4-3 5-3-7-5-2 6-3z" fill="#f3deaa"/></symbol>
+  <symbol id="rune" viewBox="0 0 32 32"><path d="M16 1l14 15-14 15L2 16z" fill="#365c59"/><path d="M16 4l11 12-11 12L5 16z" fill="#73b3a6"/><path d="M14 7h4v7h5v4h-5v7h-4v-7H9v-4h5z" fill="#dcf0cc"/><path d="M16 13l3 3-3 3-3-3z" fill="#427f77"/></symbol>
+  <symbol id="bolt" viewBox="0 0 32 32"><path d="M4 4l14 3 12 11-14 12-3-15z" fill="#4f9b92"/><path d="M4 4l17 11 5 3-9 8-2-11z" fill="#aedcd0"/><path d="M6 6l15 13-4 3zM2 20h5v3H2zM7 26h4v4H7z" fill="#eff2c5"/></symbol>
+  <symbol id="leaf" viewBox="0 0 32 32"><path d="M28 3v14L15 28H4V15L15 3z" fill="#3a6657"/><path d="M25 6v10L14 25H7V16L16 6z" fill="#91c9a4"/><path d="M23 8l2 2L5 30l-3-3zM12 10h3v10h-3zM16 19h8v3h-8z" fill="#d6e4b3"/></symbol>
+  <symbol id="ring" viewBox="0 0 32 32"><path d="M10 3h12l7 7v12l-7 7H10l-7-7V10z" fill="#6da99b"/><path d="M12 7h8l5 5v8l-5 5h-8l-5-5v-8z" fill="#1e4d45"/><path d="M14 11h4v10h-4zM11 14h10v4H11z" fill="#ddedbf"/></symbol>
+  <symbol id="crystal" viewBox="0 0 32 32"><path d="M10 2h12l8 13-14 16L2 15z" fill="#436b72"/><path d="M11 5h10l6 10-11 13L5 15z" fill="#8dcbbb"/><path d="M11 5l5 10-11 0zM16 15l5-10 6 10z" fill="#cfebce"/><path d="M16 15v13L5 15z" fill="#67a9a4"/></symbol>
+  <symbol id="pierce" viewBox="0 0 32 32"><path d="M6 3h4v26H6zM20 3h4v26h-4z" fill="#527c76"/><path d="M1 14h20V8l10 8-10 8v-6H1z" fill="#c0e0bd"/></symbol>
+  <symbol id="bloom" viewBox="0 0 32 32"><path d="M12 2h8v8h10v10H20v10h-8V20H2V10h10z" fill="#719f89"/><path d="M14 5h4v9h9v4h-9v9h-4v-9H5v-4h9z" fill="#cfe7b8"/><path d="M12 12h8v8h-8z" fill="#f4d995"/></symbol>
 </svg>

@@ -12,6 +12,19 @@ The renderer reads their directions and timers to show the same attacks the
 simulation resolves. Damage stays in the rules layer. Collision candidates use
 a 128-pixel cell index; tests compare it with a full scan of the authored world.
 
+In v0.3, talents.js owns the data-driven rank/prerequisite/point rules and
+stat effects. inventory.js checks slot and stack limits; trading.js validates
+merchant quotes and then commits one item/currency transfer. No DOM handler
+changes gold, items or talent ranks directly. ui-panels.js consumes the same
+rules for prices, disabled states, comparisons and talent descriptions.
+
+Buyback entries have stable IDs, consumed once. Quest/chest claims preflight the
+whole item bundle before changing progression. These synchronous local commands
+are consistent within one game session; they are not distributed transactions.
+A future server must add authenticated ownership, idempotency and durable atomic
+writes. The v3 save adapter reconstructs legal talent allocations and migrates
+older specialization saves to unspent points without trusting saved point totals.
+
 The renderer reads local state directly. This is a useful starting boundary,
 not a finished multiplayer SDK. A server needs its own trusted command
 validation, player/entity ownership and connection lifecycle.

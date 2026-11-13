@@ -1,13 +1,13 @@
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 export const ITEMS = Object.freeze({
-  trainingSword: { name: 'Vandrarsvärd', slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: 'En sliten klinga. Ett nytt kapitel.' },
-  linenCoat: { name: 'Resekappa', slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: 'Lätt nog för långa vandringar.' },
-  keeperBlade: { name: 'Lyktvaktens klinga', slot: 'weapon', rarity: 'uncommon', attack: 7, icon: 'sword', description: 'Smidd för att hålla mörkret på avstånd.' },
-  forestCoat: { name: 'Skogsväktarens mantel', slot: 'armor', rarity: 'uncommon', defense: 4, hp: 12, icon: 'armor', description: 'Mjuk mossa, starka sömmar.' },
-  moonBlade: { name: 'Månskärva', slot: 'weapon', rarity: 'rare', attack: 10, icon: 'sword', description: 'En gammal klinga med ett svalt sken.' },
-  beaconCharm: { name: 'Fyrens hjärta', slot: 'charm', rarity: 'rare', attack: 3, hp: 24, icon: 'charm', description: 'Ett litet ljus som aldrig ger upp.' },
-  potion: { name: 'Läkedryck', rarity: 'common', icon: 'potion', description: 'Återställer 55 hälsa. 8 sekunders återhämtning.' },
+  trainingSword: { value: 1, name: 'Vandrarsvärd', slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: 'En sliten klinga. Ett nytt kapitel.' },
+  linenCoat: { value: 1, name: 'Resekappa', slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: 'Lätt nog för långa vandringar.' },
+  keeperBlade: { value: 14, name: 'Lyktvaktens klinga', slot: 'weapon', rarity: 'uncommon', attack: 7, icon: 'sword', description: 'Smidd för att hålla mörkret på avstånd.' },
+  forestCoat: { value: 14, name: 'Skogsväktarens mantel', slot: 'armor', rarity: 'uncommon', defense: 4, hp: 12, icon: 'armor', description: 'Mjuk mossa, starka sömmar.' },
+  moonBlade: { value: 24, name: 'Månskärva', slot: 'weapon', rarity: 'rare', attack: 10, icon: 'sword', description: 'En gammal klinga med ett svalt sken.' },
+  beaconCharm: { questItem: true, name: 'Fyrens hjärta', slot: 'charm', rarity: 'rare', attack: 3, hp: 24, icon: 'charm', description: 'Ett litet ljus som aldrig ger upp.' },
+  potion: { value: 4, name: 'Läkedryck', rarity: 'common', icon: 'potion', description: 'Återställer 55 hälsa. 8 sekunders återhämtning.' },
   amber: { name: 'Skogsbärnsten', rarity: 'common', icon: 'amber', value: 4, description: 'Ivo köper dessa för 4 guld styck.' },
   swiftBlade: { name: 'Vargtand', slot: 'weapon', rarity: 'uncommon', attack: 7, haste: .20, value: 16, icon: 'sword', description: 'En lätt klinga för snabba, sammanhängande hugg.' },
   trailCharm: { name: 'Vandrarens vind', slot: 'charm', rarity: 'uncommon', speed: 12, recovery: .5, value: 14, icon: 'charm', description: 'Snabbare steg och kortare väntan mellan undanmanövrer.' },
@@ -15,11 +15,10 @@ export const ITEMS = Object.freeze({
   marshCoat: { name: 'Glödmyrens väktarmantel', slot: 'armor', rarity: 'rare', defense: 6, hp: 24, value: 24, icon: 'armor', description: 'Signes runor leder bort hettan från myren.' },
   emberCharm: { name: 'Glödvingens sigill', slot: 'charm', rarity: 'rare', attack: 2, haste: .12, value: 24, icon: 'charm', description: 'En varm sten som ger dina hugg en lättare rytm.' },
   emberBlade: { name: 'Askgryning', slot: 'weapon', rarity: 'rare', attack: 14, value: 30, icon: 'sword', description: 'Smidd ur myrens sista glöd. Början på nästa resa.' },
+  ironCharm: { name: 'Järnrot', slot: 'charm', rarity: 'uncommon', defense: 2, hp: 12, value: 18, icon: 'shield', description: 'Ett stadigt fäste när striden blir närgången.' },
+  runnerWrap: { name: 'Skymningsväv', slot: 'armor', rarity: 'uncommon', defense: 2, haste: .06, speed: 6, value: 20, icon: 'armor', description: 'Vävd för snabba steg, med mindre skydd än en tung mantel.' },
+  runeFocus: { name: 'Runvävarens prisma', slot: 'charm', rarity: 'uncommon', spellPower: .12, value: 22, icon: 'crystal', description: 'Förstärker skadan från Lyktslag och Glimtskott med 12%.' },
   emberShard: { name: 'Glödskärva', rarity: 'uncommon', icon: 'amber', value: 7, description: 'En svalnande glödsten. Ivo köper den för 7 guld.' }
-});
-export const SPECIALIZATIONS = Object.freeze({
-  ember: { name: 'Glödvandrare', description: '+3 attack. För dig som möter faran med klingan först.', attack: 3 },
-  root: { name: 'Rotväktare', description: '+24 maxhälsa och +2 försvar. Stå stadigt när skogen slår tillbaka.', hp: 24, defense: 2 }
 });
 export const ENEMIES = Object.freeze({
   sprout: { name: 'Taggrot', behavior: 'melee', level: 1, hp: 36, attack: 6, speed: 48, xp: 16, gold: 3, aggro: 135, leash: 200, radius: 12, cooldown: 1.6 },
@@ -28,7 +27,7 @@ export const ENEMIES = Object.freeze({
   wisp: { name: 'Glödvinge', behavior: 'ranged', level: 4, hp: 92, attack: 17, speed: 49, xp: 34, gold: 7, aggro: 225, leash: 260, radius: 12, cooldown: 2.1 },
   ancient: { name: 'Myrhjärtat', behavior: 'eruption', level: 6, hp: 1350, attack: 44, speed: 30, xp: 145, gold: 40, aggro: 220, leash: 270, radius: 24, cooldown: 2.4, boss: true, flag: 'ancientDefeated' }
 });
-// One weighted drop per kill. Already-owned equipment becomes gold on pickup.
+// One weighted drop per kill. Copies stay in the bag for individual trading.
 export const LOOT_TABLES = Object.freeze({
   sprout: [['amber', 68], ['potion', 25], ['barkCoat', 7]],
   wolf: [['amber', 60], ['potion', 22], ['swiftBlade', 10], ['trailCharm', 8]],
@@ -53,8 +52,8 @@ export const QUESTS = Object.freeze({
 });
 export const NPCS = Object.freeze([
   { id: 'elin', name: 'Elin', role: 'Lyktvakt', x: 528, y: 832, color: 'gold', greeting: 'Välkommen till Lyktdalen. Så länge byns lykta brinner finns det en väg hem.' },
-  { id: 'mira', name: 'Mira', role: 'Örtkännare', x: 352, y: 768, color: 'rose', greeting: 'Skogen bär både sår och läkedom. Vila här en stund; jag ser till att du blir hel igen.' },
-  { id: 'ivo', name: 'Ivo', role: 'Handlare', x: 640, y: 784, color: 'blue', greeting: 'En flaska i väskan är värd två på hyllan. Jag köper din bärnsten och dina glödskärvor.' },
+  { id: 'mira', name: 'Mira', role: 'Örtkännare & mentor', x: 352, y: 768, color: 'rose', greeting: 'Skogen bär både sår och läkedom. Vila här en stund; jag ser till att du blir hel igen.' },
+  { id: 'ivo', name: 'Ivo', role: 'Handlare', x: 640, y: 784, color: 'blue', greeting: 'En flaska i väskan är värd två på hyllan. Visa mig det du vill sälja, eller se vad jag har på hyllorna.' },
   { id: 'signe', name: 'Signe', role: 'Runvandrare', x: 1264, y: 768, color: 'rose', greeting: 'Jag såg fyren tändas. Nu svarar något under myren. Vila vid lägrets lykta innan du följer glöden söderut.' }
 ]);
 export const SPAWN = Object.freeze({ x: 448, y: 880 });

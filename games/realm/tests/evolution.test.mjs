@@ -78,13 +78,11 @@ test('safe camp heals, sets a checkpoint, blocks enemy damage, and survives deat
   s.player.dead=true;s.player.hp=0;const copy=deserialize(serialize(s));command(copy,{type:'respawn'});
   assert.equal(copy.player.x,CHECKPOINTS.camp.x);assert.equal(copy.player.y,CHECKPOINTS.camp.y);assert.equal(copy.player.dead,false);
 });
-test('specialization unlocks at level three, changes real stats and only switches in safe zones',()=>{
-  const s=createGame();assert.equal(command(s,{type:'specialize',id:'root'}),false);giveXP(s,155);
-  const before=stats(s.player);assert.equal(command(s,{type:'specialize',id:'root'}),true);
-  assert.equal(stats(s.player).maxHp,before.maxHp+24);assert.equal(stats(s.player).defense,before.defense+2);
-  assert.equal(command(s,{type:'specialize',id:'ember'}),true);assert.equal(stats(s.player).attack,before.attack+3);
-  s.player.x=1504;s.player.y=648;assert.equal(command(s,{type:'specialize',id:'root'}),false);
-  assert.equal(deserialize(serialize(s)).player.specialization,'ember');
+test('level three grants the first talent and the old specialization command is retired',()=>{
+  const s=createGame();assert.equal(command(s,{type:'learnTalent',id:'vigor'}),false);giveXP(s,155);
+  const before=stats(s.player);assert.equal(command(s,{type:'learnTalent',id:'vigor'}),true);
+  assert.equal(stats(s.player).maxHp,before.maxHp+8);assert.equal(command(s,{type:'specialize',id:'ember'}),false);
+  assert.deepEqual(deserialize(serialize(s)).player.talents,{vigor:1});
 });
 test('chapter two: prerequisite, runes, four glödvingar, equipment, boss, seal and final reward',()=>{
   const s=createGame();npc(s,'signe');assert.equal(command(s,{type:'accept',id:'embers'}),false);
@@ -107,10 +105,10 @@ test('early rune and permanent boss exploration counts when later accepting ques
   command(s,{type:'accept',id:'embers'});assert.equal(s.quests.embers.progress[0],3);
   s.quests.embers.status='done';command(s,{type:'accept',id:'heart'});assert.equal(questReady(s,'heart'),true);
 });
-test('duplicate dropped equipment becomes gold, while a first copy stays useful',()=>{
+test('duplicate dropped equipment stays in the bag for individual sale',()=>{
   const s=createGame();s.drops=[{id:1,x:s.player.x,y:s.player.y,item:'swiftBlade',life:90}];step(s);
   assert.equal(s.player.inventory.swiftBlade,1);s.drops=[{id:2,x:s.player.x,y:s.player.y,item:'swiftBlade',life:90}];step(s);
-  assert.equal(s.player.inventory.swiftBlade,1);assert.equal(s.player.gold,16);
+  assert.equal(s.player.inventory.swiftBlade,2);assert.equal(s.player.gold,0);
 });
 test('enemy loot rolls produce differentiated rewards at sane frequencies',()=>{
   const {s,e}=alone('wisp'),counts={};
@@ -126,7 +124,7 @@ test('real v1 shape migrates without losing chapter one progress, and its origin
   const storage=memory({[SAVE_KEY]:raw}),store=new SaveStore(storage),s=store.load();
   assert.equal(s.player.name,'V1-vandrare');assert.equal(s.player.level,4);assert.equal(s.player.xp,27);assert.equal(s.player.hp,112);
   assert.equal(s.player.equipment.charm,'beaconCharm');assert.equal(s.quests.beacon.status,'done');assert.equal(s.flags.ancientDefeated,false);
-  assert.deepEqual(s.runes,[]);assert.equal(s.player.specialization,null);assert.equal(s.enemies.filter(e=>e.hp>0&&e.type==='wisp').length,5);
+  assert.deepEqual(s.runes,[]);assert.deepEqual(s.player.talents,{});assert.equal(s.enemies.filter(e=>e.hp>0&&e.type==='wisp').length,5);
   assert.equal(storage.getItem(SAVE_KEY+'.v1'),raw);assert.equal(store.save(s),true);assert.equal(JSON.parse(storage.getItem(SAVE_KEY)).version,SAVE_VERSION);
   store.load();store.save(s);assert.equal(storage.getItem(SAVE_KEY+'.v1'),raw);
 });
@@ -135,11 +133,11 @@ test('migration backup storage failure keeps a valid journey playable and origin
   const store=new SaveStore({getItem:k=>k===SAVE_KEY?raw:null,setItem(){throw Error('quota');}});
   assert.equal(store.load().player.name,'Quota');assert.equal(store.blocked,true);assert.equal(store.save(createGame()),false);
 });
-test('v2 preserves pending loot and cooldowns, and repairs unknown new fields',()=>{
+test('current saves preserve pending loot and cooldowns, and repairs unknown new fields',()=>{
   const {s,e}=alone('ancient');defeat(s,e);s.player.cooldowns.potion=6.4;
   const copy=deserialize(serialize(s));assert.equal(copy.drops.length,1);assert.equal(copy.drops[0].item,'emberCharm');assert.equal(copy.player.cooldowns.potion,6.4);
   const raw=JSON.parse(serialize(s));raw.data.player.specialization='__proto__';raw.data.player.checkpoint='lost';raw.data.runes=['rune1','rune1','fake'];
-  const repaired=deserialize(JSON.stringify(raw));assert.equal(repaired.player.specialization,null);assert.equal(repaired.player.checkpoint,'village');assert.deepEqual(repaired.runes,['rune1']);
+  const repaired=deserialize(JSON.stringify(raw));assert.equal(Object.hasOwn(repaired.player,'specialization'),false);assert.equal(repaired.player.checkpoint,'village');assert.deepEqual(repaired.runes,['rune1']);
 });
 test('spatial collision index agrees with a full obstacle scan across the entire world',()=>{
   const original=(x,y,r)=>{
@@ -169,7 +167,7 @@ test('chapter-two boss lasts several telegraphs and rewards avoidance over tradi
   const fights=[];
   for(const avoid of [false,true]) {
     const s=createGame(),e=s.enemies.find(e=>e.type==='ancient');s.enemies=[e];
-    Object.assign(s.player,{x:e.x-60,y:e.y,level:5,specialization:'ember',inventory:{potion:3},equipment:{weapon:'moonBlade',armor:'marshCoat',charm:'beaconCharm'}});
+    Object.assign(s.player,{x:e.x-60,y:e.y,level:5,inventory:{potion:3},equipment:{weapon:'moonBlade',armor:'marshCoat',charm:'beaconCharm'}});
     s.player.hp=stats(s.player).maxHp;
     let seconds=0,hits=0;
     while(e.hp>0&&!s.player.dead&&seconds<45) {

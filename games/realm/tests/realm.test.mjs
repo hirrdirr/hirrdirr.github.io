@@ -93,10 +93,11 @@ test('boss and beacon progression work even when explored before taking the ques
   s.quests.roots={status:'done',progress:[5]};atNPC(s,'elin');command(s,{type:'accept',id:'beacon'});assert.equal(questReady(s,'beacon'),true);
   command(s,{type:'complete',id:'beacon'});assert.equal(s.player.inventory.beaconCharm,1);
 });
-test('shop requires proximity, enough gold and consumable material',()=>{
-  const s=createGame();s.player.gold=24;assert.equal(command(s,{type:'buy'}),false);atNPC(s,'ivo');
-  assert.equal(command(s,{type:'buy'}),true);assert.equal(s.player.gold,12);assert.equal(s.player.inventory.potion,4);
-  s.player.inventory.amber=3;command(s,{type:'sell'});assert.equal(s.player.gold,24);assert.equal(command(s,{type:'sell'}),false);
+test('shop requires proximity and an explicit item; selling transfers one copy',()=>{
+  const s=createGame();s.player.gold=24;assert.equal(command(s,{type:'buy',id:'potion'}),false);atNPC(s,'ivo');
+  assert.equal(command(s,{type:'buy',id:'potion'}),true);assert.equal(s.player.gold,12);assert.equal(s.player.inventory.potion,4);
+  s.player.inventory.amber=3;command(s,{type:'sell',id:'amber'});assert.equal(s.player.gold,16);assert.equal(s.player.inventory.amber,2);
+  assert.equal(command(s,{type:'sell'}),false);
 });
 test('save round-trip restores progress, gear, discoveries, name, death and boss state',()=>{
   const s=createGame('Åsa <test>');giveXP(s,200);s.player.inventory.forestCoat=1;command(s,{type:'equip',id:'forestCoat'});s.quests.roots={status:'active',progress:[3]};s.chests=['chest2'];s.harvested=['herb1'];s.flags.wardenDefeated=true;

@@ -1,29 +1,49 @@
-import { ITEMS, QUESTS, NPCS, RARITIES, SPECIALIZATIONS, ENEMIES, xpForLevel } from './data.js';
+import { ITEMS, QUESTS, NPCS, RARITIES, ENEMIES, xpForLevel } from './data.js';
 import { stats, questReady, nearestInteraction } from './simulation.js';
-import { zoneAt, inSafe } from './world.js';
+import { zoneAt } from './world.js';
+import { TALENTS, availableTalentPoints, spentTalentPoints, talentRank, respecCost } from './talents.js';
+import { BAG_SLOTS, occupiedSlots } from './inventory.js';
+import { escapeHTML, itemStats, bagButton, compareEquipment, tradePanel, talentPanel } from './ui-panels.js';
+export { escapeHTML } from './ui-panels.js';
 const $ = id => document.getElementById(id);
-export const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const itemIcon = name => '<svg class="item-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#'+name+'"></use></svg>';
-const itemStats = item => [item.attack?'+'+item.attack+' attack':'',item.defense?'+'+item.defense+' försvar':'',item.hp?'+'+item.hp+' maxhälsa':'',item.haste?'+'+Math.round(item.haste*100)+'% attackhastighet':'',item.speed?'+'+Math.round(item.speed/158*100)+'% rörelsefart':'',item.recovery?'−'+item.recovery+' s mellan undanmanövrer':''].filter(Boolean).join(' · ');
 const rewardsText = q => q.rewards.xp+' XP · '+q.rewards.gold+' guld · '+Object.entries(q.rewards.items).map(([id,n])=>(n>1?n+' × ':'')+ITEMS[id].name).join(' · ');
 function setText(id,value) {const el=$(id);if(el.textContent!==String(value))el.textContent=String(value);}
 export class UI {
   constructor(getState,actions) {
     this.state=getState;this.actions=actions;this.panel=$('panel');this.view=null;this.selected='trainingSword';this.lastTracker='';this.lastMap=0;
+    this.tradeSelection={side:'stock',id:'potion'};this.selectedTalent='vigor';this.activeTree='guardian';
     document.querySelectorAll('[data-panel]').forEach(button=>button.addEventListener('click',()=>this.open(button.dataset.panel)));
     $('close-panel').addEventListener('click',()=>this.close());
-    this.panel.addEventListener('close',()=>{this.view=null;actions.resume();});
+    this.panel.addEventListener('close',()=>{this.view=null;actions.resume();$('world').focus({preventScroll:true});});
     this.panel.addEventListener('cancel',e=>{if(this.view==='death')e.preventDefault();});
     $('panel-content').addEventListener('click',event=>{
       const b=event.target.closest('button');if(!b||b.disabled)return;
-      if(b.dataset.item){this.selected=b.dataset.item;this.inventory();document.querySelector('[data-item="'+this.selected+'"]')?.focus();return;}
+      const focusKey=Object.entries(b.dataset).find(([key])=>['item','stock','saleItem','buybackItem','talent','tree','action'].includes(key));
+      const scroll=this.panel.scrollTop;
+      const restore=()=>{this.panel.scrollTop=scroll;if(focusKey)Array.from($('panel-content').querySelectorAll('button')).find(el=>el.dataset[focusKey[0]]===focusKey[1]&&!el.disabled)?.focus({preventScroll:true});};
+      if(b.dataset.item){this.selected=b.dataset.item;this.inventory();restore();return;}
+      if(b.dataset.talent){this.selectedTalent=b.dataset.talent;this.activeTree=TALENTS[this.selectedTalent].tree;this.talents();restore();return;}
+      if(b.dataset.tree){this.activeTree=b.dataset.tree;this.selectedTalent=Object.keys(TALENTS).find(id=>TALENTS[id].tree===this.activeTree);this.talents();restore();return;}
+      for(const [key,side] of [['stock','stock'],['saleItem','bag'],['buybackItem','buyback']])if(b.dataset[key]){this.tradeSelection={side,id:b.dataset[key]};this.merchant();restore();return;}
       if(b.dataset.action) {
         const action=b.dataset.action;
-        if(['accept','complete','equip','buy','sell','respawn','potion','specialize'].includes(action)) {
-          actions.command({type:action,id:b.dataset.id});
+        if(action==='talents'){this.open('talents');return;}
+        if(['accept','complete','equip','unequip','buy','sell','buyback','respawn','potion','learnTalent','respec'].includes(action)) {
+          let confirm=false;
+          if(action==='sell'&&ITEMS[b.dataset.id]?.rarity==='rare'){
+            confirm=window.confirm('Sälja 1 '+ITEMS[b.dataset.id].name+' för '+ITEMS[b.dataset.id].value+' guld? Föremålet läggs i Ivos återköpslista.');if(!confirm)return;
+          }
+          if(action==='respec'){
+            const p=this.state().player,cost=respecCost(p);
+            confirm=window.confirm('Återställa '+spentTalentPoints(p)+' investerade poäng? '+(cost?'Det kostar '+cost+' guld.':'Din första återställning är gratis.'));if(!confirm)return;
+          }
+          actions.command({type:action,id:b.dataset.id,slot:b.dataset.slot,merchant:'ivo',confirm});
           if(action==='respawn'){this.close();return;}
           if(this.view==='inventory')this.inventory();
           else if(this.view==='dialogue')this.dialogue(this.npcId);
+          else if(this.view==='merchant')this.merchant();
+          else if(this.view==='talents'){this.talents();if(action==='learnTalent')$('panel-content').querySelector('[data-talent="'+b.dataset.id+'"]').classList.add('just-learned');}
+          restore();
         } else actions[action]?.();
       }
     });
@@ -39,49 +59,38 @@ export class UI {
   open(view) {
     if(!this.actions.started())return;
     if(this.state().player.dead&&view!=='death')view='death';
+    if(this.view!==view){this.panel.scrollTop=0;$('panel-feedback').hidden=true;}
     this.view=view;
     if(view==='inventory')this.inventory();
     else if(view==='journal')this.journal();
     else if(view==='settings')this.settings();
     else if(view==='help')this.help();
+    else if(view==='talents')this.talents();
+    else if(view==='merchant')this.merchant();
     else if(view==='death')this.death();
     if(!this.panel.open)this.panel.showModal();
     this.actions.pause();
   }
   close(){if(this.view==='death')return;this.panel.close();}
-  heading(kicker,title){$('panel-kicker').textContent=kicker;$('panel-title').textContent=title;$('close-panel').hidden=this.view==='death';}
+  heading(kicker,title){$('panel-kicker').textContent=kicker;$('panel-title').textContent=title;$('close-panel').hidden=this.view==='death';this.panel.classList.toggle('merchant-panel',this.view==='merchant');this.panel.classList.toggle('talents-panel',this.view==='talents');}
+  merchant(){this.heading('IVO · HANDLARE I LYKTDALEN','Ivos handelsbod');$('panel-content').innerHTML=tradePanel(this.state(),this.tradeSelection);}
+  talents(){this.heading('TRE VÄGAR · EN VANDRARE','Dina talanger');$('panel-content').innerHTML=talentPanel(this.state(),this.selectedTalent,this.activeTree);}
   inventory() {
     const s=this.state(),p=s.player,st=stats(p),item=ITEMS[this.selected],equipped=item?.slot&&p.equipment[item.slot]===this.selected;
     this.heading('LYKTVANDRARE · NIVÅ '+p.level,'Karaktär & väska');
-    let html='<div class="inventory-layout"><section class="character-sheet"><h3>'+escapeHTML(p.name)+'</h3><dl class="stat-list"><dt>Hälsa</dt><dd>'+Math.ceil(p.hp)+' / '+st.maxHp+'</dd><dt>Attack</dt><dd>'+st.attack+'</dd><dt>Försvar</dt><dd>'+st.defense+'</dd><dt>Hugg / sekund</dt><dd>'+ (1/st.attackCooldown).toFixed(2) +'</dd><dt>Rörelsefart</dt><dd>'+Math.round(st.speed/158*100)+'%</dd><dt>Undanmanöver</dt><dd>'+st.dodgeCooldown.toFixed(1)+' s</dd><dt>Erfarenhet</dt><dd>'+p.xp+' / '+xpForLevel(p.level)+'</dd><dt>Guld</dt><dd>'+p.gold+'</dd></dl><div>';
-    for(const [slot,label] of [['weapon','Vapen'],['armor','Rustning'],['charm','Amulett']])html+='<div class="gear-slot"><small>'+label+'</small>'+escapeHTML(ITEMS[p.equipment[slot]]?.name||'Ingen utrustad')+'</div>';
-    html+='</div><div class="specialization"><h4>Din inriktning</h4>';
-    if(p.level<3) html+='<p>Vid nivå 3 väljer du din väg. Varje nivå ger +16 maxhälsa och +2 attack.</p>';
-    else {
-      html+='<p>Byt fritt i byn eller Signes läger.</p>';
-      for(const [id,choice] of Object.entries(SPECIALIZATIONS))html+='<button data-action="specialize" data-id="'+id+'" aria-pressed="'+(p.specialization===id)+'" '+(!inSafe(p.x,p.y)?'disabled':'')+'><strong>'+choice.name+'</strong><span>'+choice.description+'</span></button>';
-    }
-    html+='</div></section><section><p>Välj ett föremål för information och utrustning.</p><div class="inventory-grid">';
-    for(const [id,count] of Object.entries(p.inventory).filter(([,n])=>n>0)) {
-      const data=ITEMS[id],worn=Object.values(p.equipment).includes(id);
-      html+='<button class="item-button '+data.rarity+(this.selected===id?' selected':'')+'" data-item="'+id+'" aria-label="'+escapeHTML(data.name)+(worn?', utrustad':'')+', antal '+count+'" aria-pressed="'+(this.selected===id)+'"><span class="item-symbol" aria-hidden="true">'+itemIcon(data.icon)+'</span>'+(worn?'<em>UTR.</em>':'')+'<small>'+count+'</small></button>';
-    }
-    html+='</div><div class="item-detail">';
+    let html='<div class="inventory-layout"><section class="character-sheet"><h3>'+escapeHTML(p.name)+'</h3><dl class="stat-list">';
+    for(const [label,value] of [['Hälsa',Math.ceil(p.hp)+' / '+st.maxHp],['Huggskada',Math.round(st.attack*st.meleeMultiplier)],['Försvar',st.defense],['Kritisk chans',Math.round(st.critChance*100)+'%'],['Hugg / sekund',(1/st.attackCooldown).toFixed(2)],['Lyktslag',Math.round(st.attack*st.burstMultiplier)],['Rörelsefart',Math.round(st.speed/158*100)+'%'],['Undanmanöver',st.dodgeCooldown.toFixed(2)+' s'],['Erfarenhet',p.level===20?'Maxnivå':p.xp+' / '+xpForLevel(p.level)],['Guld',p.gold]])html+='<dt>'+label+'</dt><dd>'+value+'</dd>';
+    html+='</dl><div>';
+    for(const [slot,label] of [['weapon','Vapen'],['armor','Rustning'],['charm','Amulett']])html+='<div class="gear-slot"><small>'+label+'</small>'+escapeHTML(ITEMS[p.equipment[slot]]?.name||'Ingen utrustad')+(p.equipment[slot]?'<button class="text-button" data-action="unequip" data-slot="'+slot+'" aria-label="Ta av '+ITEMS[p.equipment[slot]].name+'">Ta av</button>':'')+'</div>';
+    html+='</div><div class="talent-inventory"><h4>Din väg</h4><p>'+(p.level<3?'Din första talentpoäng väntar på nivå 3.':availableTalentPoints(p)+' lediga · '+spentTalentPoints(p)+' investerade poäng')+'</p><button data-action="talents">Öppna talanger <kbd>N</kbd></button></div></section><section><div class="bag-heading"><h3>Din väska</h3><span>'+occupiedSlots(p)+' / '+BAG_SLOTS+' fack</span></div><p>Välj ett föremål för information. Lika föremål delar fack.</p><div class="inventory-grid">';
+    for(const [id,count] of Object.entries(p.inventory))if(count>0)html+=bagButton(p,id,this.selected===id);
+    html+='</div><div class="item-detail" aria-live="polite">';
     if(item&&p.inventory[this.selected]) {
-      html+='<span class="item-rarity '+item.rarity+'">'+RARITIES[item.rarity]+'</span><h3>'+item.name+'</h3><p>'+item.description+'</p><p>'+itemStats(item)+'</p>';
+      html+='<span class="item-rarity '+item.rarity+'">'+RARITIES[item.rarity]+(item.questItem?' · Bunden till uppdrag':'')+'</span><h3>'+item.name+'</h3><p>'+item.description+'</p><p>'+itemStats(item)+'</p><p>'+(item.questItem?'Kan inte säljas.':'Säljvärde: '+item.value+' guld per exemplar hos Ivo.')+'</p>';
       if(item.slot) {
-        if(!equipped) {
-          const next=stats({...p,equipment:{...p.equipment,[item.slot]:this.selected}});
-          html+='<table class="compare-table"><caption>Hela karaktären före → efter byte</caption><thead><tr><th>Egenskap</th><th>Nu</th><th>Med fyndet</th></tr></thead><tbody>';
-          for(const [key,label,format,lower] of [['attack','Attack',v=>v],['maxHp','Maxhälsa',v=>v],['defense','Försvar',v=>v],['attackCooldown','Hugg / sekund',v=>(1/v).toFixed(2),true],['speed','Rörelsefart',v=>Math.round(v/158*100)+'%'],['dodgeCooldown','Undanmanöver',v=>v.toFixed(1)+' s',true]]) {
-            const delta=next[key]-st[key],good=lower?delta<0:delta>0;
-            if(delta!==0)html+='<tr><th>'+label+'</th><td>'+format(st[key])+'</td><td class="'+(good?'stat-up':'stat-down')+'">'+format(next[key])+'</td></tr>';
-          }
-          html+='</tbody></table>';
-          if(item.slot==='weapon')html+='<p class="detail-note">Hugg i följd: tredje träffen ger 35% mer skada. Lyktslag använder vapnets attackvärde.</p>';
-        }
-        html+='<button class="primary" data-action="equip" data-id="'+this.selected+'" '+(equipped?'disabled':'')+'>'+(equipped?'Utrustad':'Utrusta')+'</button>';
-      } else if(this.selected==='potion')html+='<button data-action="potion" '+(p.hp>=st.maxHp||p.cooldowns.potion>0?'disabled':'')+'>Drick läkedryck</button>';
+        html+=compareEquipment(p,this.selected);
+        html+='<button class="primary" data-action="'+(equipped?'unequip':'equip')+'" data-slot="'+item.slot+'" data-id="'+this.selected+'">'+(equipped?'Ta av':'Utrusta')+'</button>';
+      } else if(this.selected==='potion')html+='<button data-action="potion" '+(p.hp>=st.maxHp||p.cooldowns.potion>0?'disabled':'')+'>Drick läkedryck · +'+st.potionHealing+' hälsa</button>';
     } else html+='<p>Välj ett föremål ovan.</p>';
     $('panel-content').innerHTML=html+'</div></section></div>';
   }
@@ -106,12 +115,9 @@ export class UI {
     const npc=NPCS.find(n=>n.id===id);if(!npc)return;
     this.view='dialogue';this.npcId=id;this.heading(npc.role.toUpperCase(),npc.name);
     const s=this.state(),greeting=id==='signe'&&!s.flags.beaconLit?'Fyren i norr har tystnat. Hjälp Elin att väcka den, så kan vi följa ljuset söderut tillsammans.':id==='signe'&&s.flags.sealRestored?'Myren andas igen. Du har gett oss tid att förstå vad som väntar bortom slussen.':npc.greeting;let html='<p class="dialogue-greeting">“'+greeting+'”</p>';
-    if(id==='ivo') {
-      const value=(s.player.inventory.amber||0)*4+(s.player.inventory.emberShard||0)*7;
-      html+='<p style="margin-top:16px">Du har '+s.player.gold+' guld. Bärnsten säljs för 4 guld, glödskärvor för 7 guld.</p><div class="shop-actions"><button class="primary" data-action="buy" '+(s.player.gold<12?'disabled':'')+'>Köp läkedryck · 12 guld</button><button data-action="sell" '+(!value?'disabled':'')+'>Sälj alla fynd · '+value+' guld</button></div>';
-    }
-    else html+=Object.entries(QUESTS).filter(([,q])=>q.npc===id).map(([qid])=>this.questHTML(qid,true)).join('');
-    if(id==='mira')html+='<p>Din hälsa är återställd. Välkommen tillbaka när du behöver vila.</p>';
+    if(id==='ivo'){this.open('merchant');return;}
+    html+=Object.entries(QUESTS).filter(([,q])=>q.npc===id).map(([qid])=>this.questHTML(qid,true)).join('');
+    if(id==='mira')html+='<p>Din hälsa är återställd. Jag kan också hjälpa dig att välja en ny väg. Första återställningen av dina talanger är gratis, därefter 10 guld.</p><button class="primary" data-action="talents">Studera & återställ talanger</button>';
     $('panel-content').innerHTML=html;
     if(!this.panel.open)this.panel.showModal();
     this.actions.pause();
@@ -123,14 +129,15 @@ export class UI {
   }
   help() {
     this.heading('PACKA LÄTT. HÅLL LYKTAN NÄRA.','Kontroller & tips');
-    const controls=[['WASD / Pilar','Förflytta dig'],['Space / Klick','Hugg inom räckhåll. Håll Space för en kedja: tredje träffen ger +35% skada.'],['Tab / Klick på fiende','Välj mål. Space prioriterar det valda målet inom räckhåll.'],['Q','Lyktslag: områdesattack som avbryter vanliga fienders attacker, 5 s återhämtning'],['Shift','Undanmanöver, 2,5 s återhämtning'],['R','Läkedryck: +55 hälsa, 8 s återhämtning'],['E','Prata, läs runor, samla, öppna kistor och aktivera lyktor'],['I / C','Karaktär, utrustning och väska'],['J','Uppdragsjournal'],['Esc / P','Pausa och öppna menyn']];
-    $('panel-content').innerHTML='<p>Prata med Elin vid byns lykta och Mira väster om henne. Ta båda uppdragen innan du går österut.</p><table class="help-table">'+controls.map(([key,description])=>'<tr><td><kbd>'+key+'</kbd></td><td>'+description+'</td></tr>').join('')+'</table><p class="help-tip">Orange markeringar visar fiendens nästa slag. Flytta dig eller använd Shift innan slaget landar. Loot plockas upp när du går nära. Vila vid en lykta för full hälsa och en ny återkomstplats. Extra exemplar av utrustning från fiender blir automatiskt guld.</p><p style="margin-top:14px">Menyer och en inaktiv flik pausar världen. Vid död återvänder du till din senaste lykta med föremål och XP kvar. Välj en inriktning i karaktärspanelen vid nivå 3. Efter fyren väntar Signe i lägret öster om bron: följ hennes runor in i Glödmyren.</p>';
+    const controls=[['WASD / Pilar','Förflytta dig'],['Space / Klick','Hugg inom räckhåll. Håll Space för en kedja: tredje träffen ger +35% skada.'],['Tab / Klick på fiende','Välj mål. Space prioriterar det valda målet inom räckhåll.'],['Q','Lyktslag: områdesattack som avbryter vanliga fienders attacker, 5 s återhämtning'],['Shift','Undanmanöver, 2,5 s återhämtning'],['R','Läkedryck: +55 hälsa, 8 s återhämtning'],['E','Prata, läs runor, samla, öppna kistor och aktivera lyktor'],['I / C','Karaktär, utrustning och väska'],['N','Talangträd: en poäng per nivå från nivå 3'],['1 / 2 / 3','Lyktvärn / Skuggsprång / Glimtskott, när talangen har lärts'],['J','Uppdragsjournal'],['Esc / P','Pausa och öppna menyn']];
+    $('panel-content').innerHTML='<p>Prata med Elin vid byns lykta och Mira väster om henne. Ta båda uppdragen innan du går österut.</p><table class="help-table">'+controls.map(([key,description])=>'<tr><td><kbd>'+key+'</kbd></td><td>'+description+'</td></tr>').join('')+'</table><p class="help-tip">Orange markeringar visar fiendens nästa slag. Flytta dig eller använd Shift innan slaget landar. Loot plockas upp när du går nära. Vila vid en lykta för full hälsa och en ny återkomstplats. Extra exemplar av utrustning sparas i väskan. Hos Ivo väljer du ett föremål i taget att sälja, köpa eller återköpa. Utrustning måste tas av innan den säljs. Väskan rymmer 16 olika föremål; lika fynd staplas.</p><p style="margin-top:14px">Menyer och en inaktiv flik pausar världen. Vid död återvänder du till din senaste lykta med föremål och XP kvar. Öppna talanger med N från nivå 3. Kombinera grenarna och besök Mira om du vill återställa poängen. Efter fyren väntar Signe i lägret öster om bron: följ hennes runor in i Glödmyren.</p>';
   }
   death() {
     this.heading('LYKTAN VISAR VÄGEN HEM','Du föll i strid');
     $('panel-content').innerHTML='<div class="death-message"><h3>Din resa är inte över.</h3><p>Lyktans ljus leder dig tillbaka till din senaste viloplats. Du behåller din utrustning, XP och uppdragsprogression.</p><button class="primary" data-action="respawn">Återvänd till '+(this.state().player.checkpoint==='camp'?'Vandrarlägret':'Lyktdalen')+' →</button></div>';
   }
   toast(text) {
+    if(this.panel.open){$('panel-feedback').textContent=text;$('panel-feedback').hidden=false;}
     const toast=document.createElement('div');toast.className='toast';toast.textContent=text;
     const container=$('toasts');container.append(toast);while(container.children.length>3)container.firstChild.remove();
     setTimeout(()=>toast.remove(),4500);
@@ -140,9 +147,11 @@ export class UI {
     setText('player-name',p.name);setText('player-level','Nivå '+p.level);setText('health-value',Math.ceil(p.hp)+' / '+st.maxHp);
     $('health-fill').style.width=(p.hp/st.maxHp*100).toFixed(1)+'%';$('xp-fill').style.width=(p.xp/xpForLevel(p.level)*100).toFixed(1)+'%';
     setText('gold-value',p.gold+' guld');setText('potion-count',(p.inventory.potion||0)+' drycker');setText('zone-name',zone.name);setText('zone-type',zone.subtitle);
-    for(const [type,max] of [['attack',st.attackCooldown],['burst',5],['dodge',st.dodgeCooldown],['potion',8]]) {
-      const b=document.querySelector('[data-command="'+type+'"]');b.querySelector('.cooldown').style.height=(p.cooldowns[type]/max*100).toFixed(0)+'%';
+    for(const [type,max] of [['attack',st.attackCooldown],['burst',st.burstCooldown],['dodge',st.dodgeCooldown],['potion',8],['guard',st.guardCooldown],['rush',st.rushCooldown],['bolt',st.boltCooldown]]) {
+      const b=document.querySelector('[data-command="'+type+'"]');if(['guard','rush','bolt'].includes(type))b.hidden=!talentRank(p,type);b.querySelector('.cooldown').style.height=(Math.min(1,p.cooldowns[type]/max)*100).toFixed(0)+'%';
     }
+    $('buff-status').hidden=p.guardTime<=0&&p.counterTime<=0;setText('buff-status',p.counterTime>0?'Återsken redo · '+p.counterTime.toFixed(1)+' s':'Lyktvärn · '+p.guardTime.toFixed(1)+' s');
+    document.querySelector('[data-command="potion"]').title='Återställer '+st.potionHealing+' hälsa';
     const enemy=s.enemies.find(e=>e.id===s.targetId&&e.hp>0),targetHUD=$('target-hud');
     targetHUD.hidden=!enemy;
     if(enemy){
@@ -165,9 +174,9 @@ export class UI {
       else if(s.quests.beacon?.status==='done')tracker='<section class="quest-card"><h3>En röst från myren</h3><p>Signe väntar i Vandrarlägret, strax öster om bron. Följ vägen söderut från skogsstigen.</p></section>';
       else tracker='<section class="quest-card"><h3>En ny början</h3><p>Prata med Elin vid byns lykta.<br>Mira har också ett uppdrag.</p></section>';
     }
-    if(p.level>=3&&!p.specialization)tracker+='<section class="quest-card"><h3>Välj din väg</h3><p>Öppna Karaktär (I) i en trygg zon och välj en inriktning.</p></section>';
+    if(availableTalentPoints(p))tracker+='<section class="quest-card"><h3>'+availableTalentPoints(p)+' lediga talentpoäng</h3><p>Öppna Talanger (N) och utveckla din vandrare.</p></section>';
     if(tracker!==this.lastTracker){$('quest-tracker').innerHTML=tracker;this.lastTracker=tracker;}
-    setText('field-note',zone.id==='marsh'?'Glödvingarnas skott färdas rakt. Rör dig åt sidan, använd träden och följ runornas ljus.':zone.id==='camp'?'Vila vid lyktan med E. Här kan du byta inriktning och återvända om du faller.':zone.safe?'Här kan du andas ut. Bybornas lykta ger värme, vila och en väg tillbaka.':zone.id==='ruins'?'Väktaren slår hårt, men långsamt. Läs marken. Lämna plats åt rötterna.':'Gå utanför stigen ibland. Skogen gömmer mer än det som jagar dig.');
+    setText('field-note',zone.id==='marsh'?'Glödvingarnas skott färdas rakt. Rör dig åt sidan, använd träden och följ runornas ljus.':zone.id==='camp'?'Vila vid lyktan med E. Här återvänder du om du faller. Mira i byn hjälper dig med dina talanger.':zone.safe?'Här kan du andas ut. Bybornas lykta ger värme, vila och en väg tillbaka.':zone.id==='ruins'?'Väktaren slår hårt, men långsamt. Läs marken. Lämna plats åt rötterna.':'Gå utanför stigen ibland. Skogen gömmer mer än det som jagar dig.');
     renderer.renderMap(s);
   }
 }

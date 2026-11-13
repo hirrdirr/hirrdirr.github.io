@@ -160,19 +160,25 @@ export class Renderer {
       g.fillStyle='#a9634e';g.fillRect(shot.x-shot.vx*.025-4,shot.y-shot.vy*.025-4,8,8);
       g.fillStyle='#f0b572';g.fillRect(shot.x-4,shot.y-4,8,8);g.fillStyle='#fff0c3';g.fillRect(shot.x-2,shot.y-2,4,4);
     }
+    for(const shot of s.playerShots) if(visible(shot)) {
+      g.strokeStyle='#7bcdbb';g.lineWidth=3;g.beginPath();g.moveTo(shot.x-shot.vx*.035,shot.y-shot.vy*.035);g.lineTo(shot.x,shot.y);g.stroke();
+      g.fillStyle='#d5f2ce';g.beginPath();g.moveTo(shot.x,shot.y-6);g.lineTo(shot.x+6,shot.y);g.lineTo(shot.x,shot.y+6);g.lineTo(shot.x-6,shot.y);g.fill();
+    }
     for(const fx of s.effects) {
       g.globalAlpha=Math.min(1,fx.life*3);
-      if(['slash','finisher','burst','slam','eruption'].includes(fx.type)) {
-        const slash=['slash','finisher'].includes(fx.type),radius=slash?60:fx.type==='eruption'?62:100;
+      if(['slash','finisher','burst','slam','eruption','guard'].includes(fx.type)) {
+        const slash=['slash','finisher'].includes(fx.type),radius=slash?60:fx.radius||(fx.type==='eruption'?62:100);
         g.strokeStyle=['slam','eruption'].includes(fx.type)?'#efb080':fx.type==='burst'?'#cce6a4':fx.type==='finisher'?'#fff7d7':'#f9e6b2';g.lineWidth=fx.type==='finisher'?8:slash?5:3;
         g.beginPath();
         const angle=fx.angle||0;
         g.arc(fx.x,fx.y,radius*(1-fx.life/fx.maxLife*.35),slash?angle-1.1:0,slash?angle+1.1:Math.PI*2);g.stroke();
+      } else if(fx.type==='rush') {
+        g.strokeStyle='#c6b6df';g.lineWidth=5;g.setLineDash([8,8]);g.beginPath();g.moveTo(fx.fromX,fx.fromY-12);g.lineTo(fx.x,fx.y-12);g.stroke();g.setLineDash([]);
       } else if(fx.type==='impact') {
         const size=(1-fx.life/fx.maxLife)*19+3;g.fillStyle='#fff1c5';
         for(let n=0;n<6;n++)g.fillRect(fx.x+Math.cos(n*Math.PI/3)*size-2,fx.y+Math.sin(n*Math.PI/3)*size-2,4,4);
       } else {
-        this.label(g,fx.text,fx.x,fx.y-(1-fx.life/fx.maxLife)*25,fx.type==='hurt'?'#ffc0a8':fx.type==='damage'?'#fff3d7':'#cde6a0',fx.type==='level'?18:14);
+        this.label(g,fx.text,fx.x,fx.y-(1-fx.life/fx.maxLife)*25,fx.type==='hurt'?'#ffc0a8':fx.type==='critical'?'#ffe2a1':fx.type==='damage'?'#fff3d7':'#cde6a0',['level','critical'].includes(fx.type)?18:14);
       }
       g.globalAlpha=1;
     }
@@ -219,6 +225,8 @@ export class Renderer {
   }
   player(g,p,s) {
     this.shadow(g,p.x,p.y,30);
+    if(p.guardTime>0){g.strokeStyle='#f0d18e';g.lineWidth=2;g.beginPath();g.ellipse(p.x,p.y-19,25,31,0,0,Math.PI*2);g.stroke();}
+    if(p.counterTime>0){g.fillStyle='#fff0be';for(const dx of [-30,30])g.fillRect(p.x+dx-2,p.y-22,4,9);}
     const moving=p.moving&&!this.reduced,frame=moving?1+Math.floor(s.time*8)%2:0;
     g.save();
     if(p.invulnerable>.3&&Math.floor(s.time*15)%2)g.globalAlpha=.6;

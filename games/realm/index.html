@@ -14,15 +14,16 @@
   <div class="realm-shell">
     <header class="realm-header">
       <a href="/games/" class="back-link" aria-label="Tillbaka till Hirrdirrs spel">← <strong>hirrdirr</strong><span>/ spel</span></a>
-      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.2.0</small></div>
+      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.3.0</small></div>
       <button id="theme-button" class="icon-button" aria-label="Växla ljust eller mörkt tema" title="Växla tema">◐</button>
     </header>
     <main>
       <div class="world-heading">
-        <div><p class="eyebrow">KAPITEL 02 · GLÖDMYRENS HEMLIGHET</p><h1>Lyktdalen<span>.</span></h1></div>
+        <div><p class="eyebrow">DIN VANDRARE · DIN VÄG</p><h1>Lyktdalen<span>.</span></h1></div>
         <nav aria-label="Spelmenyer" class="game-nav">
           <button data-panel="journal"><span>Uppdrag</span><kbd>J</kbd></button>
           <button data-panel="inventory"><span>Karaktär &amp; väska</span><kbd>I</kbd></button>
+          <button data-panel="talents"><span>Talanger</span><kbd>N</kbd></button>
           <button data-panel="settings" aria-label="Öppna spelmenyn"><span>Meny</span><kbd>Esc</kbd></button>
         </nav>
       </div>
@@ -34,7 +35,7 @@
             <div class="player-hud-top"><span class="portrait" aria-hidden="true"><img src="./assets/realm-mark.svg" width="20" height="26" alt=""></span><div><strong id="player-name">Vandrare</strong><small>Lyktvandrare · <span id="player-level">Nivå 1</span></small></div></div>
             <div class="vital-label"><span>HÄLSA</span><span id="health-value">100 / 100</span></div>
             <div class="meter health"><i id="health-fill"></i></div>
-            <div class="meter experience" aria-label="Erfarenhet"><i id="xp-fill"></i></div>
+            <div class="meter experience" aria-label="Erfarenhet"><i id="xp-fill"></i></div><small id="buff-status" class="buff-status" hidden></small>
           </div>
           <div class="zone-hud"><strong id="zone-name">Lyktdalen</strong><span id="zone-type">Trygg zon</span></div>
           <div id="target-hud" class="target-hud" hidden><strong id="target-name"></strong><span id="target-hp"></span><div class="meter"><i id="target-fill"></i></div><small id="target-intent"></small></div>
@@ -46,6 +47,9 @@
             <button data-command="burst" title="Lyktslag: träffar alla fiender nära dig och avbryter vanliga fienders attacker" aria-label="Lyktslag (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lyktslag</small><i class="cooldown"></i></button>
             <button data-command="dodge" title="Undanmanöver i rörelseriktningen" aria-label="Undanmanöver (Shift)"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>Undvik</small><i class="cooldown"></i></button>
             <button data-command="potion" title="Återställer 55 hälsa" aria-label="Drick läkedryck (R)"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">3 drycker</small><i class="cooldown"></i></button>
+            <button data-command="guard" hidden title="Minskar inkommande skada. Förbättras i Lyktväktarens träd." aria-label="Lyktvärn (1)"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>Lyktvärn</small><i class="cooldown"></i></button>
+            <button data-command="rush" hidden title="Rusar mot ett mål inom räckhåll och fri sikt." aria-label="Språng (2)"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>Språng</small><i class="cooldown"></i></button>
+            <button data-command="bolt" hidden title="Skjuter en ljusruna mot ditt mål eller i riktningen du tittar." aria-label="Glimtskott (3)"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>Glimtskott</small><i class="cooldown"></i></button>
           </div>
           <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
           <div id="focus-overlay" class="focus-overlay" hidden><span>Äventyret är pausat</span><button id="resume-focus" class="primary">Fortsätt</button></div>
@@ -66,15 +70,15 @@
   <dialog id="welcome" class="welcome-dialog" aria-labelledby="welcome-title">
     <div class="welcome-art"><span class="art-label">HIRRDIRR ORIGINAL</span></div>
     <div class="welcome-copy">
-      <p class="eyebrow">PROJECT REALM · GAMEPLAY EVOLUTION</p><h2 id="welcome-title">Där lyktorna<br>fortfarande lyser.</h2>
-      <p>Bortom fyren glöder myren. Följ runorna, välj din väg och möt det som vaknat under rötterna.</p>
+      <p class="eyebrow">PROJECT REALM · RPG SYSTEMS & WORLD EVOLUTION</p><h2 id="welcome-title">Där lyktorna<br>fortfarande lyser.</h2>
+      <p>Bortom fyren glöder myren. Forma din egen väg med tre talangträd, handla hos Ivo och möt det som vaknat under rötterna.</p>
       <form id="start-form"><label for="character-name">Vad heter din vandrare?</label><input id="character-name" name="name" maxlength="18" autocomplete="off" placeholder="Ditt namn" value="Vandrare" required><button id="start-button" class="primary" type="submit">Börja din resa <span>→</span></button></form>
       <button id="new-from-welcome" class="text-button" hidden>Börja en ny resa</button>
       <p class="welcome-controls"><kbd>WASD</kbd> Förflytta <kbd>SPACE</kbd> Attackera <kbd>E</kbd> Prata</p>
       <p id="welcome-warning" class="welcome-warning" hidden></p>
     </div>
   </dialog>
-  <dialog id="panel" class="panel-dialog" aria-labelledby="panel-title"><div class="panel-header"><div><p id="panel-kicker" class="eyebrow">DIN RESA</p><h2 id="panel-title">Karaktär</h2></div><button id="close-panel" class="icon-button" aria-label="Stäng menyn">×</button></div><div id="panel-content"></div></dialog>
+  <dialog id="panel" class="panel-dialog" aria-labelledby="panel-title"><div class="panel-header"><div><p id="panel-kicker" class="eyebrow">DIN RESA</p><h2 id="panel-title">Karaktär</h2></div><button id="close-panel" class="icon-button" aria-label="Stäng menyn">×</button></div><p id="panel-feedback" class="panel-feedback" role="status" hidden></p><div id="panel-content"></div></dialog>
   <noscript><p class="notice">Aktivera JavaScript för att spela Project Realm.</p></noscript>
   <script type="module" src="./js/main.js"></script>
 </body>
