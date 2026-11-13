@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-11-12",
+  "digest_date": "2026-11-13",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "Patchtisdag november 2026",
-      "url": "https://www.cert.se/2026/11/patchtisdag-november-2026.html"
+      "title": "NCSC – CERT-SE veckobrev v.46",
+      "url": "https://www.cert.se/2026/11/ncsc-cert-se-veckobrev-v46.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "Apify rotates API tokens, prompts 2FA resets after breach",
-      "url": "https://www.bleepingcomputer.com/news/security/apify-rotates-api-tokens-prompts-2fa-resets-after-breach/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/12/Apify.jpg"
+      "title": "Microsoft says November security updates cause printing issues",
+      "url": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-november-security-updates-cause-printing-issues/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/28/Microsoft.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Why scammers want you to allow push notifications",
-      "url": "https://www.malwarebytes.com/blog/mobile/2026/11/why-scammers-want-you-to-allow-notifications",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/push_not_Header.png"
+      "title": "Google pushes second Chrome update this week",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/google-pushes-second-chrome-update-this-week",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "Exploit Attempts for GPUStack Authentication Bypass (CVE-2026-102895), (Thu, Nov 12th)",
-      "url": "https://isc.sans.edu/diary/rss/33514"
+      "title": "Macfinger ClickFix campaign sends DownTheDRAIN infostealer for macOS, (Fri, Nov 13th)",
+      "url": "https://isc.sans.edu/diary/rss/33518"
     }
   ]
 }
