@@ -88,7 +88,15 @@ test('leveling grants exactly earned points; ranks, branch gates and prerequisit
   assert.equal(p.level,3);assert.equal(availableTalentPoints(p),1);assert.equal(learnTalent(p,'guard'),false);assert.equal(learnTalent(p,'vigor'),true);assert.equal(learnTalent(p,'steel'),false);
   p.level=8;allocate(p,{vigor:2});assert.equal(learnTalent(p,'vigor'),false);assert.equal(learnTalent(p,'edge'),false);assert.equal(learnTalent(p,'resolve'),false);
   assert.equal(learnTalent(p,'guard'),true);allocate(p,{tempo:1,focus:1});assert.equal(spentTalentPoints(p),6);assert.equal(availableTalentPoints(p),0);
-  p.level=9;p.combat=1;assert.equal(learnTalent(p,'steel'),false);p.combat=0;p.dead=true;assert.equal(learnTalent(p,'steel'),false);
+  p.level=9;p.combat=5;assert.equal(learnTalent(p,'steel'),true);p.level=10;p.dead=true;assert.equal(learnTalent(p,'steel'),false);
+});
+test('talents can be allocated with a frozen combat timer while the menu is paused',()=>{
+  const s=createGame(),p=s.player;p.level=3;p.combat=5;
+  assert.equal(talentRequirement(p,'vigor'),'');
+  assert.equal(command(s,{type:'learnTalent',id:'vigor'}),true);
+  assert.equal(p.talents.vigor,1);assert.equal(p.combat,5);
+  assert.equal(command(s,{type:'learnTalent',id:'vigor'}),false);
+  assert.equal(deserialize(serialize(s)).player.talents.vigor,1);
 });
 test('all 24 talents are reachable with legal ranks and round-trip allocations preserve every tree',()=>{
   assert.equal(Object.keys(TALENTS).length,24);assert.equal(Object.keys(TALENT_TREES).length,3);
