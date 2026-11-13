@@ -45,7 +45,8 @@ export function talentRequirement(p, id) {
   if (spentTalentPoints(p, t.tree) < TIER_POINTS[t.tier]) return `Kräver ${TIER_POINTS[t.tier]} investerade poäng i ${TALENT_TREES[t.tree].name}.`;
   for (const [parent, rank] of t.requires) if (talentRank(p, parent) < rank) return `Kräver ${TALENTS[parent].name}, rank ${rank}.`;
   if (!availableTalentPoints(p)) return p.level >= 20 ? 'Alla poäng är använda. Återställ hos Mira för att välja en ny väg.' : 'Inga lediga talentpoäng. Nästa nivå ger en ny poäng.';
-  if (p.combat > 0) return 'Lämna striden innan du lär en talang.';
+  // Talent menus pause the simulation, so combat timers must not block learning.
+  // Respecialization at Mira still requires leaving combat.
   if (p.dead) return 'Återvänd till din lykta först.';
   return '';
 }
