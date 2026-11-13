@@ -11,11 +11,21 @@ function setText(id,value) {const el=$(id);if(el.textContent!==String(value))el.
 export class UI {
   constructor(getState,actions) {
     this.state=getState;this.actions=actions;this.panel=$('panel');this.view=null;this.selected='trainingSword';this.lastTracker='';this.lastMap=0;
-    this.tradeSelection={side:'stock',id:'potion'};this.selectedTalent='vigor';this.activeTree='guardian';
+    this.tradeSelection={side:'stock',id:'potion'};this.selectedTalent='vigor';this.activeTree='guardian';this.pendingSale=null;this.confirmDialog=$('realm-confirm');
     document.querySelectorAll('[data-panel]').forEach(button=>button.addEventListener('click',()=>this.open(button.dataset.panel)));
     $('close-panel').addEventListener('click',()=>this.close());
     this.panel.addEventListener('close',()=>{this.view=null;actions.resume();$('world').focus({preventScroll:true});});
     this.panel.addEventListener('cancel',e=>{if(this.view==='death')e.preventDefault();});
+    $('realm-confirm-cancel').addEventListener('click',()=>this.confirmDialog.close());
+    $('realm-confirm-accept').addEventListener('click',()=>{
+      const sale=this.pendingSale;
+      this.confirmDialog.close();
+      if(!sale)return;
+      // The transaction layer revalidates inventory, merchant proximity and currency.
+      this.actions.command({type:'sell',id:sale,merchant:'ivo',confirm:true});
+      if(this.view==='merchant')this.merchant();
+    });
+    this.confirmDialog.addEventListener('close',()=>{this.pendingSale=null;});
     $('panel-content').addEventListener('click',event=>{
       const b=event.target.closest('button');if(!b||b.disabled)return;
       const focusKey=Object.entries(b.dataset).find(([key])=>['item','stock','saleItem','buybackItem','talent','tree','action'].includes(key));
@@ -31,7 +41,7 @@ export class UI {
         if(['accept','complete','equip','unequip','buy','sell','buyback','respawn','potion','learnTalent','respec'].includes(action)) {
           let confirm=false;
           if(action==='sell'&&ITEMS[b.dataset.id]?.rarity==='rare'){
-            confirm=window.confirm('Sälja 1 '+ITEMS[b.dataset.id].name+' för '+ITEMS[b.dataset.id].value+' guld? Föremålet läggs i Ivos återköpslista.');if(!confirm)return;
+            this.confirmRareSale(b.dataset.id);return;
           }
           if(action==='respec'){
             const p=this.state().player,cost=respecCost(p);
@@ -55,7 +65,30 @@ export class UI {
       if(event.target.id==='import-save'&&event.target.files[0])actions.import(event.target.files[0]);
     });
   }
-  get isOpen(){return this.panel.open||$('welcome').open;}
+  get isOpen(){return this.panel.open||$('welcome').open||this.confirmDialog.open;}
+  get allowsSimulation(){return this.panel.open&&this.view==='talents'&&!this.confirmDialog.open;}
+  confirmRareSale(id){
+    const item=ITEMS[id];
+    if(this.view!=='merchant'||!item||item.rarity!=='rare')return;
+    this.pendingSale=id;
+    $('realm-confirm-title').textContent='Sälja sällsynt föremål?';
+    $('realm-confirm-description').textContent='Vill du sälja '+item.name+' för '+item.value+' guld? Föremålet kan återköpas hos Ivo så länge det finns kvar bland dina åtta senaste försäljningar.';
+    this.confirmDialog.showModal();
+  }
+  refreshTalentCombat(){
+    if(!this.allowsSimulation)return;
+    const p=this.state().player,blocked=p.combat>0,notice=$('talent-combat-notice');
+    if(!notice)return;
+    // Refresh the action state only when combat ends, preserving selection otherwise.
+    if(this.talentCombatBlocked!==blocked){
+      this.talentCombatBlocked=blocked;
+      const focused=document.activeElement?.dataset?.action==='learnTalent';
+      this.talents();
+      if(focused)$('panel-content').querySelector('[data-action="learnTalent"]')?.focus({preventScroll:true});
+    }else if(blocked){
+      const countdown=$('talent-combat-seconds');if(countdown)countdown.textContent=Math.ceil(p.combat);
+    }
+  }
   open(view) {
     if(!this.actions.started())return;
     if(this.state().player.dead&&view!=='death')view='death';
@@ -69,12 +102,12 @@ export class UI {
     else if(view==='merchant')this.merchant();
     else if(view==='death')this.death();
     if(!this.panel.open)this.panel.showModal();
-    this.actions.pause();
+    if(view==='talents')this.actions.resume();else this.actions.pause();
   }
   close(){if(this.view==='death')return;this.panel.close();}
   heading(kicker,title){$('panel-kicker').textContent=kicker;$('panel-title').textContent=title;$('close-panel').hidden=this.view==='death';this.panel.classList.toggle('merchant-panel',this.view==='merchant');this.panel.classList.toggle('talents-panel',this.view==='talents');}
   merchant(){this.heading('IVO · HANDLARE I LYKTDALEN','Ivos handelsbod');$('panel-content').innerHTML=tradePanel(this.state(),this.tradeSelection);}
-  talents(){this.heading('TRE VÄGAR · EN VANDRARE','Dina talanger');$('panel-content').innerHTML=talentPanel(this.state(),this.selectedTalent,this.activeTree);}
+  talents(){this.heading('TRE VÄGAR · EN VANDRARE','Dina talanger');$('panel-content').innerHTML=talentPanel(this.state(),this.selectedTalent,this.activeTree);this.talentCombatBlocked=this.state().player.combat>0;}
   inventory() {
     const s=this.state(),p=s.player,st=stats(p),item=ITEMS[this.selected],equipped=item?.slot&&p.equipment[item.slot]===this.selected;
     this.heading('LYKTVANDRARE · NIVÅ '+p.level,'Karaktär & väska');
