@@ -23,7 +23,7 @@ function save(manual=false) {
 function pause(){keys.clear();accumulator=0;if(raf)cancelAnimationFrame(raf);raf=0;}
 function resume(){
   keys.clear();last=performance.now();lastDraw=0;accumulator=0;
-  if(started&&!ui.isOpen&&!focusPaused&&!document.hidden&&!raf)raf=requestAnimationFrame(loop);
+  if(started&&(!ui.isOpen||ui.allowsSimulation)&&!focusPaused&&!document.hidden&&!raf)raf=requestAnimationFrame(loop);
 }
 function processEvents() {
   let needsSave=false;
@@ -93,21 +93,22 @@ function newJourney() {
 }
 function loop(now) {
   raf=0;
-  if(!started||ui.isOpen||focusPaused||document.hidden)return;
+  if(!started||(ui.isOpen&&!ui.allowsSimulation)||focusPaused||document.hidden)return;
   const delta=Math.min(.1,Math.max(0,(now-last)/1000));last=now;accumulator+=delta;
-  const input={x:Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')),y:Number(keys.has('KeyS')||keys.has('ArrowDown'))-Number(keys.has('KeyW')||keys.has('ArrowUp')),attack:keys.has('Space')};
+  const input=ui.isOpen?{}:{x:Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')),y:Number(keys.has('KeyS')||keys.has('ArrowDown'))-Number(keys.has('KeyW')||keys.has('ArrowUp')),attack:keys.has('Space')};
   while(accumulator>=TICK&&!state.player.dead){step(state,input,TICK);accumulator-=TICK;}
-  processEvents();
+  processEvents();ui.refreshTalentCombat();
   if(now-lastDraw>=1000/frameLimit-1){renderer.render(state,(now-lastDraw)/1000||TICK);lastDraw=now;}
   if(now-lastHUD>100){ui.hud(renderer);lastHUD=now;}
   if(now-lastSave>15000){save();lastSave=now;}
-  if(!ui.isOpen&&!focusPaused&&!document.hidden)raf=requestAnimationFrame(loop);
+  if((!ui.isOpen||ui.allowsSimulation)&&!focusPaused&&!document.hidden)raf=requestAnimationFrame(loop);
 }
 const shortcut={KeyQ:'burst',ShiftLeft:'dodge',ShiftRight:'dodge',KeyR:'potion',KeyE:'interact',Digit1:'guard',Digit2:'rush',Digit3:'bolt'};
 window.addEventListener('keydown',event=>{
   if(event.ctrlKey||event.metaKey||event.altKey||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;
   if(!started)return;
   if(ui.isOpen) {
+    if(ui.confirmDialog.open)return;
     if(!event.repeat&&['KeyI','KeyC','KeyJ','KeyN','KeyP'].includes(event.code)){event.preventDefault();ui.close();}
     return;
   }
@@ -136,7 +137,10 @@ $('world').addEventListener('pointerdown',event=>{
 });
 $('pause-button').addEventListener('click',()=>ui.open('settings'));
 window.addEventListener('blur',()=>{if(started&&!ui.isOpen){focusPaused=true;$('focus-overlay').hidden=false;}pause();save();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){focusPaused=started;$('focus-overlay').hidden=!started;pause();save();}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){focusPaused=started;$('focus-overlay').hidden=!started;pause();save();}
+  else if(ui.isOpen){focusPaused=false;$('focus-overlay').hidden=true;if(ui.allowsSimulation)resume();}
+});
 $('resume-focus').addEventListener('click',()=>{focusPaused=false;$('focus-overlay').hidden=true;audio.unlock();resume();$('world').focus({preventScroll:true});});
 window.addEventListener('pagehide',()=>save());
 $('theme-button').addEventListener('click',()=>{document.body.classList.toggle('light');try{storage.setItem('hirrdirr_theme',document.body.classList.contains('light')?'light':'dark');}catch{}});
