@@ -137,6 +137,7 @@ $('world').addEventListener('pointerdown',event=>{
 });
 $('pause-button').addEventListener('click',()=>ui.open('settings'));
 window.addEventListener('blur',()=>{if(started&&!ui.isOpen){focusPaused=true;$('focus-overlay').hidden=false;}pause();save();});
+window.addEventListener('focus',()=>{if(ui.allowsSimulation&&!document.hidden&&!focusPaused)resume();});
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){focusPaused=started;$('focus-overlay').hidden=!started;pause();save();}
   else if(ui.isOpen){focusPaused=false;$('focus-overlay').hidden=true;if(ui.allowsSimulation)resume();}
