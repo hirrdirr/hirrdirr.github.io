@@ -1,9 +1,27 @@
-# Project Realm — Lantern Vale, v0.3.1
+# Project Realm — Lantern Vale, v0.4.0
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## 0.3.1 — English Localization & Final Polish
+## 0.4.0 — Equipment Foundation
+
+Weapon, armor and charm slots now own their equipped copies independently.
+Equipping moves exactly one copy out of the bag; unequipping returns it. A swap
+returns the old equipment only after checking the final bag contents, allowing
+full-bag swaps when removing the incoming item frees the needed slot. A failed
+transfer leaves equipment, bag and stats unchanged.
+
+The bag and Ivo show only unequipped copies. Spare copies of the same item as
+worn equipment can be sold normally; the worn copy is protected. Comparisons,
+rare-sale confirmation, buyback and immediate equipment saves remain intact.
+New characters carry three potions and wear one starter sword and coat.
+
+Save schema 4 migrates v0–v3 ownership once, retaining the original before
+autosave. See [equipment.md](docs/equipment.md) for invariants and recovery.
+This release keeps the three existing slots, content, prices, stats, talents,
+combat and character-panel layout. All player-facing copy remains English.
+
+## Previous release: 0.3.1 — English Localization & Final Polish
 
 All Realm player-facing copy is English, including HUD, controls, NPC dialogue,
 quests, items, talents, world interactions, trade confirmations and save errors.
@@ -131,7 +149,7 @@ See [verification.md](docs/verification.md) for coverage and observed limitation
 | templates/index.html / scripts/localize-html.mjs | Static HTML source and generation |
 | js/data.js | Stable item, enemy, NPC, loot and quest content |
 | js/talents.js | Talent definitions, effects, point budgets and rank validation |
-| js/inventory.js | Slot/stack capacity and complete reward preflight |
+| js/inventory.js | Equipment slot definitions, atomic transfers, bag capacity and reward preflight |
 | js/trading.js | Merchant stock, quotes, individual transactions and buyback |
 | js/world.js | Terrain, placements, safe areas and indexed collision queries |
 | js/simulation.js | Commands, player combat, progression and fixed ticks |
@@ -150,7 +168,7 @@ desktop boundaries. No networking layer or credentials are included.
 
 ## Saves
 
-The key remains **hirrdirr.realm.save**, with unchanged schema version **3**. The DTO
+The key remains **hirrdirr.realm.save**, with schema version **4**. The DTO
 contains character progression, inventory/equipment, talent ranks, respec count,
 quests, permanent flags, discoveries, opened caches, herbs, runes, checkpoint,
 cooldowns, uncollected loot, buyback, elapsed time and the simulation RNG seed.
@@ -169,12 +187,17 @@ JSON backup through the menu before clearing site data or changing computers.
 The previous readable save is retained as `.backup`; corrupted input is kept
 as `.recovery`. Future-version saves and unrecoverable corruption block automatic
 overwriting. Imports/new journeys require confirmation. Files above 256 KiB are
-rejected, IDs are whitelisted and values/positions validated. Old v0/v1/v2 saves
-get untouched `.v0`/`.v1`/`.v2` backups before autosave. If that backup cannot be
+rejected, IDs are whitelisted and values/positions validated. Old v0/v1/v2/v3 saves
+get untouched `.v0`/`.v1`/`.v2`/`.v3` backups before autosave. Imported legacy files
+are also retained as `.import.vN` (the latest import for that schema version). If that backup cannot be
 written, the old original stays protected and the temporary journey can be exported.
 
-Version 3 never recreates sold starter equipment. Older over-capacity inventories
-are retained, invalid talent allocations are reconstructed within legal budgets,
+Version 4 never recreates sold or missing starter equipment. A legacy slot is
+migrated only if the item is valid for that slot and its inventory contains an
+owned copy; exactly one copy is removed from that count. Invalid references
+leave their slots empty without consuming valid bag contents. v4 loads never
+subtract equipment from bag counts again. Older over-capacity inventories are
+retained, invalid talent allocations are reconstructed within legal budgets,
 and saved buyback prices are validated against authored sale values.
 
 ## Performance
@@ -189,6 +212,6 @@ animation loop; the talent panel intentionally continues simulation. The 30 FPS 
 
 ## Next roadmap milestone
 
-**0.4.0 — Equipment Foundation** will separate equipped items from inventory,
-prepare additional equipment categories and safely migrate existing saves.
-None of that milestone is implemented in this localization release.
+**0.4.1 — Character Panel** will focus on equipment presentation and an animated
+character preview. No character-panel redesign or additional slots are included
+in the equipment foundation release.

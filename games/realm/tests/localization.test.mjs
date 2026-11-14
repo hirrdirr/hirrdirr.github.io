@@ -16,7 +16,7 @@ const swedishCopy = /[åäöÅÄÖ]|\b(?:guld|vandrare|lykt\w*|glöd\w*|talanger
 const source = file => readFile(new URL('../'+file, import.meta.url),'utf8');
 
 test('English catalog interpolates values once, supports locale fallback and rejects incomplete messages', () => {
-  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.3.1');
+  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.4.0');
   const translate=createTranslator({'ui.restores_health':'Heal {0} HP'});
   assert.equal(translate('ui.restores_health',55),'Heal 55 HP');
   assert.equal(translate('data.lanternkeeper_blade'),'Lanternkeeper Blade');
@@ -42,7 +42,7 @@ test('all English messages and referenced keys resolve, with no leftover Swedish
 
 test('committed static page matches the English template, including metadata and accessible controls', async () => {
   const html=await source('index.html');assert.equal(html,await renderHTML());
-  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.3\.1<\/small>/);
+  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.4\.0<\/small>/);
   assert.match(html,/<title>Project Realm · Lantern Vale/);
   assert.match(html,/aria-label="Lantern Ward \(1\)"/);assert.match(html,/aria-label="Close menu"/);
   assert.doesNotMatch(html,swedishCopy);assert.doesNotMatch(html,/\{\{|\{\d+\}/);
@@ -50,15 +50,16 @@ test('committed static page matches the English template, including metadata and
   assert.match(html,/class="nav-label-short" aria-hidden="true">Bag<\/span>/);
 });
 
-test('a save produced by the Swedish 0.3.0 code preserves all persisted data through English load and save', () => {
+test('a save produced by the Swedish 0.3.0 code preserves progress while transferring equipped copies during migration', () => {
   const before=JSON.parse(fixture),s=deserialize(fixture),after=JSON.parse(serialize(s));
-  assert.equal(SAVE_VERSION,3);assert.equal(after.version,before.version);
+  assert.equal(SAVE_VERSION,4);assert.equal(after.version,4);
+  for(const id of Object.values(before.data.player.equipment)){if(id && --before.data.player.inventory[id]===0)delete before.data.player.inventory[id];}
   assert.deepEqual(after.data,before.data);
   assert.equal(s.player.name,'Åsa Vandrare');assert.equal(s.player.respecCount,2);
   assert.equal(availableTalentPoints(s.player),2);assert.equal(s.tradeSequence,8);
   assert.equal(ITEMS[s.player.equipment.weapon].name,'Moonshard');
   const memory=new Map([[SAVE_KEY,fixture]]),store=new SaveStore({getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)});
-  const loaded=store.load();assert.equal(store.notice,'');assert.equal(store.save(loaded),true);
+  const loaded=store.load();assert.match(store.notice,/equipped items/);assert.equal(memory.get(SAVE_KEY+'.v3'),fixture);assert.equal(store.save(loaded),true);
   assert.equal(memory.get(SAVE_KEY+'.backup'),fixture);
   assert.deepEqual(JSON.parse(memory.get(SAVE_KEY)).data,before.data);
 });
@@ -72,7 +73,7 @@ test('old IDs still support buying, protected rare sales, buyback, quest rewards
   assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);assert.equal(p.gold,gold-12);assert.equal(p.inventory.moonBlade,1);
   const signe=NPCS.find(n=>n.id==='signe');Object.assign(p,{x:signe.x,y:signe.y});
   s.quests.embers.progress=QUESTS.embers.objectives.map(o=>o.count);
-  assert.equal(command(s,{type:'complete',id:'embers'}),true);assert.equal(s.quests.embers.status,'done');assert.equal(p.inventory.marshCoat,2);
+  assert.equal(command(s,{type:'complete',id:'embers'}),true);assert.equal(s.quests.embers.status,'done');assert.equal(p.inventory.marshCoat,1);
   const mira=NPCS.find(n=>n.id==='mira');Object.assign(p,{x:mira.x,y:mira.y});const money=p.gold;
   assert.equal(command(s,{type:'respec',confirm:true}),true);assert.equal(p.gold,money-10);assert.equal(p.respecCount,3);assert.equal(availableTalentPoints(p),18);
 });

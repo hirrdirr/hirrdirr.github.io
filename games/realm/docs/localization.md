@@ -1,6 +1,6 @@
 # English copy and stable game data
 
-English (`en`) is the active language in 0.3.1. There is no language selector.
+English (`en`) remains the active language since 0.3.1. There is no language selector.
 The catalog `js/locales/en.js` contains plain strings, never HTML or game rules.
 `tr(key, ...values)` inserts numbered placeholders in one pass. Missing keys or
 arguments are errors, caught by tests; `createTranslator(otherDictionary)` falls

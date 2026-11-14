@@ -75,9 +75,9 @@ const ui=new UI(()=>state,{
   import:async file=>{
     try{
       if(file.size>262144)throw Error(tr("main.the_file_is_too_large"));
-      const candidate=deserialize(await file.text());
+      const raw=await file.text(),candidate=deserialize(raw);
       if(!window.confirm(tr("main.replace_your_current_journey_with_level_a_copy_of_the_current_sav", candidate.player.name, candidate.player.level)))return;
-      if(!saves.replace(candidate)){warning();ui.toast(tr("main.the_import_could_not_be_saved_your_current_journey_is_unchanged"));return;}
+      if(!saves.replace(candidate,raw)){warning();ui.toast(tr("main.the_import_could_not_be_saved_your_current_journey_is_unchanged"));return;}
       state=candidate;renderer.resetCamera();ui.close();processEvents();ui.hud(renderer);renderer.render(state,0);warning();
       if(state.player.dead)ui.open('death');else resume();
       ui.toast(tr("main.your_journey_has_been_imported"));

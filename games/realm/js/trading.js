@@ -24,9 +24,8 @@ export function tradeQuote(s, action) {
   const item = ITEMS[result.item];
   if (action.type === 'sell') {
     result.price = item.value || 0;
-    if (!p.inventory[action.id]) return fail(tr("trading.you_do_not_own_that_item"));
+    if (!p.inventory[action.id]) return fail(Object.values(p.equipment).includes(action.id) ? tr("trading.unequip_the_item_before_selling_it") : tr("trading.you_do_not_own_that_item"));
     if (item.questItem || !result.price) return fail(tr("trading.quest_items_cannot_be_sold"));
-    if (Object.values(p.equipment).includes(action.id)) return fail(tr("trading.unequip_the_item_before_selling_it"));
     if (p.gold + result.price > MAX_GOLD) return fail(tr("trading.you_cannot_carry_any_more_gold"));
     if (item.rarity === 'rare' && action.confirm !== true) return { ...fail(tr("trading.confirm_the_sale_of_this_rare_item")), confirmRequired: true };
   } else if (action.type === 'buy' || action.type === 'buyback') {

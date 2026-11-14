@@ -34,7 +34,7 @@ validation, player/entity ownership and connection lifecycle.
 `i18n.js` has no DOM or gameplay dependencies. `tr(key, ...values)` reads the
 English catalog and interpolates numbered placeholders once. Values may be
 reordered in another locale. Rule modules emit localized presentation messages
-but still store and compare stable IDs. `SAVE_VERSION` remains 3. Existing player
+but still store and compare stable IDs. Localization itself did not change save schema 3. Existing player
 names are never translated. All item numbers, quest rewards, talent effects,
 world positions and combat timers match the preceding release.
 
@@ -43,10 +43,27 @@ normal Realm tests check that generated output is current, so static labels,
 metadata and accessibility text cannot silently drift from the catalog.
 No runtime network request, dependency or language selector is introduced.
 
+## Equipment boundary (0.4.0)
+
+`inventory.js` defines the three equipment slots and owns `transferEquipment`.
+It stages the incoming removal and outgoing return in a copied bag, validates
+capacity, then commits inventory and equipment together. `simulation.js` clamps
+health to the resulting maximum and emits the existing equipment event; the
+main loop saves that event. Stats read the valid equipment slots exactly once.
+
+`trading.js` owns only bag copies. It rejects a sale of worn gear when no bag
+copy exists, while allowing sale of a spare of the same type. UI rendering uses
+bag counts directly and keeps unequip actions on the equipment slots.
+
+The v4 save adapter transfers one owned bag copy for each valid old equipped
+reference. Version gating makes this migration idempotent. The same migration
+serves startup, backup recovery and imports. See [equipment.md](equipment.md)
+for the ownership, capacity and backup contracts.
+
 ## Current roadmap priority
 
-Next: **0.4.0 — Equipment Foundation**, separating equipped items from inventory,
-preparing equipment categories and safe save migration. The networking notes
+Next: **0.4.1 — Character Panel**, improving equipment presentation and adding an
+animated character preview. The networking notes
 below are long-term architecture considerations, not the next release scope.
 
 ## Stage 1: small authoritative multiplayer

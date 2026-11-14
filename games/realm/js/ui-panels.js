@@ -9,7 +9,7 @@ export const itemIcon = name => `<svg class="item-icon" viewBox="0 0 32 32" aria
 export const itemStats = item => [item.attack ? tr("ui-panels.attack", item.attack) : '', item.defense ? tr("ui-panels.defense", item.defense) : '', item.hp ? tr("ui-panels.max_health", item.hp) : '', item.haste ? tr("ui-panels.attack_speed", Math.round(item.haste * 100)) : '', item.speed ? tr("ui-panels.movement_speed", Math.round(item.speed / 158 * 100)) : '', item.recovery ? tr("ui-panels.s_dodge_cooldown", item.recovery) : '', item.spellPower ? tr("ui-panels.lantern_burst_glimmerbolt_damage", Math.round(item.spellPower * 100)) : ''].filter(Boolean).join(' · ');
 export function compareEquipment(p, id) {
   const item = ITEMS[id];
-  if (!item?.slot || p.equipment[item.slot] === id) return '';
+  if (!item?.slot) return '';
   const before = stats(p), after = stats({ ...p, equipment: { ...p.equipment, [item.slot]: id } });
   const rows = [
     [tr("ui-panels.strike_damage"), st => Math.round(st.attack * st.meleeMultiplier), v => v],
@@ -26,8 +26,8 @@ export function compareEquipment(p, id) {
   }).join('')}</tbody></table>`;
 }
 export function bagButton(p, id, selected, attribute = 'item') {
-  const item = ITEMS[id], worn = Object.values(p.equipment).includes(id), count = p.inventory[id];
-  return `<button class="item-button ${item.rarity}${selected ? ' selected' : ''}" data-${attribute}="${id}" aria-label="${tr("ui-panels.quantity", escapeHTML(item.name), worn ? tr("ui-panels.equipped") : '', count)}" aria-pressed="${selected}" title="${escapeHTML(item.name + ' · ' + itemStats(item))}"><span class="item-symbol">${itemIcon(item.icon)}</span>${worn ? `<em>${tr("ui-panels.equip")}</em>` : item.questItem ? `<em>${tr("ui-panels.bound")}</em>` : ''}<small>${count}</small></button>`;
+  const item = ITEMS[id], count = p.inventory[id];
+  return `<button class="item-button ${item.rarity}${selected ? ' selected' : ''}" data-${attribute}="${id}" aria-label="${tr("ui-panels.quantity", escapeHTML(item.name), '', count)}" aria-pressed="${selected}" title="${escapeHTML(item.name + ' · ' + itemStats(item))}"><span class="item-symbol">${itemIcon(item.icon)}</span>${item.questItem ? `<em>${tr("ui-panels.bound")}</em>` : ''}<small>${count}</small></button>`;
 }
 export function tradePanel(s, selection) {
   const p = s.player, merchant = MERCHANTS.ivo, side = selection.side;
@@ -48,7 +48,6 @@ export function tradePanel(s, selection) {
   html += '</div></section></div><section class="trade-detail" aria-live="polite">';
   if (item) {
     html += `<div><span class="item-rarity ${item.rarity}">${RARITIES[item.rarity]}${item.questItem ? tr("ui-panels.quest_bound") : ''}</span><h3>${item.name}</h3><p>${item.description}</p><p class="item-properties">${itemStats(item)}</p></div><div>${compareEquipment(p, id)}</div><div class="trade-actions">`;
-    if (side === 'bag' && Object.values(p.equipment).includes(id)) html += `<button data-action="unequip" data-slot="${item.slot}">${tr("ui-panels.unequip", item.name)}</button>`;
     const label = side === 'stock' ? tr("ui-panels.buy_1") : side === 'buyback' ? tr("ui-panels.buyback") : tr("ui-panels.sell_1");
     html += `<button class="primary" data-action="${quote.type}" data-id="${selection.id}" ${quote.ok ? '' : 'disabled'}>${tr("ui-panels.gold_2", label, quote.price)}</button>`;
     if (quote.reason) html += `<p class="panel-hint">${quote.reason}</p>`;

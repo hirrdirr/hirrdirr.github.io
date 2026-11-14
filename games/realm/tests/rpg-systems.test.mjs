@@ -41,9 +41,9 @@ test('buy, individual sale and stable-ID buyback conserve inventory and cannot r
   const copy=deserialize(serialize(s));assert.deepEqual(copy.player.inventory,s.player.inventory);assert.equal(copy.player.gold,s.player.gold);
 });
 test('equipped copies and quest rewards cannot be sold; unequip first, confirm rare sales',()=>{
-  const s=shop();s.player.inventory.trainingSword=2;const gold=s.player.gold;
+  const s=shop();const gold=s.player.gold;
   assert.equal(command(s,{type:'sell',id:'trainingSword'}),false);assert.equal(command(s,{type:'unequip',slot:'weapon'}),true);
-  assert.equal(command(s,{type:'sell',id:'trainingSword'}),true);assert.equal(s.player.inventory.trainingSword,1);
+  assert.equal(command(s,{type:'sell',id:'trainingSword'}),true);assert.equal(s.player.inventory.trainingSword,undefined);
   s.player.inventory.beaconCharm=1;assert.equal(command(s,{type:'sell',id:'beaconCharm',confirm:true}),false);
   s.player.inventory.moonBlade=1;assert.equal(command(s,{type:'sell',id:'moonBlade'}),false);assert.equal(command(s,{type:'sell',id:'moonBlade',confirm:true}),true);
   assert.equal(s.player.gold,gold+1+ITEMS.moonBlade.value);assert.equal(s.player.inventory.beaconCharm,1);
@@ -64,7 +64,7 @@ test('buyback is bounded, survives reload and rejects buying into a full bag',()
   assert.equal(command(s,{type:'buyback',id}),false);assert.equal(s.player.gold,gold);assert.ok(s.buyback.some(e=>e.id===id));
   delete s.player.inventory.linenCoat;assert.equal(command(s,{type:'buyback',id}),true);assert.equal(s.player.inventory.amber,1);assert.equal(command(s,{type:'buyback',id}),false);
 });
-test('sold starter equipment never reappears after a v3 reload',()=>{
+test('sold starter equipment never reappears after a current-schema reload',()=>{
   let s=shop();command(s,{type:'unequip',slot:'weapon'});command(s,{type:'sell',id:'trainingSword'});
   const gold=s.player.gold;for(let i=0;i<4;i++){s=deserialize(serialize(s));assert.equal(s.player.inventory.trainingSword,undefined);assert.equal(s.player.equipment.weapon,null);assert.equal(command(s,{type:'sell',id:'trainingSword'}),false);assert.equal(s.player.gold,gold);}
   assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);assert.equal(s.player.inventory.trainingSword,1);
@@ -176,19 +176,19 @@ test('potion talents heal their stated amount, and losing max-health gear clamps
   p.inventory.forestCoat=1;command(s,{type:'equip',id:'forestCoat'});p.hp=stats(p).maxHp;command(s,{type:'unequip',slot:'armor'});assert.equal(p.hp,stats(p).maxHp);
 });
 test('real v2 specialization migrates to unspent talents and preserves its untouched original',()=>{
-  const s=shop();s.player.level=7;s.player.inventory.swiftBlade=2;const raw=JSON.parse(serialize(s));raw.version=2;raw.data.player.specialization='ember';delete raw.data.player.talents;delete raw.data.player.respecCount;delete raw.data.buyback;
+  const s=shop();s.player.level=7;s.player.inventory.swiftBlade=2;const raw=JSON.parse(serialize(s));raw.version=2;raw.data.player.inventory.trainingSword=1;raw.data.player.inventory.linenCoat=1;raw.data.player.specialization='ember';delete raw.data.player.talents;delete raw.data.player.respecCount;delete raw.data.buyback;
   const text=JSON.stringify(raw),memory=new Map([[SAVE_KEY,text]]),store=new SaveStore({getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)}),loaded=store.load();
   assert.equal(availableTalentPoints(loaded.player),5);assert.equal(Object.hasOwn(loaded.player,'specialization'),false);assert.equal(loaded.player.gold,300);assert.equal(loaded.player.inventory.swiftBlade,2);
-  assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.match(store.notice,/5 points/);store.save(loaded);assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.equal(JSON.parse(memory.get(SAVE_KEY)).version,3);
+  assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.match(store.notice,/5 points/);store.save(loaded);assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.equal(JSON.parse(memory.get(SAVE_KEY)).version,4);
 });
 test('older overflowing bags retain every item and buyback repair never trusts an edited price',()=>{
   const s=shop();s.player.inventory=Object.fromEntries(Object.keys(ITEMS).map(id=>[id,2]));const raw=JSON.parse(serialize(s));raw.version=2;
-  let loaded=deserialize(JSON.stringify(raw));assert.deepEqual(loaded.player.inventory,s.player.inventory);assert.ok(occupiedSlots(loaded.player)>BAG_SLOTS);
+  let loaded=deserialize(JSON.stringify(raw));assert.deepEqual(loaded.player.inventory,{...s.player.inventory,trainingSword:1,linenCoat:1});assert.ok(occupiedSlots(loaded.player)>BAG_SLOTS);
   raw.version=3;raw.data.buyback=[{id:'sale-7',merchant:'ivo',item:'potion',price:-99},{id:'sale-7',merchant:'ivo',item:'potion',price:0},{id:'sale-8',merchant:'ivo',item:'beaconCharm',price:1},{id:'sale-9',merchant:'fake',item:'potion',price:1}];
   loaded=deserialize(JSON.stringify(raw));assert.equal(loaded.buyback.length,1);assert.equal(loaded.buyback[0].price,4);assert.equal(loaded.tradeSequence,8);
 });
 test('panels expose prices, equipment protection, all talents and honest full-character comparisons',()=>{
-  const s=shop();let html=tradePanel(s,{side:'bag',id:'trainingSword'});assert.match(html,/Unequip Wanderer’s Sword/);assert.match(html,/data-action="sell"[^>]+disabled/);assert.doesNotMatch(html,/Sell all/);
+  const s=shop();let html=tradePanel(s,{side:'bag',id:'trainingSword'});assert.match(html,/Unequip the item before selling it/);assert.doesNotMatch(html,/data-action="unequip"/);assert.match(html,/data-action="sell"[^>]+disabled/);assert.doesNotMatch(html,/Sell all/);
   html=talentPanel(s,'guard');assert.equal((html.match(/data-talent=/g)||[]).length,24);assert.match(html,/class="talent-links"/);assert.match(html,/first talent point/);
   html=compareEquipment(s.player,'runnerWrap');assert.match(html,/Strikes \/ second/);assert.match(html,/Movement speed/);
 });
