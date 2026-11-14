@@ -1,3 +1,4 @@
+import { tr } from './i18n.js';
 import { SPAWN, NPCS } from './data.js';
 export const TILE = 32;
 export const WIDTH = 1920;
@@ -44,9 +45,9 @@ export const LANDMARKS = [
   { id: 'herb3', kind: 'herb', x: 1216, y: 704 },
   { id: 'campfire', kind: 'fire', x: 1220, y: 756 },
   { id: 'marshSign', kind: 'sign', x: 1432, y: 692 },
-  { id: 'rune1', kind: 'rune', x: 1432, y: 816, text: '”Där ljuset slutar börjar inte mörkret. Där börjar rötterna.”' },
-  { id: 'rune2', kind: 'rune', x: 1696, y: 816, text: '”Tre lyktor höll slussen stängd. En för minnet, en för modet, en för hemmet.”' },
-  { id: 'rune3', kind: 'rune', x: 1584, y: 1120, text: '”Om hjärtat vaknar: följ inte dess glöd. Följ markens tecken.”' },
+  { id: 'rune1', kind: 'rune', x: 1432, y: 816, text: tr("world.where_the_light_ends_darkness_does_not_begin_the_roots_do") },
+  { id: 'rune2', kind: 'rune', x: 1696, y: 816, text: tr("world.three_lanterns_kept_the_sluice_closed_one_for_memory_one_for_cour") },
+  { id: 'rune3', kind: 'rune', x: 1584, y: 1120, text: tr("world.if_the_heart_awakens_do_not_follow_its_glow_heed_the_signs_upon_t") },
   { id: 'seal', kind: 'seal', x: 1776, y: 1056 },
   { id: 'chest4', kind: 'chest', x: 1824, y: 1168, item: 'trailCharm', quantity: 1 },
   { id: 'gate', kind: 'gate', x: 1816, y: 1232 }
@@ -122,10 +123,10 @@ export function moveBody(body, dx, dy, radius = 11) {
   }
 }
 export function zoneAt(x, y) {
-  if (inRect(x, y, CAMP)) return { id: 'camp', name: 'Vandrarlägret', subtitle: 'Trygg zon · Signe väntar', safe: true };
-  if (inSafe(x, y)) return { id: 'village', name: 'Lyktdalen', subtitle: 'Trygg zon', safe: true };
-  if (inMarsh(x, y)) return { id: 'marsh', name: 'Glödmyren', subtitle: 'Glödvingarnas hem · nivå 4–6' };
-  if (x > 1380 && y < 500) return { id: 'ruins', name: 'Den gamla fyren', subtitle: 'Väktarens hemvist · nivå 4' };
-  if (x > 1100) return { id: 'forest', name: 'Skymningsskogen', subtitle: 'Vildmark · nivå 2–4' };
-  return { id: 'trail', name: 'Mossgläntan', subtitle: 'Vildmark · nivå 1–2' };
+  if (inRect(x, y, CAMP)) return { id: 'camp', name: tr("world.wanderers_camp"), subtitle: tr("world.safe_area_signe_awaits"), safe: true };
+  if (inSafe(x, y)) return { id: 'village', name: tr("world.lantern_vale"), subtitle: tr("world.safe_area"), safe: true };
+  if (inMarsh(x, y)) return { id: 'marsh', name: tr("world.emberfen"), subtitle: tr("world.emberwing_territory_level_4_6") };
+  if (x > 1380 && y < 500) return { id: 'ruins', name: tr("world.old_beacon"), subtitle: tr("world.the_wardens_domain_level_4") };
+  if (x > 1100) return { id: 'forest', name: tr("world.duskwood"), subtitle: tr("world.wilderness_level_2_4") };
+  return { id: 'trail', name: tr("world.mossglade"), subtitle: tr("world.wilderness_level_1_2") };
 }

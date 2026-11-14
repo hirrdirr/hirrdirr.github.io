@@ -1,36 +1,37 @@
+import { tr } from './i18n.js';
 // Content and allocation rules are shared by simulation, save validation and UI.
 export const TALENT_TREES = Object.freeze({
-  guardian: { name: 'Lyktväktare', subtitle: 'Stå kvar. Slå tillbaka.', color: '#dbbd7c', icon: 'shield' },
-  hunter: { name: 'Skymningsjägare', subtitle: 'Rörelse, precision och huggkedjor.', color: '#bdafd9', icon: 'fang' },
-  weaver: { name: 'Runvävare', subtitle: 'Ljus, läkedom och runmagi.', color: '#8dcfc1', icon: 'rune' }
+  guardian: { name: tr("talents.lantern_guardian"), subtitle: tr("talents.stand_firm_strike_back"), color: '#dbbd7c', icon: 'shield' },
+  hunter: { name: tr("talents.dusk_hunter"), subtitle: tr("talents.movement_precision_and_combos"), color: '#bdafd9', icon: 'fang' },
+  weaver: { name: tr("talents.runeweaver"), subtitle: tr("talents.light_healing_and_runic_magic"), color: '#8dcfc1', icon: 'rune' }
 });
 const node = (tree, tier, column, name, maxRank, icon, description, effects, requires = []) =>
   ({ tree, tier, column, name, maxRank, icon, description, effects, requires });
 export const TALENTS = Object.freeze({
-  vigor: node('guardian', 0, 0, 'Djupa rötter', 3, 'heart', r => `+${r * 8} maxhälsa.`, r => ({ hp: r * 8 })),
-  steel: node('guardian', 0, 1, 'Barkhud', 3, 'armor', r => `+${r} försvar mot alla träffar.`, r => ({ defense: r })),
-  guard: node('guardian', 1, 0, 'Lyktvärn', 1, 'shield', () => 'Aktiv [1]: minska inkommande skada med 40% i 4 s. 14 s återhämtning.', () => ({}), [['vigor', 2]]),
-  edge: node('guardian', 1, 1, 'Stadig klinga', 2, 'sword', r => `+${r * 6}% skada med hugg och Skuggsprång.`, r => ({ meleeBonus: r * .06 }), [['steel', 2]]),
-  resolve: node('guardian', 2, 0, 'Varmt ljus', 2, 'lantern', r => `Lyktvärn varar ${r} s längre och minskar skadan med ytterligare ${r * 5} procentenheter.`, r => ({ guardDuration: r, guardReduction: r * .05 }), [['guard', 1]]),
-  remedy: node('guardian', 2, 1, 'Fältläkare', 2, 'potion', r => `Läkedrycker återställer ${r * 10} extra hälsa.`, r => ({ potionHealing: r * 10 }), [['edge', 1]]),
-  bastion: node('guardian', 3, 0, 'Orubblig', 1, 'bastion', () => 'Lyktvärn återhämtar sig 3 s snabbare och minskar skadan med ytterligare 15 procentenheter.', () => ({ guardRecovery: 3, guardReduction: .15 }), [['resolve', 2]]),
-  retaliation: node('guardian', 3, 1, 'Återsken', 1, 'counter', () => 'En träff under Lyktvärn förstärker nästa vanliga hugg med 50%. Laddningen varar 5 s och staplas inte.', () => ({ retaliation: 1 }), [['guard', 1], ['edge', 2]]),
-  tempo: node('hunter', 0, 0, 'Lätta händer', 3, 'tempo', r => `+${r * 4}% attackhastighet.`, r => ({ haste: r * .04 })),
-  precision: node('hunter', 0, 1, 'Skarp blick', 3, 'eye', r => `+${r * 3}% chans till kritisk träff med hugg, Skuggsprång och Glimtskott. Kritiska träffar ger 150% skada.`, r => ({ critChance: r * .03 })),
-  rush: node('hunter', 1, 0, 'Skuggsprång', 1, 'fang', () => 'Aktiv [2]: rusa mot ett mål inom 210 steg och slå för 140% attack. Kräver fri sikt; passerar aldrig väggar. 12 s återhämtning.', () => ({}), [['tempo', 2]]),
-  footwork: node('hunter', 1, 1, 'Skogssteg', 2, 'boots', r => `+${r * 6} rörelsefart och ${(r * .15).toFixed(2)} s kortare återhämtning på undanmanöver.`, r => ({ speed: r * 6, recovery: r * .15 }), [['precision', 2]]),
-  momentum: node('hunter', 2, 0, 'Jaktens rytm', 2, 'combo', r => `Tredje hugget i kedjan ger ytterligare ${r * 8}% attack som skada.`, r => ({ comboBonus: r * .08 }), [['rush', 1]]),
-  exposed: node('hunter', 2, 1, 'Öm punkt', 2, 'critical', r => `Kritiska träffar ger ${150 + r * 15}% skada.`, r => ({ critPower: r * .15 }), [['precision', 3]]),
-  dance: node('hunter', 3, 0, 'Skuggdans', 1, 'dodge', () => 'En träff med tredje hugget kortar Skuggsprångs återhämtning med 2 s och undanmanöverns med 0,5 s.', () => ({ dance: 1 }), [['momentum', 2]]),
-  hunter: node('hunter', 3, 1, 'Andra andningen', 1, 'heart', () => 'Varje besegrad fiende återställer 6 hälsa.', () => ({ killHealing: 6 }), [['exposed', 2]]),
-  embers: node('weaver', 0, 0, 'Glödens kraft', 3, 'burst', r => `+${r * 8}% skada med Lyktslag.`, r => ({ burstBonus: r * .08 })),
-  focus: node('weaver', 0, 1, 'Klarsyn', 3, 'rune', r => `+${r * 6}% återhämtningshastighet för Lyktslag och Glimtskott.`, r => ({ magicHaste: r * .06 })),
-  bolt: node('weaver', 1, 0, 'Glimtskott', 1, 'bolt', () => 'Aktiv [3]: skjut en ljusruna för 150% attack. Den träffar första fienden längs vägen. Räckvidd 360 steg, 4 s återhämtning.', () => ({}), [['focus', 2]]),
-  bloom: node('weaver', 1, 1, 'Ljusblom', 2, 'leaf', r => `Lyktslag återställer ${r * 4} hälsa när det träffar minst en fiende.`, r => ({ burstHealing: r * 4 }), [['embers', 2]]),
-  reach: node('weaver', 2, 0, 'Ljusring', 2, 'ring', r => `Lyktslags räckvidd ökar med ${r * 10} steg.`, r => ({ burstRadius: r * 10 }), [['embers', 3]]),
-  resonance: node('weaver', 2, 1, 'Runresonans', 2, 'crystal', r => `+${r * 10}% skada med Glimtskott.`, r => ({ boltBonus: r * .10 }), [['bolt', 1]]),
-  piercing: node('weaver', 3, 0, 'Genomlysning', 1, 'pierce', () => 'Glimtskott går genom den första fienden och kan träffa en till. Varje fiende träffas bara en gång.', () => ({ boltPierce: 1 }), [['resonance', 2]]),
-  renewal: node('weaver', 3, 1, 'Vårens återkomst', 1, 'bloom', () => 'Lyktslag återställer ytterligare 8% av din maxhälsa när det träffar en fiende.', () => ({ burstHealPercent: .08 }), [['bloom', 2]])
+  vigor: node('guardian', 0, 0, tr("talents.deep_roots"), 3, 'heart', r => tr("talents.max_health", r * 8), r => ({ hp: r * 8 })),
+  steel: node('guardian', 0, 1, tr("talents.barkskin"), 3, 'armor', r => tr("talents.defense_against_all_hits", r), r => ({ defense: r })),
+  guard: node('guardian', 1, 0, tr("talents.lantern_ward"), 1, 'shield', () => tr("talents.active_1_reduce_incoming_damage_by_40_for_4_s_14_s_cooldown"), () => ({}), [['vigor', 2]]),
+  edge: node('guardian', 1, 1, tr("talents.steady_blade"), 2, 'sword', r => tr("talents.damage_with_strikes_and_shadow_rush", r * 6), r => ({ meleeBonus: r * .06 }), [['steel', 2]]),
+  resolve: node('guardian', 2, 0, tr("talents.warm_light"), 2, 'lantern', r => tr("talents.lantern_ward_lasts_s_longer_and_reduces_damage_by_an_additional_p", r, r * 5), r => ({ guardDuration: r, guardReduction: r * .05 }), [['guard', 1]]),
+  remedy: node('guardian', 2, 1, tr("talents.field_medic"), 2, 'potion', r => tr("talents.healing_potions_restore_extra_health", r * 10), r => ({ potionHealing: r * 10 }), [['edge', 1]]),
+  bastion: node('guardian', 3, 0, tr("talents.unyielding"), 1, 'bastion', () => tr("talents.lantern_ward_has_a_3_s_shorter_cooldown_and_reduces_damage_by_an"), () => ({ guardRecovery: 3, guardReduction: .15 }), [['resolve', 2]]),
+  retaliation: node('guardian', 3, 1, tr("talents.afterglow"), 1, 'counter', () => tr("talents.taking_a_hit_during_lantern_ward_empowers_your_next_basic_strike"), () => ({ retaliation: 1 }), [['guard', 1], ['edge', 2]]),
+  tempo: node('hunter', 0, 0, tr("talents.light_hands"), 3, 'tempo', r => tr("talents.attack_speed", r * 4), r => ({ haste: r * .04 })),
+  precision: node('hunter', 0, 1, tr("talents.keen_eye"), 3, 'eye', r => tr("talents.critical_strike_chance_with_strikes_shadow_rush_and_glimmerbolt_c", r * 3), r => ({ critChance: r * .03 })),
+  rush: node('hunter', 1, 0, tr("talents.shadow_rush"), 1, 'fang', () => tr("talents.active_2_rush_at_a_target_within_210_units_and_deal_140_of_attack"), () => ({}), [['tempo', 2]]),
+  footwork: node('hunter', 1, 1, tr("talents.forest_stride"), 2, 'boots', r => tr("talents.movement_speed_and_a_s_shorter_dodge_cooldown", r * 6, (r * .15).toFixed(2)), r => ({ speed: r * 6, recovery: r * .15 }), [['precision', 2]]),
+  momentum: node('hunter', 2, 0, tr("talents.rhythm_of_the_hunt"), 2, 'combo', r => tr("talents.the_third_strike_in_a_combo_deals_an_additional_of_attack_as_dama", r * 8), r => ({ comboBonus: r * .08 }), [['rush', 1]]),
+  exposed: node('hunter', 2, 1, tr("talents.weak_spot"), 2, 'critical', r => tr("talents.critical_hits_deal_damage", 150 + r * 15), r => ({ critPower: r * .15 }), [['precision', 3]]),
+  dance: node('hunter', 3, 0, tr("talents.shadow_dance"), 1, 'dodge', () => tr("talents.landing_the_third_strike_reduces_shadow_rushs_cooldown_by_2_s_and"), () => ({ dance: 1 }), [['momentum', 2]]),
+  hunter: node('hunter', 3, 1, tr("talents.second_wind"), 1, 'heart', () => tr("talents.each_enemy_defeated_restores_6_health"), () => ({ killHealing: 6 }), [['exposed', 2]]),
+  embers: node('weaver', 0, 0, tr("talents.ember_power"), 3, 'burst', r => tr("talents.damage_with_lantern_burst", r * 8), r => ({ burstBonus: r * .08 })),
+  focus: node('weaver', 0, 1, tr("talents.clarity"), 3, 'rune', r => tr("talents.cooldown_recovery_speed_for_lantern_burst_and_glimmerbolt", r * 6), r => ({ magicHaste: r * .06 })),
+  bolt: node('weaver', 1, 0, tr("talents.glimmerbolt"), 1, 'bolt', () => tr("talents.active_3_fire_a_rune_of_light_dealing_150_of_attack_as_damage_to"), () => ({}), [['focus', 2]]),
+  bloom: node('weaver', 1, 1, tr("talents.lightbloom"), 2, 'leaf', r => tr("talents.lantern_burst_restores_health_when_it_hits_at_least_one_enemy", r * 4), r => ({ burstHealing: r * 4 }), [['embers', 2]]),
+  reach: node('weaver', 2, 0, tr("talents.ring_of_light"), 2, 'ring', r => tr("talents.lantern_bursts_radius_increases_by_units", r * 10), r => ({ burstRadius: r * 10 }), [['embers', 3]]),
+  resonance: node('weaver', 2, 1, tr("talents.runic_resonance"), 2, 'crystal', r => tr("talents.damage_with_glimmerbolt", r * 10), r => ({ boltBonus: r * .10 }), [['bolt', 1]]),
+  piercing: node('weaver', 3, 0, tr("talents.piercing_light"), 1, 'pierce', () => tr("talents.glimmerbolt_pierces_the_first_enemy_and_can_hit_one_more_each_ene"), () => ({ boltPierce: 1 }), [['resonance', 2]]),
+  renewal: node('weaver', 3, 1, tr("talents.springs_return"), 1, 'bloom', () => tr("talents.lantern_burst_restores_an_additional_8_of_your_maximum_health_whe"), () => ({ burstHealPercent: .08 }), [['bloom', 2]])
 });
 export const TIER_POINTS = Object.freeze([0, 3, 6, 10]);
 export const earnedTalentPoints = level => Number.isFinite(level) ? Math.max(0, Math.min(20, Math.floor(level)) - 2) : 0;
@@ -38,15 +39,15 @@ export const talentRank = (p, id) => Object.hasOwn(TALENTS, id) ? Math.max(0, Ma
 export const spentTalentPoints = (p, tree) => Object.entries(TALENTS).reduce((n, [id, t]) => n + (!tree || t.tree === tree ? talentRank(p, id) : 0), 0);
 export const availableTalentPoints = p => Math.max(0, earnedTalentPoints(p.level) - spentTalentPoints(p));
 export function talentRequirement(p, id) {
-  if (!Object.hasOwn(TALENTS, id)) return 'Okänd talang.';
+  if (!Object.hasOwn(TALENTS, id)) return tr("talents.unknown_talent");
   const t = TALENTS[id];
-  if (talentRank(p, id) >= t.maxRank) return 'Högsta rank uppnådd.';
-  if (p.level < 3) return 'Första poängen låses upp på nivå 3.';
-  if (spentTalentPoints(p, t.tree) < TIER_POINTS[t.tier]) return `Kräver ${TIER_POINTS[t.tier]} investerade poäng i ${TALENT_TREES[t.tree].name}.`;
-  for (const [parent, rank] of t.requires) if (talentRank(p, parent) < rank) return `Kräver ${TALENTS[parent].name}, rank ${rank}.`;
-  if (!availableTalentPoints(p)) return p.level >= 20 ? 'Alla poäng är använda. Återställ hos Mira för att välja en ny väg.' : 'Inga lediga talentpoäng. Nästa nivå ger en ny poäng.';
-  if (p.combat > 0) return 'Lämna striden innan du lär en talang.';
-  if (p.dead) return 'Återvänd till din lykta först.';
+  if (talentRank(p, id) >= t.maxRank) return tr("talents.maximum_rank_reached");
+  if (p.level < 3) return tr("talents.your_first_talent_point_unlocks_at_level_3");
+  if (spentTalentPoints(p, t.tree) < TIER_POINTS[t.tier]) return tr("talents.requires_points_spent_in", TIER_POINTS[t.tier], TALENT_TREES[t.tree].name);
+  for (const [parent, rank] of t.requires) if (talentRank(p, parent) < rank) return tr("talents.requires_rank", TALENTS[parent].name, rank);
+  if (!availableTalentPoints(p)) return p.level >= 20 ? tr("talents.all_points_are_spent_visit_mira_to_respecialize_and_choose_a_new") : tr("talents.no_unspent_talent_points_gain_another_point_at_the_next_level");
+  if (p.combat > 0) return tr("talents.leave_combat_before_learning_a_talent");
+  if (p.dead) return tr("talents.return_to_your_lantern_first");
   return '';
 }
 export function learnTalent(p, id) {

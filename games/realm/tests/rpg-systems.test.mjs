@@ -92,10 +92,10 @@ test('leveling grants exactly earned points; ranks, branch gates and prerequisit
 });
 test('combat timer blocks talents until it expires, then allocation succeeds',()=>{
   const s=createGame(),p=s.player;p.level=3;p.combat=5;
-  assert.match(talentRequirement(p,'vigor'),/striden/);
+  assert.match(talentRequirement(p,'vigor'),/combat/);
   assert.equal(command(s,{type:'learnTalent',id:'vigor'}),false);
   assert.equal(p.talents.vigor,undefined);
-  assert.match(talentPanel(s,'vigor'),/id="talent-combat-notice"[^>]*>Du är i strid/);
+  assert.match(talentPanel(s,'vigor'),/id="talent-combat-notice"[^>]*>You are in combat/);
   assert.match(talentPanel(s,'vigor'),/data-action="learnTalent"[^>]*disabled/);
   run(s,5.1);
   assert.equal(p.combat,0);assert.equal(talentRequirement(p,'vigor'),'');
@@ -179,7 +179,7 @@ test('real v2 specialization migrates to unspent talents and preserves its untou
   const s=shop();s.player.level=7;s.player.inventory.swiftBlade=2;const raw=JSON.parse(serialize(s));raw.version=2;raw.data.player.specialization='ember';delete raw.data.player.talents;delete raw.data.player.respecCount;delete raw.data.buyback;
   const text=JSON.stringify(raw),memory=new Map([[SAVE_KEY,text]]),store=new SaveStore({getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)}),loaded=store.load();
   assert.equal(availableTalentPoints(loaded.player),5);assert.equal(Object.hasOwn(loaded.player,'specialization'),false);assert.equal(loaded.player.gold,300);assert.equal(loaded.player.inventory.swiftBlade,2);
-  assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.match(store.notice,/5 poäng/);store.save(loaded);assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.equal(JSON.parse(memory.get(SAVE_KEY)).version,3);
+  assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.match(store.notice,/5 points/);store.save(loaded);assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.equal(JSON.parse(memory.get(SAVE_KEY)).version,3);
 });
 test('older overflowing bags retain every item and buyback repair never trusts an edited price',()=>{
   const s=shop();s.player.inventory=Object.fromEntries(Object.keys(ITEMS).map(id=>[id,2]));const raw=JSON.parse(serialize(s));raw.version=2;
@@ -188,9 +188,9 @@ test('older overflowing bags retain every item and buyback repair never trusts a
   loaded=deserialize(JSON.stringify(raw));assert.equal(loaded.buyback.length,1);assert.equal(loaded.buyback[0].price,4);assert.equal(loaded.tradeSequence,8);
 });
 test('panels expose prices, equipment protection, all talents and honest full-character comparisons',()=>{
-  const s=shop();let html=tradePanel(s,{side:'bag',id:'trainingSword'});assert.match(html,/Ta av Vandrarsvärd/);assert.match(html,/data-action="sell"[^>]+disabled/);assert.doesNotMatch(html,/Sälj alla/);
-  html=talentPanel(s,'guard');assert.equal((html.match(/data-talent=/g)||[]).length,24);assert.match(html,/class="talent-links"/);assert.match(html,/Första poängen/);
-  html=compareEquipment(s.player,'runnerWrap');assert.match(html,/Hugg \/ sekund/);assert.match(html,/Rörelsefart/);
+  const s=shop();let html=tradePanel(s,{side:'bag',id:'trainingSword'});assert.match(html,/Unequip Wanderer’s Sword/);assert.match(html,/data-action="sell"[^>]+disabled/);assert.doesNotMatch(html,/Sell all/);
+  html=talentPanel(s,'guard');assert.equal((html.match(/data-talent=/g)||[]).length,24);assert.match(html,/class="talent-links"/);assert.match(html,/first talent point/);
+  html=compareEquipment(s.player,'runnerWrap');assert.match(html,/Strikes \/ second/);assert.match(html,/Movement speed/);
 });
 
 test('ranged hits provoke idle enemies outside their normal detection radius',()=>{

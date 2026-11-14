@@ -1,3 +1,4 @@
+import { tr } from './i18n.js';
 import { createGame, stats } from './simulation.js';
 import { ITEMS, QUESTS, SPAWN, ENEMIES, CHECKPOINTS, xpForLevel } from './data.js';
 import { blocked, LANDMARKS } from './world.js';
@@ -18,17 +19,17 @@ export function serialize(state) {
   } });
 }
 export function deserialize(raw) {
-  if (typeof raw !== 'string' || raw.length > MAX_BYTES) throw new Error('Sparfilen är för stor eller saknar innehåll.');
+  if (typeof raw !== 'string' || raw.length > MAX_BYTES) throw new Error(tr("save.the_save_file_is_empty_or_too_large"));
   const envelope = JSON.parse(raw);
-  if (!envelope || !Number.isInteger(envelope.version)) throw new Error('Sparfilen saknar versionsnummer.');
+  if (!envelope || !Number.isInteger(envelope.version)) throw new Error(tr("save.the_save_file_has_no_version_number"));
   if (envelope.version > SAVE_VERSION) {
-    const error = new Error('Sparfilen kommer från en nyare version. Den lämnas orörd.');
+    const error = new Error(tr("save.this_save_is_from_a_newer_version_it_has_been_left_untouched"));
     error.futureVersion = true; throw error;
   }
   // Prototype format v0 used the same stable content IDs but lacked discoveries.
-  if (![0, 1, 2, 3].includes(envelope.version)) throw new Error('Den här sparversionen stöds inte.');
+  if (![0, 1, 2, 3].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
   const d = envelope.data, old = d?.player;
-  if (!d || !old || typeof old.name !== 'string' || !Number.isFinite(old.level) || !old.inventory || typeof old.inventory !== 'object' || Array.isArray(old.inventory)) throw new Error('Sparfilen är skadad.');
+  if (!d || !old || typeof old.name !== 'string' || !Number.isFinite(old.level) || !old.inventory || typeof old.inventory !== 'object' || Array.isArray(old.inventory)) throw new Error(tr("save.the_save_file_is_damaged"));
   const s = createGame(old.name), p = s.player;
   p.level = integer(old.level, 1, 20, 1);
   p.xp = p.level === 20 ? 0 : integer(old.xp, 0, xpForLevel(p.level) - 1, 0);
@@ -101,9 +102,9 @@ export class SaveStore {
         const state = deserialize(raw);
         const version = JSON.parse(raw).version;
         if (version < SAVE_VERSION) {
-          this.notice = `Din resa har uppdaterats. Den gamla inriktningen ersätts av tre talentträd. Du har ${availableTalentPoints(state.player)} poäng att fördela med N.`;
+          this.notice = tr("save.your_journey_has_been_updated_three_talent_trees_replace_the_old", availableTalentPoints(state.player));
           try { if (!this.storage.getItem(SAVE_KEY + '.v' + version)) this.storage.setItem(SAVE_KEY + '.v' + version, raw); }
-          catch { this.blocked = true; this.message = 'Din äldre resa kan spelas, men originalet kunde inte säkerhetskopieras. Exportera resan via menyn.'; }
+          catch { this.blocked = true; this.message = tr("save.you_can_play_your_older_journey_but_the_original_could_not_be_bac"); }
         }
         return state;
       }
@@ -113,15 +114,15 @@ export class SaveStore {
         this.storage.setItem(SAVE_KEY + '.recovery', raw);
         const backup = this.storage.getItem(SAVE_KEY + '.backup');
         if (backup) {
-          try { const state = deserialize(backup); this.message = 'En skadad sparning återställdes från säkerhetskopian.'; return state; }
+          try { const state = deserialize(backup); this.message = tr("save.a_damaged_save_was_restored_from_the_backup"); return state; }
           catch { /* Keep both originals for manual recovery. */ }
         }
         this.blocked = true;
-        this.message = 'Sparningen kunde inte läsas. Originalet är bevarat. Du kan spela tillfälligt eller importera en säkerhetskopia i menyn.';
+        this.message = tr("save.the_save_could_not_be_read_the_original_is_preserved_you_can_play");
         return null;
       }
     } catch {
-      this.message = 'Webbläsaren blockerar lokal sparning. Exportera din resa via menyn innan du stänger.';
+      this.message = tr("save.your_browser_is_blocking_local_saves_export_your_journey_from_the");
       return null;
     }
   }
@@ -135,7 +136,7 @@ export class SaveStore {
       }
       this.storage.setItem(SAVE_KEY, serialize(state));
       this.message = ''; return true;
-    } catch { this.message = 'Kunde inte spara lokalt. Exportera din resa via menyn.'; return false; }
+    } catch { this.message = tr("save.could_not_save_locally_export_your_journey_from_the_menu"); return false; }
   }
   // Called only after the player confirms an import or a new journey.
   replace(state) {
@@ -145,7 +146,7 @@ export class SaveStore {
       if (original) this.storage.setItem(SAVE_KEY + '.recovery', original);
       this.blocked = false;
       if (this.save(state)) return true;
-    } catch { this.message = 'Kunde inte ersätta sparningen.'; }
+    } catch { this.message = tr("save.could_not_replace_the_save"); }
     this.blocked = wasBlocked; return false;
   }
 }

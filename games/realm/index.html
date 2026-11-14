@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#122623">
-  <meta name="description" content="Börja din resa i Lyktdalen. Ett litet fantasy-RPG med utforskning, strider, uppdrag och en värld att återvända till.">
-  <title>Project Realm · Lyktdalen | Hirrdirr</title>
+  <meta name="description" content="Begin your journey in Lantern Vale. A small fantasy RPG with exploration, combat, quests and a world to come home to.">
+  <title>Project Realm · Lantern Vale | Hirrdirr</title>
   <link rel="icon" href="./assets/realm-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./realm.css">
 </head>
@@ -13,79 +13,79 @@
   <script>try{if(localStorage.getItem('hirrdirr_theme')==='light')document.body.classList.add('light')}catch{}</script>
   <div class="realm-shell">
     <header class="realm-header">
-      <a href="/games/" class="back-link" aria-label="Tillbaka till Hirrdirrs spel">← <strong>hirrdirr</strong><span>/ spel</span></a>
-      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.3.0</small></div>
-      <button id="theme-button" class="icon-button" aria-label="Växla ljust eller mörkt tema" title="Växla tema">◐</button>
+      <a href="/games/" class="back-link" aria-label="Back to Hirrdirr’s games">← <strong>hirrdirr</strong><span>/ games</span></a>
+      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.3.1</small></div>
+      <button id="theme-button" class="icon-button" aria-label="Switch between light and dark themes" title="Switch theme">◐</button>
     </header>
     <main>
       <div class="world-heading">
-        <div><p class="eyebrow">DIN VANDRARE · DIN VÄG</p><h1>Lyktdalen<span>.</span></h1></div>
-        <nav aria-label="Spelmenyer" class="game-nav">
-          <button data-panel="journal"><span>Uppdrag</span><kbd>J</kbd></button>
-          <button data-panel="inventory"><span>Karaktär &amp; väska</span><kbd>I</kbd></button>
-          <button data-panel="talents"><span>Talanger</span><kbd>N</kbd></button>
-          <button data-panel="settings" aria-label="Öppna spelmenyn"><span>Meny</span><kbd>Esc</kbd></button>
+        <div><p class="eyebrow">YOUR WANDERER · YOUR PATH</p><h1>Lantern Vale<span>.</span></h1></div>
+        <nav aria-label="Game menus" class="game-nav">
+          <button data-panel="journal"><span>Quests</span><kbd>J</kbd></button>
+          <button data-panel="inventory" aria-label="Character &amp; bag"><span class="nav-label-full">Character &amp; bag</span><span class="nav-label-short" aria-hidden="true">Bag</span><kbd>I</kbd></button>
+          <button data-panel="talents"><span>Talents</span><kbd>N</kbd></button>
+          <button data-panel="settings" aria-label="Open game menu"><span>Menu</span><kbd>Esc</kbd></button>
         </nav>
       </div>
       <p id="save-warning" class="notice" role="status" hidden></p>
       <div class="game-layout">
-        <section class="viewport" aria-label="Spelvärld">
-          <canvas id="world" width="960" height="600" tabindex="0" aria-label="Lyktdalen. Rör dig med WASD. Space attackerar, E interagerar. Kontroller finns under spelvärlden.">Spelet behöver en webbläsare med stöd för Canvas och JavaScript.</canvas>
+        <section class="viewport" aria-label="Game world">
+          <canvas id="world" width="960" height="600" tabindex="0" aria-label="Lantern Vale. Move with WASD, attack with Space, interact with E. Controls are listed below the game world.">This game requires a browser with Canvas and JavaScript support.</canvas>
           <div class="player-hud">
-            <div class="player-hud-top"><span class="portrait" aria-hidden="true"><img src="./assets/realm-mark.svg" width="20" height="26" alt=""></span><div><strong id="player-name">Vandrare</strong><small>Lyktvandrare · <span id="player-level">Nivå 1</span></small></div></div>
-            <div class="vital-label"><span>HÄLSA</span><span id="health-value">100 / 100</span></div>
+            <div class="player-hud-top"><span class="portrait" aria-hidden="true"><img src="./assets/realm-mark.svg" width="20" height="26" alt=""></span><div><strong id="player-name">Wanderer</strong><small>Lantern Wanderer · <span id="player-level">Level 1</span></small></div></div>
+            <div class="vital-label"><span>HEALTH</span><span id="health-value">100 / 100</span></div>
             <div class="meter health"><i id="health-fill"></i></div>
-            <div class="meter experience" aria-label="Erfarenhet"><i id="xp-fill"></i></div><small id="buff-status" class="buff-status" hidden></small>
+            <div class="meter experience" aria-label="Experience"><i id="xp-fill"></i></div><small id="buff-status" class="buff-status" hidden></small>
           </div>
-          <div class="zone-hud"><strong id="zone-name">Lyktdalen</strong><span id="zone-type">Trygg zon</span></div>
+          <div class="zone-hud"><strong id="zone-name">Lantern Vale</strong><span id="zone-type">Safe area</span></div>
           <div id="target-hud" class="target-hud" hidden><strong id="target-name"></strong><span id="target-hp"></span><div class="meter"><i id="target-fill"></i></div><small id="target-intent"></small></div>
-          <button id="pause-button" class="pause-button" title="Pausa" aria-label="Pausa spelet">Ⅱ</button>
+          <button id="pause-button" class="pause-button" title="Pause" aria-label="Pause game">Ⅱ</button>
           <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
-          <div id="combo-hud" class="combo-hud" title="Tredje träffen i följd ger 35% mer skada"><span id="combo-count">◇◇◇</span><small>Huggkedja</small></div>
-          <div class="hotbar" aria-label="Förmågor">
-            <button data-command="attack" title="Hugg: valt mål inom räckhåll, annars närmaste. Tredje träffen ger +35% skada." aria-label="Svärdshugg (Space)"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>Hugg</small><i class="cooldown"></i></button>
-            <button data-command="burst" title="Lyktslag: träffar alla fiender nära dig och avbryter vanliga fienders attacker" aria-label="Lyktslag (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lyktslag</small><i class="cooldown"></i></button>
-            <button data-command="dodge" title="Undanmanöver i rörelseriktningen" aria-label="Undanmanöver (Shift)"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>Undvik</small><i class="cooldown"></i></button>
-            <button data-command="potion" title="Återställer 55 hälsa" aria-label="Drick läkedryck (R)"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">3 drycker</small><i class="cooldown"></i></button>
-            <button data-command="guard" hidden title="Minskar inkommande skada. Förbättras i Lyktväktarens träd." aria-label="Lyktvärn (1)"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>Lyktvärn</small><i class="cooldown"></i></button>
-            <button data-command="rush" hidden title="Rusar mot ett mål inom räckhåll och fri sikt." aria-label="Språng (2)"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>Språng</small><i class="cooldown"></i></button>
-            <button data-command="bolt" hidden title="Skjuter en ljusruna mot ditt mål eller i riktningen du tittar." aria-label="Glimtskott (3)"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>Glimtskott</small><i class="cooldown"></i></button>
+          <div id="combo-hud" class="combo-hud" title="The third consecutive hit deals 35% more damage"><span id="combo-count">◇◇◇</span><small>Strike combo</small></div>
+          <div class="hotbar" aria-label="Abilities">
+            <button data-command="attack" title="Strike: selected target in range, otherwise the nearest. The third hit deals +35% damage." aria-label="Sword strike (Space)"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>Strike</small><i class="cooldown"></i></button>
+            <button data-command="burst" title="Lantern Burst: hits all nearby enemies and interrupts normal enemies" aria-label="Lantern Burst (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lantern Burst</small><i class="cooldown"></i></button>
+            <button data-command="dodge" title="Dodge in your movement direction" aria-label="Dodge (Shift)"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>Dodge</small><i class="cooldown"></i></button>
+            <button data-command="potion" title="Restores 55 health" aria-label="Drink healing potion (R)"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">3 potions</small><i class="cooldown"></i></button>
+            <button data-command="guard" hidden title="Reduces incoming damage. Improved by Lantern Guardian talents." aria-label="Lantern Ward (1)"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>Lantern Ward</small><i class="cooldown"></i></button>
+            <button data-command="rush" hidden title="Rush toward a target in range and line of sight." aria-label="Rush (2)"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>Rush</small><i class="cooldown"></i></button>
+            <button data-command="bolt" hidden title="Fire a rune of light toward your target or in the direction you face." aria-label="Glimmerbolt (3)"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>Glimmerbolt</small><i class="cooldown"></i></button>
           </div>
           <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
-          <div id="focus-overlay" class="focus-overlay" hidden><span>Äventyret är pausat</span><button id="resume-focus" class="primary">Fortsätt</button></div>
+          <div id="focus-overlay" class="focus-overlay" hidden><span>Adventure paused</span><button id="resume-focus" class="primary">Continue</button></div>
         </section>
         <aside class="journey-rail">
-          <div class="rail-heading"><span class="eyebrow">DIN RESA</span><span id="gold-value">0 guld</span></div>
+          <div class="rail-heading"><span class="eyebrow">YOUR JOURNEY</span><span id="gold-value">0 gold</span></div>
           <div id="quest-tracker" class="quest-tracker"></div>
-          <section class="map-section"><div class="map-title"><h2>Lyktdalen &amp; omnejd</h2><span>N ↑</span></div><canvas id="minimap" width="232" height="155" role="img" aria-label="Karta: byn i sydväst, bron i mitten och fyren i nordost och Glödmyren i sydost"></canvas><div class="map-legend"><span>◇ Du</span><span>● Bybor</span><span>◆ Runor</span><span>● Fiender</span></div></section>
-          <div class="field-note"><span class="eyebrow">VANDRARENS ANTECKNING</span><p id="field-note">Alla vägar börjar med ett första steg. Elin väntar vid byns lykta.</p></div>
-          <button class="rail-link" data-panel="help">Visa kontroller &amp; tips <span>↗</span></button>
+          <section class="map-section"><div class="map-title"><h2>Lantern Vale &amp; beyond</h2><span>N ↑</span></div><canvas id="minimap" width="232" height="155" role="img" aria-label="Map: village to the southwest, bridge in the center, beacon to the northeast and Emberfen to the southeast"></canvas><div class="map-legend"><span>◇ You</span><span>● Villagers</span><span>◆ Runes</span><span>● Enemies</span></div></section>
+          <div class="field-note"><span class="eyebrow">WANDERER’S NOTES</span><p id="field-note">Every journey starts with a single step. Elin awaits by the village lantern.</p></div>
+          <button class="rail-link" data-panel="help">Show controls &amp; tips <span>↗</span></button>
         </aside>
       </div>
-      <footer class="game-footer"><div><span><kbd>W A S D</kbd> Förflytta</span><span><kbd>E</kbd> Prata / samla</span><span><kbd>SPACE</kbd> Attackera</span><span><kbd>TAB</kbd> Välj mål</span></div><span id="save-status" role="status">Din resa sparas på den här enheten</span></footer>
-      <p class="pc-note">Designat för PC med tangentbord. Du kan öppna menyer på mindre skärmar.</p>
+      <footer class="game-footer"><div><span><kbd>W A S D</kbd> Move</span><span><kbd>E</kbd> Talk / gather</span><span><kbd>SPACE</kbd> Attack</span><span><kbd>TAB</kbd> Select target</span></div><span id="save-status" role="status">Your journey is saved on this device</span></footer>
+      <p class="pc-note">Designed for desktop and keyboard. Menus are also available on smaller screens.</p>
     </main>
-    <div class="bottom-line"><span>En liten värld. Ett nytt äventyr.</span><span>Singleplayer · Lokal sparning · Tidig version</span></div>
+    <div class="bottom-line"><span>A small world. A new adventure.</span><span>Single-player · Local saves · Early release</span></div>
   </div>
   <dialog id="welcome" class="welcome-dialog" aria-labelledby="welcome-title">
     <div class="welcome-art"><span class="art-label">HIRRDIRR ORIGINAL</span></div>
     <div class="welcome-copy">
-      <p class="eyebrow">PROJECT REALM · RPG SYSTEMS & WORLD EVOLUTION</p><h2 id="welcome-title">Där lyktorna<br>fortfarande lyser.</h2>
-      <p>Bortom fyren glöder myren. Forma din egen väg med tre talangträd, handla hos Ivo och möt det som vaknat under rötterna.</p>
-      <form id="start-form"><label for="character-name">Vad heter din vandrare?</label><input id="character-name" name="name" maxlength="18" autocomplete="off" placeholder="Ditt namn" value="Vandrare" required><button id="start-button" class="primary" type="submit">Börja din resa <span>→</span></button></form>
-      <button id="new-from-welcome" class="text-button" hidden>Börja en ny resa</button>
-      <p class="welcome-controls"><kbd>WASD</kbd> Förflytta <kbd>SPACE</kbd> Attackera <kbd>E</kbd> Prata</p>
+      <p class="eyebrow">PROJECT REALM · RPG SYSTEMS &amp; WORLD EVOLUTION</p><h2 id="welcome-title">Where lanterns<br> still shine.</h2>
+      <p>Beyond the beacon, the fen glows. Shape your path with three talent trees, trade with Ivo and face what has awakened beneath the roots.</p>
+      <form id="start-form"><label for="character-name">What is your wanderer’s name?</label><input id="character-name" name="name" maxlength="18" autocomplete="off" placeholder="Your name" value="Wanderer" required><button id="start-button" class="primary" type="submit">Begin your journey <span>→</span></button></form>
+      <button id="new-from-welcome" class="text-button" hidden>Start a new journey</button>
+      <p class="welcome-controls"><kbd>WASD</kbd> Move <kbd>SPACE</kbd> Attack <kbd>E</kbd> Talk</p>
       <p id="welcome-warning" class="welcome-warning" hidden></p>
     </div>
   </dialog>
-  <dialog id="panel" class="panel-dialog" aria-labelledby="panel-title"><div class="panel-header"><div><p id="panel-kicker" class="eyebrow">DIN RESA</p><h2 id="panel-title">Karaktär</h2></div><button id="close-panel" class="icon-button" aria-label="Stäng menyn">×</button></div><p id="panel-feedback" class="panel-feedback" role="status" hidden></p><div id="panel-content"></div></dialog>
+  <dialog id="panel" class="panel-dialog" aria-labelledby="panel-title"><div class="panel-header"><div><p id="panel-kicker" class="eyebrow">YOUR JOURNEY</p><h2 id="panel-title">Character</h2></div><button id="close-panel" class="icon-button" aria-label="Close menu">×</button></div><p id="panel-feedback" class="panel-feedback" role="status" hidden></p><div id="panel-content"></div></dialog>
   <dialog id="realm-confirm" class="realm-confirm-dialog" aria-labelledby="realm-confirm-title" aria-describedby="realm-confirm-description">
-    <p class="eyebrow">IVO · HANDELSBOD</p>
-    <h2 id="realm-confirm-title">Bekräfta försäljning</h2>
+    <p class="eyebrow">IVO · TRADING POST</p>
+    <h2 id="realm-confirm-title">Confirm sale</h2>
     <p id="realm-confirm-description"></p>
-    <div class="realm-confirm-actions"><button id="realm-confirm-cancel" type="button">Avbryt</button><button id="realm-confirm-accept" class="primary" type="button">Bekräfta försäljning</button></div>
+    <div class="realm-confirm-actions"><button id="realm-confirm-cancel" type="button">Cancel</button><button id="realm-confirm-accept" class="primary" type="button">Confirm sale</button></div>
   </dialog>
-  <noscript><p class="notice">Aktivera JavaScript för att spela Project Realm.</p></noscript>
+  <noscript><p class="notice">Enable JavaScript to play Project Realm.</p></noscript>
   <script type="module" src="./js/main.js"></script>
 </body>
 </html>
