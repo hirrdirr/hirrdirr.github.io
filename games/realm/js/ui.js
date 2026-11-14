@@ -3,7 +3,7 @@ import { ITEMS, QUESTS, NPCS, RARITIES, ENEMIES, xpForLevel } from './data.js';
 import { stats, questReady, nearestInteraction } from './simulation.js';
 import { zoneAt } from './world.js';
 import { TALENTS, availableTalentPoints, spentTalentPoints, talentRank, respecCost } from './talents.js';
-import { BAG_SLOTS, occupiedSlots } from './inventory.js';
+import { BAG_SLOTS, occupiedSlots, EQUIPMENT_SLOTS } from './inventory.js';
 import { escapeHTML, itemStats, bagButton, compareEquipment, tradePanel, talentPanel } from './ui-panels.js';
 export { escapeHTML } from './ui-panels.js';
 const $ = id => document.getElementById(id);
@@ -110,12 +110,13 @@ export class UI {
   merchant(){this.heading(tr("ui.ivo_lantern_vale_merchant"),tr("trading.ivos_trading_post"));$('panel-content').innerHTML=tradePanel(this.state(),this.tradeSelection);}
   talents(){this.heading(tr("ui.three_paths_one_wanderer"),tr("ui.your_talents"));$('panel-content').innerHTML=talentPanel(this.state(),this.selectedTalent,this.activeTree);this.talentCombatBlocked=this.state().player.combat>0;}
   inventory() {
-    const s=this.state(),p=s.player,st=stats(p),item=ITEMS[this.selected],equipped=item?.slot&&p.equipment[item.slot]===this.selected;
+    const s=this.state(),p=s.player,st=stats(p),item=ITEMS[this.selected];
     this.heading(tr("ui.lantern_wanderer_level", p.level),tr("ui.character_bag"));
     let html='<div class="inventory-layout"><section class="character-sheet"><h3>'+escapeHTML(p.name)+'</h3><dl class="stat-list">';
     for(const [label,value] of [[tr("ui.health"),Math.ceil(p.hp)+' / '+st.maxHp],[tr("ui-panels.strike_damage"),Math.round(st.attack*st.meleeMultiplier)],[tr("ui-panels.defense_2"),st.defense],[tr("ui.critical_chance"),Math.round(st.critChance*100)+'%'],[tr("ui-panels.strikes_second"),(1/st.attackCooldown).toFixed(2)],[tr("ui-panels.lantern_burst"),Math.round(st.attack*st.burstMultiplier)],[tr("ui-panels.movement_speed_2"),Math.round(st.speed/158*100)+'%'],[tr("ui-panels.dodge"),st.dodgeCooldown.toFixed(2)+' s'],[tr("ui.experience"),p.level===20?tr("ui.max_level"):p.xp+' / '+xpForLevel(p.level)],[tr("ui.gold"),p.gold]])html+='<dt>'+label+'</dt><dd>'+value+'</dd>';
     html+='</dl><div>';
-    for(const [slot,label] of [['weapon',tr("ui.weapon")],['armor',tr("ui.armor")],['charm',tr("ui.charm")]])html+=`<div class="gear-slot"><small>${label}</small>${escapeHTML(ITEMS[p.equipment[slot]]?.name||tr("ui.nothing_equipped"))}${p.equipment[slot]?`<button class="text-button" data-action="unequip" data-slot="${slot}" aria-label="${tr("ui-panels.unequip", ITEMS[p.equipment[slot]].name)}">${tr("ui.unequip")}</button>`:''}</div>`;
+    const slotLabels={weapon:tr('ui.weapon'),armor:tr('ui.armor'),charm:tr('ui.charm')};
+    for(const slot of EQUIPMENT_SLOTS)html+=`<div class="gear-slot"><small>${slotLabels[slot]}</small>${escapeHTML(ITEMS[p.equipment[slot]]?.name||tr("ui.nothing_equipped"))}${p.equipment[slot]?`<button class="text-button" data-action="unequip" data-slot="${slot}" aria-label="${tr("ui-panels.unequip", ITEMS[p.equipment[slot]].name)}">${tr("ui.unequip")}</button>`:''}</div>`;
     html+=`</div><div class="talent-inventory"><h4>${tr("ui.your_path")}</h4><p>${p.level<3?tr("ui.your_first_talent_point_awaits_at_level_3"):tr("ui.unspent_points_spent", availableTalentPoints(p), spentTalentPoints(p))}</p><button data-action="talents">${tr("ui.open_talents")}<kbd>${tr("ui.n")}</kbd></button></div></section><section><div class="bag-heading"><h3>${tr("ui-panels.your_bag")}</h3><span>${tr("ui-panels.slots", occupiedSlots(p), BAG_SLOTS)}</span></div><p>${tr("ui.select_an_item_for_details_identical_items_share_a_slot")}</p><div class="inventory-grid">`;
     for(const [id,count] of Object.entries(p.inventory))if(count>0)html+=bagButton(p,id,this.selected===id);
     html+='</div><div class="item-detail" aria-live="polite">';
@@ -123,7 +124,7 @@ export class UI {
       html+=`<span class="item-rarity ${item.rarity}">${RARITIES[item.rarity]}${item.questItem?tr("ui-panels.quest_bound"):''}</span><h3>${item.name}</h3><p>${item.description}</p><p>${itemStats(item)}</p><p>${item.questItem?tr("ui.cannot_be_sold"):tr("ui.sell_value_gold_each_at_ivos_shop", item.value)}</p>`;
       if(item.slot) {
         html+=compareEquipment(p,this.selected);
-        html+=`<button class="primary" data-action="${equipped?'unequip':'equip'}" data-slot="${item.slot}" data-id="${this.selected}">${equipped?tr("ui.unequip"):tr("ui.equip")}</button>`;
+        html+=`<button class="primary" data-action="equip" data-slot="${item.slot}" data-id="${this.selected}">${tr("ui.equip")}</button>`;
       } else if(this.selected==='potion')html+=`<button data-action="potion" ${p.hp>=st.maxHp||p.cooldowns.potion>0?'disabled':''}>${tr("ui.drink_healing_potion_health", st.potionHealing)}</button>`;
     } else html+=`<p>${tr("ui.select_an_item_above")}</p>`;
     $('panel-content').innerHTML=html+'</div></section></div>';

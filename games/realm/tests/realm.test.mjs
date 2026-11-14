@@ -109,7 +109,7 @@ test('save round-trip restores progress, gear, discoveries, name, death and boss
 test('older v0 saves migrate and invalid values are bounded without trusting unknown IDs',()=>{
   const raw=JSON.parse(serialize(createGame()));raw.version=0;raw.data.player.level=999;raw.data.player.gold=-100;raw.data.player.x=-999;raw.data.player.inventory={potion:Infinity,invalid:9,moonBlade:4};raw.data.player.equipment={weapon:'__proto__',armor:'moonBlade'};
   raw.data.harvested=['herb1','herb1','fake'];const s=deserialize(JSON.stringify(raw));
-  assert.equal(s.player.level,20);assert.equal(s.player.gold,0);assert.equal(s.player.x,SPAWN.x);assert.equal(s.player.equipment.weapon,'trainingSword');assert.equal(s.player.equipment.armor,'linenCoat');assert.deepEqual(s.harvested,['herb1']);
+  assert.equal(s.player.level,20);assert.equal(s.player.gold,0);assert.equal(s.player.x,SPAWN.x);assert.equal(s.player.equipment.weapon,null);assert.equal(s.player.equipment.armor,null);assert.equal(s.player.inventory.moonBlade,4);assert.deepEqual(s.harvested,['herb1']);
 });
 test('corruption recovers the validated backup and preserves the damaged original',()=>{
   const backup=serialize(createGame('Backup')),storage=memory({[SAVE_KEY]:'broken',[SAVE_KEY+'.backup']:backup}),store=new SaveStore(storage);

@@ -5,14 +5,14 @@ import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLev
 import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, zoneAt } from './world.js';
 import { stepEnemies } from './enemy-ai.js';
 import { talentEffects, talentRank, learnTalent, talentRequirement, spentTalentPoints, respecCost } from './talents.js';
-import { capacityReason, bundleCapacityReason, MAX_GOLD } from './inventory.js';
+import { capacityReason, bundleCapacityReason, MAX_GOLD, EQUIPMENT_SLOTS, emptyEquipment, transferEquipment } from './inventory.js';
 import { transact } from './trading.js';
 export const TICK = 1 / 60;
 export function stats(player) {
   const result = { maxHp: 100 + (player.level - 1) * 16, attack: 9 + (player.level - 1) * 2, defense: Math.floor((player.level - 1) / 2), speed: 158, haste: 0, dodgeCooldown: 2.5 };
   const talents = talentEffects(player);
   let spellPower = 0;
-  for (const item of [...Object.values(player.equipment).map(id => ITEMS[id]), talents]) {
+  for (const item of [...EQUIPMENT_SLOTS.map(slot => ITEMS[player.equipment[slot]]).filter((item, i) => item?.slot === EQUIPMENT_SLOTS[i]), talents]) {
     if (item) { result.maxHp += item.hp || 0; result.attack += item.attack || 0; result.defense += item.defense || 0; result.haste += item.haste || 0; result.speed += item.speed || 0; result.dodgeCooldown -= item.recovery || 0; }
     spellPower += item?.spellPower || 0;
   }
@@ -34,7 +34,7 @@ export function createGame(name = tr("simulation.wanderer")) {
     time: 0, seed: 784533, sequence: 0, events: [], drops: [], effects: [], projectiles: [], playerShots: [], hazards: [], targetId: null,
     buyback: [], tradeSequence: 1, bagNotice: 0,
     player: { name: name.trim().slice(0, 18) || tr("simulation.wanderer"), ...SPAWN, hp: 100, level: 1, xp: 0, gold: 0, facing: { x: 0, y: 1 }, moveFacing: { x: 0, y: 1 }, dodgeDirection: { x: 0, y: 1 },
-      inventory: { trainingSword: 1, linenCoat: 1, potion: 3 }, equipment: { weapon: 'trainingSword', armor: 'linenCoat', charm: null },
+      inventory: { potion: 3 }, equipment: { ...emptyEquipment(), weapon: 'trainingSword', armor: 'linenCoat' },
       cooldowns: { attack: 0, burst: 0, dodge: 0, potion: 0, guard: 0, rush: 0, bolt: 0 }, talents: {}, respecCount: 0, guardTime: 0, counterTime: 0, checkpoint: 'village', combo: 0, comboTime: 0, invulnerable: 0, dodging: 0, attackTime: 0, moving: false, combat: 0, dead: false },
     quests: {}, harvested: [], chests: [], runes: [], discovered: ['village'], flags: { beaconLit: false, wardenDefeated: false, ancientDefeated: false, sealRestored: false }, enemies: []
   };
@@ -110,9 +110,9 @@ export function completeQuest(s, id) {
   return true;
 }
 export function equip(s, id) {
-  const item = ITEMS[id];
-  if (s.player.dead || !item?.slot || !s.player.inventory[id]) return false;
-  s.player.equipment[item.slot] = id;
+  const slot = Object.hasOwn(ITEMS, id) ? ITEMS[id].slot : null;
+  const result = transferEquipment(s.player, slot, id);
+  if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
   s.player.hp = Math.min(s.player.hp, stats(s.player).maxHp);
   emit(s, 'equip', { id });
   return true;
@@ -335,9 +335,9 @@ export function command(s, input) {
     case 'complete': return completeQuest(s, input.id);
     case 'equip': return equip(s, input.id);
     case 'unequip': {
-      if (!Object.hasOwn(p.equipment, input.slot) || !p.equipment[input.slot]) return false;
-      const id = p.equipment[input.slot]; p.equipment[input.slot] = null;
-      p.hp = Math.min(p.hp, stats(p).maxHp); emit(s, 'unequip', { id }); return true;
+      const result = transferEquipment(p, input.slot);
+      if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
+      p.hp = Math.min(p.hp, stats(p).maxHp); emit(s, 'unequip', { id: result.id }); return true;
     }
     case 'buy': case 'sell': case 'buyback': {
       const result = transact(s, input);

@@ -4,8 +4,9 @@ import { ITEMS, QUESTS, SPAWN, ENEMIES, CHECKPOINTS, xpForLevel } from './data.j
 import { blocked, LANDMARKS } from './world.js';
 import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
+import { EQUIPMENT_SLOTS, emptyEquipment } from './inventory.js';
 export const SAVE_KEY = 'hirrdirr.realm.save';
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 const MAX_BYTES = 262144;
 const integer = (v, min, max, fallback) => Number.isFinite(v) ? Math.max(min, Math.min(max, Math.floor(v))) : fallback;
 const idsOf = kind => LANDMARKS.filter(l => l.kind === kind).map(l => l.id);
@@ -27,7 +28,7 @@ export function deserialize(raw) {
     error.futureVersion = true; throw error;
   }
   // Prototype format v0 used the same stable content IDs but lacked discoveries.
-  if (![0, 1, 2, 3].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
+  if (![0, 1, 2, 3, 4].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
   const d = envelope.data, old = d?.player;
   if (!d || !old || typeof old.name !== 'string' || !Number.isFinite(old.level) || !old.inventory || typeof old.inventory !== 'object' || Array.isArray(old.inventory)) throw new Error(tr("save.the_save_file_is_damaged"));
   const s = createGame(old.name), p = s.player;
@@ -39,16 +40,17 @@ export function deserialize(raw) {
     const count = integer(old.inventory[id], 0, 999, 0);
     if (count) p.inventory[id] = count;
   }
-  p.equipment = { weapon: null, armor: null, charm: null };
-  // Pre-trading saves could not sell these items. v3 must never recreate sold gear.
-  if (envelope.version < 3) {
-    p.inventory.trainingSword = Math.max(1, p.inventory.trainingSword || 0);
-    p.inventory.linenCoat = Math.max(1, p.inventory.linenCoat || 0);
-    p.equipment.weapon = 'trainingSword'; p.equipment.armor = 'linenCoat';
-  }
-  for (const slot of ['weapon', 'armor', 'charm']) {
+  p.equipment = emptyEquipment();
+  for (const slot of EQUIPMENT_SLOTS) {
     const id = old.equipment?.[slot];
-    if (Object.hasOwn(ITEMS, id) && ITEMS[id].slot === slot && p.inventory[id]) p.equipment[slot] = id;
+    if (typeof id !== 'string' || !Object.hasOwn(ITEMS, id) || ITEMS[id].slot !== slot) continue;
+    // v0–v3 slots reference a bag copy. v4 slots own their copy independently.
+    // Unowned or malformed legacy references cannot manufacture equipment.
+    if (envelope.version < 4) {
+      if (!p.inventory[id]) continue;
+      if (--p.inventory[id] === 0) delete p.inventory[id];
+    }
+    p.equipment[slot] = id;
   }
   p.talents = envelope.version >= 3 ? sanitizeTalents(old.talents, p.level) : {};
   p.respecCount = integer(old.respecCount, 0, 999999, 0);
@@ -94,18 +96,22 @@ export function deserialize(raw) {
 }
 export class SaveStore {
   constructor(storage) { this.storage = storage; this.blocked = false; this.message = ''; this.notice = ''; }
+  readWithBackup(raw) {
+    const state = deserialize(raw), version = JSON.parse(raw).version;
+    if (version < SAVE_VERSION) {
+      this.notice = tr('save.equipment_migrated');
+      if (version < 3) this.notice += ' ' + tr("save.your_journey_has_been_updated_three_talent_trees_replace_the_old", availableTalentPoints(state.player));
+      try { if (!this.storage.getItem(SAVE_KEY + '.v' + version)) this.storage.setItem(SAVE_KEY + '.v' + version, raw); }
+      catch { this.blocked = true; this.message = tr("save.you_can_play_your_older_journey_but_the_original_could_not_be_bac"); }
+    }
+    return state;
+  }
   load() {
     try {
       const raw = this.storage.getItem(SAVE_KEY);
       if (!raw) return null;
       try {
-        const state = deserialize(raw);
-        const version = JSON.parse(raw).version;
-        if (version < SAVE_VERSION) {
-          this.notice = tr("save.your_journey_has_been_updated_three_talent_trees_replace_the_old", availableTalentPoints(state.player));
-          try { if (!this.storage.getItem(SAVE_KEY + '.v' + version)) this.storage.setItem(SAVE_KEY + '.v' + version, raw); }
-          catch { this.blocked = true; this.message = tr("save.you_can_play_your_older_journey_but_the_original_could_not_be_bac"); }
-        }
+        const state = this.readWithBackup(raw);
         return state;
       }
       catch (error) {
@@ -114,7 +120,7 @@ export class SaveStore {
         this.storage.setItem(SAVE_KEY + '.recovery', raw);
         const backup = this.storage.getItem(SAVE_KEY + '.backup');
         if (backup) {
-          try { const state = deserialize(backup); this.message = tr("save.a_damaged_save_was_restored_from_the_backup"); return state; }
+          try { const state = this.readWithBackup(backup); if (!this.blocked) this.message = tr("save.a_damaged_save_was_restored_from_the_backup"); return state; }
           catch { /* Keep both originals for manual recovery. */ }
         }
         this.blocked = true;
@@ -139,9 +145,14 @@ export class SaveStore {
     } catch { this.message = tr("save.could_not_save_locally_export_your_journey_from_the_menu"); return false; }
   }
   // Called only after the player confirms an import or a new journey.
-  replace(state) {
+  replace(state, importedRaw = null) {
     const wasBlocked = this.blocked;
     try {
+      // Keep the exact imported legacy file as well as the current local journey.
+      if (importedRaw !== null) {
+        const version = JSON.parse(importedRaw).version;
+        if (version < SAVE_VERSION) this.storage.setItem(SAVE_KEY + '.import.v' + version, importedRaw);
+      }
       const original = this.storage.getItem(SAVE_KEY);
       if (original) this.storage.setItem(SAVE_KEY + '.recovery', original);
       this.blocked = false;
