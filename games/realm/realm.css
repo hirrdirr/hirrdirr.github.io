@@ -156,6 +156,7 @@ h1 {
 h1 span {
   color:var(--gold)
 }
+.game-nav .nav-label-short { display: none; }
 .game-nav {
   display:flex;
   gap:8px
@@ -1128,13 +1129,8 @@ input,select {
     font-size:10px;
     padding:7px
   }
-  .game-nav button:nth-child(2) span {
-    font-size:0
-  }
-  .game-nav button:nth-child(2) span:after {
-    content:"Väska";
-    font-size:10px
-  }
+  .game-nav .nav-label-full { display: none; }
+  .game-nav .nav-label-short { display: inline; }
   h1 {
     font-size:28px
   }
@@ -1442,7 +1438,7 @@ input,select {
   .hotbar small { font-size: 7px; }
 }
 
-/* Focused Realm 0.3.1a: confirmation is a real in-game modal, not a browser alert. */
+/* Rare-item sales use an accessible in-game modal. */
 .realm-confirm-dialog {
   width: min(440px, calc(100% - 32px));
   padding: 26px;

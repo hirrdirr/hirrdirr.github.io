@@ -1,0 +1,128 @@
+{
+  "version": 3,
+  "savedAt": "2026-11-13T12:00:00.000Z",
+  "data": {
+    "player": {
+      "name": "Åsa Vandrare",
+      "x": 1232,
+      "y": 784,
+      "hp": 231,
+      "level": 20,
+      "xp": 0,
+      "gold": 417,
+      "inventory": {
+        "potion": 7,
+        "moonBlade": 1,
+        "marshCoat": 1,
+        "emberCharm": 1,
+        "amber": 2
+      },
+      "equipment": {
+        "weapon": "moonBlade",
+        "armor": "marshCoat",
+        "charm": "emberCharm"
+      },
+      "dead": false,
+      "talents": {
+        "vigor": 3,
+        "steel": 2,
+        "guard": 1,
+        "edge": 2,
+        "tempo": 3,
+        "rush": 1,
+        "focus": 3,
+        "bolt": 1
+      },
+      "respecCount": 2,
+      "checkpoint": "camp",
+      "cooldowns": {
+        "attack": 0,
+        "burst": 0,
+        "dodge": 0,
+        "potion": 0,
+        "guard": 7,
+        "rush": 0,
+        "bolt": 2
+      }
+    },
+    "quests": {
+      "roots": {
+        "status": "done",
+        "progress": [
+          5
+        ]
+      },
+      "herbs": {
+        "status": "done",
+        "progress": [
+          3
+        ]
+      },
+      "beacon": {
+        "status": "done",
+        "progress": [
+          1,
+          1
+        ]
+      },
+      "embers": {
+        "status": "active",
+        "progress": [
+          1,
+          2
+        ]
+      }
+    },
+    "harvested": [
+      "herb1",
+      "herb2",
+      "herb3"
+    ],
+    "chests": [
+      "chest1",
+      "chest2"
+    ],
+    "discovered": [
+      "village",
+      "trail",
+      "forest",
+      "ruins",
+      "camp",
+      "marsh"
+    ],
+    "runes": [
+      "rune1"
+    ],
+    "flags": {
+      "beaconLit": true,
+      "wardenDefeated": true,
+      "ancientDefeated": false,
+      "sealRestored": false
+    },
+    "drops": [
+      {
+        "id": 1,
+        "x": 1232,
+        "y": 784,
+        "item": "potion",
+        "life": 45
+      }
+    ],
+    "buyback": [
+      {
+        "id": "sale-7",
+        "merchant": "ivo",
+        "item": "trainingSword",
+        "price": 1
+      },
+      {
+        "id": "sale-6",
+        "merchant": "ivo",
+        "item": "emberShard",
+        "price": 7
+      }
+    ],
+    "seed": 12345,
+    "time": 1207
+  }
+}

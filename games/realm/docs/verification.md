@@ -1,3 +1,73 @@
+# v0.3.1 verification — 2026-11-14
+
+## Automated verification
+
+`node --test games/realm/tests/*.test.mjs`: **73 passed, 0 failed**.
+The 64 baseline checks remain; nine additional checks cover:
+
+- Translation interpolation, English fallback, missing keys/arguments, HTML
+  escaping and literal user text.
+- Catalog references, placeholder counts, remaining Swedish source copy, and
+  generated HTML freshness, language, metadata and accessible navigation.
+- Exact persisted-data round-trip of a Swedish v0.3.0 fixture generated with
+  the pre-localization code: name, equipment, inventory, talents, reset history,
+  quests, discoveries, checkpoint and buyback. Save schema remains version 3;
+  the original backup remains unchanged.
+- Transactions, quest completion and paid respecialization using that fixture.
+- Every rank of all 24 talents and correct next-rank descriptions.
+- Actual UI handlers for rare-sale cancel/confirm and merchant-distance
+  revalidation, talent-panel combat countdown/unlocking, and stale NPC feedback.
+  These handler tests use DOM doubles; they are separate from browser QA below.
+
+An independent comparison with the pre-localization baseline confirmed unchanged
+gameplay IDs, item/enemy/quest numerical data, rewards, checkpoints, talent
+structures and every talent rank's effects, excluding display text.
+
+`node games/realm/scripts/localize-html.mjs --check`, JavaScript syntax checks
+and `git diff --check` pass. Changes are confined to `games/realm/`.
+
+## Actual browser verification
+
+Chromium, 2026-11-13–14, with a disposable QA character:
+
+- Loaded an existing character and checked English welcome, HUD, menus,
+  tooltips, NPC dialogue, quest objectives and rewards.
+- Accepted Light Along the Trail, gathered a glimmerherb and killed a Thornroot
+  with Glimmerbolt; the quest tracker and gold updated correctly.
+- Opened Talents during combat: the visible countdown ran while the panel
+  stayed open, learning was disabled, then became available automatically.
+  Learned Barkskin ranks 1 and 2 successfully.
+- At Ivo, bought a healing potion (415 → 403 gold), cancelled a rare Moonshard
+  sale without losing the item, confirmed it through the custom in-game dialog
+  (403 → 427), then bought it back (427 → 403).
+- Equipped Moonshard and observed the corresponding stat changes. Reloaded
+  and retained the QA character, equipment, four potions, 403 gold and talent
+  allocation (14 spent, four unspent).
+- Checked dark/light panels and a 390 × 820 iframe viewport. All seven ability
+  buttons fit; talent branch tabs work and the 330-pixel panel has no horizontal
+  overflow. Verified the localized narrow “Bag” label and welcome-heading
+  spacing after fixing them.
+
+Respecialization is covered by automated tests in this release, not a new manual
+browser run. No full five-quest campaign replay, Firefox/Safari run or physical
+low-powered Windows hardware test was performed. Narrow-layout checks do not
+add touch gameplay; the game remains designed for desktop keyboard controls.
+Deployment verification is pending merge.
+
+## Performance comparison
+
+Five alternating warmed-up samples per version, each with 36,000 fixed ticks,
+17 enemies, movement, attacks and abilities using a mixed talent build:
+
+- Pre-localization baseline median: **0.021424 ms/tick**.
+- v0.3.1 median: **0.021410 ms/tick**.
+- Talent-panel HTML generation: **0.161429 ms/render** over 1,000 renders.
+
+No measurable simulation regression in this sample. These are host CPU timings,
+not browser FPS or GPU measurements.
+
+---
+
 # v0.3.0 verification — 2026-11-13
 
 ## Automated

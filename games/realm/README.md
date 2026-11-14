@@ -1,20 +1,38 @@
-# Project Realm — Lyktdalen, v0.3.0
+# Project Realm — Lantern Vale, v0.3.1
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## RPG Systems & World Evolution
+## 0.3.1 — English Localization & Final Polish
 
-**Ivo** now opens a dedicated trading window: his stock on the left, your bag
+All Realm player-facing copy is English, including HUD, controls, NPC dialogue,
+quests, items, talents, world interactions, trade confirmations and save errors.
+English copy lives in `js/locales/en.js`; `js/i18n.js` formats numbered placeholders
+with a fallback for future locale dictionaries. Gameplay IDs stay unchanged.
+
+Static HTML comes from `templates/index.html`. After changing its text or markup,
+run `node games/realm/scripts/localize-html.mjs` and commit the generated
+`index.html`. Tests reject stale output. GitHub Pages needs no build step.
+See [localization.md](docs/localization.md) for terminology and authoring rules.
+
+The live combat countdown in the talent panel and in-game rare-sale confirmation
+remain intact. Narrow navigation now uses an accessible localized Bag label instead
+of CSS-generated Swedish text. The welcome heading keeps word spacing on narrow
+screens. Opening another NPC clears old panel feedback. No gameplay content,
+balance, persistent IDs or save schema changed.
+
+## Trading and talent systems
+
+**Ivo** opens a dedicated trading window: his stock on the left, your bag
 on the right. Select an item, inspect its rarity, stats, equipment comparison
 and price, then buy or sell exactly one copy. The window stays open. The last
 eight sales can be bought back at their original sale price, including after
 reloading. There is no sell-all command or automatic conversion of equipment.
 
-- Seven offers: a potion and six equipment choices, including the new Järnrot,
-  Skymningsväv and Runvävarens prisma. Protection, movement/attack rate and spell
+- Seven offers: a potion and six equipment choices, including Ironroot,
+  Duskweave and Runeweaver Prism. Protection, movement/attack rate and spell
   damage are distinct choices; purchase prices always exceed sale prices.
-- Equipped items must be taken off first. The bound quest reward Fyrens hjärta
+- Equipped items must be taken off first. The bound quest reward Beacon’s Heart
   cannot be sold. Rare sales require confirmation.
 - The bag holds 16 different item stacks, each capped at 999 copies. Existing
   overflowing saves retain their possessions. Buying existing stacks is still
@@ -31,9 +49,9 @@ small screens offer branch tabs. Every talent has an implemented game effect.
 
 | Branch | Play style | Active ability |
 | --- | --- | --- |
-| Lyktväktare | Health, defense, melee damage, potions, guarded retaliation | **1 — Lyktvärn:** temporary damage reduction |
-| Skymningsjägare | Attack rate, movement, critical hits, combos, kill healing | **2 — Skuggsprång:** a collision-aware rush and strike |
-| Runvävare | Area damage, recovery, healing, range, piercing projectiles | **3 — Glimtskott:** a travelling light projectile |
+| Lantern Guardian | Health, defense, melee damage, potions, guarded retaliation | **1 — Lantern Ward:** temporary damage reduction |
+| Dusk Hunter | Attack rate, movement, critical hits, combos, kill healing | **2 — Shadow Rush:** a collision-aware rush and strike |
+| Runeweaver | Area damage, recovery, healing, range, piercing projectiles | **3 — Glimmerbolt:** a travelling light projectile |
 
 - Earn one point per level from level 3: at most 18 points at level 20.
   A complete branch costs 15. Mix branches or specialize.
@@ -50,17 +68,17 @@ small screens offer branch tabs. Every talent has an implemented game effect.
 - Equipment comparisons and character stats include talent effects. Unequipping
   health gear clamps current health; equipping it again does not grant free healing.
 
-## Explore Lyktdalen and Glödmyren
+## Explore Lantern Vale and Emberfen
 
 The connected 1920 × 1280 world includes a safe village, forest, river crossing,
 ancient beacon, camp and marsh. Start with **Elin** and **Mira**, follow the
 beacon quest, then meet **Signe** east of the bridge. Read the three marsh
-runestones, face **Myrhjärtat** and restore the sluice seal.
+runestones, face **Fenheart** and restore the sluice seal.
 
 - Five linked quests, four exploration caches, local discoveries and loot.
-- Five enemy types: ordinary melee, telegraphed wolf pounces, ranged glödvingar
+- Five enemy types: ordinary melee, telegraphed wolf pounces, ranged Emberwings
   and two bosses. Boss defeat persists; ordinary enemies eventually respawn.
-- Every third connected sword hit deals 35% extra base damage. Lyktslag
+- Every third connected sword hit deals 35% extra base damage. Lantern Burst
   interrupts ordinary enemy attacks; boss telegraphs still require avoidance.
 - Select a target, read its intent and move or dodge away from warnings.
 - Death returns you to the last rested lantern with items, XP and quests intact.
@@ -78,7 +96,7 @@ and combat styles within the existing world, rather than adding another zone.
 | WASD / arrow keys | Move |
 | Space / left click on world | Sword attack; hold Space for a combo |
 | Tab with world focused / click enemy | Select target |
-| Q | Lyktslag / Lantern Strike |
+| Q | Lantern Burst |
 | Shift | Dodge in movement/facing direction |
 | R | Healing potion |
 | 1 / 2 / 3 | Learned talent abilities |
@@ -88,8 +106,11 @@ and combat styles within the existing world, rather than adding another zone.
 | J | Quest journal |
 | Esc / P | Pause/settings, or close a menu |
 
-Menus pause the world. Inactive tabs and focus loss also pause; the focus
-overlay requires an explicit resume. Use one active game tab per browser profile.
+Most menus pause the world. The **talent panel keeps the world running**, including
+enemy attacks and the combat countdown. You can learn talents anywhere outside
+combat, without closing the panel when the countdown ends. Mira is still required
+for respecialization. Inactive tabs and focus loss pause; the focus overlay requires
+an explicit resume. Use one active game tab per browser profile.
 
 ## Run and test
 
@@ -106,6 +127,8 @@ See [verification.md](docs/verification.md) for coverage and observed limitation
 
 | Module | Responsibility |
 | --- | --- |
+| js/i18n.js / js/locales/en.js | Plain-text English catalog and locale fallback |
+| templates/index.html / scripts/localize-html.mjs | Static HTML source and generation |
 | js/data.js | Stable item, enemy, NPC, loot and quest content |
 | js/talents.js | Talent definitions, effects, point budgets and rank validation |
 | js/inventory.js | Slot/stack capacity and complete reward preflight |
@@ -127,7 +150,7 @@ desktop boundaries. No networking layer or credentials are included.
 
 ## Saves
 
-The key remains **hirrdirr.realm.save**, now with schema version **3**. The DTO
+The key remains **hirrdirr.realm.save**, with unchanged schema version **3**. The DTO
 contains character progression, inventory/equipment, talent ranks, respec count,
 quests, permanent flags, discoveries, opened caches, herbs, runes, checkpoint,
 cooldowns, uncollected loot, buyback, elapsed time and the simulation RNG seed.
@@ -161,5 +184,11 @@ clamped to 100 ms, movement/projectiles are substepped, and the canvas is capped
 at 960 × 720 regardless of device pixel ratio. Static terrain and sprites are
 cached; offscreen sprites are culled. Player shots (6), enemy shots (32), hazards
 (12), effects (70), drops (64), events (100) and buyback (8) are bounded.
-HUD updates at most 10 times/second. Menus/background pause cancel the animation
-loop. The 30 FPS setting reduces drawing work without changing game rules.
+HUD updates at most 10 times/second. Pausing menus and background tabs cancel the
+animation loop; the talent panel intentionally continues simulation. The 30 FPS setting reduces drawing work without changing game rules.
+
+## Next roadmap milestone
+
+**0.4.0 — Equipment Foundation** will separate equipped items from inventory,
+prepare additional equipment categories and safely migrate existing saves.
+None of that milestone is implemented in this localization release.

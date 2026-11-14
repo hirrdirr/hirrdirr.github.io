@@ -1,3 +1,4 @@
+import { tr } from './i18n.js';
 import { createGame, command, step, TICK } from './simulation.js';
 import { SaveStore, serialize, deserialize } from './save.js';
 import { Renderer } from './renderer.js';
@@ -17,8 +18,8 @@ function warning(){const message=saves.message;$('save-warning').hidden=!message
 function save(manual=false) {
   if(!started)return;
   const success=saves.save(state);
-  $('save-status').textContent=success?'Sparat på den här enheten':'Sparning saknas · exportera via menyn';
-  warning();if(manual)ui.toast(success?'Resan är sparad.':saves.message||'Sparningen är skyddad. Exportera din resa via menyn.');
+  $('save-status').textContent=success?tr("main.saved_on_this_device"):tr("main.not_saved_export_from_the_menu");
+  warning();if(manual)ui.toast(success?tr("main.your_journey_is_saved"):saves.message||tr("main.the_existing_save_is_protected_export_your_journey_from_the_menu"));
 }
 function pause(){keys.clear();accumulator=0;if(raf)cancelAnimationFrame(raf);raf=0;}
 function resume(){
@@ -32,20 +33,20 @@ function processEvents() {
     if(event.type==='dialogue')ui.dialogue(event.id);
     else if(event.type==='message')ui.toast(event.text);
     else if(event.type==='item')ui.toast('+'+event.quantity+' '+ITEMS[event.id].name);
-    else if(event.type==='level')ui.toast('Nivå '+event.level+'! Din hälsa och attack har ökat.'+(event.level>=3?' '+availableTalentPoints(state.player)+' lediga talentpoäng · N':''));
-    else if(event.type==='questAccepted')ui.toast('Nytt uppdrag · '+QUESTS[event.id].name);
-    else if(event.type==='questReady')ui.toast('Uppdrag klart · Återvänd till '+NPCS.find(n=>n.id===QUESTS[event.id].npc).name);
-    else if(event.type==='questDone'){ui.toast('Uppdrag slutfört · '+QUESTS[event.id].name);if(event.id==='beacon')ui.toast('Kapitel 01 avklarat. Signe väntar öster om bron!');if(event.id==='heart')ui.toast('Kapitel 02 avklarat. Myren andas igen!');}
-    else if(event.type==='discovery')ui.toast('Upptäckt: '+event.name+' · +12 XP');
-    else if(event.type==='equip')ui.toast(ITEMS[event.id].name+' utrustad');
-    else if(event.type==='beacon')ui.toast('Fyren lyser igen. Återvänd till Elin!');
-    else if(event.type==='rune')ui.toast('Runsten läst · +18 XP');
-    else if(event.type==='seal')ui.toast('Sigillet är återställt. Återvänd till Signe!');
-    else if(event.type==='checkpoint')ui.toast('Full hälsa · Återkomstplats: '+event.name);
-    else if(event.type==='talent')ui.toast(TALENTS[event.id].name+' · rank '+state.player.talents[event.id]+' inlärd');
-    else if(event.type==='respec')ui.toast('Dina talanger är återställda. '+availableTalentPoints(state.player)+' poäng att fördela.');
-    else if(event.type==='unequip')ui.toast(ITEMS[event.id].name+' avlagd');
-    else if(event.type==='trade')ui.toast(({buy:'Köpt',sell:'Sålt',buyback:'Återköpt'}[event.action])+' · '+ITEMS[event.id].name+' · '+(event.action==='sell'?'+':'−')+event.price+' guld');
+    else if(event.type==='level')ui.toast(tr("main.level_your_health_and_attack_have_increased", event.level, event.level>=3?tr("main.unspent_talent_points_n", availableTalentPoints(state.player)):''));
+    else if(event.type==='questAccepted')ui.toast(tr("main.new_quest", QUESTS[event.id].name));
+    else if(event.type==='questReady')ui.toast(tr("main.quest_ready_return_to", NPCS.find(n=>n.id===QUESTS[event.id].npc).name));
+    else if(event.type==='questDone'){ui.toast(tr("main.quest_completed", QUESTS[event.id].name));if(event.id==='beacon')ui.toast(tr("main.chapter_01_complete_signe_awaits_east_of_the_bridge"));if(event.id==='heart')ui.toast(tr("main.chapter_02_complete_the_fen_breathes_again"));}
+    else if(event.type==='discovery')ui.toast(tr("main.discovered_12_xp", event.name));
+    else if(event.type==='equip')ui.toast(tr("main.equipped", ITEMS[event.id].name));
+    else if(event.type==='beacon')ui.toast(tr("main.the_beacon_shines_again_return_to_elin"));
+    else if(event.type==='rune')ui.toast(tr("main.runestone_read_18_xp"));
+    else if(event.type==='seal')ui.toast(tr("main.the_seal_is_restored_return_to_signe"));
+    else if(event.type==='checkpoint')ui.toast(tr("main.full_health_checkpoint", event.name));
+    else if(event.type==='talent')ui.toast(tr("main.rank_learned", TALENTS[event.id].name, state.player.talents[event.id]));
+    else if(event.type==='respec')ui.toast(tr("main.your_talents_have_been_reset_points_to_spend", availableTalentPoints(state.player)));
+    else if(event.type==='unequip')ui.toast(tr("main.unequipped", ITEMS[event.id].name));
+    else if(event.type==='trade')ui.toast(tr("main.gold", {buy:tr("main.bought"),sell:tr("main.sold"),buyback:tr("main.bought_back")}[event.action], ITEMS[event.id].name, event.action==='sell'?'+':'−', event.price));
     else if(event.type==='death'){save();ui.open('death');}
     else if(event.type==='respawn'){renderer.resetCamera();ui.view=null;ui.panel.close();}
     if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','talent','respec','unequip','trade','kill'].includes(event.type))needsSave=true;
@@ -66,28 +67,28 @@ const ui=new UI(()=>state,{
   export:()=>download(serialize(state),'project-realm-save.json'),
   volume:value=>{audio.volume=value;audio.unlock();preferences();},
   frameLimit:value=>{frameLimit=value===30?30:60;preferences();},
-  settings:()=>({volume:audio.volume,fps:frameLimit,diagnostics:'Canvas '+$('world').width+' × '+$('world').height+' · '+(renderer.metrics.frames?renderer.metrics.total/renderer.metrics.frames:0).toFixed(1)+' ms genomsnittlig ritning · '+state.enemies.length+' fiender'}),
+  settings:()=>({volume:audio.volume,fps:frameLimit,diagnostics:tr("main.canvas_ms_average_draw_time_enemies", $('world').width, $('world').height, (renderer.metrics.frames?renderer.metrics.total/renderer.metrics.frames:0).toFixed(1), state.enemies.length)}),
   fullscreen:async()=>{
     try{if(document.fullscreenElement)await document.exitFullscreen();else{document.querySelector('.realm-shell').classList.add('fullscreen-shell');await document.querySelector('.realm-shell').requestFullscreen();}}
-    catch{ui.toast('Helskärm är inte tillgängligt i den här webbläsaren.');}
+    catch{ui.toast(tr("main.fullscreen_is_not_available_in_this_browser"));}
   },
   import:async file=>{
     try{
-      if(file.size>262144)throw Error('Filen är för stor.');
+      if(file.size>262144)throw Error(tr("main.the_file_is_too_large"));
       const candidate=deserialize(await file.text());
-      if(!window.confirm('Ersätta din nuvarande resa med '+candidate.player.name+', nivå '+candidate.player.level+'? En kopia av den nuvarande sparningen bevaras.'))return;
-      if(!saves.replace(candidate)){warning();ui.toast('Importen kunde inte sparas. Din nuvarande resa är kvar.');return;}
+      if(!window.confirm(tr("main.replace_your_current_journey_with_level_a_copy_of_the_current_sav", candidate.player.name, candidate.player.level)))return;
+      if(!saves.replace(candidate)){warning();ui.toast(tr("main.the_import_could_not_be_saved_your_current_journey_is_unchanged"));return;}
       state=candidate;renderer.resetCamera();ui.close();processEvents();ui.hud(renderer);renderer.render(state,0);warning();
       if(state.player.dead)ui.open('death');else resume();
-      ui.toast('Resan är importerad.');
-    }catch(error){ui.toast('Kunde inte importera: '+error.message);}
+      ui.toast(tr("main.your_journey_has_been_imported"));
+    }catch(error){ui.toast(tr("main.could_not_import", error.message));}
   },
   newGame:()=>newJourney()
 });
 function newJourney() {
-  if(!window.confirm('Börja en ny resa? Den tidigare lokala sparningen ersätts. Exportera den först om du vill fortsätta den senare.'))return;
+  if(!window.confirm(tr("main.start_a_new_journey_this_replaces_the_current_local_save_export_i")))return;
   pause();state=createGame();started=false;focusPaused=false;ui.view=null;ui.panel.close();
-  $('character-name').disabled=false;$('character-name').value='Vandrare';$('start-button').textContent='Börja din nya resa →';
+  $('character-name').disabled=false;$('character-name').value=tr("simulation.wanderer");$('start-button').textContent=tr("main.begin_your_new_journey");
   $('new-from-welcome').hidden=true;renderer.resetCamera();renderer.render(state,0);ui.hud(renderer);
   $('welcome').dataset.replace='true';$('welcome').showModal();
 }
@@ -156,14 +157,14 @@ $('start-form').addEventListener('submit',event=>{
   event.preventDefault();
   if(!loaded||$('welcome').dataset.replace==='true') {
     state=createGame($('character-name').value);
-    if($('welcome').dataset.replace==='true'&&!saves.replace(state)){warning();ui.toast('Resan startas tillfälligt. Exportera den innan du stänger.');}
+    if($('welcome').dataset.replace==='true'&&!saves.replace(state)){warning();ui.toast(tr("main.this_journey_is_temporary_export_it_before_closing"));}
   }
   started=true;focusPaused=false;$('focus-overlay').hidden=true;$('welcome').close();audio.unlock();
   renderer.resetCamera();renderer.render(state,0);ui.hud(renderer);save();resume();
-  if(state.player.dead)ui.open('death');else ui.toast(loaded&&!$('welcome').dataset.replace?'Välkommen tillbaka, '+state.player.name+'.':'Prata med Elin och Mira i byn. E för att interagera.');
+  if(state.player.dead)ui.open('death');else ui.toast(loaded&&!$('welcome').dataset.replace?tr("main.welcome_back", state.player.name):tr("main.talk_to_elin_and_mira_in_the_village_press_e_to_interact"));
   $('world').focus({preventScroll:true});
 });
 $('new-from-welcome').addEventListener('click',newJourney);
-if(loaded){$('character-name').value=state.player.name;$('character-name').disabled=true;$('start-button').textContent='Fortsätt resan · nivå '+state.player.level+' →';$('new-from-welcome').hidden=false;}
+if(loaded){$('character-name').value=state.player.name;$('character-name').disabled=true;$('start-button').textContent=tr("main.continue_journey_level", state.player.level);$('new-from-welcome').hidden=false;}
 if(saves.message||saves.notice){$('welcome-warning').textContent=saves.message||saves.notice;$('welcome-warning').hidden=false;warning();}
 renderer.render(state,0);ui.hud(renderer);$('welcome').showModal();

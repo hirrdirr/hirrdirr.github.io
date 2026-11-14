@@ -1,3 +1,4 @@
+import { tr } from './i18n.js';
 // Pure game rules. No DOM, Canvas, storage, clocks or network access.
 // Clients send commands; step() advances a fixed tick and emits presentation events.
 import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLevel } from './data.js';
@@ -28,11 +29,11 @@ export function stats(player) {
   });
   return result;
 }
-export function createGame(name = 'Vandrare') {
+export function createGame(name = tr("simulation.wanderer")) {
   const state = {
     time: 0, seed: 784533, sequence: 0, events: [], drops: [], effects: [], projectiles: [], playerShots: [], hazards: [], targetId: null,
     buyback: [], tradeSequence: 1, bagNotice: 0,
-    player: { name: name.trim().slice(0, 18) || 'Vandrare', ...SPAWN, hp: 100, level: 1, xp: 0, gold: 0, facing: { x: 0, y: 1 }, moveFacing: { x: 0, y: 1 }, dodgeDirection: { x: 0, y: 1 },
+    player: { name: name.trim().slice(0, 18) || tr("simulation.wanderer"), ...SPAWN, hp: 100, level: 1, xp: 0, gold: 0, facing: { x: 0, y: 1 }, moveFacing: { x: 0, y: 1 }, dodgeDirection: { x: 0, y: 1 },
       inventory: { trainingSword: 1, linenCoat: 1, potion: 3 }, equipment: { weapon: 'trainingSword', armor: 'linenCoat', charm: null },
       cooldowns: { attack: 0, burst: 0, dodge: 0, potion: 0, guard: 0, rush: 0, bolt: 0 }, talents: {}, respecCount: 0, guardTime: 0, counterTime: 0, checkpoint: 'village', combo: 0, comboTime: 0, invulnerable: 0, dodging: 0, attackTime: 0, moving: false, combat: 0, dead: false },
     quests: {}, harvested: [], chests: [], runes: [], discovered: ['village'], flags: { beaconLit: false, wardenDefeated: false, ancientDefeated: false, sealRestored: false }, enemies: []
@@ -64,7 +65,7 @@ export function giveXP(s, amount) {
     p.xp -= xpForLevel(p.level);
     p.level++;
     p.hp = stats(p).maxHp;
-    effect(s, 'level', p.x, p.y, 'Nivå ' + p.level);
+    effect(s, 'level', p.x, p.y, tr("simulation.level", p.level));
     emit(s, 'level', { level: p.level });
   }
   if (p.level === 20) p.xp = 0;
@@ -99,7 +100,7 @@ export function acceptQuest(s, id) {
 export function completeQuest(s, id) {
   if (!QUESTS[id] || !questReady(s, id) || !nearNpc(s, QUESTS[id].npc) || s.player.dead) return false;
   const reason = bundleCapacityReason(s.player, QUESTS[id].rewards.items);
-  if (reason) { emit(s, 'message', { text: reason + ' Belöningen väntar kvar här.' }); return false; }
+  if (reason) { emit(s, 'message', { text: tr("simulation.your_reward_will_stay_here", reason) }); return false; }
   s.quests[id].status = 'done'; // Commit before rewarding: repeated commands cannot duplicate rewards.
   const rewards = QUESTS[id].rewards;
   giveXP(s, rewards.xp);
@@ -129,38 +130,38 @@ export function interact(s) {
   } else if (target.kind === 'herb') {
     s.harvested.push(target.id);
     questEvent(s, 'gather', 'glimmer');
-    emit(s, 'message', { text: 'Glimört samlad · ' + s.harvested.length + '/3' });
+    emit(s, 'message', { text: tr("simulation.glimmerherb_gathered_3", s.harvested.length) });
   } else if (target.kind === 'chest') {
     const reason = capacityReason(s.player, target.item, target.quantity);
-    if (reason) { emit(s, 'message', { text: reason + ' Gömman lämnas orörd.' }); return false; }
+    if (reason) { emit(s, 'message', { text: tr("simulation.the_cache_is_left_untouched", reason) }); return false; }
     s.chests.push(target.id);
     s.player.gold = Math.min(MAX_GOLD, s.player.gold + 12);
     addItem(s, target.item, target.quantity);
     giveXP(s, 15);
-    emit(s, 'message', { text: 'Gömma upptäckt · +12 guld · +15 XP' });
+    emit(s, 'message', { text: tr("simulation.cache_discovered_12_gold_15_xp") });
   } else if (target.kind === 'beacon') {
-    if (!s.flags.wardenDefeated) emit(s, 'message', { text: 'Väktarens rötter håller fyren släckt.' });
+    if (!s.flags.wardenDefeated) emit(s, 'message', { text: tr("simulation.the_wardens_roots_keep_the_beacon_dark") });
     else if (!s.flags.beaconLit) {
       s.flags.beaconLit = true;
       questEvent(s, 'beacon', 'beacon');
       emit(s, 'beacon');
-      effect(s, 'level', target.x, target.y, 'Ljuset har återvänt');
-    } else emit(s, 'message', { text: 'Fyren lyser åter över Lyktdalen.' });
+      effect(s, 'level', target.x, target.y, tr("simulation.the_light_has_returned"));
+    } else emit(s, 'message', { text: tr("simulation.the_beacon_shines_over_lantern_vale_once_more") });
   } else if (target.kind === 'fire') {
     s.player.hp = stats(s.player).maxHp;
     s.player.checkpoint = target.id === 'campfire' ? 'camp' : 'village';
-    emit(s, 'checkpoint', { name: target.id === 'campfire' ? 'Vandrarlägret' : 'Lyktdalen' });
+    emit(s, 'checkpoint', { name: target.id === 'campfire' ? tr("world.wanderers_camp") : tr("world.lantern_vale") });
   } else if (target.kind === 'rune') {
     if (!s.runes.includes(target.id)) { s.runes.push(target.id); giveXP(s, 18); questEvent(s, 'rune', 'ember'); emit(s, 'rune'); }
     emit(s, 'message', { text: target.text });
   } else if (target.kind === 'seal') {
-    if (!s.flags.ancientDefeated) emit(s, 'message', { text: 'Myrhjärtats glöd håller sigillet öppet.' });
+    if (!s.flags.ancientDefeated) emit(s, 'message', { text: tr("simulation.fenhearts_embers_hold_the_seal_open") });
     else if (!s.flags.sealRestored) {
       s.flags.sealRestored = true; questEvent(s, 'seal', 'seal'); emit(s, 'seal');
-      effect(s, 'level', target.x, target.y, 'Myren andas igen');
-    } else emit(s, 'message', { text: 'Sigillet lyser stilla. Vägen bortom slussen får vänta.' });
-  } else if (target.kind === 'gate') emit(s, 'message', { text: 'Bortom slussen ligger Asklanden. Din resa fortsätter i ett kommande kapitel.' });
-  else emit(s, 'message', { text: target.id === 'marshSign' ? '↑ Gamla fyren · ← Signes läger · Glödmyren ↓ (nivå 4–6)' : '← Lyktdalen · Bron → · Gamla fyren i nordost' });
+      effect(s, 'level', target.x, target.y, tr("simulation.the_fen_breathes_again"));
+    } else emit(s, 'message', { text: tr("simulation.the_seal_glows_softly_the_road_beyond_the_sluice_must_wait") });
+  } else if (target.kind === 'gate') emit(s, 'message', { text: tr("simulation.beyond_the_sluice_lie_the_ashlands_your_journey_will_continue_in") });
+  else emit(s, 'message', { text: target.id === 'marshSign' ? tr("simulation.old_beacon_signes_camp_emberfen_level_4_6") : tr("simulation.lantern_vale_bridge_old_beacon_to_the_northeast") });
   return true;
 }
 function kill(s, enemy) {
@@ -241,14 +242,14 @@ function castAbility(s, id) {
   const p = s.player, st = stats(p);
   if (!talentRank(p, id) || p.cooldowns[id] > 0 || p.dodging > 0) return false;
   if (id !== 'guard' && inSafe(p.x, p.y)) {
-    emit(s, 'message', { text: 'Lämna den trygga zonen för att använda ' + (id === 'rush' ? 'Skuggsprång.' : 'Glimtskott.') }); return false;
+    emit(s, 'message', { text: tr("simulation.leave_the_safe_area_to_use", id === 'rush' ? tr("simulation.shadow_rush") : tr("simulation.glimmerbolt")) }); return false;
   }
   if (id === 'guard') {
     p.guardTime = st.guardDuration; p.cooldowns.guard = st.guardCooldown;
     effect(s, 'guard', p.x, p.y, '', { radius: 34 });
   } else if (id === 'rush') {
     const target = combatTargets(s, 210)[0];
-    if (!target) { emit(s, 'message', { text: 'Skuggsprång behöver ett mål inom räckhåll och fri sikt.' }); return false; }
+    if (!target) { emit(s, 'message', { text: tr("simulation.shadow_rush_needs_a_target_in_range_and_a_clear_line_of_sight") }); return false; }
     const d = distance(p, target) || 1, fromX = p.x, fromY = p.y, travel = Math.max(0, d - 30);
     p.cooldowns.rush = st.rushCooldown; p.facing = { x: (target.x - p.x) / d, y: (target.y - p.y) / d };
     moveBody(p, p.facing.x * travel, p.facing.y * travel);

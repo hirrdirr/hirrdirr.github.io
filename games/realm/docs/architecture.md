@@ -29,6 +29,26 @@ The renderer reads local state directly. This is a useful starting boundary,
 not a finished multiplayer SDK. A server needs its own trusted command
 validation, player/entity ownership and connection lifecycle.
 
+## Localization boundary (0.3.1)
+
+`i18n.js` has no DOM or gameplay dependencies. `tr(key, ...values)` reads the
+English catalog and interpolates numbered placeholders once. Values may be
+reordered in another locale. Rule modules emit localized presentation messages
+but still store and compare stable IDs. `SAVE_VERSION` remains 3. Existing player
+names are never translated. All item numbers, quest rewards, talent effects,
+world positions and combat timers match the preceding release.
+
+The committed HTML is generated from a template and the same dictionary. The
+normal Realm tests check that generated output is current, so static labels,
+metadata and accessibility text cannot silently drift from the catalog.
+No runtime network request, dependency or language selector is introduced.
+
+## Current roadmap priority
+
+Next: **0.4.0 — Equipment Foundation**, separating equipped items from inventory,
+preparing equipment categories and safe save migration. The networking notes
+below are long-term architecture considerations, not the next release scope.
+
 ## Stage 1: small authoritative multiplayer
 
 1. Run the rule/content modules in a dedicated server process. Keep health,

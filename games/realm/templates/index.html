@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="{{language}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122623">
+  <meta name="description" content="{{static.begin_your_journey_in_lantern_vale_a_small_fantasy_rpg_with_explo}}">
+  <title>{{static.project_realm_lantern_vale_hirrdirr}}</title>
+  <link rel="icon" href="./assets/realm-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./realm.css">
+</head>
+<body>
+  <script>try{if(localStorage.getItem('hirrdirr_theme')==='light')document.body.classList.add('light')}catch{}</script>
+  <div class="realm-shell">
+    <header class="realm-header">
+      <a href="/games/" class="back-link" aria-label="{{static.back_to_hirrdirrs_games}}">← <strong>hirrdirr</strong><span>{{static.games}}</span></a>
+      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>{{version}}</small></div>
+      <button id="theme-button" class="icon-button" aria-label="{{static.switch_between_light_and_dark_themes}}" title="{{static.switch_theme}}">◐</button>
+    </header>
+    <main>
+      <div class="world-heading">
+        <div><p class="eyebrow">{{static.your_wanderer_your_path}}</p><h1>{{world.lantern_vale}}<span>.</span></h1></div>
+        <nav aria-label="{{static.game_menus}}" class="game-nav">
+          <button data-panel="journal"><span>{{static.quests}}</span><kbd>J</kbd></button>
+          <button data-panel="inventory" aria-label="{{ui.character_bag}}"><span class="nav-label-full">{{ui.character_bag}}</span><span class="nav-label-short" aria-hidden="true">{{static.bag}}</span><kbd>I</kbd></button>
+          <button data-panel="talents"><span>{{static.talents}}</span><kbd>N</kbd></button>
+          <button data-panel="settings" aria-label="{{static.open_game_menu}}"><span>{{static.menu}}</span><kbd>Esc</kbd></button>
+        </nav>
+      </div>
+      <p id="save-warning" class="notice" role="status" hidden></p>
+      <div class="game-layout">
+        <section class="viewport" aria-label="{{static.game_world}}">
+          <canvas id="world" width="960" height="600" tabindex="0" aria-label="{{static.lantern_vale_move_with_wasd_attack_with_space_interact_with_e_con}}">{{static.this_game_requires_a_browser_with_canvas_and_javascript_support}}</canvas>
+          <div class="player-hud">
+            <div class="player-hud-top"><span class="portrait" aria-hidden="true"><img src="./assets/realm-mark.svg" width="20" height="26" alt=""></span><div><strong id="player-name">{{simulation.wanderer}}</strong><small>{{static.lantern_wanderer}} <span id="player-level">{{static.level_1}}</span></small></div></div>
+            <div class="vital-label"><span>{{static.health}}</span><span id="health-value">100 / 100</span></div>
+            <div class="meter health"><i id="health-fill"></i></div>
+            <div class="meter experience" aria-label="{{ui.experience}}"><i id="xp-fill"></i></div><small id="buff-status" class="buff-status" hidden></small>
+          </div>
+          <div class="zone-hud"><strong id="zone-name">{{world.lantern_vale}}</strong><span id="zone-type">{{world.safe_area}}</span></div>
+          <div id="target-hud" class="target-hud" hidden><strong id="target-name"></strong><span id="target-hp"></span><div class="meter"><i id="target-fill"></i></div><small id="target-intent"></small></div>
+          <button id="pause-button" class="pause-button" title="{{static.pause}}" aria-label="{{static.pause_game}}">Ⅱ</button>
+          <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
+          <div id="combo-hud" class="combo-hud" title="{{static.the_third_consecutive_hit_deals_35_more_damage}}"><span id="combo-count">◇◇◇</span><small>{{static.strike_combo}}</small></div>
+          <div class="hotbar" aria-label="{{static.abilities}}">
+            <button data-command="attack" title="{{static.strike_selected_target_in_range_otherwise_the_nearest_the_third_h}}" aria-label="{{static.sword_strike_space}}"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>{{static.strike}}</small><i class="cooldown"></i></button>
+            <button data-command="burst" title="{{static.lantern_burst_hits_all_nearby_enemies_and_interrupts_normal_enemi}}" aria-label="{{static.lantern_burst_q}}"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>{{ui-panels.lantern_burst}}</small><i class="cooldown"></i></button>
+            <button data-command="dodge" title="{{static.dodge_in_your_movement_direction}}" aria-label="{{static.dodge_shift}}"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>{{ui-panels.dodge}}</small><i class="cooldown"></i></button>
+            <button data-command="potion" title="{{static.restores_55_health}}" aria-label="{{static.drink_healing_potion_r}}"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">{{static.3_potions}}</small><i class="cooldown"></i></button>
+            <button data-command="guard" hidden title="{{static.reduces_incoming_damage_improved_by_lantern_guardian_talents}}" aria-label="{{static.lantern_ward_1}}"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>{{talents.lantern_ward}}</small><i class="cooldown"></i></button>
+            <button data-command="rush" hidden title="{{static.rush_toward_a_target_in_range_and_line_of_sight}}" aria-label="{{static.rush_2}}"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>{{static.rush}}</small><i class="cooldown"></i></button>
+            <button data-command="bolt" hidden title="{{static.fire_a_rune_of_light_toward_your_target_or_in_the_direction_you_f}}" aria-label="{{static.glimmerbolt_3}}"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>{{talents.glimmerbolt}}</small><i class="cooldown"></i></button>
+          </div>
+          <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+          <div id="focus-overlay" class="focus-overlay" hidden><span>{{static.adventure_paused}}</span><button id="resume-focus" class="primary">{{static.continue}}</button></div>
+        </section>
+        <aside class="journey-rail">
+          <div class="rail-heading"><span class="eyebrow">{{static.your_journey}}</span><span id="gold-value">{{static.0_gold}}</span></div>
+          <div id="quest-tracker" class="quest-tracker"></div>
+          <section class="map-section"><div class="map-title"><h2>{{static.lantern_vale_beyond}}</h2><span>N ↑</span></div><canvas id="minimap" width="232" height="155" role="img" aria-label="{{static.map_village_to_the_southwest_bridge_in_the_center_beacon_to_the_n}}"></canvas><div class="map-legend"><span>{{static.you}}</span><span>{{static.villagers}}</span><span>{{static.runes}}</span><span>{{static.enemies}}</span></div></section>
+          <div class="field-note"><span class="eyebrow">{{static.wanderers_notes}}</span><p id="field-note">{{static.every_journey_starts_with_a_single_step_elin_awaits_by_the_villag}}</p></div>
+          <button class="rail-link" data-panel="help">{{static.show_controls_tips}} <span>↗</span></button>
+        </aside>
+      </div>
+      <footer class="game-footer"><div><span><kbd>W A S D</kbd> {{ui.move}}</span><span><kbd>E</kbd> {{static.talk_gather}}</span><span><kbd>SPACE</kbd> {{static.attack}}</span><span><kbd>TAB</kbd> {{static.select_target}}</span></div><span id="save-status" role="status">{{static.your_journey_is_saved_on_this_device}}</span></footer>
+      <p class="pc-note">{{static.designed_for_desktop_and_keyboard_menus_are_also_available_on_sma}}</p>
+    </main>
+    <div class="bottom-line"><span>{{static.a_small_world_a_new_adventure}}</span><span>{{static.single_player_local_saves_early_release}}</span></div>
+  </div>
+  <dialog id="welcome" class="welcome-dialog" aria-labelledby="welcome-title">
+    <div class="welcome-art"><span class="art-label">HIRRDIRR ORIGINAL</span></div>
+    <div class="welcome-copy">
+      <p class="eyebrow">{{static.project_realm_rpg_systems_world_evolution}}</p><h2 id="welcome-title">{{static.where_lanterns}}<br> {{static.still_shine}}</h2>
+      <p>{{static.beyond_the_beacon_the_fen_glows_shape_your_path_with_three_talent}}</p>
+      <form id="start-form"><label for="character-name">{{static.what_is_your_wanderers_name}}</label><input id="character-name" name="name" maxlength="18" autocomplete="off" placeholder="{{static.your_name}}" value="{{simulation.wanderer}}" required><button id="start-button" class="primary" type="submit">{{static.begin_your_journey}} <span>→</span></button></form>
+      <button id="new-from-welcome" class="text-button" hidden>{{static.start_a_new_journey}}</button>
+      <p class="welcome-controls"><kbd>WASD</kbd> {{ui.move}} <kbd>SPACE</kbd> {{static.attack}} <kbd>E</kbd> {{static.talk}}</p>
+      <p id="welcome-warning" class="welcome-warning" hidden></p>
+    </div>
+  </dialog>
+  <dialog id="panel" class="panel-dialog" aria-labelledby="panel-title"><div class="panel-header"><div><p id="panel-kicker" class="eyebrow">{{static.your_journey}}</p><h2 id="panel-title">{{static.character}}</h2></div><button id="close-panel" class="icon-button" aria-label="{{static.close_menu}}">×</button></div><p id="panel-feedback" class="panel-feedback" role="status" hidden></p><div id="panel-content"></div></dialog>
+  <dialog id="realm-confirm" class="realm-confirm-dialog" aria-labelledby="realm-confirm-title" aria-describedby="realm-confirm-description">
+    <p class="eyebrow">{{static.ivo_trading_post}}</p>
+    <h2 id="realm-confirm-title">{{static.confirm_sale}}</h2>
+    <p id="realm-confirm-description"></p>
+    <div class="realm-confirm-actions"><button id="realm-confirm-cancel" type="button">{{static.cancel}}</button><button id="realm-confirm-accept" class="primary" type="button">{{static.confirm_sale}}</button></div>
+  </dialog>
+  <noscript><p class="notice">{{static.enable_javascript_to_play_project_realm}}</p></noscript>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
