@@ -1,3 +1,58 @@
+# v0.4.1 verification — 2026-11-15
+
+## Automated verification
+
+`node --test games/realm/tests/*.test.mjs`: **100 passed, 0 failed**.
+All 91 prior checks remain. Nine new focused checks cover:
+
+- Presentation without state mutation or save-schema changes; escaped names,
+  the three real equipment slots, bag-only copies and duplicate quantities.
+- Item details, rarity, empty slots, named actions and equipment comparisons.
+- Grouped values from actual stats and accurate combat explanations.
+- Actual UI click handlers with DOM doubles: successful equip/unequip selection,
+  complete action identity, keyboard focus, scroll preservation and view cleanup.
+- Full-bag rejection preserving state, selection and action focus.
+- Cached sprite drawing, time-based idle motion and the 30-draw/second ceiling.
+- Offscreen/hidden/unfocused/disconnected preview suspension and cleanup.
+- Reduced motion, repeated mount/unmount without leaked callbacks/listeners,
+  and missing-context/sprite fallback.
+
+Existing save migration, capacity, trading/buyback, talent/combat and quest tests
+remain green. JavaScript syntax, generated HTML freshness and `git diff --check`
+pass. All changes are confined to `games/realm/`; save schema remains **4**.
+
+## Actual browser verification
+
+Chromium, using the existing disposable v4 QA character:
+
+- Loaded level 20, 403 gold, four potions and 14 spent/four free talent points
+  without a migration notice. Checked light and dark desktop presentation.
+- Unequipped Wolf’s Fang: the weapon slot became empty and its bag stack grew
+  to two. Equipping it moved one copy back. Selection, keyboard focus, item
+  details and actual strike/attack-speed values followed both transfers.
+- Equipped Moonshard from the bag: it disappeared from the bag, Wolf’s Fang
+  returned to its stack of two, and the equipment slot/detail showed Moonshard.
+- Compared successive portrait screenshots with no intervening state mutation:
+  pixels changed, confirming the visible idle animation.
+- Reloaded and retained Moonshard, Travel Coat, Runeweaver Prism, the correct
+  four bag stacks, 403 gold and the talent allocation.
+- Inspected 800 × 650 and 390 × 820 iframe viewports. The dialog had no horizontal
+  overflow (740/740 and 330/330 client/scroll widths). Scrolling exposed the bag,
+  grouped stats and action button without clipping.
+- Reopened Ivo after using the panel, sold one Forest Amber (403 → 407 gold,
+  four → three copies), then bought it back (403 gold, four copies).
+- Reopened Character & bag and captured the final dark-theme view. No Realm
+  warnings/errors were captured in the final console check.
+
+Full-bag edge cases, hidden/reduced-motion lifecycle and talent/combat/quest
+regressions were verified by automated tests, not a new manual campaign run.
+No Firefox/Safari, physical mobile, low-powered Windows hardware or browser
+FPS/GPU benchmark was performed. The narrow layout does not add touch gameplay.
+Equipment appearance changes are intentionally deferred; the portrait shows the
+existing base sprite. Deployment verification awaits merge authorization.
+
+---
+
 # v0.4.0 verification — 2026-11-14
 
 ## Automated verification

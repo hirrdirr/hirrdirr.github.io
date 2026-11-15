@@ -1,9 +1,30 @@
-# Project Realm — Lantern Vale, v0.4.0
+# Project Realm — Lantern Vale, v0.4.1
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## 0.4.0 — Equipment Foundation
+## 0.4.1 — Character Panel
+
+Character & bag now puts the three equipment slots beside an animated pixel
+portrait and grouped attributes, with the bag and selected item details below.
+Select a worn item to inspect or remove it; select bag gear to compare and equip
+it. Successful transfers select the moved copy, update stats immediately and
+preserve keyboard focus and scroll position. Failed transfers retain selection
+and show the existing rule-layer feedback.
+
+The portrait reuses the actual cached player sprite, with subtle idle movement.
+It draws at most 30 times per second and suspends when closed, offscreen or in
+an inactive tab/window. Reduced motion displays a still portrait. The current
+base appearance does not change with gear; the renderer has a separate extension
+point for future equipment layers. No new artwork or dependencies are required.
+
+Dark/light themes and scrolling desktop/narrow layouts share the existing game
+styles. Only Weapon, Armor and Charm are functional. Equipment transactions,
+combat, talents, trading and save schema **4** are unchanged. See
+[character-panel.md](docs/character-panel.md) for the presentation boundaries and
+[verification.md](docs/verification.md) for automated and actual browser checks.
+
+## Previous release: 0.4.0 — Equipment Foundation
 
 Weapon, armor and charm slots now own their equipped copies independently.
 Equipping moves exactly one copy out of the bag; unequipping returns it. A swap
@@ -212,6 +233,6 @@ animation loop; the talent panel intentionally continues simulation. The 30 FPS 
 
 ## Next roadmap milestone
 
-**0.4.1 — Character Panel** will focus on equipment presentation and an animated
-character preview. No character-panel redesign or additional slots are included
-in the equipment foundation release.
+**0.4.2 — Equipment Expansion** will add functional equipment categories,
+itemization and supporting loot systems. Those additions are outside 0.4.1;
+its panel reads the existing slot list and keeps appearance rendering separate.

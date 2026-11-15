@@ -1,6 +1,6 @@
 import { tr } from './i18n.js';
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.4.0';
+export const VERSION = '0.4.1';
 export const ITEMS = Object.freeze({
   trainingSword: { value: 1, name: tr("data.wanderers_sword"), slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: tr("data.a_worn_blade_a_new_chapter") },
   linenCoat: { value: 1, name: tr("data.travel_coat"), slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: tr("data.light_enough_for_a_long_journey") },

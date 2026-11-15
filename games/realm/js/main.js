@@ -3,6 +3,7 @@ import { createGame, command, step, TICK } from './simulation.js';
 import { SaveStore, serialize, deserialize } from './save.js';
 import { Renderer } from './renderer.js';
 import { UI } from './ui.js';
+import { CharacterPreview } from './character-preview.js';
 import { AudioBus } from './audio.js';
 import { ITEMS, QUESTS, NPCS } from './data.js';
 import { TALENTS, availableTalentPoints } from './talents.js';
@@ -55,7 +56,7 @@ function processEvents() {
 }
 function dispatch(input) {
   if(!started)return;
-  audio.unlock();command(state,input);processEvents();ui.hud(renderer);renderer.render(state,0);
+  audio.unlock();const result=command(state,input);processEvents();ui.hud(renderer);renderer.render(state,0);return result;
 }
 function download(raw,name) {
   const url=URL.createObjectURL(new Blob([raw],{type:'application/json'})),a=document.createElement('a');
@@ -63,6 +64,7 @@ function download(raw,name) {
 }
 const ui=new UI(()=>state,{
   started:()=>started,pause,resume,command:dispatch,
+  preview:new CharacterPreview(()=>renderer.art.player[0]),
   save:()=>save(true),
   export:()=>download(serialize(state),'project-realm-save.json'),
   volume:value=>{audio.volume=value;audio.unlock();preferences();},
