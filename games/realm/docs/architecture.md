@@ -60,10 +60,26 @@ reference. Version gating makes this migration idempotent. The same migration
 serves startup, backup recovery and imports. See [equipment.md](equipment.md)
 for the ownership, capacity and backup contracts.
 
+## Character presentation boundary (0.4.1)
+
+`character-panel.js` renders slots, grouped attributes and selected-item details
+from existing state, item data, localization and `stats(player)`. It reuses bag
+buttons and equipment comparisons from `ui-panels.js`. It does not mutate
+inventory or validate transfers. `ui.js` dispatches the existing equip/unequip
+commands and uses their result to select the transferred copy. Focus restoration
+matches the complete button dataset, then the selected slot/item, and preserves
+panel scroll position.
+
+`character-preview.js` owns a small Canvas lifecycle independent of simulation.
+`main.js` injects a resolver for the cached world player sprite. UI mounting,
+unmounting and visibility events control animation; reduced motion draws a still
+frame. Nothing is added to saved state. See [character-panel.md](character-panel.md)
+for lifecycle and extension details.
+
 ## Current roadmap priority
 
-Next: **0.4.1 — Character Panel**, improving equipment presentation and adding an
-animated character preview. The networking notes
+Next: **0.4.2 — Equipment Expansion**, adding functional categories, itemization
+and supporting loot systems. No additional slots are included in 0.4.1. The networking notes
 below are long-term architecture considerations, not the next release scope.
 
 ## Stage 1: small authoritative multiplayer

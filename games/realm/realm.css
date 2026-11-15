@@ -1449,6 +1449,89 @@ input,select {
 }
 .realm-confirm-dialog h2 { font: 25px RealmSerif, Georgia, serif; margin: 8px 0 12px; }
 .realm-confirm-dialog p:not(.eyebrow) { color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+/* The character chamber: worn gear, the world's own sprite, and live attributes. */
+.character-panel { width: 1060px; }
+.character-overview { display: grid; grid-template-columns: minmax(175px, .85fr) minmax(210px, 1.25fr) minmax(235px, 1fr); gap: 24px; align-items: start; }
+.character-overview > *, .character-belongings > * { min-width: 0; }
+.character-section-title { font: 12px/1.4 system-ui, sans-serif; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin: 0 0 15px; }
+.character-slot { display: flex; width: 100%; align-items: center; gap: 11px; padding: 14px 10px; margin-bottom: 13px; text-align: left; background: var(--soft); border-radius: 3px; border-left: 2px solid var(--line); min-height: 86px; transition: border-color .15s, background .15s; }
+.character-slot:hover, .character-slot.selected { border-color: var(--gold); background: var(--panel); }
+.character-slot.selected { outline: 1px solid var(--gold); outline-offset: 2px; }
+.character-slot.uncommon { border-left-color: #8fb78e; }
+.character-slot.rare { border-left-color: #8cbbdb; }
+.character-slot-icon, .character-detail-icon { display: grid; place-items: center; flex: 0 0 46px; width: 46px; height: 52px; background: var(--surface); border: 1px solid var(--line); border-radius: 3px; }
+.character-slot-icon .item-icon, .character-detail-icon .item-icon { width: 36px; height: 36px; }
+.character-slot.empty .character-slot-icon { opacity: .5; border-style: dashed; }
+.character-slot-copy { min-width: 0; }
+.character-slot-copy small { display: block; text-transform: uppercase; letter-spacing: 1px; font-size: 9px; color: var(--muted); }
+.character-slot-copy strong { display: block; font: 16px/1.25 RealmSerif, Georgia, serif; margin: 4px 0; overflow-wrap: anywhere; }
+.character-slot-copy > span { font-size: 9px; color: var(--muted); }
+#panel-content .character-slot-hint { font-size: 11px; line-height: 1.7; }
+.character-portrait { text-align: center; }
+.character-identity > span { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); }
+.character-identity h3 { font: 29px/1.1 RealmSerif, Georgia, serif; margin: 7px 0 12px; overflow-wrap: anywhere; }
+.character-stage { position: relative; isolation: isolate; max-width: 300px; margin: auto; background: radial-gradient(ellipse at 50% 60%, #b4965720, transparent 65%), linear-gradient(180deg, var(--surface), var(--soft)); border: 1px solid var(--line); border-radius: 48% 48% 3px 3px; overflow: hidden; }
+.character-stage::before { content: ''; position: absolute; inset: 12px; border: 1px solid var(--line); border-radius: inherit; z-index: -1; }
+.character-stage::after { content: ''; position: absolute; width: 72%; height: 20%; left: 14%; bottom: 5%; border: 1px solid var(--line); border-radius: 50%; z-index: -1; background: var(--surface); }
+#character-preview { display: block; width: 240px; max-width: 100%; height: auto; margin: auto; image-rendering: pixelated; }
+.character-stage-mark { position: absolute; top: 21px; left: 0; width: 100%; color: var(--gold); font-size: 12px; }
+#panel-content .character-appearance-note { margin: 10px 0 13px; font-size: 9px; line-height: 1.5; }
+.character-talents { width: 100%; max-width: 300px; text-align: left; font-size: 12px; }
+.character-talents kbd { float: right; }
+.character-talents small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+.character-statistics { padding-left: 20px; border-left: 1px solid var(--line); }
+.character-statistics section + section { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.character-statistics h4 { font: 17px RealmSerif, Georgia, serif; margin: 0 0 8px; color: var(--gold); }
+.character-statistics dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 8px; margin: 0; font-size: 11px; }
+.character-statistics dt { color: var(--muted); cursor: help; }
+.character-statistics dt > span { opacity: .6; font-size: 9px; }
+.character-statistics dt:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.character-statistics dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.character-belongings { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr); gap: 26px; border-top: 1px solid var(--line); padding-top: 22px; margin-top: 24px; }
+.character-bag .character-section-title { margin: 0; }
+#panel-content .character-bag > p { font-size: 11px; margin-top: 9px; }
+.character-bag .inventory-grid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); }
+.character-bag .item-button { height: 62px; }
+.character-item-detail { border-left: 1px solid var(--line); padding-left: 24px; }
+.character-item-title { display: flex; align-items: center; gap: 12px; }
+.character-item-title h3 { font: 23px/1.2 RealmSerif, Georgia, serif; margin: 3px 0; }
+.character-item-title small { font-size: 10px; color: var(--muted); }
+.character-detail-icon.rare { border-color: #8cbbdb; }
+.character-detail-icon.uncommon { border-color: #8fb78e; }
+#panel-content .character-item-detail p { font-size: 12px; margin: 10px 0; }
+#panel-content .character-item-detail .detail-note { font-size: 10px; }
+#panel-content .character-item-stats { color: var(--accent); }
+.character-item-detail > button { margin-top: 8px; max-width: 100%; white-space: normal; }
+.character-detail-empty { padding: 12px; text-align: center; color: var(--muted); }
+.character-detail-empty > .item-icon { width: 40px; height: 40px; opacity: .5; }
+.character-detail-empty h3 { font: 22px RealmSerif, Georgia, serif; margin: 10px 0; }
+.character-panel .item-rarity.rare { color: #8cbbdb; }
+.character-panel .item-rarity.uncommon { color: #a1c69d; }
+body.light .character-panel .item-rarity.rare { color: #356485; }
+body.light .character-panel .item-rarity.uncommon { color: #42693f; }
+@media (max-width: 850px) {
+  .character-overview { grid-template-columns: minmax(165px, 1fr) minmax(190px, 1.15fr); gap: 20px; }
+  .character-statistics { grid-column: 1/-1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-left: 0; border-top: 1px solid var(--line); padding: 17px 0 0; }
+  .character-statistics > h3 { grid-column: 1/-1; margin-bottom: 0; }
+  .character-statistics section + section { margin: 0; padding: 0 0 0 12px; border-top: 0; border-left: 1px solid var(--line); }
+}
+@media (max-width: 570px) {
+  .character-panel { padding: 18px; }
+  .character-overview { grid-template-columns: minmax(0, 1fr); }
+  .character-portrait { grid-row: 1; }
+  .character-stage { max-width: 230px; }
+  #character-preview { width: 195px; }
+  .character-equipment { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .character-equipment > h3, .character-slot-hint { grid-column: 1/-1; margin: 0; }
+  .character-slot { display: flex; flex-direction: column; padding: 10px 5px; margin: 0; text-align: center; gap: 6px; }
+  .character-slot-copy strong { font-size: 14px; }
+  .character-statistics { display: block; }
+  .character-statistics > h3 { margin-bottom: 12px; }
+  .character-statistics section + section { border-left: 0; border-top: 1px solid var(--line); margin-top: 12px; padding: 12px 0 0; }
+  .character-belongings { grid-template-columns: minmax(0, 1fr); }
+  .character-item-detail { border-left: 0; border-top: 1px solid var(--line); padding: 18px 0 0; }
+}
 .realm-confirm-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .realm-confirm-actions button { min-width: 115px; }
 .talent-combat-notice { padding: 11px 14px; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); color: var(--ink); font-size: 12px; }
