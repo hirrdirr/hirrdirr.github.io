@@ -1,17 +1,28 @@
 {
-  "digest_date": "2026-11-15",
+  "digest_date": "2026-11-16",
   "articles": [
     {
       "source": "BleepingComputer",
-      "title": "Cursor confirms security breach led to malicious Claude Code extension",
-      "url": "https://www.bleepingcomputer.com/news/security/cursor-confirms-security-breach-led-to-malicious-claude-code-extension/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2025/07/13/cursor-header.jpg"
+      "title": "7 Tips For Complying with CJIS Password and MFA Requirements",
+      "url": "https://www.bleepingcomputer.com/news/security/7-tips-for-complying-with-cjis-password-and-mfa-requirements/",
+      "image": "https://www.bleepstatic.com/content/posts/2026/11/12/specops-password-security.jpg"
+    },
+    {
+      "source": "Malwarebytes",
+      "title": "Hijacked Bitly links turn old brand posts into offensive redirects",
+      "url": "https://www.malwarebytes.com/blog/news/2026/11/hijacked-bitly-links-turn-old-brand-posts-into-offensive-redirects",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/bitly_logo.png"
+    },
+    {
+      "source": "SANS ISC Diary",
+      "title": "Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710), (Mon, Nov 16th)",
+      "url": "https://isc.sans.edu/diary/rss/33522"
     },
     {
       "source": "BleepingComputer",
-      "title": "US disrupts North Korean campaign behind $400 million crypto theft",
-      "url": "https://www.bleepingcomputer.com/news/security/us-disrupts-north-korean-campaign-behind-400-million-crypto-theft/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/21/DPRK.jpg"
+      "title": "Google warns that fully-automated AI attacks are coming soon",
+      "url": "https://www.bleepingcomputer.com/news/security/google-warns-that-fully-automated-ai-attacks-are-coming-soon/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/10/09/robot-hacker.jpg"
     }
   ]
 }
