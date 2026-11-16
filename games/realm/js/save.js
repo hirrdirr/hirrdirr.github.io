@@ -4,7 +4,7 @@ import { ITEMS, QUESTS, SPAWN, ENEMIES, CHECKPOINTS, xpForLevel } from './data.j
 import { blocked, LANDMARKS } from './world.js';
 import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
-import { EQUIPMENT_SLOTS, emptyEquipment } from './inventory.js';
+import { EQUIPMENT_SLOTS, emptyEquipment, acceptsEquipment } from './inventory.js';
 export const SAVE_KEY = 'hirrdirr.realm.save';
 export const SAVE_VERSION = 4;
 const MAX_BYTES = 262144;
@@ -43,7 +43,7 @@ export function deserialize(raw) {
   p.equipment = emptyEquipment();
   for (const slot of EQUIPMENT_SLOTS) {
     const id = old.equipment?.[slot];
-    if (typeof id !== 'string' || !Object.hasOwn(ITEMS, id) || ITEMS[id].slot !== slot) continue;
+    if (!acceptsEquipment(slot, id)) continue;
     // v0–v3 slots reference a bag copy. v4 slots own their copy independently.
     // Unowned or malformed legacy references cannot manufacture equipment.
     if (envelope.version < 4) {

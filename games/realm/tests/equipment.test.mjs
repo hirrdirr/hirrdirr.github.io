@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { ITEMS, NPCS } from '../js/data.js';
 import { createGame, command, stats, addItem, step } from '../js/simulation.js';
-import { BAG_SLOTS, MAX_STACK, EQUIPMENT_SLOTS, occupiedSlots, transferEquipment } from '../js/inventory.js';
+import { BAG_SLOTS, MAX_STACK, EQUIPMENT_SLOTS, occupiedSlots, transferEquipment, emptyEquipment } from '../js/inventory.js';
 import { serialize, deserialize, SaveStore, SAVE_KEY, SAVE_VERSION } from '../js/save.js';
 import { tradeQuote } from '../js/trading.js';
 import { bagButton, compareEquipment, tradePanel } from '../js/ui-panels.js';
@@ -25,7 +25,7 @@ function storage(initial = {}) {
 test('new characters own exactly one starter sword and coat outside the bag', () => {
   const s = createGame(), p = s.player;
   assert.deepEqual(p.inventory, { potion: 3 });
-  assert.deepEqual(p.equipment, { weapon: 'trainingSword', armor: 'linenCoat', charm: null });
+  assert.deepEqual(p.equipment, { ...emptyEquipment(), weapon: 'trainingSword', armor: 'linenCoat' });
   assert.equal(occupiedSlots(p), 1); assert.equal(total(p).trainingSword, 1);
   assert.equal(stats(p).attack, 11); assert.equal(stats(p).defense, 1);
   assert.deepEqual(data(deserialize(serialize(s))), data(s));
@@ -121,6 +121,7 @@ test('gear changes never heal, permanently stack bonuses or disturb talents and 
 
 test('real 0.3.1 save migrates exactly one owned copy per slot, preserving all other persisted data', () => {
   const original = JSON.parse(legacy), expected = structuredClone(original.data);
+  expected.player.equipment = { ...emptyEquipment(), ...expected.player.equipment };
   expected.player.inventory.moonBlade = 2; delete expected.player.inventory.marshCoat; delete expected.player.inventory.trailCharm;
   let s = deserialize(legacy); assert.equal(SAVE_VERSION, 4); assert.deepEqual(data(s), expected);
   for (const id of Object.keys(ITEMS)) assert.equal(total(s.player)[id], original.data.player.inventory[id] || 0, id);
@@ -135,14 +136,14 @@ test('all legacy versions migrate once; missing and mismatched references never 
     raw.data.player.equipment = { weapon: 'trainingSword', armor: 'moonBlade', charm: 'trailCharm', unknown: 'moonBlade' };
     let s = deserialize(JSON.stringify(raw));
     assert.deepEqual(s.player.inventory, { trainingSword: 2, moonBlade: 1, potion: 5 });
-    assert.deepEqual(s.player.equipment, { weapon: 'trainingSword', armor: null, charm: null });
+    assert.deepEqual(s.player.equipment, { ...emptyEquipment(), weapon: 'trainingSword' });
     const before = data(s); s = deserialize(serialize(s)); assert.deepEqual(data(s), before);
     raw.data.player.equipment = { weapon: ['moonBlade'], armor: { id: 'marshCoat' }, charm: 12 };
     s = deserialize(JSON.stringify(raw)); assert.deepEqual(s.player.inventory, raw.data.player.inventory);
-    assert.deepEqual(s.player.equipment, { weapon: null, armor: null, charm: null });
+    assert.deepEqual(s.player.equipment, emptyEquipment());
     raw.data.player.equipment = { weapon: '__proto__', armor: 'constructor', charm: 'potion' };
     s = deserialize(JSON.stringify(raw)); assert.deepEqual(s.player.inventory, raw.data.player.inventory);
-    assert.deepEqual(s.player.equipment, { weapon: null, armor: null, charm: null });
+    assert.deepEqual(s.player.equipment, emptyEquipment());
   }
 });
 
@@ -151,7 +152,7 @@ test('v4 slots preserve independently owned gear and do not subtract bag duplica
   raw.data.player.inventory = { moonBlade: 2, potion: 5 };
   const s = deserialize(JSON.stringify(raw));
   assert.deepEqual(s.player.inventory, raw.data.player.inventory);
-  assert.deepEqual(s.player.equipment, raw.data.player.equipment);
+  assert.deepEqual(s.player.equipment, { ...emptyEquipment(), ...raw.data.player.equipment });
   assert.equal(total(s.player).moonBlade, 3); assert.equal(s.player.inventory.trainingSword, undefined);
 });
 

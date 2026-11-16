@@ -116,7 +116,7 @@ test('enemy loot rolls produce differentiated rewards at sane frequencies',()=>{
     Object.assign(e,{hp:1,mode:'idle',x:1504,y:648});s.player.x=1464;s.player.y=648;s.player.cooldowns.attack=0;
     command(s,{type:'attack'});const drop=s.drops.pop();assert.ok(drop);counts[drop.item]=(counts[drop.item]||0)+1;
   }
-  assert.ok(counts.emberShard>600&&counts.emberShard<750);assert.ok(counts.potion>150&&counts.potion<300);assert.ok(counts.emberCharm>60&&counts.emberCharm<150);
+  assert.ok(counts.emberShard>420&&counts.emberShard<560);assert.ok(counts.potion>150&&counts.potion<300);assert.ok(counts.emberCharm>60&&counts.emberCharm<150);
   assert.equal(counts.amber,undefined);
 });
 test('real v1 shape migrates without losing chapter one progress, and its original is retained',()=>{

@@ -4,14 +4,36 @@ export const BAG_SLOTS = 16;
 export const MAX_STACK = 999;
 export const MAX_GOLD = 999999;
 // Each slot owns one copy; inventory counts only copies carried in the bag.
-export const EQUIPMENT_SLOTS = Object.freeze(['weapon', 'armor', 'charm']);
+export const EQUIPMENT_DEFINITIONS = Object.freeze({
+  weapon: { category: 'weapon', label: 'ui.weapon', icon: 'sword' },
+  armor: { category: 'armor', label: 'ui.armor', icon: 'armor' },
+  charm: { category: 'charm', label: 'ui.charm', icon: 'charm' },
+  head: { category: 'head', label: 'equipment.head', icon: 'helm' },
+  shoulders: { category: 'shoulders', label: 'equipment.shoulders', icon: 'shoulders' },
+  hands: { category: 'hands', label: 'equipment.hands', icon: 'gloves' },
+  legs: { category: 'legs', label: 'equipment.legs', icon: 'leggings' },
+  feet: { category: 'feet', label: 'equipment.feet', icon: 'boots' },
+  ring1: { category: 'ring', label: 'equipment.ring1', icon: 'band' },
+  ring2: { category: 'ring', label: 'equipment.ring2', icon: 'band' }
+});
+export const EQUIPMENT_SLOTS = Object.freeze(Object.keys(EQUIPMENT_DEFINITIONS));
+export const equipmentLabel = slot => Object.hasOwn(EQUIPMENT_DEFINITIONS, slot) ? tr(EQUIPMENT_DEFINITIONS[slot].label) : '';
+export const acceptsEquipment = (slot, id) => typeof id === 'string' && Object.hasOwn(ITEMS, id) &&
+  typeof slot === 'string' && Object.hasOwn(EQUIPMENT_DEFINITIONS, slot) && ITEMS[id].slot === EQUIPMENT_DEFINITIONS[slot].category;
+export const compatibleSlots = id => EQUIPMENT_SLOTS.filter(slot => acceptsEquipment(slot, id));
+// Existing single-slot commands keep working. Ring UI always sends an explicit target.
+export function equipmentTarget(p, id, requested) {
+  if (requested !== undefined) return requested;
+  const slots = compatibleSlots(id);
+  return slots.find(slot => !p.equipment[slot]) || slots[0];
+}
 export const emptyEquipment = () => Object.fromEntries(EQUIPMENT_SLOTS.map(slot => [slot, null]));
 export function transferEquipment(p, slot, nextId = null) {
   const fail = reason => ({ ok: false, reason });
   if (!EQUIPMENT_SLOTS.includes(slot) || p.dead) return fail(tr('inventory.cannot_change_equipment'));
   const previous = p.equipment[slot];
-  if (previous && (typeof previous !== 'string' || !Object.hasOwn(ITEMS, previous) || ITEMS[previous].slot !== slot)) return fail(tr('inventory.invalid_item'));
-  if (nextId !== null && (typeof nextId !== 'string' || !Object.hasOwn(ITEMS, nextId) || ITEMS[nextId].slot !== slot || !(p.inventory[nextId] > 0))) return fail(tr('inventory.item_not_in_bag'));
+  if (previous && !acceptsEquipment(slot, previous)) return fail(tr('inventory.invalid_item'));
+  if (nextId !== null && (!acceptsEquipment(slot, nextId) || !(p.inventory[nextId] > 0))) return fail(tr('inventory.item_not_in_bag'));
   if (nextId === null && !previous) return fail(tr('inventory.slot_is_empty'));
   // Stage both transfers. Removing the new item may free a slot for the old one.
   const inventory = { ...p.inventory };

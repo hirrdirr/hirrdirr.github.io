@@ -1,17 +1,25 @@
-# Equipment ownership — v0.4.0
+# Equipment ownership — v0.4.2
 
 ## Invariants
 
 - `player.inventory[id]` counts only unequipped bag copies. Positive stacks
   occupy one of 16 bag slots, with up to 999 copies each.
-- Each key in `EQUIPMENT_SLOTS` owns either one valid item of that slot's type
-  or `null`. The existing slots are weapon, armor and charm.
+- Each key in `EQUIPMENT_SLOTS` owns either one valid item of its declared
+  category or `null`. Slots are weapon, armor, charm, head, shoulders, hands,
+  legs, feet, ring1 and ring2. Both ring slots accept the shared `ring` category.
 - Total ownership is bag count plus matching equipped slots. Equipping,
   unequipping and swapping conserve that total for every item ID.
 - Item types remain fungible: two identical swords have the same stats. No
-  instance IDs, durability, affixes or new equipment categories are introduced.
+  instance IDs, durability or affixes are introduced.
 - Stats use equipped items once, independent of bag quantities. Transfers clamp
   current health down if necessary, never heal it or accumulate bonuses.
+
+`EQUIPMENT_DEFINITIONS` centralizes category, label and empty-slot icon.
+`acceptsEquipment` is shared by transactions, loading, stats and comparisons.
+An equip command accepts an explicit `slot`; invalid explicit targets fail.
+Without a target, the first empty compatible slot is used, otherwise the first
+compatible slot. The ring UI always supplies the chosen target. Identical rings
+in both slots require two copies; a spare bag copy can be sold independently.
 
 ## Transactions and capacity
 
@@ -55,6 +63,9 @@ changes their ownership meaning. `deserialize` applies this migration to v0–v3
 5. Preserve the existing progression validation and serialize the result as v4.
 
 v4 loads validate slots independently of bag ownership and never subtract again.
+A 0.4.0/0.4.1 save with three slots loads with the seven added slots empty,
+without a schema bump, bag deductions or a new migration notice. New saves
+serialize all ten slots. Slot IDs and item categories are validated separately.
 Valid names, levels, XP, gold, talents, reset history, quests, discoveries,
 checkpoints, buyback and other persisted progress keep their existing meaning.
 The old pre-v3 specialization-to-talent migration still applies where needed.
@@ -77,6 +88,5 @@ editing; use one active game tab. No backend is introduced.
 
 ## Next milestone
 
-0.4.1 focuses on character-panel presentation and an animated character preview.
-Additional slots can build on the shared slot list and item definitions, with
-their own UI, migration and balance review. None are added in 0.4.0.
+0.5.x focuses on World & Quest Expansion. Randomized item instances and visual
+armor layering are separate future work; see [equipment-expansion.md](equipment-expansion.md).

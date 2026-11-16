@@ -45,7 +45,7 @@ No runtime network request, dependency or language selector is introduced.
 
 ## Equipment boundary (0.4.0)
 
-`inventory.js` defines the three equipment slots and owns `transferEquipment`.
+`inventory.js` defines equipment slots and owns `transferEquipment`.
 It stages the incoming removal and outgoing return in a copied bag, validates
 capacity, then commits inventory and equipment together. `simulation.js` clamps
 health to the resulting maximum and emits the existing equipment event; the
@@ -76,11 +76,20 @@ unmounting and visibility events control animation; reduced motion draws a still
 frame. Nothing is added to saved state. See [character-panel.md](character-panel.md)
 for lifecycle and extension details.
 
+## Equipment expansion boundary (0.4.2)
+
+`EQUIPMENT_DEFINITIONS` separates ten slot identities from nine item categories:
+`ring1` and `ring2` both accept `ring`. Validation, stat aggregation, loading and
+comparisons use `acceptsEquipment`; no module infers category from the slot key.
+Equip commands accept an explicit target. The UI supplies it for both ring
+buttons, and each slot owns one separate copy. The existing atomic transfer
+algorithm and schema-4 ownership meaning remain unchanged. Missing new slots
+load as null. See [equipment-expansion.md](equipment-expansion.md) for itemization.
+
 ## Current roadmap priority
 
-Next: **0.4.2 — Equipment Expansion**, adding functional categories, itemization
-and supporting loot systems. No additional slots are included in 0.4.1. The networking notes
-below are long-term architecture considerations, not the next release scope.
+Next: **0.5.x — World & Quest Expansion**. The networking notes below are
+long-term architecture considerations, not the next release scope.
 
 ## Stage 1: small authoritative multiplayer
 

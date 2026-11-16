@@ -5,14 +5,14 @@ import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLev
 import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, zoneAt } from './world.js';
 import { stepEnemies } from './enemy-ai.js';
 import { talentEffects, talentRank, learnTalent, talentRequirement, spentTalentPoints, respecCost } from './talents.js';
-import { capacityReason, bundleCapacityReason, MAX_GOLD, EQUIPMENT_SLOTS, emptyEquipment, transferEquipment } from './inventory.js';
+import { capacityReason, bundleCapacityReason, MAX_GOLD, EQUIPMENT_SLOTS, emptyEquipment, transferEquipment, acceptsEquipment, equipmentTarget } from './inventory.js';
 import { transact } from './trading.js';
 export const TICK = 1 / 60;
 export function stats(player) {
   const result = { maxHp: 100 + (player.level - 1) * 16, attack: 9 + (player.level - 1) * 2, defense: Math.floor((player.level - 1) / 2), speed: 158, haste: 0, dodgeCooldown: 2.5 };
   const talents = talentEffects(player);
   let spellPower = 0;
-  for (const item of [...EQUIPMENT_SLOTS.map(slot => ITEMS[player.equipment[slot]]).filter((item, i) => item?.slot === EQUIPMENT_SLOTS[i]), talents]) {
+  for (const item of [...EQUIPMENT_SLOTS.filter(slot => acceptsEquipment(slot, player.equipment[slot])).map(slot => ITEMS[player.equipment[slot]]), talents]) {
     if (item) { result.maxHp += item.hp || 0; result.attack += item.attack || 0; result.defense += item.defense || 0; result.haste += item.haste || 0; result.speed += item.speed || 0; result.dodgeCooldown -= item.recovery || 0; }
     spellPower += item?.spellPower || 0;
   }
@@ -109,8 +109,8 @@ export function completeQuest(s, id) {
   emit(s, 'questDone', { id });
   return true;
 }
-export function equip(s, id) {
-  const slot = Object.hasOwn(ITEMS, id) ? ITEMS[id].slot : null;
+export function equip(s, id, requestedSlot) {
+  const slot = equipmentTarget(s.player, id, requestedSlot);
   const result = transferEquipment(s.player, slot, id);
   if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
   s.player.hp = Math.min(s.player.hp, stats(s.player).maxHp);
@@ -333,7 +333,7 @@ export function command(s, input) {
     case 'interact': return interact(s);
     case 'accept': return acceptQuest(s, input.id);
     case 'complete': return completeQuest(s, input.id);
-    case 'equip': return equip(s, input.id);
+    case 'equip': return equip(s, input.id, input.slot);
     case 'unequip': {
       const result = transferEquipment(p, input.slot);
       if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
