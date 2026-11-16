@@ -1,9 +1,28 @@
-# Project Realm — Lantern Vale, v0.4.1
+# Project Realm — Lantern Vale, v0.4.2
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## 0.4.1 — Character Panel
+## 0.4.2 — Equipment Expansion
+
+Character & bag now has ten functional slots: Weapon, Armor, Charm, Head,
+Shoulders, Hands, Legs, Feet, Ring 1 and Ring 2. Five slots sit on each side
+of the existing animated portrait. Select bag gear to compare, equip or swap;
+rings offer an explicit comparison and button for each ring slot. Wearing two
+identical rings consumes two owned copies.
+
+Twelve new items are available through Ivo and existing respawning enemies.
+Their modest health, defense, attack, haste, movement and magic bonuses reuse
+the existing combat calculations. No new world content or talent rules are
+introduced. See [equipment-expansion.md](docs/equipment-expansion.md) for the
+item catalog, sources and balance review.
+
+Existing schema-4 journeys keep their three old equipped items, bag and progress;
+the seven additional slots start empty. Legacy migration and backups remain
+intact. A queued dialog-close event can no longer clear a newly opened merchant
+view, keeping fast menu switches and trading feedback consistent.
+
+## Previous release: 0.4.1 — Character Panel
 
 Character & bag now puts the three equipment slots beside an animated pixel
 portrait and grouped attributes, with the bag and selected item details below.
@@ -68,8 +87,8 @@ and price, then buy or sell exactly one copy. The window stays open. The last
 eight sales can be bought back at their original sale price, including after
 reloading. There is no sell-all command or automatic conversion of equipment.
 
-- Seven offers: a potion and six equipment choices, including Ironroot,
-  Duskweave and Runeweaver Prism. Protection, movement/attack rate and spell
+- Eleven offers: a potion and ten equipment choices, including Ironroot,
+  Duskweave, Runeweaver Prism and four new common secondary-slot items. Protection, movement/attack rate and spell
   damage are distinct choices; purchase prices always exceed sale prices.
 - Equipped items must be taken off first. The bound quest reward Beacon’s Heart
   cannot be sold. Rare sales require confirmation.
@@ -233,6 +252,5 @@ animation loop; the talent panel intentionally continues simulation. The 30 FPS 
 
 ## Next roadmap milestone
 
-**0.4.2 — Equipment Expansion** will add functional equipment categories,
-itemization and supporting loot systems. Those additions are outside 0.4.1;
-its panel reads the existing slot list and keeps appearance rendering separate.
+**0.5.x — World & Quest Expansion** will expand the playable world, quests
+and enemies into a more cohesive adventure. It is outside this equipment release.

@@ -1,3 +1,75 @@
+# v0.4.2 verification — 2026-11-16
+
+## Automated verification
+
+`node --test games/realm/tests/*.test.mjs`: **115 passed, 0 failed**.
+The 100 prior checks remain, with slot-count, version and authored-loot
+expectations updated. Fifteen new checks cover:
+
+- Every authored equipment item against all ten slots, category validation,
+  invalid explicit targets, two-ring ownership, repeated swaps and conservation.
+- Full bags/full stacks, failure without partial transfer, correct talent-aware
+  stats, health clamping and no healing or accumulating bonuses.
+- An actual v0.4.1 save fixture generated using modules at `4712fe5`: the original
+  three slots and persisted progress survive, with seven new slots empty.
+  All-ten-slot saves, duplicate rings, pending loot and malformed slot references
+  are checked alongside the existing v0–v3 migration/recovery tests.
+- Buying, selling and buying back spare rings while both worn copies stay
+  protected; all twelve new items' icons, prices and acquisition sources.
+- Actual simulated kills obtaining every new enemy-drop item, including blocked
+  loot remaining available when the bag is full.
+- Slot-specific ring comparisons, ten panel buttons, actual UI command targets
+  and selection/focus. A queued close event cannot clear an already reopened view.
+
+Generated HTML freshness, JavaScript syntax and `git diff --check` pass.
+All changes are confined to `games/realm/`.
+
+## Actual Chromium verification
+
+- Continued the existing v0.4.1 QA journey: old equipment, bag, level, talents
+  and quest progress retained; new slots empty, without another migration notice.
+- Checked all ten labeled slots in dark/light desktop layouts, 800 × 650 and
+  390 × 820 iframe viewports. Narrow panel widths matched scroll widths; vertical
+  scrolling exposed details and actions without horizontal overflow.
+- Bought three Hearthcopper Bands; equipped Ring 2 first, then Ring 1. Each
+  command consumed exactly one copy and increased maximum HP by four without
+  granting current HP. Comparisons used the selected ring slot.
+- Unequipped/re-equipped Ring 2, sold and bought back the spare ring while both
+  worn copies remained intact. Bought/equipped a cap, gloves and trousers;
+  displayed maximum HP and damage updated immediately.
+- Reloaded with eight occupied slots, five bag stacks, 237 gold and unchanged
+  talents/quest progress. Both ring copies remained equipped.
+- Verified actual idle portrait pixel changes in a focused window. The existing
+  preview lifecycle/reduced-motion tests also pass; preview code is unchanged.
+- Fast Character → Ivo switching exposed a queued native close event clearing
+  the merchant view. After the narrow guard fix, selling the spare ring changed
+  gold immediately from 237 to 243 and showed buyback; buying back restored 237.
+- No Realm console warnings/errors in the final check.
+
+Every slot/item combination, full-bag edges and legacy recovery are automated
+checks, not all manually repeated. No full campaign replay, Firefox/Safari,
+physical mobile or low-powered Windows/GPU benchmark was performed. Narrow
+menus do not add touch gameplay. Deployment verification awaits merge approval.
+
+## Balance and performance samples
+
+See [equipment-expansion.md](equipment-expansion.md) for the level-5 boss sample:
+secondary gear provides modest gains and avoiding attacks still saves potions.
+
+Five warmed-up alternating samples per version, each 36,000 ticks with 17
+enemies, level 6, mixed talents, circular movement, melee/Burst and invulnerability
+to sustain the run; events were drained each tick. v0.4.1 wore its three primary
+items; v0.4.2 wore all ten slots:
+
+- Baseline median: **0.026623 ms/tick**.
+- Expanded median: **0.032942 ms/tick**.
+
+The full-loadout sample adds about **0.00632 ms/tick** (24% relative). These are
+host CPU timings, not browser FPS/GPU measurements. No additional rendering loop
+or dependency is introduced; the existing bounded world and cached preview remain.
+
+---
+
 # v0.4.1 verification — 2026-11-15
 
 ## Automated verification

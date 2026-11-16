@@ -38,4 +38,10 @@
   <symbol id="crystal" viewBox="0 0 32 32"><path d="M10 2h12l8 13-14 16L2 15z" fill="#436b72"/><path d="M11 5h10l6 10-11 13L5 15z" fill="#8dcbbb"/><path d="M11 5l5 10-11 0zM16 15l5-10 6 10z" fill="#cfebce"/><path d="M16 15v13L5 15z" fill="#67a9a4"/></symbol>
   <symbol id="pierce" viewBox="0 0 32 32"><path d="M6 3h4v26H6zM20 3h4v26h-4z" fill="#527c76"/><path d="M1 14h20V8l10 8-10 8v-6H1z" fill="#c0e0bd"/></symbol>
   <symbol id="bloom" viewBox="0 0 32 32"><path d="M12 2h8v8h10v10H20v10h-8V20H2V10h10z" fill="#719f89"/><path d="M14 5h4v9h9v4h-9v9h-4v-9H5v-4h9z" fill="#cfe7b8"/><path d="M12 12h8v8h-8z" fill="#f4d995"/></symbol>
+
+  <symbol id="helm" viewBox="0 0 32 32"><path d="M9 3h14v4h4v22h-7v-9h-8v9H5V7h4z" fill="#26483f"/><path d="M10 5h12v4h3v17h-3V16H10v10H7V9h3z" fill="#9aaa87"/><path d="M10 5h5v8H7V9h3z" fill="#d1d5ae"/><path d="M16 5h3v11h-3zM10 13h12v3H10z" fill="#d8b978"/></symbol>
+  <symbol id="shoulders" viewBox="0 0 32 32"><path d="M2 9l8-5h12l8 5v15H20l-4-7-4 7H2z" fill="#294b40"/><path d="M4 10l6-4h3v9l-3 6H4zM19 6h3l6 4v11h-6l-3-6z" fill="#91ae8a"/><path d="M4 10h7v4H4zM21 10h7v4h-7zM13 6h6v4h-6z" fill="#d2c38e"/><path d="M5 17h4v3H5zM23 17h4v3h-4z" fill="#56785e"/></symbol>
+  <symbol id="gloves" viewBox="0 0 32 32"><path d="M4 3h9v8h3v13l-4 5H3L1 19V9h3zM21 3h8v8h2v14l-4 4h-8V15h2z" fill="#3e4939"/><path d="M6 5h5v10h3v8l-3 4H5l-2-8v-7h3zM23 5h4v10h2v9l-3 3h-5V17h2z" fill="#b39767"/><path d="M5 5h7v5H5zM22 5h6v5h-6z" fill="#ddc895"/><path d="M5 21h6v3H5zM22 21h4v3h-4z" fill="#7d7150"/></symbol>
+  <symbol id="leggings" viewBox="0 0 32 32"><path d="M6 2h20v28h-9V17h-2v13H6z" fill="#2e4943"/><path d="M8 7h16v20h-5V14h-6v13H8z" fill="#829b87"/><path d="M8 7h5v17H8zM19 7h3v5h-3z" fill="#b3c3a0"/><path d="M7 3h18v4H7z" fill="#9a8057"/><path d="M14 3h5v4h-5z" fill="#dec789"/></symbol>
+  <symbol id="band" viewBox="0 0 32 32"><path d="M10 8h12l7 7v10l-6 6H9l-6-6V15z" fill="#655c40"/><path d="M11 11h10l5 5v8l-4 4H10l-4-4v-8zM11 16v7h10v-7z" fill="#d3ae69" fill-rule="evenodd"/><path d="M10 2h12v10H10z" fill="#3e6f68"/><path d="M12 4h8v6h-8z" fill="#a1d2bc"/><path d="M12 4h3v3h-3zM7 18h3v6H7z" fill="#eee3b3"/></symbol>
 </svg>

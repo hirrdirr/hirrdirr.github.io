@@ -6,7 +6,9 @@ export const MERCHANTS = Object.freeze({
   ivo: { name: tr("trading.ivos_trading_post"), greeting: tr("trading.choose_what_you_need_i_also_buy_what_you_have_outgrown"), stock: [
     { id: 'potion', price: 12 }, { id: 'keeperBlade', price: 62 },
     { id: 'forestCoat', price: 64 }, { id: 'trailCharm', price: 58 },
-    { id: 'ironCharm', price: 72 }, { id: 'runnerWrap', price: 78 }, { id: 'runeFocus', price: 82 }
+    { id: 'ironCharm', price: 72 }, { id: 'runnerWrap', price: 78 }, { id: 'runeFocus', price: 82 },
+    { id: 'trailCap', price: 24 }, { id: 'workGloves', price: 28 },
+    { id: 'linenLegs', price: 30 }, { id: 'copperBand', price: 28 }
   ] }
 });
 export const nearMerchant = (s, id) => Object.hasOwn(MERCHANTS, id) && NPCS.some(n => n.id === id && Math.hypot(s.player.x - n.x, s.player.y - n.y) <= 80);

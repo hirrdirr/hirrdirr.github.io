@@ -1,13 +1,13 @@
-# Character Panel — 0.4.1
+# Character Panel — 0.4.2
 
 ## Presentation and interactions
 
-The wide layout places equipment left, the player portrait center and grouped
-attributes right. Bag contents and the selected item details stay below in the
-same dialog. Below 850 px, attributes move below equipment/portrait; below 570 px,
-the portrait leads, equipment becomes a three-card row, and the bag/details stack.
-The existing dialog provides vertical scrolling; no nested inventory scroller or
-new tabs are required.
+The wide layout places five equipment slots on each side of the existing player
+portrait, with grouped attributes at the right. Left: Head, Shoulders, Armor,
+Hands, Weapon. Right: Charm, Ring 1, Ring 2, Legs, Feet. Bag contents and selected
+item details stay below. At 1050 px and below, attributes move below the loadout;
+at 570 px and below, the portrait leads, equipment becomes two five-card columns,
+and bag/details stack. The existing dialog scrolls vertically.
 
 Only entries from `EQUIPMENT_SLOTS` are rendered. Empty slots have a muted category
 icon and explicit text. Rarity uses the existing names, colors and icons. Buttons
@@ -20,7 +20,10 @@ quantity. A successful equip selects its slot; a successful unequip selects its
 returned bag copy. A rejected transfer keeps the current selection. The UI
 restores focus using the original button's complete data identity, then selected
 slot/item, then Close. It preserves the dialog's scroll offset when rerendering.
-All ownership/capacity validation remains in existing commands.
+All ownership/capacity validation remains in existing commands. Ring details
+show a comparison and explicit equip button for each ring slot; merchant
+comparisons also show both replacement outcomes. A queued native close event
+from a preceding view is ignored while the shared dialog is already open again.
 
 Attributes come from the shared `stats` result, including talent bonuses. Strike
 damage is a normal melee hit before critical/combo bonuses; strikes per second is
@@ -46,6 +49,6 @@ particle system or persistent animation state.
 The constructor's `resolveSprite(player)` callback is the future appearance seam.
 It currently returns `renderer.art.player[0]`; equipment does not alter the base
 portrait. Future equipment layers should be composed/cached behind this boundary
-rather than adding ownership rules to the preview. Additional functional slots
-belong to 0.4.2 and must also extend slot labels/icons and gameplay definitions.
+rather than adding ownership rules to the preview. The ten functional slots
+use shared category labels/icons; equipment expansion does not change this lifecycle.
 Save schema remains 4.

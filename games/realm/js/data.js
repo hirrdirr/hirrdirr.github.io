@@ -1,6 +1,6 @@
 import { tr } from './i18n.js';
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.4.1';
+export const VERSION = '0.4.2';
 export const ITEMS = Object.freeze({
   trainingSword: { value: 1, name: tr("data.wanderers_sword"), slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: tr("data.a_worn_blade_a_new_chapter") },
   linenCoat: { value: 1, name: tr("data.travel_coat"), slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: tr("data.light_enough_for_a_long_journey") },
@@ -19,7 +19,19 @@ export const ITEMS = Object.freeze({
   ironCharm: { name: tr("data.ironroot"), slot: 'charm', rarity: 'uncommon', defense: 2, hp: 12, value: 18, icon: 'shield', description: tr("data.a_steady_anchor_when_battle_closes_in") },
   runnerWrap: { name: tr("data.duskweave"), slot: 'armor', rarity: 'uncommon', defense: 2, haste: .06, speed: 6, value: 20, icon: 'armor', description: tr("data.woven_for_swift_movement_with_less_protection_than_a_heavy_cloak") },
   runeFocus: { name: tr("data.runeweaver_prism"), slot: 'charm', rarity: 'uncommon', spellPower: .12, value: 22, icon: 'crystal', description: tr("data.adds_12_of_base_damage_to_lantern_burst_and_glimmerbolt") },
-  emberShard: { name: tr("data.ember_shard"), rarity: 'uncommon', icon: 'amber', value: 7, description: tr("data.a_cooling_emberstone_ivo_buys_it_for_7_gold") }
+  emberShard: { name: tr("data.ember_shard"), rarity: 'uncommon', icon: 'amber', value: 7, description: tr("data.a_cooling_emberstone_ivo_buys_it_for_7_gold") },
+  trailCap: { name: tr('gear.trailCap.name'), slot: 'head', rarity: 'common', icon: 'helm', value: 6, hp: 6, description: tr('gear.trailCap.description') },
+  fenCowl: { name: tr('gear.fenCowl.name'), slot: 'head', rarity: 'rare', icon: 'helm', value: 22, hp: 4, spellPower: 0.04, description: tr('gear.fenCowl.description') },
+  mossMantle: { name: tr('gear.mossMantle.name'), slot: 'shoulders', rarity: 'common', icon: 'shoulders', value: 5, hp: 4, description: tr('gear.mossMantle.description') },
+  briarPads: { name: tr('gear.briarPads.name'), slot: 'shoulders', rarity: 'uncommon', icon: 'shoulders', value: 14, defense: 1, description: tr('gear.briarPads.description') },
+  workGloves: { name: tr('gear.workGloves.name'), slot: 'hands', rarity: 'common', icon: 'gloves', value: 6, attack: 1, description: tr('gear.workGloves.description') },
+  duskGrips: { name: tr('gear.duskGrips.name'), slot: 'hands', rarity: 'uncommon', icon: 'gloves', value: 16, haste: 0.03, description: tr('gear.duskGrips.description') },
+  linenLegs: { name: tr('gear.linenLegs.name'), slot: 'legs', rarity: 'common', icon: 'leggings', value: 7, hp: 8, description: tr('gear.linenLegs.description') },
+  reedLegs: { name: tr('gear.reedLegs.name'), slot: 'legs', rarity: 'uncommon', icon: 'leggings', value: 16, hp: 12, recovery: 0.1, description: tr('gear.reedLegs.description') },
+  trailBoots: { name: tr('gear.trailBoots.name'), slot: 'feet', rarity: 'common', icon: 'boots', value: 6, speed: 3, description: tr('gear.trailBoots.description') },
+  fenBoots: { name: tr('gear.fenBoots.name'), slot: 'feet', rarity: 'uncommon', icon: 'boots', value: 17, speed: 5, recovery: 0.1, description: tr('gear.fenBoots.description') },
+  copperBand: { name: tr('gear.copperBand.name'), slot: 'ring', rarity: 'common', icon: 'band', value: 6, hp: 4, description: tr('gear.copperBand.description') },
+  emberBand: { name: tr('gear.emberBand.name'), slot: 'ring', rarity: 'rare', icon: 'band', value: 24, attack: 1, spellPower: 0.03, description: tr('gear.emberBand.description') }
 });
 export const ENEMIES = Object.freeze({
   sprout: { name: tr("data.thornroot"), behavior: 'melee', level: 1, hp: 36, attack: 6, speed: 48, xp: 16, gold: 3, aggro: 135, leash: 200, radius: 12, cooldown: 1.6 },
@@ -30,10 +42,10 @@ export const ENEMIES = Object.freeze({
 });
 // One weighted drop per kill. Copies stay in the bag for individual trading.
 export const LOOT_TABLES = Object.freeze({
-  sprout: [['amber', 68], ['potion', 25], ['barkCoat', 7]],
-  wolf: [['amber', 60], ['potion', 22], ['swiftBlade', 10], ['trailCharm', 8]],
+  sprout: [['amber', 56], ['potion', 25], ['barkCoat', 7], ['mossMantle', 6], ['trailBoots', 6]],
+  wolf: [['amber', 48], ['potion', 22], ['swiftBlade', 10], ['trailCharm', 8], ['briarPads', 6], ['reedLegs', 6]],
   warden: [['moonBlade', 100]],
-  wisp: [['emberShard', 68], ['potion', 22], ['emberCharm', 10]],
+  wisp: [['emberShard', 49], ['potion', 22], ['emberCharm', 10], ['duskGrips', 8], ['fenBoots', 6], ['fenCowl', 3], ['emberBand', 2]],
   ancient: [['emberCharm', 100]]
 });
 export const QUESTS = Object.freeze({

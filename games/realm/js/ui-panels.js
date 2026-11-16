@@ -1,16 +1,19 @@
 import { tr } from './i18n.js';
 import { ITEMS, RARITIES, NPCS } from './data.js';
 import { stats } from './simulation.js';
-import { BAG_SLOTS, occupiedSlots } from './inventory.js';
+import { BAG_SLOTS, occupiedSlots, compatibleSlots, acceptsEquipment, equipmentLabel } from './inventory.js';
 import { MERCHANTS, BUYBACK_LIMIT, tradeQuote } from './trading.js';
 import { TALENTS, TALENT_TREES, TIER_POINTS, talentRank, talentRequirement, spentTalentPoints, availableTalentPoints, earnedTalentPoints, respecCost } from './talents.js';
 export const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const itemIcon = name => `<svg class="item-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#${name}"></use></svg>`;
 export const itemStats = item => [item.attack ? tr("ui-panels.attack", item.attack) : '', item.defense ? tr("ui-panels.defense", item.defense) : '', item.hp ? tr("ui-panels.max_health", item.hp) : '', item.haste ? tr("ui-panels.attack_speed", Math.round(item.haste * 100)) : '', item.speed ? tr("ui-panels.movement_speed", Math.round(item.speed / 158 * 100)) : '', item.recovery ? tr("ui-panels.s_dodge_cooldown", item.recovery) : '', item.spellPower ? tr("ui-panels.lantern_burst_glimmerbolt_damage", Math.round(item.spellPower * 100)) : ''].filter(Boolean).join(' · ');
-export function compareEquipment(p, id) {
-  const item = ITEMS[id];
-  if (!item?.slot) return '';
-  const before = stats(p), after = stats({ ...p, equipment: { ...p.equipment, [item.slot]: id } });
+export function compareEquipment(p, id, targetSlot) {
+  const slots = compatibleSlots(id);
+  if (!slots.length) return '';
+  if (targetSlot === undefined && slots.length > 1) return slots.map(slot => `<section class="ring-comparison"><h4>${tr('equipment.compare_slot', equipmentLabel(slot))}</h4>${compareEquipment(p, id, slot)}</section>`).join('');
+  const slot = targetSlot === undefined ? slots[0] : targetSlot;
+  if (!acceptsEquipment(slot, id)) return '';
+  const before = stats(p), after = stats({ ...p, equipment: { ...p.equipment, [slot]: id } });
   const rows = [
     [tr("ui-panels.strike_damage"), st => Math.round(st.attack * st.meleeMultiplier), v => v],
     [tr("ui-panels.max_health_2"), st => st.maxHp, v => v], [tr("ui-panels.defense_2"), st => st.defense, v => v],

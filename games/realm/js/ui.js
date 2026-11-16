@@ -15,7 +15,7 @@ export class UI {
     this.tradeSelection={side:'stock',id:'potion'};this.selectedTalent='vigor';this.activeTree='guardian';this.pendingSale=null;this.confirmDialog=$('realm-confirm');
     document.querySelectorAll('[data-panel]').forEach(button=>button.addEventListener('click',()=>this.open(button.dataset.panel)));
     $('close-panel').addEventListener('click',()=>this.close());
-    this.panel.addEventListener('close',()=>{this.preview?.unmount();this.view=null;actions.resume();$('world').focus({preventScroll:true});});
+    this.panel.addEventListener('close',()=>{if(this.panel.open)return;this.preview?.unmount();this.view=null;actions.resume();$('world').focus({preventScroll:true});});
     this.panel.addEventListener('cancel',e=>{if(this.view==='death')e.preventDefault();});
     $('realm-confirm-cancel').addEventListener('click',()=>this.confirmDialog.close());
     $('realm-confirm-accept').addEventListener('click',()=>{

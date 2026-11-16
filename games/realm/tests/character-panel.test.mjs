@@ -12,7 +12,7 @@ test('character presentation reads the state without changing ownership, progres
   const before = JSON.parse(serialize(s));
   const html = characterPanel(s);
   assert.match(html, /&lt;Wanderer&gt;/); assert.doesNotMatch(html, /<Wanderer>/);
-  assert.equal((html.match(/data-equipment=/g) || []).length, 3);
+  assert.equal((html.match(/data-equipment=/g) || []).length, 10);
   for (const slot of ['weapon', 'armor', 'charm']) assert.match(html, new RegExp(`data-equipment="${slot}"`));
   assert.doesNotMatch(html, /data-item="trainingSword"|data-item="linenCoat"/);
   assert.match(html, /data-item="moonBlade"/); assert.match(html, /Empty Charm slot/);
@@ -172,4 +172,35 @@ test('a missing canvas context or unavailable sprite leaves a safe static fallba
   const h = previewHarness(); h.canvas.getContext = () => null; h.preview.mount(h.canvas, h.player);
   assert.equal(h.frames.size, 0); h.preview.unmount();
   drawCharacterPreview(h.context, null); assert.equal(h.calls.length, 0);
+});
+
+
+test('ring controls target the selected slot and restore focus to that exact ring', () => {
+  const s = createGame(); s.player.inventory.copperBand = 2;
+  const h = uiHarness(s);
+  try {
+    h.ui.open('inventory'); h.click('item', 'copperBand');
+    assert.match(h.element('panel-content').innerHTML, /Equip in Ring 1/);
+    assert.match(h.element('panel-content').innerHTML, /Equip in Ring 2/);
+    h.click('slot', 'ring2');
+    assert.equal(s.player.equipment.ring2, 'copperBand'); assert.equal(s.player.equipment.ring1, null);
+    assert.equal(h.focused.dataset.equipment, 'ring2');
+    h.click('item', 'copperBand'); h.click('slot', 'ring1');
+    assert.equal(s.player.equipment.ring1, 'copperBand'); assert.equal(h.focused.dataset.equipment, 'ring1');
+    h.click('equipment', 'ring2'); h.click('action', 'unequip');
+    assert.equal(s.player.equipment.ring1, 'copperBand'); assert.equal(s.player.equipment.ring2, null);
+    assert.equal(s.player.inventory.copperBand, 1); assert.equal(h.focused.dataset.item, 'copperBand');
+  } finally { h.restore(); }
+});
+
+
+test('a queued close event cannot clear a newly reopened panel or stop its preview', () => {
+  const h=uiHarness(createGame());
+  try {
+    h.ui.open('inventory'); const before=h.lifecycle.length;
+    // Native dialog close events may arrive after another view has reopened it.
+    h.ui.panel.handlers.close();
+    assert.equal(h.ui.view,'inventory'); assert.equal(h.lifecycle.length,before);
+    h.ui.close(); assert.equal(h.ui.view,null); assert.equal(h.lifecycle.at(-1),'unmount');
+  } finally { h.restore(); }
 });
