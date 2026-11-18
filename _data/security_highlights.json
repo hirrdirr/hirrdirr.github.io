@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-11-17",
+  "digest_date": "2026-11-18",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "Uppmaning till ökad vaksamhet efter flera fall av nätfiske",
-      "url": "https://www.cert.se/2026/11/uppmanar-till-okad-vaksamhet-natfiske.html"
+      "title": "Kritisk sårbarhet i Oracle Java",
+      "url": "https://www.cert.se/2026/11/kritisk-sarbarhet-i-oracle-java.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "Inside Modern Phishing Kits Built to Steal Microsoft 365 Sessions",
-      "url": "https://www.bleepingcomputer.com/news/security/inside-modern-phishing-kits-built-to-steal-microsoft-365-sessions/",
-      "image": "https://www.bleepstatic.com/content/posts/2026/11/15/huntress-microsoft-365-phishing.jpg"
+      "title": "From Deepfakes to Helpdesk Impersonation: Why Stronger Verification Matters",
+      "url": "https://www.bleepingcomputer.com/news/security/from-deepfakes-to-helpdesk-impersonation-why-stronger-verification-matters/",
+      "image": "https://www.bleepstatic.com/content/posts/2026/11/16/specops-hacker.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "“Amazon” job offer promises $5,000 a month, but it’s got all the signs of a scam",
-      "url": "https://www.malwarebytes.com/blog/threat-intel/2026/11/amazon-job-offer-promises-5000-a-month-but-its-got-all-the-signs-of-a-scam",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/amazon-boxes.png"
+      "title": "Who protects the antivirus? How we secure Malwarebytes itself",
+      "url": "https://www.malwarebytes.com/blog/inside-malwarebytes/2026/11/who-protects-the-antivirus-how-we-secure-malwarebytes-itself",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2025/10/Inside-Malwarebytes_04.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "A phishing page interested in MX records, (Tue, Nov 17th)",
-      "url": "https://isc.sans.edu/diary/rss/33526"
+      "title": "ISC Stormcast For Wednesday, November 18th, 2026 https://isc.sans.edu/podcastdetail/10184, (Wed, Nov 18th)",
+      "url": "https://isc.sans.edu/diary/rss/33528"
     }
   ]
 }
