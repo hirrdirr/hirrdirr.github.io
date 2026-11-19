@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-11-18",
+  "digest_date": "2026-11-19",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "Kritisk sårbarhet i Oracle Java",
-      "url": "https://www.cert.se/2026/11/kritisk-sarbarhet-i-oracle-java.html"
+      "title": "Kritisk sårbarhet i Apache Axis",
+      "url": "https://www.cert.se/2026/11/kritisk-sarbarhet-i-apache.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "From Deepfakes to Helpdesk Impersonation: Why Stronger Verification Matters",
-      "url": "https://www.bleepingcomputer.com/news/security/from-deepfakes-to-helpdesk-impersonation-why-stronger-verification-matters/",
-      "image": "https://www.bleepstatic.com/content/posts/2026/11/16/specops-hacker.jpg"
+      "title": "Five warning signs of ransomware breach before encryption or data theft",
+      "url": "https://www.bleepingcomputer.com/news/security/five-warning-signs-of-ransomware-breach-before-encryption-or-data-theft/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2021/12/02/system-hacked.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Who protects the antivirus? How we secure Malwarebytes itself",
-      "url": "https://www.malwarebytes.com/blog/inside-malwarebytes/2026/11/who-protects-the-antivirus-how-we-secure-malwarebytes-itself",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2025/10/Inside-Malwarebytes_04.png"
+      "title": "Chrome patches six critical flaws, two found with AI’s help",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/chrome-patches-six-critical-flaws-two-found-with-ais-help",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Wednesday, November 18th, 2026 https://isc.sans.edu/podcastdetail/10184, (Wed, Nov 18th)",
-      "url": "https://isc.sans.edu/diary/rss/33528"
+      "title": "ISC Stormcast For Thursday, November 19th, 2026 https://isc.sans.edu/podcastdetail/10186, (Thu, Nov 19th)",
+      "url": "https://isc.sans.edu/diary/rss/33536"
     }
   ]
 }
