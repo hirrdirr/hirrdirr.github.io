@@ -1,27 +1,27 @@
 {
-  "digest_date": "2026-11-19",
+  "digest_date": "2026-11-20",
   "articles": [
     {
       "source": "CERT-SE",
-      "title": "Kritisk sårbarhet i Apache Axis",
-      "url": "https://www.cert.se/2026/11/kritisk-sarbarhet-i-apache.html"
+      "title": "NCSC – CERT-SE veckobrev v.47",
+      "url": "https://www.cert.se/2026/11/ncsc-cert-se-veckobrev-v47.html"
     },
     {
       "source": "BleepingComputer",
-      "title": "Five warning signs of ransomware breach before encryption or data theft",
-      "url": "https://www.bleepingcomputer.com/news/security/five-warning-signs-of-ransomware-breach-before-encryption-or-data-theft/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2021/12/02/system-hacked.jpg"
+      "title": "N-able says recent security breach led to major service outage",
+      "url": "https://www.bleepingcomputer.com/news/microsoft/n-able-says-recent-security-breach-led-to-major-service-outage/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/20/N-able.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Chrome patches six critical flaws, two found with AI’s help",
-      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/chrome-patches-six-critical-flaws-two-found-with-ais-help",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2023/11/Chrome-1200.png"
+      "title": "US launches center to disrupt scams and warn victims sooner",
+      "url": "https://www.malwarebytes.com/blog/news/2026/11/us-launches-center-to-disrupt-scams-and-warn-victims-sooner",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/HSFT_header.png"
     },
     {
       "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Thursday, November 19th, 2026 https://isc.sans.edu/podcastdetail/10186, (Thu, Nov 19th)",
-      "url": "https://isc.sans.edu/diary/rss/33536"
+      "title": "ISC Stormcast For Friday, November 20th, 2026 https://isc.sans.edu/podcastdetail/10188, (Fri, Nov 20th)",
+      "url": "https://isc.sans.edu/diary/rss/33538"
     }
   ]
 }
