@@ -1,5 +1,5 @@
 {
-  "digest_date": "2026-11-20",
+  "digest_date": "2026-11-21",
   "articles": [
     {
       "source": "CERT-SE",
@@ -8,9 +8,9 @@
     },
     {
       "source": "BleepingComputer",
-      "title": "N-able says recent security breach led to major service outage",
-      "url": "https://www.bleepingcomputer.com/news/microsoft/n-able-says-recent-security-breach-led-to-major-service-outage/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/20/N-able.jpg"
+      "title": "Bell Canada says 'agentic' hacker stole enterprise customer data",
+      "url": "https://www.bleepingcomputer.com/news/security/bell-canada-says-agentic-hacker-stole-enterprise-customer-data/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/20/bell-canada.jpg"
     },
     {
       "source": "Malwarebytes",
@@ -19,9 +19,10 @@
       "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/HSFT_header.png"
     },
     {
-      "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Friday, November 20th, 2026 https://isc.sans.edu/podcastdetail/10188, (Fri, Nov 20th)",
-      "url": "https://isc.sans.edu/diary/rss/33538"
+      "source": "BleepingComputer",
+      "title": "Hackers use autonomous AI tool Cairn to find zero-day, take over server",
+      "url": "https://www.bleepingcomputer.com/news/security/hackers-use-autonomous-ai-tool-cairn-to-find-zero-day-take-over-server/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2022/05/12/evil-hacker-ai.jpg"
     }
   ]
 }
