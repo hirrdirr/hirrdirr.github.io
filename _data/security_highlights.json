@@ -1,28 +1,29 @@
 {
-  "digest_date": "2026-11-21",
+  "digest_date": "2026-11-22",
   "articles": [
     {
-      "source": "CERT-SE",
-      "title": "NCSC – CERT-SE veckobrev v.47",
-      "url": "https://www.cert.se/2026/11/ncsc-cert-se-veckobrev-v47.html"
+      "source": "BleepingComputer",
+      "title": "Rackspace Spot breach let hackers access customer Kubernetes secrets",
+      "url": "https://www.bleepingcomputer.com/news/security/rackspace-spot-breach-let-hackers-access-customer-kubernetes-secrets/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2022/12/09/Rackspace.jpg"
     },
     {
       "source": "BleepingComputer",
-      "title": "Bell Canada says 'agentic' hacker stole enterprise customer data",
-      "url": "https://www.bleepingcomputer.com/news/security/bell-canada-says-agentic-hacker-stole-enterprise-customer-data/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/20/bell-canada.jpg"
-    },
-    {
-      "source": "Malwarebytes",
-      "title": "US launches center to disrupt scams and warn victims sooner",
-      "url": "https://www.malwarebytes.com/blog/news/2026/11/us-launches-center-to-disrupt-scams-and-warn-victims-sooner",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/HSFT_header.png"
+      "title": "Microsoft Entra Connect Health flaw exploited to steal tenant data",
+      "url": "https://www.bleepingcomputer.com/news/security/microsoft-entra-connect-health-flaw-exploited-to-steal-tenant-data/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2024/01/26/microsoft-red-header.jpg"
     },
     {
       "source": "BleepingComputer",
-      "title": "Hackers use autonomous AI tool Cairn to find zero-day, take over server",
-      "url": "https://www.bleepingcomputer.com/news/security/hackers-use-autonomous-ai-tool-cairn-to-find-zero-day-take-over-server/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2022/05/12/evil-hacker-ai.jpg"
+      "title": "BADBOX botnet returns with record-breaking 40 billion daily ad requests",
+      "url": "https://www.bleepingcomputer.com/news/security/badbox-30-botnet-returns-with-record-breaking-40-billion-daily-ad-requests/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2024/12/19/android-malware-botnet.jpg"
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "FBI reportedly hacked again, this time targeting nationwide police database",
+      "url": "https://www.bleepingcomputer.com/news/security/fbi-reportedly-hacked-again-this-time-targeting-nationwide-police-database/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2022/12/16/FBI__headpic.jpg"
     }
   ]
 }
