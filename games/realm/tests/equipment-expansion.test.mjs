@@ -72,7 +72,7 @@ test('new-slot and ring swaps are atomic with a full non-stacking bag', () => {
 
 test('actual 0.4.1 save retains every persisted value and gains only seven empty slots', () => {
   const expected=JSON.parse(fixture).data;expected.player.equipment={...emptyEquipment(),...expected.player.equipment};
-  let s=deserialize(fixture);assert.equal(SAVE_VERSION,5);assert.deepEqual(legacyView(data(s)),expected);
+  let s=deserialize(fixture);assert.equal(SAVE_VERSION,6);assert.deepEqual(legacyView(data(s)),expected);
   for(let i=0;i<10;i++){s=deserialize(serialize(s));assert.deepEqual(legacyView(data(s)),expected);}
 });
 

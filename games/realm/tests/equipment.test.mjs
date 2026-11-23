@@ -66,7 +66,7 @@ test('gear changes do not heal, stack bonuses or change talents and cooldowns',(
 test('real 0.3.1 migration preserves all progress and total owned quantities',()=>{
  const original=JSON.parse(legacy),expected=structuredClone(original.data);
  expected.player.equipment={...emptyEquipment(),...expected.player.equipment};expected.player.inventory.moonBlade=2;delete expected.player.inventory.marshCoat;delete expected.player.inventory.trailCharm;
- let s=deserialize(legacy);assert.equal(SAVE_VERSION,5);assert.deepEqual(legacyView(data(s)),expected);
+ let s=deserialize(legacy);assert.equal(SAVE_VERSION,6);assert.deepEqual(legacyView(data(s)),expected);
  for(const id of Object.keys(ITEMS))assert.equal(totals(s.player)[id],original.data.player.inventory[id]||0);
  const stable=data(s),st=stats(s.player);for(let i=0;i<10;i++){s=deserialize(serialize(s));assert.deepEqual(data(s),stable);assert.deepEqual(stats(s.player),st);}
 });
@@ -101,7 +101,7 @@ test('corrupt-save recovery preserves the original and backs up the recovered le
 });
 test('legacy import preserves both originals; failed replacement leaves current journey intact',()=>{
  const current=serialize(createGame('Current')),mem=storage({[SAVE_KEY]:current}),store=new SaveStore(mem);
- assert.equal(store.replace(deserialize(legacy),legacy),true);assert.equal(mem.getItem(SAVE_KEY+'.import.v3'),legacy);assert.equal(mem.getItem(SAVE_KEY+'.recovery'),current);assert.equal(JSON.parse(mem.getItem(SAVE_KEY)).version,5);assert.equal(bagCount(store.load().player,'moonBlade'),2);
+ assert.equal(store.replace(deserialize(legacy),legacy),true);assert.equal(mem.getItem(SAVE_KEY+'.import.v3'),legacy);assert.equal(mem.getItem(SAVE_KEY+'.recovery'),current);assert.equal(JSON.parse(mem.getItem(SAVE_KEY)).version,6);assert.equal(bagCount(store.load().player,'moonBlade'),2);
  const failing=storage({[SAVE_KEY]:current});failing.setItem=()=>{throw Error('quota');};assert.equal(new SaveStore(failing).replace(deserialize(legacy),legacy),false);assert.equal(failing.getItem(SAVE_KEY),current);
 });
 test('selling an exact spare protects worn gear and restores that spare through buyback',()=>{

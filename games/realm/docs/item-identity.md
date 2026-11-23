@@ -1,4 +1,29 @@
-# Item Identity System — 0.4.3
+# Equipment identity and permanent stats
+
+## Permanent gear stats in 0.4.4
+
+Eligible equipment gets a single draw from the saved simulation RNG at creation.
+All three profiles have equal weight. The standard profile keeps the base stats.
+The focused profile adds one point of attack or defense, one percentage point of
+haste or spell power, or two units of movement speed, depending on the template.
+For health-focused pieces it trades one health for two movement units. The hardy
+profile adds 2 / 4 / 6 maximum health at common / uncommon / rare quality. Where
+the template has enough of its specialty stat to retain a positive value, it gives
+up one increment of that stat. Health-focused pieces receive the full health gain.
+
+`gear-rolls.js` lists the eligible templates and their specialties. Drops roll
+before touching the ground. Caches and purchases roll after capacity checks.
+Quest rewards, starter gear, story-only equipment and migrated items use the
+standard profile. Capacity previews, trades of existing gear and loading consume
+no gear RNG. Base merchant previews are labeled as such. Inventory, buyback and
+combat share the resolved instance values, including both rings.
+
+Schema 6 stores the actual numeric deltas in the existing `modifiers` field.
+The loader checks the entire combination against the template's allowed profiles.
+Future balance edits must keep historical combinations readable or explicitly
+migrate them. Schema 5 accepts only empty modifiers and upgrades to 6 with the
+same IDs and stats, preserving the original backup. A 0.4.3 client treats a v6
+file as a future save and protects it from autosave.
 
 ## Data model
 
@@ -9,10 +34,8 @@ An equipment record is stored once in `player.itemInstances`:
 ```
 
 The key and `id` must match. `templateId` references the authoritative `ITEMS`
-definition. `resolveItem(player, ref)` is the shared stat/display resolver; in
-0.4.3 it returns that template unchanged. The reserved `modifiers` object must
-be empty. 0.4.4 can extend validation/resolution there without changing bag,
-slot, trading or drop references. No attributes are randomly generated here.
+definition. `resolveItem(player, ref)` returns the shared effective item for that
+record, with the saved deltas applied once. An empty object uses base stats.
 
 `player.itemSequence` is a persisted monotonic safe-integer allocator. IDs are
 unique within a journey, not global account identifiers. Allocation uses no
@@ -49,7 +72,7 @@ another copy. Trades validate first, then transfer one selected instance and its
 price. Buyback keeps that instance in the registry until repurchased or evicted
 by the existing eight-entry limit. Eviction retires only the evicted record.
 
-## Schema 5 and legacy migration
+## Identity migration introduced in schema 5
 
 The storage key remains `hirrdirr.realm.save`. All prior progression validation,
 talent migration, checkpoints, flags, quest progress and currency rules remain.
@@ -97,6 +120,4 @@ Internal IDs appear only in action data, not visible item names. Comparisons
 resolve the selected record and target slot. Shop comparisons create a read-only
 projection, never allocating a real record or consuming an ID.
 
-Version 0.4.3 adds no items, rarities, loot rates, price changes, quests, enemies,
-combat formulas, XP scaling, respawn rules or visual redesign. The next milestone
-is **0.4.4 — Randomized Gear Stats**; the later 0.5.x world expansion is unchanged.
+The next milestone is **0.5.0 — XP Scaling & World Respawn**.

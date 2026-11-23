@@ -1,3 +1,4 @@
+import { random } from './random.js';
 import { instance, templateId, resolveItem, discardItem } from './item-instances.js';
 import { tr } from './i18n.js';
 import { NPCS } from './data.js';
@@ -58,7 +59,7 @@ export function transact(s, action) {
     for (const entry of s.buyback.splice(BUYBACK_LIMIT)) discardItem(p, entry.item);
   } else {
     if (q.type === 'buyback' && instance(p, q.item)) p.inventory[q.item] = 1;
-    else if (!grantItems(p, q.item)) return { ...q, ok: false };
+    else if (!grantItems(p, q.item, 1, () => random(s))) return { ...q, ok: false };
     p.gold -= q.price;
     if (q.type === 'buyback') s.buyback = s.buyback.filter(e => e.id !== action.id);
   }

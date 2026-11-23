@@ -1,3 +1,4 @@
+import { gearProfile } from './gear-rolls.js';
 import { instance, instanceNumber, template, resolveItem, createItemInstance } from './item-instances.js';
 import { tr } from './i18n.js';
 import { createGame, stats } from './simulation.js';
@@ -7,7 +8,7 @@ import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
 import { EQUIPMENT_SLOTS, emptyEquipment, acceptsEquipment } from './inventory.js';
 export const SAVE_KEY = 'hirrdirr.realm.save';
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 // A valid legacy bag can contain 999 copies of every template. Expansion into
 // individual records must still fit export/import and recovery validation.
 export const MAX_SAVE_BYTES = 8 * 1024 * 1024;
@@ -33,7 +34,7 @@ export function deserialize(raw) {
     error.futureVersion = true; throw error;
   }
   // Prototype format v0 used the same stable content IDs but lacked discoveries.
-  if (![0, 1, 2, 3, 4, 5].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
+  if (![0, 1, 2, 3, 4, 5, 6].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
   const d = envelope.data, old = d?.player;
   if (!d || !old || typeof old.name !== 'string' || !Number.isFinite(old.level) || !old.inventory || typeof old.inventory !== 'object' || Array.isArray(old.inventory)) throw new Error(tr("save.the_save_file_is_damaged"));
   const s = createGame(old.name), p = s.player;
@@ -41,7 +42,7 @@ export function deserialize(raw) {
   p.xp = p.level === 20 ? 0 : integer(old.xp, 0, xpForLevel(p.level) - 1, 0);
   p.gold = integer(old.gold, 0, 999999, 0);
   p.inventory = {}; p.equipment = emptyEquipment(); p.itemInstances = {}; p.itemSequence = 1;
-  const seen = new Set(), modern = envelope.version === 5;
+  const seen = new Set(), modern = envelope.version >= 5;
   const claim = id => {
     if (!instance(p, id) || seen.has(id)) damaged();
     seen.add(id); return id;
@@ -51,8 +52,11 @@ export function deserialize(raw) {
     let highest = 0;
     for (const [id, record] of Object.entries(old.itemInstances)) {
       const number = instanceNumber(id);
-      if (!number || !record || record.id !== id || !template(record.templateId)?.slot || !record.modifiers || typeof record.modifiers !== 'object' || Array.isArray(record.modifiers) || Object.keys(record.modifiers).length || Object.keys(record).some(k => !['id', 'templateId', 'modifiers'].includes(k))) damaged();
-      p.itemInstances[id] = { id, templateId: record.templateId, modifiers: {} };
+      if (!number || record?.id !== id || !template(record.templateId)?.slot ||
+          Object.keys(record).some(key => !['id', 'templateId', 'modifiers'].includes(key))) damaged();
+      const profile = gearProfile(record.templateId, record.modifiers);
+      if (!profile || (envelope.version === 5 && Object.keys(profile.delta).length)) damaged();
+      p.itemInstances[id] = { id, templateId: record.templateId, modifiers: profile.delta };
       highest = Math.max(highest, number);
     }
     if (!Number.isSafeInteger(old.itemSequence) || old.itemSequence <= highest || old.itemSequence >= Number.MAX_SAFE_INTEGER) damaged();
@@ -148,7 +152,7 @@ export class SaveStore {
   readWithBackup(raw) {
     const state = deserialize(raw), version = JSON.parse(raw).version;
     if (version < SAVE_VERSION) {
-      this.notice = tr('save.equipment_migrated');
+      this.notice = version === 5 ? tr('save.rolls_migrated') : tr('save.equipment_migrated');
       if (version < 3) this.notice += ' ' + tr("save.your_journey_has_been_updated_three_talent_trees_replace_the_old", availableTalentPoints(state.player));
       try { if (!this.storage.getItem(SAVE_KEY + '.v' + version)) this.storage.setItem(SAVE_KEY + '.v' + version, raw); }
       catch { this.blocked = true; this.message = tr("save.you_can_play_your_older_journey_but_the_original_could_not_be_bac"); }

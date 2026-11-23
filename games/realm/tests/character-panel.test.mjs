@@ -19,7 +19,7 @@ test('character presentation reads the state without changing ownership, progres
   assert.doesNotMatch(html, /data-item="trainingSword"|data-item="linenCoat"/);
   for(const id of bagIds(s.player,'moonBlade'))assert.ok(html.includes(`data-item="${id}"`)); assert.match(html, /Empty Charm slot/);
   assert.match(html, /canvas id="character-preview"/); assert.match(html, /gear visuals do not change yet/);
-  assert.deepEqual(JSON.parse(serialize(s)).data, before.data); assert.equal(SAVE_VERSION, 5);
+  assert.deepEqual(JSON.parse(serialize(s)).data, before.data); assert.equal(SAVE_VERSION, 6);
   assert.deepEqual(JSON.parse(serialize(deserialize(serialize(s)))).data, before.data);
 });
 

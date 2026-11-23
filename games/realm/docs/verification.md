@@ -1,3 +1,20 @@
+# v0.4.4 verification — 2026-11-23
+
+Baseline: merged 0.4.3 at `3402c58` (130 passing tests). The 0.4.4 suite
+passes 139 tests, including every authored gear profile, tier bounds, repeated
+swaps with talents, both ring slots, blocked ground pickup, trading, buyback,
+malformed rolls, import and backup recovery. The schema-5 fixture was generated
+by the actual 0.4.3 serializer from the existing QA journey with ten worn items,
+duplicates, pending drops and buyback entries. The migrated save's complete data
+matches that fixture. The static English page matches its template.
+
+Chromium smoke test with an isolated test save: selected two merchant-generated
+Hearthcopper Bands with the keyboard. One gave +6 max health, the other +3 max
+health and +1% movement speed. Wearing the first produced 106 max health;
+the second previewed 103 as its replacement or 109 in the empty ring slot.
+Equipping it in Ring 2 produced 109 max health and 101% movement speed as shown.
+Save migration and merchant sale/buyback were exercised by automated tests.
+
 # v0.4.3 verification — 2026-11-18
 
 ## Automated verification
