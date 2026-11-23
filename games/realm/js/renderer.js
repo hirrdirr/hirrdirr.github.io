@@ -1,6 +1,7 @@
+import { resolveItem } from './item-instances.js';
 import { makeArt } from './art.js';
-import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, terrain, riverLeft, inSafe, LANDMARKS } from './world.js';
-import { NPCS, ENEMIES, QUESTS, ITEMS } from './data.js';
+import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, terrain, riverLeft, LANDMARKS } from './world.js';
+import { NPCS, ENEMIES, QUESTS } from './data.js';
 import { questReady } from './simulation.js';
 function makeCanvas(w,h) { const c=document.createElement('canvas'); c.width=w;c.height=h;return c; }
 function rand(seed) { return () => { seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}; }
@@ -117,7 +118,7 @@ export class Renderer {
     ].sort((a,b)=>a.y-b.y);
     for(const drop of s.drops) {
       if(!visible(drop))continue;
-      g.fillStyle=ITEMS[drop.item].rarity==='rare'?'#9bd5e9':ITEMS[drop.item].rarity==='uncommon'?'#b6d990':'#f1d28f';g.fillRect(drop.x-5,drop.y-10,10,10);
+      g.fillStyle=resolveItem(s.player, drop.item).rarity==='rare'?'#9bd5e9':resolveItem(s.player, drop.item).rarity==='uncommon'?'#b6d990':'#f1d28f';g.fillRect(drop.x-5,drop.y-10,10,10);
       g.fillStyle='#9f6d43';g.fillRect(drop.x-3,drop.y-7,6,5);
       g.strokeStyle='#f4d99566';g.strokeRect(drop.x-8,drop.y-13,16,16);
     }

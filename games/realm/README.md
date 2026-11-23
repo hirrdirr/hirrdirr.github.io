@@ -1,9 +1,28 @@
-# Project Realm — Lantern Vale, v0.4.2
+# Project Realm — Lantern Vale, v0.4.3
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## 0.4.2 — Equipment Expansion
+## 0.4.3 — Item Identity System
+
+Every equipment copy now has a persistent identity. Identical swords and rings
+appear separately in the bag and can be selected independently. Equip, swap,
+unequip, sell and buyback move the exact selected copy; buying back gear restores
+its original identity. Consumables and materials still stack. Each equipment
+copy occupies one of the bag's 16 slots.
+
+All ten equipment slots, item stats, prices, loot tables and the character-panel
+layout are retained. Save schema **5** migrates v0–v4 journeys, including worn
+rings, spare copies, buyback and outstanding ground loot. Original legacy files
+are backed up before autosaving. If expanded legacy gear exceeds bag capacity,
+every copy remains available; sell or equip items to make room.
+
+See [item-identity.md](docs/item-identity.md) for the ownership and migration
+contracts and [verification.md](docs/verification.md) for actual checks.
+Randomized stats are deferred to **0.4.4**; this release only provides the data
+foundation, with unchanged template-derived attributes.
+
+## Previous release: 0.4.2 — Equipment Expansion
 
 Character & bag now has ten functional slots: Weapon, Armor, Charm, Head,
 Shoulders, Hands, Legs, Feet, Ring 1 and Ring 2. Five slots sit on each side
@@ -92,9 +111,9 @@ reloading. There is no sell-all command or automatic conversion of equipment.
   damage are distinct choices; purchase prices always exceed sale prices.
 - Equipped items must be taken off first. The bound quest reward Beacon’s Heart
   cannot be sold. Rare sales require confirmation.
-- The bag holds 16 different item stacks, each capped at 999 copies. Existing
-  overflowing saves retain their possessions. Buying existing stacks is still
-  possible when all slots are occupied. Quest/chest rewards remain unclaimed
+- The bag holds 16 slots. Equipment copies each occupy one slot; consumables
+  and materials stack up to 999. Existing overflowing saves retain their
+  possessions. Buying an existing stackable item remains possible in a full bag. Quest/chest rewards remain unclaimed
   if the complete reward cannot fit; nearby blocked loot stays on the ground.
 - Transaction validation checks item ownership, stock, quantity, proximity,
   gold and capacity before moving either money or items. Stable buyback IDs
@@ -189,6 +208,7 @@ See [verification.md](docs/verification.md) for coverage and observed limitation
 | templates/index.html / scripts/localize-html.mjs | Static HTML source and generation |
 | js/data.js | Stable item, enemy, NPC, loot and quest content |
 | js/talents.js | Talent definitions, effects, point budgets and rank validation |
+| js/item-instances.js | Persistent equipment identities and template resolution |
 | js/inventory.js | Equipment slot definitions, atomic transfers, bag capacity and reward preflight |
 | js/trading.js | Merchant stock, quotes, individual transactions and buyback |
 | js/world.js | Terrain, placements, safe areas and indexed collision queries |
@@ -208,7 +228,7 @@ desktop boundaries. No networking layer or credentials are included.
 
 ## Saves
 
-The key remains **hirrdirr.realm.save**, with schema version **4**. The DTO
+The key remains **hirrdirr.realm.save**, with schema version **5**. The DTO
 contains character progression, inventory/equipment, talent ranks, respec count,
 quests, permanent flags, discoveries, opened caches, herbs, runes, checkpoint,
 cooldowns, uncollected loot, buyback, elapsed time and the simulation RNG seed.
@@ -226,19 +246,19 @@ JSON backup through the menu before clearing site data or changing computers.
 
 The previous readable save is retained as `.backup`; corrupted input is kept
 as `.recovery`. Future-version saves and unrecoverable corruption block automatic
-overwriting. Imports/new journeys require confirmation. Files above 256 KiB are
-rejected, IDs are whitelisted and values/positions validated. Old v0/v1/v2/v3 saves
-get untouched `.v0`/`.v1`/`.v2`/`.v3` backups before autosave. Imported legacy files
+overwriting. Imports/new journeys require confirmation. Files above 8 MiB are
+rejected; the larger limit accommodates expanded legacy equipment stacks. IDs
+and ownership references are validated. Old v0/v1/v2/v3/v4 saves
+get untouched `.v0`/`.v1`/`.v2`/`.v3`/`.v4` backups before autosave. Imported legacy files
 are also retained as `.import.vN` (the latest import for that schema version). If that backup cannot be
 written, the old original stays protected and the temporary journey can be exported.
 
-Version 4 never recreates sold or missing starter equipment. A legacy slot is
-migrated only if the item is valid for that slot and its inventory contains an
-owned copy; exactly one copy is removed from that count. Invalid references
-leave their slots empty without consuming valid bag contents. v4 loads never
-subtract equipment from bag counts again. Older over-capacity inventories are
-retained, invalid talent allocations are reconstructed within legal budgets,
-and saved buyback prices are validated against authored sale values.
+Schema 5 stores equipment records once, with one reference in the bag, a worn
+slot, buyback or a ground drop. IDs persist through transfers and reloads. Invalid
+or conflicting references reject the save as a whole and use the existing
+backup/recovery path. v4 migration treats bag copies and worn copies separately;
+v0–v3 first deduct their valid shared equipped copies exactly once. Migration
+never invents missing starter gear. See [item-identity.md](docs/item-identity.md).
 
 ## Performance
 
@@ -252,5 +272,5 @@ animation loop; the talent panel intentionally continues simulation. The 30 FPS 
 
 ## Next roadmap milestone
 
-**0.5.x — World & Quest Expansion** will expand the playable world, quests
-and enemies into a more cohesive adventure. It is outside this equipment release.
+**0.4.4 — Randomized Gear Stats** will add persistent stat variations to these
+individual equipment records. World & Quest Expansion follows in 0.5.x.

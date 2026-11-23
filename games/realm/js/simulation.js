@@ -1,3 +1,4 @@
+import { instance, templateId, resolveItem, createItemInstance, discardItem } from './item-instances.js';
 import { tr } from './i18n.js';
 // Pure game rules. No DOM, Canvas, storage, clocks or network access.
 // Clients send commands; step() advances a fixed tick and emits presentation events.
@@ -5,14 +6,14 @@ import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLev
 import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, zoneAt } from './world.js';
 import { stepEnemies } from './enemy-ai.js';
 import { talentEffects, talentRank, learnTalent, talentRequirement, spentTalentPoints, respecCost } from './talents.js';
-import { capacityReason, bundleCapacityReason, MAX_GOLD, EQUIPMENT_SLOTS, emptyEquipment, transferEquipment, acceptsEquipment, equipmentTarget } from './inventory.js';
+import { capacityReason, bundleCapacityReason, MAX_GOLD, EQUIPMENT_SLOTS, emptyEquipment, transferEquipment, acceptsEquipment, equipmentTarget, grantItems } from './inventory.js';
 import { transact } from './trading.js';
 export const TICK = 1 / 60;
 export function stats(player) {
   const result = { maxHp: 100 + (player.level - 1) * 16, attack: 9 + (player.level - 1) * 2, defense: Math.floor((player.level - 1) / 2), speed: 158, haste: 0, dodgeCooldown: 2.5 };
   const talents = talentEffects(player);
   let spellPower = 0;
-  for (const item of [...EQUIPMENT_SLOTS.filter(slot => acceptsEquipment(slot, player.equipment[slot])).map(slot => ITEMS[player.equipment[slot]]), talents]) {
+  for (const item of [...EQUIPMENT_SLOTS.filter(slot => acceptsEquipment(slot, instance(player, player.equipment[slot])?.templateId)).map(slot => resolveItem(player, player.equipment[slot])), talents]) {
     if (item) { result.maxHp += item.hp || 0; result.attack += item.attack || 0; result.defense += item.defense || 0; result.haste += item.haste || 0; result.speed += item.speed || 0; result.dodgeCooldown -= item.recovery || 0; }
     spellPower += item?.spellPower || 0;
   }
@@ -34,10 +35,12 @@ export function createGame(name = tr("simulation.wanderer")) {
     time: 0, seed: 784533, sequence: 0, events: [], drops: [], effects: [], projectiles: [], playerShots: [], hazards: [], targetId: null,
     buyback: [], tradeSequence: 1, bagNotice: 0,
     player: { name: name.trim().slice(0, 18) || tr("simulation.wanderer"), ...SPAWN, hp: 100, level: 1, xp: 0, gold: 0, facing: { x: 0, y: 1 }, moveFacing: { x: 0, y: 1 }, dodgeDirection: { x: 0, y: 1 },
-      inventory: { potion: 3 }, equipment: { ...emptyEquipment(), weapon: 'trainingSword', armor: 'linenCoat' },
+      inventory: { potion: 3 }, equipment: emptyEquipment(), itemInstances: {}, itemSequence: 1,
       cooldowns: { attack: 0, burst: 0, dodge: 0, potion: 0, guard: 0, rush: 0, bolt: 0 }, talents: {}, respecCount: 0, guardTime: 0, counterTime: 0, checkpoint: 'village', combo: 0, comboTime: 0, invulnerable: 0, dodging: 0, attackTime: 0, moving: false, combat: 0, dead: false },
     quests: {}, harvested: [], chests: [], runes: [], discovered: ['village'], flags: { beaconLit: false, wardenDefeated: false, ancientDefeated: false, sealRestored: false }, enemies: []
   };
+  state.player.equipment.weapon = createItemInstance(state.player, 'trainingSword');
+  state.player.equipment.armor = createItemInstance(state.player, 'linenCoat');
   state.enemies = ENEMY_SPAWNS.map(([type, x, y], index) => ({ id: 'enemy' + index, type, x, y, homeX: x, homeY: y, hp: ENEMIES[type].hp, mode: 'idle', timer: 0, cooldown: .5, windup: 0, hit: 0, respawn: 0, facing: 1 }));
   return state;
 }
@@ -52,8 +55,7 @@ function effect(s, type, x, y, text = '', extra = {}) {
   if (s.effects.length > 70) s.effects.shift();
 }
 export function addItem(s, id, quantity = 1) {
-  if (capacityReason(s.player, id, quantity)) return false;
-  s.player.inventory[id] = (s.player.inventory[id] || 0) + quantity;
+  if (!grantItems(s.player, id, quantity)) return false;
   emit(s, 'item', { id, quantity });
   return true;
 }
@@ -114,7 +116,7 @@ export function equip(s, id, requestedSlot) {
   const result = transferEquipment(s.player, slot, id);
   if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
   s.player.hp = Math.min(s.player.hp, stats(s.player).maxHp);
-  emit(s, 'equip', { id });
+  emit(s, 'equip', { id: templateId(s.player, id) });
   return true;
 }
 export function nearestInteraction(s) {
@@ -178,8 +180,9 @@ function kill(s, enemy) {
   const table = LOOT_TABLES[enemy.type];
   let roll = random(s) * table.reduce((sum, [, weight]) => sum + weight, 0), item = table[0][0];
   for (const [id, weight] of table) { roll -= weight; if (roll < 0) { item = id; break; } }
+  if (ITEMS[item].slot) item = createItemInstance(s.player, item);
   s.drops.push({ id: ++s.sequence, x: enemy.x, y: enemy.y, item, life: 90 });
-  if (s.drops.length > 64) s.drops.shift();
+  if (s.drops.length > 64) discardItem(s.player, s.drops.shift().item);
   emit(s, 'kill', { typeId: enemy.type, xp: def.xp, gold: def.gold });
   effect(s, 'xp', enemy.x, enemy.y - 16, '+' + def.xp + ' XP');
 }
@@ -337,12 +340,12 @@ export function command(s, input) {
     case 'unequip': {
       const result = transferEquipment(p, input.slot);
       if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
-      p.hp = Math.min(p.hp, stats(p).maxHp); emit(s, 'unequip', { id: result.id }); return true;
+      p.hp = Math.min(p.hp, stats(p).maxHp); emit(s, 'unequip', { id: templateId(p, result.id) }); return true;
     }
     case 'buy': case 'sell': case 'buyback': {
       const result = transact(s, input);
       if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
-      emit(s, 'trade', { action: result.type, id: result.item, price: result.price }); return true;
+      emit(s, 'trade', { action: result.type, id: result.templateId, price: result.price }); return true;
     }
     default: return false;
   }
@@ -375,10 +378,15 @@ export function step(s, input = {}, dt = TICK) {
   s.drops = s.drops.filter(drop => {
     drop.life -= dt;
     if (!p.dead && distance(drop, p) < 32) {
-      if (addItem(s, drop.item)) return false;
+      if (!capacityReason(p, drop.item)) {
+        if (instance(p, drop.item)) { p.inventory[drop.item] = 1; emit(s, 'item', { id: templateId(p, drop.item), quantity: 1 }); }
+        else addItem(s, drop.item);
+        return false;
+      }
       drop.life = Math.max(3, drop.life);
       if (s.bagNotice === 0) { emit(s, 'message', { text: capacityReason(p, drop.item) }); s.bagNotice = 4; }
     }
+    if (drop.life <= 0) discardItem(p, drop.item);
     return drop.life > 0;
   });
   for (const fx of s.effects) fx.life -= dt;

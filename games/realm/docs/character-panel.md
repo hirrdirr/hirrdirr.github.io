@@ -1,4 +1,4 @@
-# Character Panel — 0.4.2
+# Character Panel — 0.4.3
 
 ## Presentation and interactions
 
@@ -15,11 +15,13 @@ expose selection with `aria-pressed`; keyboard focus has its own visible outline
 Item and stat explanations use native titles and accessible labels. Item details
 are a polite live region, and existing transaction feedback remains visible.
 
-Selection identifies an equipment **slot** or a bag **item ID**, never a guessed
+Selection identifies an equipment **slot** or a bag **instance ID** (stackable items retain their template ID), never a guessed
 quantity. A successful equip selects its slot; a successful unequip selects its
 returned bag copy. A rejected transfer keeps the current selection. The UI
 restores focus using the original button's complete data identity, then selected
 slot/item, then Close. It preserves the dialog's scroll offset when rerendering.
+Identical equipment copies render separate buttons. Technical IDs stay in
+internal action data, while labels and details show the normal item names.
 All ownership/capacity validation remains in existing commands. Ring details
 show a comparison and explicit equip button for each ring slot; merchant
 comparisons also show both replacement outcomes. A queued native close event
@@ -51,4 +53,5 @@ It currently returns `renderer.art.player[0]`; equipment does not alter the base
 portrait. Future equipment layers should be composed/cached behind this boundary
 rather than adding ownership rules to the preview. The ten functional slots
 use shared category labels/icons; equipment expansion does not change this lifecycle.
-Save schema remains 4.
+Save schema is 5; equipment records and ownership are documented in
+[item-identity.md](item-identity.md).

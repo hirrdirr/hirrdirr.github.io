@@ -1,3 +1,75 @@
+# v0.4.3 verification — 2026-11-18
+
+## Automated verification
+
+`node --test games/realm/tests/*.test.mjs`: **130 passed, 0 failed**.
+The 115 earlier checks were adapted to explicit equipment identities and the
+intentionally replaced stacking/schema behavior. Test fixture helpers mint real
+instances; commands still exercise the production rule layer. Fifteen additional
+identity-focused checks cover:
+
+- Separate IDs and bag slots for identical equipment; exact references through
+  equip, swap, sale, buyback and repeated reloads. Template-only equip/sell is
+  rejected rather than selecting an arbitrary copy.
+- An actual schema-4 fixture serialized with the 0.4.2 modules at `626dd18`, with
+  ten worn slots, duplicate rings and swords, buyback and outstanding loot.
+  Projection back to template/count ownership preserves all persisted progress.
+- v0–v4 migration, twenty repeated reloads, deterministic legacy replacement,
+  untouched v4/import backups, backup failures and recovery of a corrupt graph.
+- Twenty-six malformed ownership variants: duplicate owners, wrong slots,
+  missing/orphan records, mismatched/unknown IDs, injected modifiers, invalid
+  counters, stacked equipment, conflicting buyback/drop references and invalid
+  current drop locations. These reject the whole save, preserving the original.
+- Maximum legacy quantities (999 of every template), exceeding the former
+  256 KiB limit after migration, successfully round-trip under the shared 8 MiB
+  import/validation bound without losing copies.
+- Full-bag equipment purchases, blocked buyback, bundle preflight, quantity
+  validation, consumable stacks, one-time quest rewards and exact loot pickup.
+- Buyback eviction, drop expiry and the 64-drop cap retire only their own records;
+  later acquisitions never reuse retired IDs.
+- Separate UI selections, hidden technical identifiers and read-only merchant
+  comparisons that do not allocate instances or consume sequence numbers.
+
+The existing all-item/all-ten-slot matrix, actual enemy-drop tests, combat,
+quests, talents, migration/recovery and preview lifecycle checks pass.
+A direct comparison against 0.4.2 confirmed identical item definitions, loot
+tables, quests, NPCs, enemy data, merchant prices and full-loadout computed stats.
+JavaScript syntax, generated HTML freshness and `git diff --check` pass.
+Changes are confined to `games/realm/`.
+
+## Actual Chromium smoke test
+
+Continued the existing disposable 0.4.2 QA journey in the local preview:
+
+- The migration notice appeared. Eight worn slots, both rings, level 20, talent
+  allocation, quest progress and 237 gold survived. Two Wolf's Fang copies became
+  separate bag buttons; occupancy changed from five stacks to six slots.
+- Selected the second sword by its actual DOM action ID, equipped it and then
+  unequipped it. The same reference returned selected to the bag. Displayed
+  damage changed 58 → 55 and attack rate 2.67 → 3.14 while worn.
+- Sold the other sword: only its button disappeared and gold became 253.
+  Buyback restored that same ID and 237 gold. A purchased ring received a new
+  ID, with the previous spare still present; gold became 209.
+- Cancelled a rare Moonshard sale and retained the item; confirmed the sale,
+  received 24 gold, then bought back the exact original instance for 24 gold.
+- Re-equipped Moonshard and swapped the newly purchased ring into Ring 2.
+  The preceding ring returned to the bag as its original instance.
+- Reloaded: the selected ring's ID, separate sword/spare-ring IDs, seven occupied
+  bag slots, 209 gold, 450 maximum HP, 58 strike damage and 14 spent/four unspent
+  talent points persisted. The migration notice did not recur.
+- Checked dark/light desktop presentation and a 390 × 820 iframe. The narrow
+  panel measured 330 px client width and scroll width; bag selections and details
+  remained accessible through vertical scrolling. No layout/CSS redesign.
+- No Realm console errors/warnings in the final filtered check. Browser-extension
+  metadata errors were present and unrelated to the game.
+
+No full campaign replay, physical mobile, Firefox/Safari or GPU/FPS benchmark was
+performed. Full bags, maximum migrations, pending-loot integrity, import recovery
+and malformed graphs were automated checks, not all repeated in the browser.
+Publication awaits explicit merge authorization for the 0.4.3 PR.
+
+---
+
 # v0.4.2 verification — 2026-11-16
 
 ## Automated verification

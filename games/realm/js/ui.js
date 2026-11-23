@@ -1,3 +1,4 @@
+import { resolveItem } from './item-instances.js';
 import { tr } from './i18n.js';
 import { ITEMS, QUESTS, NPCS, ENEMIES, xpForLevel } from './data.js';
 import { stats, questReady, nearestInteraction } from './simulation.js';
@@ -47,7 +48,7 @@ export class UI {
         if(action==='talents'){this.open('talents');return;}
         if(['accept','complete','equip','unequip','buy','sell','buyback','respawn','potion','learnTalent','respec'].includes(action)) {
           let confirm=false;
-          if(action==='sell'&&ITEMS[b.dataset.id]?.rarity==='rare'){
+          if(action==='sell'&&resolveItem(this.state().player,b.dataset.id)?.rarity==='rare'){
             this.confirmRareSale(b.dataset.id);return;
           }
           if(action==='respec'){
@@ -79,7 +80,7 @@ export class UI {
   get isOpen(){return this.panel.open||$('welcome').open||this.confirmDialog.open;}
   get allowsSimulation(){return this.panel.open&&this.view==='talents'&&!this.confirmDialog.open;}
   confirmRareSale(id){
-    const item=ITEMS[id];
+    const item=resolveItem(this.state().player,id);
     if(this.view!=='merchant'||!item||item.rarity!=='rare')return;
     this.pendingSale=id;
     $('realm-confirm-title').textContent=tr("ui.sell_a_rare_item");

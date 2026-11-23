@@ -1,6 +1,7 @@
+import { instance, templateId, resolveItem, discardItem } from './item-instances.js';
 import { tr } from './i18n.js';
-import { ITEMS, NPCS } from './data.js';
-import { capacityReason, MAX_GOLD } from './inventory.js';
+import { NPCS } from './data.js';
+import { capacityReason, grantItems, MAX_GOLD } from './inventory.js';
 export const BUYBACK_LIMIT = 8;
 export const MERCHANTS = Object.freeze({
   ivo: { name: tr("trading.ivos_trading_post"), greeting: tr("trading.choose_what_you_need_i_also_buy_what_you_have_outgrown"), stock: [
@@ -22,8 +23,10 @@ export function tradeQuote(s, action) {
     const entry = s.buyback.find(e => e.id === action.id && e.merchant === merchant);
     if (!entry) return fail(tr("trading.that_item_is_no_longer_available_for_buyback"));
     result.item = entry.item; result.price = entry.price;
-  } else if (!Object.hasOwn(ITEMS, action.id)) return fail(tr("trading.select_an_item"));
-  const item = ITEMS[result.item];
+  } else if (!resolveItem(p, action.id)) return fail(tr("trading.select_an_item"));
+  const item = resolveItem(p, result.item);
+  if (!item || (action.type !== 'buy' && item.slot && !instance(p, result.item))) return fail(tr('trading.select_an_item'));
+  result.templateId = templateId(p, result.item);
   if (action.type === 'sell') {
     result.price = item.value || 0;
     if (!p.inventory[action.id]) return fail(Object.values(p.equipment).includes(action.id) ? tr("trading.unequip_the_item_before_selling_it") : tr("trading.you_do_not_own_that_item"));
@@ -52,9 +55,11 @@ export function transact(s, action) {
     if (!p.inventory[q.item]) delete p.inventory[q.item];
     p.gold += q.price;
     s.buyback.unshift({ id: 'sale-' + s.tradeSequence++, merchant: q.merchant, item: q.item, price: q.price });
-    s.buyback.length = Math.min(s.buyback.length, BUYBACK_LIMIT);
+    for (const entry of s.buyback.splice(BUYBACK_LIMIT)) discardItem(p, entry.item);
   } else {
-    p.gold -= q.price; p.inventory[q.item] = (p.inventory[q.item] || 0) + 1;
+    if (q.type === 'buyback' && instance(p, q.item)) p.inventory[q.item] = 1;
+    else if (!grantItems(p, q.item)) return { ...q, ok: false };
+    p.gold -= q.price;
     if (q.type === 'buyback') s.buyback = s.buyback.filter(e => e.id !== action.id);
   }
   return q;

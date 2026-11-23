@@ -1,3 +1,4 @@
+import { instance, templateId, resolveItem } from './item-instances.js';
 import { tr } from './i18n.js';
 import { ITEMS, RARITIES, NPCS } from './data.js';
 import { stats } from './simulation.js';
@@ -8,12 +9,15 @@ export const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({ '&'
 export const itemIcon = name => `<svg class="item-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#${name}"></use></svg>`;
 export const itemStats = item => [item.attack ? tr("ui-panels.attack", item.attack) : '', item.defense ? tr("ui-panels.defense", item.defense) : '', item.hp ? tr("ui-panels.max_health", item.hp) : '', item.haste ? tr("ui-panels.attack_speed", Math.round(item.haste * 100)) : '', item.speed ? tr("ui-panels.movement_speed", Math.round(item.speed / 158 * 100)) : '', item.recovery ? tr("ui-panels.s_dodge_cooldown", item.recovery) : '', item.spellPower ? tr("ui-panels.lantern_burst_glimmerbolt_damage", Math.round(item.spellPower * 100)) : ''].filter(Boolean).join(' · ');
 export function compareEquipment(p, id, targetSlot) {
-  const slots = compatibleSlots(id);
+  const slots = compatibleSlots(templateId(p, id));
   if (!slots.length) return '';
   if (targetSlot === undefined && slots.length > 1) return slots.map(slot => `<section class="ring-comparison"><h4>${tr('equipment.compare_slot', equipmentLabel(slot))}</h4>${compareEquipment(p, id, slot)}</section>`).join('');
   const slot = targetSlot === undefined ? slots[0] : targetSlot;
-  if (!acceptsEquipment(slot, id)) return '';
-  const before = stats(p), after = stats({ ...p, equipment: { ...p.equipment, [slot]: id } });
+  if (!acceptsEquipment(slot, templateId(p, id))) return '';
+  // A shop template needs a read-only projected instance, never an allocation.
+  const previewId = instance(p, id) ? id : 'preview';
+  const projected = { ...p, itemInstances: { ...p.itemInstances, [previewId]: instance(p, id) || { id: previewId, templateId: id, modifiers: {} } }, equipment: { ...p.equipment, [slot]: previewId } };
+  const before = stats(p), after = stats(projected);
   const rows = [
     [tr("ui-panels.strike_damage"), st => Math.round(st.attack * st.meleeMultiplier), v => v],
     [tr("ui-panels.max_health_2"), st => st.maxHp, v => v], [tr("ui-panels.defense_2"), st => st.defense, v => v],
@@ -29,13 +33,13 @@ export function compareEquipment(p, id, targetSlot) {
   }).join('')}</tbody></table>`;
 }
 export function bagButton(p, id, selected, attribute = 'item') {
-  const item = ITEMS[id], count = p.inventory[id];
-  return `<button class="item-button ${item.rarity}${selected ? ' selected' : ''}" data-${attribute}="${id}" aria-label="${tr("ui-panels.quantity", escapeHTML(item.name), '', count)}" aria-pressed="${selected}" title="${escapeHTML(item.name + ' · ' + itemStats(item))}"><span class="item-symbol">${itemIcon(item.icon)}</span>${item.questItem ? `<em>${tr("ui-panels.bound")}</em>` : ''}<small>${count}</small></button>`;
+  const item = resolveItem(p, id), count = p.inventory[id];
+  return `<button class="item-button ${item.rarity}${selected ? ' selected' : ''}" data-${attribute}="${id}" aria-label="${tr("ui-panels.quantity", escapeHTML(item.name), '', count)}" aria-pressed="${selected}" title="${escapeHTML(item.name + ' · ' + itemStats(item))}"><span class="item-symbol">${itemIcon(item.icon)}</span>${item.questItem ? `<em>${tr("ui-panels.bound")}</em>` : ''}${item.slot ? '' : `<small>${count}</small>`}</button>`;
 }
 export function tradePanel(s, selection) {
   const p = s.player, merchant = MERCHANTS.ivo, side = selection.side;
   const entry = side === 'buyback' ? s.buyback.find(e => e.id === selection.id) : null;
-  const id = entry?.item || selection.id, item = ITEMS[id];
+  const id = entry?.item || selection.id, item = resolveItem(p, id);
   const quote = tradeQuote(s, { type: side === 'stock' ? 'buy' : side === 'buyback' ? 'buyback' : 'sell', id: selection.id, merchant: 'ivo', confirm: true });
   let html = `<div class="trade-summary"><p>${merchant.greeting}</p><strong aria-live="polite">${p.gold} <span>${tr("ui-panels.gold")}</span></strong></div><div class="trade-layout"><section class="merchant-stock"><h3>${tr("ui-panels.in_stock")}</h3><p class="panel-hint">${tr("ui-panels.select_an_item_to_see_its_price_and_compare_stats")}</p><div class="stock-list">`;
   for (const offer of merchant.stock) {
@@ -46,7 +50,7 @@ export function tradePanel(s, selection) {
   for (const [key, count] of Object.entries(p.inventory)) if (count > 0) html += bagButton(p, key, side === 'bag' && selection.id === key, 'sale-item');
   if (!occupiedSlots(p)) html += `<p>${tr("ui-panels.your_bag_is_empty")}</p>`;
   html += `</div><div class="buyback-heading"><h4>${tr("ui-panels.buyback")}</h4><span>${tr("ui-panels.your_last_sales", BUYBACK_LIMIT)}</span></div><div class="buyback-list">`;
-  for (const sale of s.buyback) html += `<button class="buyback-item${side === 'buyback' && selection.id === sale.id ? ' selected' : ''}" data-buyback-item="${sale.id}" title="${tr("ui-panels.buyback_gold", escapeHTML(ITEMS[sale.item].name), sale.price)}">${itemIcon(ITEMS[sale.item].icon)}<span>${ITEMS[sale.item].name}</span><b>${tr("ui-panels.g", sale.price)}</b></button>`;
+  for (const sale of s.buyback) html += `<button class="buyback-item${side === 'buyback' && selection.id === sale.id ? ' selected' : ''}" data-buyback-item="${sale.id}" title="${tr("ui-panels.buyback_gold", escapeHTML(resolveItem(p, sale.item).name), sale.price)}">${itemIcon(resolveItem(p, sale.item).icon)}<span>${resolveItem(p, sale.item).name}</span><b>${tr("ui-panels.g", sale.price)}</b></button>`;
   if (!s.buyback.length) html += `<p class="panel-hint">${tr("ui-panels.sold_something_by_mistake_buy_it_back_here_for_the_same_price")}</p>`;
   html += '</div></section></div><section class="trade-detail" aria-live="polite">';
   if (item) {

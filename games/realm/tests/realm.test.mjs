@@ -1,7 +1,9 @@
+import { bagCount, put, equipTemplate } from './item-helpers.mjs';
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame, command, step, stats, questReady, giveXP, TICK } from '../js/simulation.js';
-import { ITEMS, ENEMIES, NPCS, QUESTS, SPAWN } from '../js/data.js';
+import { ENEMIES, NPCS, SPAWN } from '../js/data.js';
 import { blocked, moveBody, WIDTH, HEIGHT, LANDMARKS, ENEMY_SPAWNS, riverLeft } from '../js/world.js';
 import { serialize, deserialize, SaveStore, SAVE_KEY } from '../js/save.js';
 
@@ -46,8 +48,8 @@ test('attack has a cooldown; a kill awards XP/gold once and drops collectible lo
 });
 test('level-up increases stats and heals; equipment must be owned and have the correct slot',()=>{
   const s=createGame();s.player.hp=1;giveXP(s,60);assert.equal(s.player.level,2);assert.equal(s.player.hp,stats(s.player).maxHp);
-  assert.equal(command(s,{type:'equip',id:'moonBlade'}),false);
-  s.player.inventory.moonBlade=1;assert.equal(command(s,{type:'equip',id:'moonBlade'}),true);assert.equal(stats(s.player).attack,21);
+  assert.equal(equipTemplate(s,'moonBlade'),false);
+  put(s.player,'moonBlade',1);assert.equal(equipTemplate(s,'moonBlade'),true);assert.equal(stats(s.player).attack,21);
   assert.equal(command(s,{type:'equip',id:'potion'}),false);
 });
 test('enemy telegraphs before damage and cannot hurt a player inside the safe zone',()=>{
@@ -76,14 +78,14 @@ test('full first quest: accept, kill five, return, receive equipment; rewards ca
   for(const e of s.enemies.filter(e=>e.type==='sprout').slice(0,5))killEnemy(s,e);
   assert.equal(questReady(s,'roots'),true);assert.equal(command(s,{type:'complete',id:'roots'}),false);
   atNPC(s,'elin');assert.equal(command(s,{type:'complete',id:'roots'}),true);const gold=s.player.gold;
-  assert.equal(s.player.inventory.keeperBlade,1);assert.equal(command(s,{type:'complete',id:'roots'}),false);assert.equal(s.player.gold,gold);
+  assert.equal((bagCount(s.player,'keeperBlade') || undefined),1);assert.equal(command(s,{type:'complete',id:'roots'}),false);assert.equal(s.player.gold,gold);
   assert.equal(command(s,{type:'accept',id:'beacon'}),true);
 });
 test('herbs collected before accepting count; gathering and chest rewards are one-time',()=>{
   const s=createGame();for(const herb of LANDMARKS.filter(l=>l.kind==='herb')){s.player.x=herb.x;s.player.y=herb.y;command(s,{type:'interact'});command(s,{type:'interact'});}
-  assert.equal(s.harvested.length,3);atNPC(s,'mira');command(s,{type:'accept',id:'herbs'});assert.equal(questReady(s,'herbs'),true);command(s,{type:'complete',id:'herbs'});assert.equal(s.player.inventory.forestCoat,1);
+  assert.equal(s.harvested.length,3);atNPC(s,'mira');command(s,{type:'accept',id:'herbs'});assert.equal(questReady(s,'herbs'),true);command(s,{type:'complete',id:'herbs'});assert.equal((bagCount(s.player,'forestCoat') || undefined),1);
   const chest=LANDMARKS.find(l=>l.id==='chest2');s.player.x=chest.x;s.player.y=chest.y;command(s,{type:'interact'});command(s,{type:'interact'});
-  assert.equal(s.chests.length,1);assert.equal(s.player.inventory.moonBlade,1);
+  assert.equal(s.chests.length,1);assert.equal((bagCount(s.player,'moonBlade') || undefined),1);
 });
 test('boss and beacon progression work even when explored before taking the quest',()=>{
   const s=createGame(),beacon=LANDMARKS.find(l=>l.id==='beacon');s.player.x=beacon.x;s.player.y=beacon.y+40;
@@ -91,7 +93,7 @@ test('boss and beacon progression work even when explored before taking the ques
   killEnemy(s,s.enemies.find(e=>e.type==='warden'));
   s.player.x=beacon.x;s.player.y=beacon.y+40;command(s,{type:'interact'});assert.equal(s.flags.beaconLit,true);
   s.quests.roots={status:'done',progress:[5]};atNPC(s,'elin');command(s,{type:'accept',id:'beacon'});assert.equal(questReady(s,'beacon'),true);
-  command(s,{type:'complete',id:'beacon'});assert.equal(s.player.inventory.beaconCharm,1);
+  command(s,{type:'complete',id:'beacon'});assert.equal((bagCount(s.player,'beaconCharm') || undefined),1);
 });
 test('shop requires proximity and an explicit item; selling transfers one copy',()=>{
   const s=createGame();s.player.gold=24;assert.equal(command(s,{type:'buy',id:'potion'}),false);atNPC(s,'ivo');
@@ -100,7 +102,7 @@ test('shop requires proximity and an explicit item; selling transfers one copy',
   assert.equal(command(s,{type:'sell'}),false);
 });
 test('save round-trip restores progress, gear, discoveries, name, death and boss state',()=>{
-  const s=createGame('Åsa <test>');giveXP(s,200);s.player.inventory.forestCoat=1;command(s,{type:'equip',id:'forestCoat'});s.quests.roots={status:'active',progress:[3]};s.chests=['chest2'];s.harvested=['herb1'];s.flags.wardenDefeated=true;
+  const s=createGame('Åsa <test>');giveXP(s,200);put(s.player,'forestCoat',1);equipTemplate(s,'forestCoat');s.quests.roots={status:'active',progress:[3]};s.chests=['chest2'];s.harvested=['herb1'];s.flags.wardenDefeated=true;
   s.player.hp=0;s.player.dead=true;
   const copy=deserialize(serialize(s));
   for(const key of ['name','level','xp','equipment','inventory','dead','hp'])assert.deepEqual(copy.player[key],s.player[key]);
@@ -109,7 +111,7 @@ test('save round-trip restores progress, gear, discoveries, name, death and boss
 test('older v0 saves migrate and invalid values are bounded without trusting unknown IDs',()=>{
   const raw=JSON.parse(serialize(createGame()));raw.version=0;raw.data.player.level=999;raw.data.player.gold=-100;raw.data.player.x=-999;raw.data.player.inventory={potion:Infinity,invalid:9,moonBlade:4};raw.data.player.equipment={weapon:'__proto__',armor:'moonBlade'};
   raw.data.harvested=['herb1','herb1','fake'];const s=deserialize(JSON.stringify(raw));
-  assert.equal(s.player.level,20);assert.equal(s.player.gold,0);assert.equal(s.player.x,SPAWN.x);assert.equal(s.player.equipment.weapon,null);assert.equal(s.player.equipment.armor,null);assert.equal(s.player.inventory.moonBlade,4);assert.deepEqual(s.harvested,['herb1']);
+  assert.equal(s.player.level,20);assert.equal(s.player.gold,0);assert.equal(s.player.x,SPAWN.x);assert.equal(s.player.equipment.weapon,null);assert.equal(s.player.equipment.armor,null);assert.equal((bagCount(s.player,'moonBlade') || undefined),4);assert.deepEqual(s.harvested,['herb1']);
 });
 test('corruption recovers the validated backup and preserves the damaged original',()=>{
   const backup=serialize(createGame('Backup')),storage=memory({[SAVE_KEY]:'broken',[SAVE_KEY+'.backup']:backup}),store=new SaveStore(storage);

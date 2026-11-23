@@ -1,3 +1,4 @@
+import { instance, instanceNumber, template, resolveItem, createItemInstance } from './item-instances.js';
 import { tr } from './i18n.js';
 import { createGame, stats } from './simulation.js';
 import { ITEMS, QUESTS, SPAWN, ENEMIES, CHECKPOINTS, xpForLevel } from './data.js';
@@ -6,21 +7,25 @@ import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
 import { EQUIPMENT_SLOTS, emptyEquipment, acceptsEquipment } from './inventory.js';
 export const SAVE_KEY = 'hirrdirr.realm.save';
-export const SAVE_VERSION = 4;
-const MAX_BYTES = 262144;
+export const SAVE_VERSION = 5;
+// A valid legacy bag can contain 999 copies of every template. Expansion into
+// individual records must still fit export/import and recovery validation.
+export const MAX_SAVE_BYTES = 8 * 1024 * 1024;
+const MAX_INSTANCES = Object.values(ITEMS).filter(i => i.slot).length * 999 + 82;
+const damaged = () => { throw new Error(tr('save.invalid_item_ownership')); };
 const integer = (v, min, max, fallback) => Number.isFinite(v) ? Math.max(min, Math.min(max, Math.floor(v))) : fallback;
 const idsOf = kind => LANDMARKS.filter(l => l.kind === kind).map(l => l.id);
 const cleanList = (value, allowed) => Array.isArray(value) ? [...new Set(value.filter(v => allowed.includes(v)))] : [];
 export function serialize(state) {
   const p = state.player;
   return JSON.stringify({ version: SAVE_VERSION, savedAt: new Date().toISOString(), data: {
-    player: { name: p.name, x: p.x, y: p.y, hp: p.hp, level: p.level, xp: p.xp, gold: p.gold, inventory: p.inventory, equipment: p.equipment, dead: p.dead, talents: p.talents, respecCount: p.respecCount, checkpoint: p.checkpoint, cooldowns: p.cooldowns },
+    player: { name: p.name, x: p.x, y: p.y, hp: p.hp, level: p.level, xp: p.xp, gold: p.gold, inventory: p.inventory, equipment: p.equipment, itemInstances: p.itemInstances, itemSequence: p.itemSequence, dead: p.dead, talents: p.talents, respecCount: p.respecCount, checkpoint: p.checkpoint, cooldowns: p.cooldowns },
     quests: state.quests, harvested: state.harvested, chests: state.chests, discovered: state.discovered, runes: state.runes,
     flags: state.flags, drops: state.drops, buyback: state.buyback, seed: state.seed, time: state.time
   } });
 }
 export function deserialize(raw) {
-  if (typeof raw !== 'string' || raw.length > MAX_BYTES) throw new Error(tr("save.the_save_file_is_empty_or_too_large"));
+  if (typeof raw !== 'string' || raw.length > MAX_SAVE_BYTES) throw new Error(tr("save.the_save_file_is_empty_or_too_large"));
   const envelope = JSON.parse(raw);
   if (!envelope || !Number.isInteger(envelope.version)) throw new Error(tr("save.the_save_file_has_no_version_number"));
   if (envelope.version > SAVE_VERSION) {
@@ -28,29 +33,65 @@ export function deserialize(raw) {
     error.futureVersion = true; throw error;
   }
   // Prototype format v0 used the same stable content IDs but lacked discoveries.
-  if (![0, 1, 2, 3, 4].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
+  if (![0, 1, 2, 3, 4, 5].includes(envelope.version)) throw new Error(tr("save.this_save_version_is_not_supported"));
   const d = envelope.data, old = d?.player;
   if (!d || !old || typeof old.name !== 'string' || !Number.isFinite(old.level) || !old.inventory || typeof old.inventory !== 'object' || Array.isArray(old.inventory)) throw new Error(tr("save.the_save_file_is_damaged"));
   const s = createGame(old.name), p = s.player;
   p.level = integer(old.level, 1, 20, 1);
   p.xp = p.level === 20 ? 0 : integer(old.xp, 0, xpForLevel(p.level) - 1, 0);
   p.gold = integer(old.gold, 0, 999999, 0);
-  p.inventory = {};
-  for (const id of Object.keys(ITEMS)) {
-    const count = integer(old.inventory[id], 0, 999, 0);
-    if (count) p.inventory[id] = count;
-  }
-  p.equipment = emptyEquipment();
-  for (const slot of EQUIPMENT_SLOTS) {
-    const id = old.equipment?.[slot];
-    if (!acceptsEquipment(slot, id)) continue;
-    // v0–v3 slots reference a bag copy. v4 slots own their copy independently.
-    // Unowned or malformed legacy references cannot manufacture equipment.
-    if (envelope.version < 4) {
-      if (!p.inventory[id]) continue;
-      if (--p.inventory[id] === 0) delete p.inventory[id];
+  p.inventory = {}; p.equipment = emptyEquipment(); p.itemInstances = {}; p.itemSequence = 1;
+  const seen = new Set(), modern = envelope.version === 5;
+  const claim = id => {
+    if (!instance(p, id) || seen.has(id)) damaged();
+    seen.add(id); return id;
+  };
+  if (modern) {
+    if (!old.itemInstances || typeof old.itemInstances !== 'object' || Array.isArray(old.itemInstances) || Object.keys(old.itemInstances).length > MAX_INSTANCES) damaged();
+    let highest = 0;
+    for (const [id, record] of Object.entries(old.itemInstances)) {
+      const number = instanceNumber(id);
+      if (!number || !record || record.id !== id || !template(record.templateId)?.slot || !record.modifiers || typeof record.modifiers !== 'object' || Array.isArray(record.modifiers) || Object.keys(record.modifiers).length || Object.keys(record).some(k => !['id', 'templateId', 'modifiers'].includes(k))) damaged();
+      p.itemInstances[id] = { id, templateId: record.templateId, modifiers: {} };
+      highest = Math.max(highest, number);
     }
-    p.equipment[slot] = id;
+    if (!Number.isSafeInteger(old.itemSequence) || old.itemSequence <= highest || old.itemSequence >= Number.MAX_SAFE_INTEGER) damaged();
+    p.itemSequence = old.itemSequence;
+    for (const [id, count] of Object.entries(old.inventory)) {
+      if (instance(p, id)) { if (count !== 1) damaged(); p.inventory[claim(id)] = 1; }
+      else {
+        if (!template(id) || template(id).slot || !Number.isInteger(count) || count < 0 || count > 999) damaged();
+        if (count) p.inventory[id] = count;
+      }
+    }
+    if (!old.equipment || typeof old.equipment !== 'object' || Array.isArray(old.equipment) || Object.keys(old.equipment).some(k => !EQUIPMENT_SLOTS.includes(k))) damaged();
+    for (const slot of EQUIPMENT_SLOTS) {
+      const id = old.equipment[slot];
+      if (id == null) continue;
+      if (!acceptsEquipment(slot, instance(p, id)?.templateId)) damaged();
+      p.equipment[slot] = claim(id);
+    }
+  } else {
+    // First apply the pre-v4 shared-copy semantics, then mint each remaining
+    // bag copy and each independently worn copy exactly once, in stable order.
+    const counts = {};
+    for (const id of Object.keys(ITEMS)) {
+      const count = integer(old.inventory[id], 0, 999, 0);
+      if (count) counts[id] = count;
+    }
+    for (const slot of EQUIPMENT_SLOTS) {
+      const id = old.equipment?.[slot];
+      if (!acceptsEquipment(slot, id)) continue;
+      if (envelope.version < 4) {
+        if (!counts[id]) continue;
+        if (--counts[id] === 0) delete counts[id];
+      }
+      p.equipment[slot] = createItemInstance(p, id);
+    }
+    for (const [id, count] of Object.entries(counts)) {
+      if (ITEMS[id].slot) for (let i = 0; i < count; i++) p.inventory[createItemInstance(p, id)] = 1;
+      else p.inventory[id] = count;
+    }
   }
   p.talents = envelope.version >= 3 ? sanitizeTalents(old.talents, p.level) : {};
   p.respecCount = integer(old.respecCount, 0, 999999, 0);
@@ -79,18 +120,26 @@ export function deserialize(raw) {
   }
   s.seed = integer(d.seed, 0, 4294967295, s.seed);
   s.time = integer(d.time, 0, 100000000, 0);
+  if (modern && (!Array.isArray(d.buyback) || d.buyback.length > BUYBACK_LIMIT || !Array.isArray(d.drops) || d.drops.length > 64)) damaged();
   if (envelope.version >= 3 && Array.isArray(d.buyback)) for (const entry of d.buyback.slice(0, BUYBACK_LIMIT)) {
-    if (!entry || typeof entry.id !== 'string' || !/^sale-\d+$/.test(entry.id) || !Object.hasOwn(ITEMS, entry.item) || !Object.hasOwn(MERCHANTS, entry.merchant)) continue;
-    const id = Number(entry.id.slice(5)), item = ITEMS[entry.item];
-    if (!Number.isSafeInteger(id) || id < 1 || id > 1e9 || !item.value || item.questItem || s.buyback.some(e => e.id === entry.id)) continue;
-    s.buyback.push({ id: entry.id, merchant: entry.merchant, item: entry.item, price: item.value });
+    const item = modern ? resolveItem(p, entry?.item) : template(entry?.item);
+    if (!entry || typeof entry.id !== 'string' || !/^sale-\d+$/.test(entry.id) || !item || !Object.hasOwn(MERCHANTS, entry.merchant)) { if (modern) damaged(); else continue; }
+    const id = Number(entry.id.slice(5));
+    if (!Number.isSafeInteger(id) || id < 1 || id > 1e9 || !item.value || item.questItem || s.buyback.some(e => e.id === entry.id)) { if (modern) damaged(); else continue; }
+    const ref = item.slot ? (modern ? claim(entry.item) : createItemInstance(p, entry.item)) : entry.item;
+    s.buyback.push({ id: entry.id, merchant: entry.merchant, item: ref, price: item.value });
     s.tradeSequence = Math.max(s.tradeSequence, id + 1);
   }
-  // Uncollected rewards survive closing the tab, including a defeated boss's loot.
+  // Uncollected equipment is already an instance: pickup transfers that copy.
   if (Array.isArray(d.drops)) for (const drop of d.drops.slice(0, 64)) {
-    if (!drop || !Object.hasOwn(ITEMS, drop.item) || !Number.isFinite(drop.x) || !Number.isFinite(drop.y) || blocked(drop.x, drop.y, 2)) continue;
-    s.drops.push({ id: ++s.sequence, x: drop.x, y: drop.y, item: drop.item, life: integer(drop.life, 1, 90, 90) });
+    const item = modern ? resolveItem(p, drop?.item) : template(drop?.item);
+    if (!drop || !item || !Number.isFinite(drop.x) || !Number.isFinite(drop.y) || blocked(drop.x, drop.y, 2)) { if (modern) damaged(); else continue; }
+    const ref = item.slot ? (modern ? claim(drop.item) : createItemInstance(p, drop.item)) : drop.item;
+    s.drops.push({ id: ++s.sequence, x: drop.x, y: drop.y, item: ref, life: integer(drop.life, 1, 90, 90) });
   }
+  // Ambiguous ownership is rejected as a whole. SaveStore retains the original
+  // and tries its backup; it never silently deletes or clones an instance.
+  if (modern && seen.size !== Object.keys(p.itemInstances).length) damaged();
   for (const e of s.enemies) if (ENEMIES[e.type].flag && s.flags[ENEMIES[e.type].flag]) Object.assign(e, { hp: 0, mode: 'dead', respawn: Infinity });
   return s;
 }

@@ -1,5 +1,9 @@
 # Equipment Expansion — 0.4.2
 
+Historical itemization/balance record. In 0.4.3, equipment copies become individual
+instances; see [item-identity.md](item-identity.md). The immediate next milestone
+is now 0.4.4 Randomized Gear Stats, before 0.5.x world expansion.
+
 Seven additional slots extend the 0.4.0 ownership system and 0.4.1 character
 panel. Weapon, Armor and Charm keep their existing identities and items.
 Head, Shoulders, Hands, Legs, Feet and two Ring slots use the same atomic
