@@ -1,6 +1,6 @@
 import { tr } from './i18n.js';
 import { createGame, command, step, TICK } from './simulation.js';
-import { SaveStore, serialize, deserialize } from './save.js';
+import { MAX_SAVE_BYTES, SaveStore, serialize, deserialize } from './save.js';
 import { Renderer } from './renderer.js';
 import { UI } from './ui.js';
 import { CharacterPreview } from './character-preview.js';
@@ -76,7 +76,7 @@ const ui=new UI(()=>state,{
   },
   import:async file=>{
     try{
-      if(file.size>262144)throw Error(tr("main.the_file_is_too_large"));
+      if(file.size>MAX_SAVE_BYTES)throw Error(tr("main.the_file_is_too_large"));
       const raw=await file.text(),candidate=deserialize(raw);
       if(!window.confirm(tr("main.replace_your_current_journey_with_level_a_copy_of_the_current_sav", candidate.player.name, candidate.player.level)))return;
       if(!saves.replace(candidate,raw)){warning();ui.toast(tr("main.the_import_could_not_be_saved_your_current_journey_is_unchanged"));return;}

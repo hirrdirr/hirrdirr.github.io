@@ -1,7 +1,9 @@
+import { bagId, bagCount, put, setBag, equipTemplate, sellTemplate, itemRef, bagTemplates, totals, legacyView } from './item-helpers.mjs';
+import { discardItem } from '../js/item-instances.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame, command, step, stats, giveXP, TICK } from '../js/simulation.js';
-import { ITEMS, NPCS, QUESTS, xpForLevel } from '../js/data.js';
+import { ITEMS, NPCS, xpForLevel } from '../js/data.js';
 import { TALENTS, TALENT_TREES, learnTalent, talentRequirement, spentTalentPoints, availableTalentPoints, sanitizeTalents } from '../js/talents.js';
 import { MERCHANTS, tradeQuote, BUYBACK_LIMIT } from '../js/trading.js';
 import { BAG_SLOTS, MAX_GOLD, occupiedSlots } from '../js/inventory.js';
@@ -13,7 +15,7 @@ const run=(s,seconds)=>{for(let i=0;i<Math.round(seconds/TICK);i++)step(s);};
 function near(s,id){const n=NPCS.find(n=>n.id===id);s.player.x=n.x;s.player.y=n.y;}
 function shop(){const s=createGame();near(s,'ivo');s.player.gold=300;return s;}
 function allocate(p,entries){for(const [id,count] of Object.entries(entries))for(let i=0;i<count;i++)assert.equal(learnTalent(p,id),true,id+': '+talentRequirement(p,id));}
-function fillBag(p,exclude){p.inventory=Object.fromEntries(Object.keys(ITEMS).filter(id=>!exclude.includes(id)).slice(0,BAG_SLOTS).map(id=>[id,1]));assert.equal(occupiedSlots(p),16);}
+function fillBag(p,exclude){setBag(p,Object.fromEntries(Object.keys(ITEMS).filter(id=>!exclude.includes(id)).slice(0,BAG_SLOTS).map(id=>[id,1])));assert.equal(occupiedSlots(p),16);}
 function arena(){
   const s=createGame(),e=s.enemies.find(e=>e.type==='warden');s.enemies=[e];
   Object.assign(s.player,{x:1404,y:648,level:20,hp:300});
@@ -42,15 +44,15 @@ test('buy, individual sale and stable-ID buyback conserve inventory and cannot r
 });
 test('equipped copies and quest rewards cannot be sold; unequip first, confirm rare sales',()=>{
   const s=shop();const gold=s.player.gold;
-  assert.equal(command(s,{type:'sell',id:'trainingSword'}),false);assert.equal(command(s,{type:'unequip',slot:'weapon'}),true);
-  assert.equal(command(s,{type:'sell',id:'trainingSword'}),true);assert.equal(s.player.inventory.trainingSword,undefined);
-  s.player.inventory.beaconCharm=1;assert.equal(command(s,{type:'sell',id:'beaconCharm',confirm:true}),false);
-  s.player.inventory.moonBlade=1;assert.equal(command(s,{type:'sell',id:'moonBlade'}),false);assert.equal(command(s,{type:'sell',id:'moonBlade',confirm:true}),true);
-  assert.equal(s.player.gold,gold+1+ITEMS.moonBlade.value);assert.equal(s.player.inventory.beaconCharm,1);
+  assert.equal(sellTemplate(s,'trainingSword'),false);assert.equal(command(s,{type:'unequip',slot:'weapon'}),true);
+  assert.equal(sellTemplate(s,'trainingSword'),true);assert.equal((bagCount(s.player,'trainingSword') || undefined),undefined);
+  put(s.player,'beaconCharm',1);assert.equal(sellTemplate(s,'beaconCharm',true),false);
+  put(s.player,'moonBlade',1);assert.equal(sellTemplate(s,'moonBlade'),false);assert.equal(sellTemplate(s,'moonBlade',true),true);
+  assert.equal(s.player.gold,gold+1+ITEMS.moonBlade.value);assert.equal((bagCount(s.player,'beaconCharm') || undefined),1);
 });
 test('full bag, full stack, insufficient gold and gold cap fail without partial transactions',()=>{
   const s=shop();fillBag(s.player,['runeFocus','runnerWrap']);const gold=s.player.gold;
-  assert.equal(command(s,{type:'buy',id:'runeFocus'}),false);assert.equal(s.player.gold,gold);assert.equal(s.player.inventory.runeFocus,undefined);
+  assert.equal(command(s,{type:'buy',id:'runeFocus'}),false);assert.equal(s.player.gold,gold);assert.equal((bagCount(s.player,'runeFocus') || undefined),undefined);
   const potions=s.player.inventory.potion;assert.equal(command(s,{type:'buy',id:'potion'}),true);assert.equal(s.player.inventory.potion,potions+1);
   s.player.inventory.potion=999;const before=s.player.gold;assert.equal(command(s,{type:'buy',id:'potion'}),false);assert.equal(s.player.gold,before);
   s.player.gold=3;s.player.inventory.potion=2;assert.equal(command(s,{type:'buy',id:'potion'}),false);assert.equal(s.player.inventory.potion,2);
@@ -62,26 +64,26 @@ test('buyback is bounded, survives reload and rejects buying into a full bag',()
   s=deserialize(serialize(s));assert.equal(s.tradeSequence,11);const id=s.buyback[0].id;
   fillBag(s.player,['amber','runeFocus']);const gold=s.player.gold;
   assert.equal(command(s,{type:'buyback',id}),false);assert.equal(s.player.gold,gold);assert.ok(s.buyback.some(e=>e.id===id));
-  delete s.player.inventory.linenCoat;assert.equal(command(s,{type:'buyback',id}),true);assert.equal(s.player.inventory.amber,1);assert.equal(command(s,{type:'buyback',id}),false);
+  const removed=bagId(s.player,'linenCoat');delete s.player.inventory[removed];discardItem(s.player,removed);assert.equal(command(s,{type:'buyback',id}),true);assert.equal(s.player.inventory.amber,1);assert.equal(command(s,{type:'buyback',id}),false);
 });
 test('sold starter equipment never reappears after a current-schema reload',()=>{
-  let s=shop();command(s,{type:'unequip',slot:'weapon'});command(s,{type:'sell',id:'trainingSword'});
-  const gold=s.player.gold;for(let i=0;i<4;i++){s=deserialize(serialize(s));assert.equal(s.player.inventory.trainingSword,undefined);assert.equal(s.player.equipment.weapon,null);assert.equal(command(s,{type:'sell',id:'trainingSword'}),false);assert.equal(s.player.gold,gold);}
-  assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);assert.equal(s.player.inventory.trainingSword,1);
+  let s=shop();command(s,{type:'unequip',slot:'weapon'});sellTemplate(s,'trainingSword');
+  const gold=s.player.gold;for(let i=0;i<4;i++){s=deserialize(serialize(s));assert.equal((bagCount(s.player,'trainingSword') || undefined),undefined);assert.equal(s.player.equipment.weapon,null);assert.equal(sellTemplate(s,'trainingSword'),false);assert.equal(s.player.gold,gold);}
+  assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);assert.equal((bagCount(s.player,'trainingSword') || undefined),1);
 });
 test('full-inventory quest and chest claims keep all rewards pending, including gold and XP',()=>{
   const s=shop();near(s,'elin');s.quests.roots={status:'active',progress:[5]};fillBag(s.player,['keeperBlade','runeFocus']);
   const gold=s.player.gold,xp=s.player.xp;assert.equal(command(s,{type:'complete',id:'roots'}),false);
-  assert.equal(s.quests.roots.status,'active');assert.equal(s.player.gold,gold);assert.equal(s.player.xp,xp);assert.equal(s.player.inventory.keeperBlade,undefined);
-  delete s.player.inventory.amber;assert.equal(command(s,{type:'complete',id:'roots'}),true);assert.equal(s.player.inventory.keeperBlade,1);
+  assert.equal(s.quests.roots.status,'active');assert.equal(s.player.gold,gold);assert.equal(s.player.xp,xp);assert.equal((bagCount(s.player,'keeperBlade') || undefined),undefined);
+  delete s.player.inventory.amber;assert.equal(command(s,{type:'complete',id:'roots'}),true);assert.equal((bagCount(s.player,'keeperBlade') || undefined),1);
   const chest=LANDMARKS.find(x=>x.id==='chest2');s.player.x=chest.x;s.player.y=chest.y;fillBag(s.player,['moonBlade','runeFocus']);
   const money=s.player.gold;assert.equal(command(s,{type:'interact'}),false);assert.equal(s.chests.includes(chest.id),false);assert.equal(s.player.gold,money);
-  delete s.player.inventory.amber;assert.equal(command(s,{type:'interact'}),true);assert.equal(s.player.inventory.moonBlade,1);
+  delete s.player.inventory.amber;assert.equal(command(s,{type:'interact'}),true);assert.equal((bagCount(s.player,'moonBlade') || undefined),1);
 });
 test('blocked ground loot remains collectible after space is freed',()=>{
-  const s=shop();s.enemies=[];fillBag(s.player,['moonBlade','runeFocus']);s.drops=[{id:1,x:s.player.x,y:s.player.y,item:'moonBlade',life:1}];
-  run(s,2);assert.equal(s.drops.length,1);assert.equal(s.player.inventory.moonBlade,undefined);
-  delete s.player.inventory.amber;step(s);assert.equal(s.drops.length,0);assert.equal(s.player.inventory.moonBlade,1);
+  const s=shop();s.enemies=[];fillBag(s.player,['moonBlade','runeFocus']);s.drops=[{id:1,x:s.player.x,y:s.player.y,item:itemRef(s.player,'moonBlade'),life:1}];
+  run(s,2);assert.equal(s.drops.length,1);assert.equal((bagCount(s.player,'moonBlade') || undefined),undefined);
+  delete s.player.inventory.amber;step(s);assert.equal(s.drops.length,0);assert.equal((bagCount(s.player,'moonBlade') || undefined),1);
 });
 test('leveling grants exactly earned points; ranks, branch gates and prerequisites cannot be bypassed',()=>{
   const s=createGame(),p=s.player;assert.equal(learnTalent(p,'vigor'),false);giveXP(s,xpForLevel(1)+xpForLevel(2));
@@ -125,7 +127,7 @@ test('respec requires Mira, explicit confirmation and its fee; refunds points wi
 test('talent and item changes recompute health, armor, haste, mobility and magic without repeated stacking',()=>{
   const s=createGame(),p=s.player;p.level=20;const base=stats(p);allocate(p,{vigor:3,steel:3,tempo:3,precision:3,footwork:2,focus:3});
   let st=stats(p);assert.equal(st.maxHp,base.maxHp+24);assert.equal(st.defense,base.defense+3);assert.equal(st.speed,170);assert.equal(st.dodgeCooldown,2.2);assert.ok(st.attackCooldown<base.attackCooldown);assert.ok(st.burstCooldown<5);
-  p.inventory.runnerWrap=1;p.inventory.runeFocus=1;command(s,{type:'equip',id:'runnerWrap'});command(s,{type:'equip',id:'runeFocus'});st=stats(p);
+  put(p,'runnerWrap',1);put(p,'runeFocus',1);equipTemplate(s,'runnerWrap');equipTemplate(s,'runeFocus');st=stats(p);
   assert.equal(st.speed,176);assert.equal(st.burstMultiplier,1.8*1.12);assert.equal(st.boltMultiplier,1.5*1.12);
   for(let i=0;i<5;i++)assert.deepEqual(stats(p),st);const hp=p.hp;command(s,{type:'unequip',slot:'charm'});assert.equal(p.hp,hp);assert.equal(stats(p).burstMultiplier,1.8);
 });
@@ -173,22 +175,22 @@ test('critical talents increase actual damage; finishers shorten movement cooldo
 });
 test('potion talents heal their stated amount, and losing max-health gear clamps health',()=>{
   const {s,p}=arena();allocate(p,guardian);p.hp=100;command(s,{type:'potion'});assert.equal(p.hp,175);
-  p.inventory.forestCoat=1;command(s,{type:'equip',id:'forestCoat'});p.hp=stats(p).maxHp;command(s,{type:'unequip',slot:'armor'});assert.equal(p.hp,stats(p).maxHp);
+  put(p,'forestCoat',1);equipTemplate(s,'forestCoat');p.hp=stats(p).maxHp;command(s,{type:'unequip',slot:'armor'});assert.equal(p.hp,stats(p).maxHp);
 });
 test('real v2 specialization migrates to unspent talents and preserves its untouched original',()=>{
-  const s=shop();s.player.level=7;s.player.inventory.swiftBlade=2;const raw=JSON.parse(serialize(s));raw.version=2;raw.data.player.inventory.trainingSword=1;raw.data.player.inventory.linenCoat=1;raw.data.player.specialization='ember';delete raw.data.player.talents;delete raw.data.player.respecCount;delete raw.data.buyback;
+  const s=shop();s.player.level=7;put(s.player,'swiftBlade',2);const raw=JSON.parse(serialize(s));raw.data=legacyView(raw.data);raw.version=2;raw.data.player.inventory.trainingSword=1;raw.data.player.inventory.linenCoat=1;raw.data.player.specialization='ember';delete raw.data.player.talents;delete raw.data.player.respecCount;delete raw.data.buyback;
   const text=JSON.stringify(raw),memory=new Map([[SAVE_KEY,text]]),store=new SaveStore({getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)}),loaded=store.load();
-  assert.equal(availableTalentPoints(loaded.player),5);assert.equal(Object.hasOwn(loaded.player,'specialization'),false);assert.equal(loaded.player.gold,300);assert.equal(loaded.player.inventory.swiftBlade,2);
-  assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.match(store.notice,/5 points/);store.save(loaded);assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.equal(JSON.parse(memory.get(SAVE_KEY)).version,4);
+  assert.equal(availableTalentPoints(loaded.player),5);assert.equal(Object.hasOwn(loaded.player,'specialization'),false);assert.equal(loaded.player.gold,300);assert.equal((bagCount(loaded.player,'swiftBlade') || undefined),2);
+  assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.match(store.notice,/5 points/);store.save(loaded);assert.equal(memory.get(SAVE_KEY+'.v2'),text);assert.equal(JSON.parse(memory.get(SAVE_KEY)).version,5);
 });
 test('older overflowing bags retain every item and buyback repair never trusts an edited price',()=>{
-  const s=shop();s.player.inventory=Object.fromEntries(Object.keys(ITEMS).map(id=>[id,2]));const raw=JSON.parse(serialize(s));raw.version=2;
-  let loaded=deserialize(JSON.stringify(raw));assert.deepEqual(loaded.player.inventory,{...s.player.inventory,trainingSword:1,linenCoat:1});assert.ok(occupiedSlots(loaded.player)>BAG_SLOTS);
+  const s=shop();setBag(s.player,Object.fromEntries(Object.keys(ITEMS).map(id=>[id,2])));const raw=JSON.parse(serialize(s));raw.data=legacyView(raw.data);raw.version=2;
+  let loaded=deserialize(JSON.stringify(raw));assert.deepEqual(bagTemplates(loaded.player),{...bagTemplates(s.player),trainingSword:1,linenCoat:1});assert.ok(occupiedSlots(loaded.player)>BAG_SLOTS);
   raw.version=3;raw.data.buyback=[{id:'sale-7',merchant:'ivo',item:'potion',price:-99},{id:'sale-7',merchant:'ivo',item:'potion',price:0},{id:'sale-8',merchant:'ivo',item:'beaconCharm',price:1},{id:'sale-9',merchant:'fake',item:'potion',price:1}];
   loaded=deserialize(JSON.stringify(raw));assert.equal(loaded.buyback.length,1);assert.equal(loaded.buyback[0].price,4);assert.equal(loaded.tradeSequence,8);
 });
 test('panels expose prices, equipment protection, all talents and honest full-character comparisons',()=>{
-  const s=shop();let html=tradePanel(s,{side:'bag',id:'trainingSword'});assert.match(html,/Unequip the item before selling it/);assert.doesNotMatch(html,/data-action="unequip"/);assert.match(html,/data-action="sell"[^>]+disabled/);assert.doesNotMatch(html,/Sell all/);
+  const s=shop();let html=tradePanel(s,{side:'bag',id:s.player.equipment.weapon});assert.match(html,/Unequip the item before selling it/);assert.doesNotMatch(html,/data-action="unequip"/);assert.match(html,/data-action="sell"[^>]+disabled/);assert.doesNotMatch(html,/Sell all/);
   html=talentPanel(s,'guard');assert.equal((html.match(/data-talent=/g)||[]).length,24);assert.match(html,/class="talent-links"/);assert.match(html,/first talent point/);
   html=compareEquipment(s.player,'runnerWrap');assert.match(html,/Strikes \/ second/);assert.match(html,/Movement speed/);
 });

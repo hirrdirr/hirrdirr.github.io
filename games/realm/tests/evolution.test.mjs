@@ -1,3 +1,5 @@
+import { bagCount, put, setBag, setGear, equipTemplate, itemRef, gearTemplates, legacyView } from './item-helpers.mjs';
+import { templateId, discardItem } from '../js/item-instances.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame, command, step, stats, questReady, giveXP, TICK } from '../js/simulation.js';
@@ -29,7 +31,7 @@ test('third connected melee hit is stronger, expires naturally, and uses equipme
   for(let i=0;i<3;i++){const hp=e.hp;command(s,{type:'attack'});damage.push(hp-e.hp);s.player.cooldowns.attack=0;}
   assert.deepEqual(damage,[11,11,15]);assert.equal(s.player.combo,3);
   run(s,1.2,{x:-1});assert.equal(s.player.combo,0);
-  s.player.inventory.swiftBlade=1;command(s,{type:'equip',id:'swiftBlade'});
+  put(s.player,'swiftBlade',1);equipTemplate(s,'swiftBlade');
   assert.ok(stats(s.player).attackCooldown<.36);
   command(s,{type:'attack'});assert.ok(s.player.cooldowns.attack<.36);
 });
@@ -91,10 +93,10 @@ test('chapter two: prerequisite, runes, four glödvingar, equipment, boss, seal 
   assert.equal(s.runes.length,3);assert.equal(s.quests.embers.progress[0],3);
   for(const e of s.enemies.filter(e=>e.type==='wisp').slice(0,4))defeat(s,e);
   assert.equal(questReady(s,'embers'),true);npc(s,'signe');command(s,{type:'complete',id:'embers'});
-  assert.equal(s.player.inventory.marshCoat,1);command(s,{type:'accept',id:'heart'});
+  assert.equal((bagCount(s.player,'marshCoat') || undefined),1);command(s,{type:'accept',id:'heart'});
   landmark(s,'seal');assert.equal(s.flags.sealRestored,false);
   defeat(s,s.enemies.find(e=>e.type==='ancient'));landmark(s,'seal');assert.equal(questReady(s,'heart'),true);
-  npc(s,'signe');command(s,{type:'complete',id:'heart'});assert.equal(s.player.inventory.emberBlade,1);
+  npc(s,'signe');command(s,{type:'complete',id:'heart'});assert.equal((bagCount(s.player,'emberBlade') || undefined),1);
   const gold=s.player.gold;assert.equal(command(s,{type:'complete',id:'heart'}),false);assert.equal(s.player.gold,gold);
   const saved=deserialize(serialize(s));assert.equal(saved.flags.sealRestored,true);assert.equal(saved.enemies.find(e=>e.type==='ancient').hp,0);
   assert.deepEqual(saved.runes,s.runes);assert.equal(saved.quests.heart.status,'done');
@@ -106,15 +108,15 @@ test('early rune and permanent boss exploration counts when later accepting ques
   s.quests.embers.status='done';command(s,{type:'accept',id:'heart'});assert.equal(questReady(s,'heart'),true);
 });
 test('duplicate dropped equipment stays in the bag for individual sale',()=>{
-  const s=createGame();s.drops=[{id:1,x:s.player.x,y:s.player.y,item:'swiftBlade',life:90}];step(s);
-  assert.equal(s.player.inventory.swiftBlade,1);s.drops=[{id:2,x:s.player.x,y:s.player.y,item:'swiftBlade',life:90}];step(s);
-  assert.equal(s.player.inventory.swiftBlade,2);assert.equal(s.player.gold,0);
+  const s=createGame();s.drops=[{id:1,x:s.player.x,y:s.player.y,item:itemRef(s.player,'swiftBlade'),life:90}];step(s);
+  assert.equal((bagCount(s.player,'swiftBlade') || undefined),1);s.drops=[{id:2,x:s.player.x,y:s.player.y,item:itemRef(s.player,'swiftBlade'),life:90}];step(s);
+  assert.equal((bagCount(s.player,'swiftBlade') || undefined),2);assert.equal(s.player.gold,0);
 });
 test('enemy loot rolls produce differentiated rewards at sane frequencies',()=>{
   const {s,e}=alone('wisp'),counts={};
   for(let i=0;i<1000;i++) {
     Object.assign(e,{hp:1,mode:'idle',x:1504,y:648});s.player.x=1464;s.player.y=648;s.player.cooldowns.attack=0;
-    command(s,{type:'attack'});const drop=s.drops.pop();assert.ok(drop);counts[drop.item]=(counts[drop.item]||0)+1;
+    command(s,{type:'attack'});const drop=s.drops.pop();assert.ok(drop);const id=templateId(s.player,drop.item);counts[id]=(counts[id]||0)+1;discardItem(s.player,drop.item);
   }
   assert.ok(counts.emberShard>420&&counts.emberShard<560);assert.ok(counts.potion>150&&counts.potion<300);assert.ok(counts.emberCharm>60&&counts.emberCharm<150);
   assert.equal(counts.amber,undefined);
@@ -123,19 +125,19 @@ test('real v1 shape migrates without losing chapter one progress, and its origin
   const raw=JSON.stringify({version:1,savedAt:'2026-11-10T08:00:00.000Z',data:{player:{name:'V1-vandrare',x:448,y:880,hp:112,level:4,xp:27,gold:98,inventory:{trainingSword:1,linenCoat:1,keeperBlade:1,forestCoat:1,beaconCharm:1,potion:4},equipment:{weapon:'keeperBlade',armor:'forestCoat',charm:'beaconCharm'},dead:false},quests:{roots:{status:'done',progress:[5]},herbs:{status:'done',progress:[3]},beacon:{status:'done',progress:[1,1]}},harvested:['herb1','herb2','herb3'],chests:['chest1'],discovered:['village','trail','forest','ruins'],flags:{beaconLit:true,wardenDefeated:true},seed:985321,time:1924}});
   const storage=memory({[SAVE_KEY]:raw}),store=new SaveStore(storage),s=store.load();
   assert.equal(s.player.name,'V1-vandrare');assert.equal(s.player.level,4);assert.equal(s.player.xp,27);assert.equal(s.player.hp,112);
-  assert.equal(s.player.equipment.charm,'beaconCharm');assert.equal(s.quests.beacon.status,'done');assert.equal(s.flags.ancientDefeated,false);
+  assert.equal(gearTemplates(s.player).charm,'beaconCharm');assert.equal(s.quests.beacon.status,'done');assert.equal(s.flags.ancientDefeated,false);
   assert.deepEqual(s.runes,[]);assert.deepEqual(s.player.talents,{});assert.equal(s.enemies.filter(e=>e.hp>0&&e.type==='wisp').length,5);
   assert.equal(storage.getItem(SAVE_KEY+'.v1'),raw);assert.equal(store.save(s),true);assert.equal(JSON.parse(storage.getItem(SAVE_KEY)).version,SAVE_VERSION);
   store.load();store.save(s);assert.equal(storage.getItem(SAVE_KEY+'.v1'),raw);
 });
 test('migration backup storage failure keeps a valid journey playable and original protected',()=>{
-  const d=JSON.parse(serialize(createGame('Quota')));d.version=1;const raw=JSON.stringify(d);
+  const d=JSON.parse(serialize(createGame('Quota')));d.data=legacyView(d.data);d.version=1;d.data.player.inventory.trainingSword=1;d.data.player.inventory.linenCoat=1;const raw=JSON.stringify(d);
   const store=new SaveStore({getItem:k=>k===SAVE_KEY?raw:null,setItem(){throw Error('quota');}});
   assert.equal(store.load().player.name,'Quota');assert.equal(store.blocked,true);assert.equal(store.save(createGame()),false);
 });
 test('current saves preserve pending loot and cooldowns, and repairs unknown new fields',()=>{
   const {s,e}=alone('ancient');defeat(s,e);s.player.cooldowns.potion=6.4;
-  const copy=deserialize(serialize(s));assert.equal(copy.drops.length,1);assert.equal(copy.drops[0].item,'emberCharm');assert.equal(copy.player.cooldowns.potion,6.4);
+  const copy=deserialize(serialize(s));assert.equal(copy.drops.length,1);assert.equal(templateId(copy.player,copy.drops[0].item),'emberCharm');assert.equal(copy.player.cooldowns.potion,6.4);
   const raw=JSON.parse(serialize(s));raw.data.player.specialization='__proto__';raw.data.player.checkpoint='lost';raw.data.runes=['rune1','rune1','fake'];
   const repaired=deserialize(JSON.stringify(raw));assert.equal(Object.hasOwn(repaired.player,'specialization'),false);assert.equal(repaired.player.checkpoint,'village');assert.deepEqual(repaired.runes,['rune1']);
 });
@@ -167,7 +169,7 @@ test('chapter-two boss lasts several telegraphs and rewards avoidance over tradi
   const fights=[];
   for(const avoid of [false,true]) {
     const s=createGame(),e=s.enemies.find(e=>e.type==='ancient');s.enemies=[e];
-    Object.assign(s.player,{x:e.x-60,y:e.y,level:5,inventory:{potion:3},equipment:{weapon:'moonBlade',armor:'marshCoat',charm:'beaconCharm'}});
+    Object.assign(s.player,{x:e.x-60,y:e.y,level:5});setBag(s.player,{potion:3});for(const [slot,id] of Object.entries({weapon:'moonBlade',armor:'marshCoat',charm:'beaconCharm'}))setGear(s.player,slot,id);
     s.player.hp=stats(s.player).maxHp;
     let seconds=0,hits=0;
     while(e.hp>0&&!s.player.dead&&seconds<45) {

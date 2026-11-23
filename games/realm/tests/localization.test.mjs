@@ -1,9 +1,11 @@
+import { bagId, bagCount, sellTemplate, legacyView } from './item-helpers.mjs';
+import { resolveItem } from '../js/item-instances.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import english from '../js/locales/en.js';
 import { tr, createTranslator, LANGUAGE } from '../js/i18n.js';
-import { VERSION, ITEMS, QUESTS, NPCS } from '../js/data.js';
+import { VERSION, QUESTS, NPCS } from '../js/data.js';
 import { TALENTS, talentRequirement, availableTalentPoints } from '../js/talents.js';
 import { createGame, command, step, TICK, stats } from '../js/simulation.js';
 import { deserialize, serialize, SaveStore, SAVE_KEY, SAVE_VERSION } from '../js/save.js';
@@ -17,7 +19,7 @@ const swedishCopy = /[åäöÅÄÖ]|\b(?:guld|vandrare|lykt\w*|glöd\w*|talanger
 const source = file => readFile(new URL('../'+file, import.meta.url),'utf8');
 
 test('English catalog interpolates values once, supports locale fallback and rejects incomplete messages', () => {
-  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.4.2');
+  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.4.3');
   const translate=createTranslator({'ui.restores_health':'Heal {0} HP'});
   assert.equal(translate('ui.restores_health',55),'Heal 55 HP');
   assert.equal(translate('data.lanternkeeper_blade'),'Lanternkeeper Blade');
@@ -43,7 +45,7 @@ test('all English messages and referenced keys resolve, with no leftover Swedish
 
 test('committed static page matches the English template, including metadata and accessible controls', async () => {
   const html=await source('index.html');assert.equal(html,await renderHTML());
-  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.4\.2<\/small>/);
+  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.4\.3<\/small>/);
   assert.match(html,/<title>Project Realm · Lantern Vale/);
   assert.match(html,/aria-label="Lantern Ward \(1\)"/);assert.match(html,/aria-label="Close menu"/);
   assert.doesNotMatch(html,swedishCopy);assert.doesNotMatch(html,/\{\{|\{\d+\}/);
@@ -53,29 +55,29 @@ test('committed static page matches the English template, including metadata and
 
 test('a save produced by the Swedish 0.3.0 code preserves progress while transferring equipped copies during migration', () => {
   const before=JSON.parse(fixture),s=deserialize(fixture),after=JSON.parse(serialize(s));
-  assert.equal(SAVE_VERSION,4);assert.equal(after.version,4);
+  assert.equal(SAVE_VERSION,5);assert.equal(after.version,5);
   for(const id of Object.values(before.data.player.equipment)){if(id && --before.data.player.inventory[id]===0)delete before.data.player.inventory[id];}
   before.data.player.equipment={...emptyEquipment(),...before.data.player.equipment};
-  assert.deepEqual(after.data,before.data);
+  assert.deepEqual(legacyView(after.data),before.data);
   assert.equal(s.player.name,'Åsa Vandrare');assert.equal(s.player.respecCount,2);
   assert.equal(availableTalentPoints(s.player),2);assert.equal(s.tradeSequence,8);
-  assert.equal(ITEMS[s.player.equipment.weapon].name,'Moonshard');
+  assert.equal(resolveItem(s.player,s.player.equipment.weapon).name,'Moonshard');
   const memory=new Map([[SAVE_KEY,fixture]]),store=new SaveStore({getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)});
   const loaded=store.load();assert.match(store.notice,/equipped items/);assert.equal(memory.get(SAVE_KEY+'.v3'),fixture);assert.equal(store.save(loaded),true);
   assert.equal(memory.get(SAVE_KEY+'.backup'),fixture);
-  assert.deepEqual(JSON.parse(memory.get(SAVE_KEY)).data,before.data);
+  assert.deepEqual(legacyView(JSON.parse(memory.get(SAVE_KEY)).data),before.data);
 });
 
 test('old IDs still support buying, protected rare sales, buyback, quest rewards and paid respecialization', () => {
   const s=deserialize(fixture),p=s.player,ivo=NPCS.find(n=>n.id==='ivo');Object.assign(p,{x:ivo.x,y:ivo.y});
   const gold=p.gold;assert.equal(command(s,{type:'buy',id:'potion'}),true);assert.equal(p.inventory.potion,8);
-  assert.equal(command(s,{type:'sell',id:'moonBlade',confirm:true}),false);
-  command(s,{type:'unequip',slot:'weapon'});assert.equal(command(s,{type:'sell',id:'moonBlade'}),false);
-  assert.equal(command(s,{type:'sell',id:'moonBlade',confirm:true}),true);
-  assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);assert.equal(p.gold,gold-12);assert.equal(p.inventory.moonBlade,1);
+  assert.equal(sellTemplate(s,'moonBlade',true),false);
+  command(s,{type:'unequip',slot:'weapon'});assert.equal(sellTemplate(s,'moonBlade'),false);
+  assert.equal(sellTemplate(s,'moonBlade',true),true);
+  assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);assert.equal(p.gold,gold-12);assert.equal((bagCount(p,'moonBlade') || undefined),1);
   const signe=NPCS.find(n=>n.id==='signe');Object.assign(p,{x:signe.x,y:signe.y});
   s.quests.embers.progress=QUESTS.embers.objectives.map(o=>o.count);
-  assert.equal(command(s,{type:'complete',id:'embers'}),true);assert.equal(s.quests.embers.status,'done');assert.equal(p.inventory.marshCoat,1);
+  assert.equal(command(s,{type:'complete',id:'embers'}),true);assert.equal(s.quests.embers.status,'done');assert.equal((bagCount(p,'marshCoat') || undefined),1);
   const mira=NPCS.find(n=>n.id==='mira');Object.assign(p,{x:mira.x,y:mira.y});const money=p.gold;
   assert.equal(command(s,{type:'respec',confirm:true}),true);assert.equal(p.gold,money-10);assert.equal(p.respecCount,3);assert.equal(availableTalentPoints(p),18);
 });
@@ -112,12 +114,12 @@ test('the actual rare-sale UI confirms or cancels inside the game and revalidate
   const s=deserialize(fixture),ivo=NPCS.find(n=>n.id==='ivo');Object.assign(s.player,{x:ivo.x,y:ivo.y});command(s,{type:'unequip',slot:'weapon'});
   const h=uiHarness(s),{ui,element}=h;try{
     ui.view='merchant';const gold=s.player.gold;
-    ui.confirmRareSale('moonBlade');assert.equal(ui.confirmDialog.open,true);assert.match(element('realm-confirm-description').textContent,/Sell Moonshard for 24 gold/);
+    ui.confirmRareSale(bagId(s.player,'moonBlade'));assert.equal(ui.confirmDialog.open,true);assert.match(element('realm-confirm-description').textContent,/Sell Moonshard for 24 gold/);
     element('realm-confirm-cancel').handlers.click();assert.equal(ui.pendingSale,null);assert.equal(s.player.gold,gold);
-    ui.confirmRareSale('moonBlade');element('realm-confirm-accept').handlers.click();
-    assert.equal(ui.confirmDialog.open,false);assert.equal(s.player.gold,gold+24);assert.equal(s.player.inventory.moonBlade,undefined);
+    ui.confirmRareSale(bagId(s.player,'moonBlade'));element('realm-confirm-accept').handlers.click();
+    assert.equal(ui.confirmDialog.open,false);assert.equal(s.player.gold,gold+24);assert.equal((bagCount(s.player,'moonBlade') || undefined),undefined);
     assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);
-    ui.confirmRareSale('moonBlade');s.player.x=448;element('realm-confirm-accept').handlers.click();assert.equal(s.player.inventory.moonBlade,1);assert.equal(s.player.gold,gold);
+    ui.confirmRareSale(bagId(s.player,'moonBlade'));s.player.x=448;element('realm-confirm-accept').handlers.click();assert.equal((bagCount(s.player,'moonBlade') || undefined),1);assert.equal(s.player.gold,gold);
   }finally{h.restore();}
 });
 

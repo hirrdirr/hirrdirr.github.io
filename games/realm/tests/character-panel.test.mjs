@@ -1,44 +1,46 @@
+import { bagIds, bagId, bagCount, put, setBag, equipTemplate } from './item-helpers.mjs';
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame, command, stats } from '../js/simulation.js';
-import { ITEMS } from '../js/data.js';
+
 import { serialize, deserialize, SAVE_VERSION } from '../js/save.js';
 import { characterPanel, characterItemDetail, characterStatGroups } from '../js/character-panel.js';
 import { CharacterPreview, drawCharacterPreview } from '../js/character-preview.js';
 import { UI } from '../js/ui.js';
 
 test('character presentation reads the state without changing ownership, progress or save schema', () => {
-  const s = createGame('<Wanderer>'); s.player.inventory.moonBlade = 2;
+  const s = createGame('<Wanderer>'); put(s.player,'moonBlade',2);
   const before = JSON.parse(serialize(s));
   const html = characterPanel(s);
   assert.match(html, /&lt;Wanderer&gt;/); assert.doesNotMatch(html, /<Wanderer>/);
   assert.equal((html.match(/data-equipment=/g) || []).length, 10);
   for (const slot of ['weapon', 'armor', 'charm']) assert.match(html, new RegExp(`data-equipment="${slot}"`));
   assert.doesNotMatch(html, /data-item="trainingSword"|data-item="linenCoat"/);
-  assert.match(html, /data-item="moonBlade"/); assert.match(html, /Empty Charm slot/);
+  for(const id of bagIds(s.player,'moonBlade'))assert.ok(html.includes(`data-item="${id}"`)); assert.match(html, /Empty Charm slot/);
   assert.match(html, /canvas id="character-preview"/); assert.match(html, /gear visuals do not change yet/);
-  assert.deepEqual(JSON.parse(serialize(s)).data, before.data); assert.equal(SAVE_VERSION, 4);
+  assert.deepEqual(JSON.parse(serialize(s)).data, before.data); assert.equal(SAVE_VERSION, 5);
   assert.deepEqual(JSON.parse(serialize(deserialize(serialize(s)))).data, before.data);
 });
 
 test('equipment inspection exposes rarity, properties, unequip and accurate bag comparisons', () => {
-  const s = createGame(), p = s.player; p.inventory.moonBlade = 2;
-  const bag = characterItemDetail(p, { side: 'bag', id: 'moonBlade' });
-  assert.match(bag, /In your bag · 2/); assert.match(bag, /Character stats before/);
+  const s = createGame(), p = s.player; put(p,'moonBlade',2);
+  const bag = characterItemDetail(p, { side: 'bag', id: bagId(p, 'moonBlade') });
+  assert.match(bag, /In your bag · 1/); assert.match(bag, /Character stats before/);
   assert.match(bag, /Equip Moonshard/); assert.doesNotMatch(bag, /data-action="unequip"/);
-  command(s, { type: 'equip', id: 'moonBlade' });
+  equipTemplate(s,'moonBlade');
   const worn = characterItemDetail(p, { side: 'equipment', id: 'weapon' });
   assert.match(worn, /item-rarity rare/); assert.match(worn, /\+10 attack/);
-  assert.match(worn, /data-action="unequip" data-slot="weapon" data-id="moonBlade"/);
+  assert.match(worn, /data-action="unequip" data-slot="weapon" data-id="gear-\d+"/);
   assert.doesNotMatch(worn, /data-action="equip"/);
-  assert.match(characterItemDetail(p, { side: 'bag', id: 'moonBlade' }), /same combat stats/);
+  assert.match(characterItemDetail(p, { side: 'bag', id: bagId(p, 'moonBlade') }), /same combat stats/);
   assert.match(characterItemDetail(p, { side: 'equipment', id: 'charm' }), /Select a matching item/);
 });
 
 test('attribute groups match actual computed values and explain existing mechanics', () => {
   const s = createGame(), p = s.player; p.level = 7; p.xp = 40; p.gold = 70;
-  p.talents = { vigor: 3, steel: 1, guard: 1 }; p.inventory.runnerWrap = 1; p.inventory.runeFocus = 1;
-  command(s, { type: 'equip', id: 'runnerWrap' }); command(s, { type: 'equip', id: 'runeFocus' });
+  p.talents = { vigor: 3, steel: 1, guard: 1 }; put(p,'runnerWrap',1); put(p,'runeFocus',1);
+  equipTemplate(s,'runnerWrap'); equipTemplate(s,'runeFocus');
   const st = stats(p), rows = characterStatGroups(p).flatMap(group => group.rows);
   const value = label => rows.find(row => row[0] === label)[1];
   assert.equal(value('Health'), `${Math.ceil(p.hp)} / ${st.maxHp}`);
@@ -88,17 +90,17 @@ function uiHarness(s) {
 }
 
 test('actual panel handlers preserve focus/scroll and follow a copy between bag and slot', () => {
-  const s = createGame(); s.player.inventory.moonBlade = 1;
+  const s = createGame(); const [ref]=put(s.player,'moonBlade',1);
   const h = uiHarness(s);
   try {
     h.ui.open('inventory'); h.ui.panel.scrollTop = 180;
-    h.click('item', 'moonBlade'); assert.deepEqual(h.ui.characterSelection, { side: 'bag', id: 'moonBlade' });
-    assert.equal(h.focused.dataset.item, 'moonBlade'); assert.equal(h.ui.panel.scrollTop, 180);
-    h.click('action', 'equip'); assert.equal(s.player.inventory.moonBlade, undefined);
+    h.click('item', ref); assert.deepEqual(h.ui.characterSelection, { side: 'bag', id: ref });
+    assert.equal(h.focused.dataset.item, ref); assert.equal(h.ui.panel.scrollTop, 180);
+    h.click('action', 'equip'); assert.equal((bagCount(s.player,'moonBlade') || undefined), undefined);
     assert.deepEqual(h.ui.characterSelection, { side: 'equipment', id: 'weapon' });
     assert.equal(h.focused.dataset.equipment, 'weapon'); assert.equal(h.ui.panel.scrollTop, 180);
-    h.click('action', 'unequip'); assert.equal(s.player.inventory.moonBlade, 1);
-    assert.deepEqual(h.ui.characterSelection, { side: 'bag', id: 'moonBlade' }); assert.equal(h.focused.dataset.item, 'moonBlade');
+    h.click('action', 'unequip'); assert.equal((bagCount(s.player,'moonBlade') || undefined), 1);
+    assert.deepEqual(h.ui.characterSelection, { side: 'bag', id: ref }); assert.equal(h.focused.dataset.item, ref);
     h.click('equipment', 'charm'); assert.match(h.element('panel-content').innerHTML, /Empty Charm slot/);
     h.ui.open('talents'); assert.equal(h.lifecycle.at(-1), 'unmount');
     h.ui.close(); assert.equal(h.lifecycle.at(-1), 'unmount');
@@ -106,7 +108,7 @@ test('actual panel handlers preserve focus/scroll and follow a copy between bag 
 });
 
 test('full-bag unequip rejection retains the selected worn item, action focus and all possessions', () => {
-  const s = createGame(); s.player.inventory = Object.fromEntries(Object.keys(ITEMS).filter(id => id !== 'trainingSword').slice(0, 16).map(id => [id, 1]));
+  const s = createGame(); setBag(s.player,{copperBand:15,potion:3});
   const h = uiHarness(s), before = JSON.parse(serialize(s)).data;
   try {
     h.ui.open('inventory'); h.click('action', 'unequip');
@@ -176,20 +178,20 @@ test('a missing canvas context or unavailable sprite leaves a safe static fallba
 
 
 test('ring controls target the selected slot and restore focus to that exact ring', () => {
-  const s = createGame(); s.player.inventory.copperBand = 2;
+  const s = createGame(); const [first,second]=put(s.player,'copperBand',2);
   const h = uiHarness(s);
   try {
-    h.ui.open('inventory'); h.click('item', 'copperBand');
+    h.ui.open('inventory'); h.click('item', first);
     assert.match(h.element('panel-content').innerHTML, /Equip in Ring 1/);
     assert.match(h.element('panel-content').innerHTML, /Equip in Ring 2/);
     h.click('slot', 'ring2');
-    assert.equal(s.player.equipment.ring2, 'copperBand'); assert.equal(s.player.equipment.ring1, null);
+    assert.equal(s.player.equipment.ring2, first); assert.equal(s.player.equipment.ring1, null);
     assert.equal(h.focused.dataset.equipment, 'ring2');
-    h.click('item', 'copperBand'); h.click('slot', 'ring1');
-    assert.equal(s.player.equipment.ring1, 'copperBand'); assert.equal(h.focused.dataset.equipment, 'ring1');
+    h.click('item', second); h.click('slot', 'ring1');
+    assert.equal(s.player.equipment.ring1, second); assert.equal(h.focused.dataset.equipment, 'ring1');
     h.click('equipment', 'ring2'); h.click('action', 'unequip');
-    assert.equal(s.player.equipment.ring1, 'copperBand'); assert.equal(s.player.equipment.ring2, null);
-    assert.equal(s.player.inventory.copperBand, 1); assert.equal(h.focused.dataset.item, 'copperBand');
+    assert.equal(s.player.equipment.ring1, second); assert.equal(s.player.equipment.ring2, null);
+    assert.equal((bagCount(s.player,'copperBand') || undefined), 1); assert.equal(h.focused.dataset.item, first);
   } finally { h.restore(); }
 });
 

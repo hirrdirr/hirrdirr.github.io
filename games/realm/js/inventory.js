@@ -1,5 +1,6 @@
 import { tr } from './i18n.js';
 import { ITEMS } from './data.js';
+import { instance, resolveItem, template, createItemInstance } from './item-instances.js';
 export const BAG_SLOTS = 16;
 export const MAX_STACK = 999;
 export const MAX_GOLD = 999999;
@@ -24,7 +25,7 @@ export const compatibleSlots = id => EQUIPMENT_SLOTS.filter(slot => acceptsEquip
 // Existing single-slot commands keep working. Ring UI always sends an explicit target.
 export function equipmentTarget(p, id, requested) {
   if (requested !== undefined) return requested;
-  const slots = compatibleSlots(id);
+  const slots = compatibleSlots(instance(p, id)?.templateId);
   return slots.find(slot => !p.equipment[slot]) || slots[0];
 }
 export const emptyEquipment = () => Object.fromEntries(EQUIPMENT_SLOTS.map(slot => [slot, null]));
@@ -32,34 +33,49 @@ export function transferEquipment(p, slot, nextId = null) {
   const fail = reason => ({ ok: false, reason });
   if (!EQUIPMENT_SLOTS.includes(slot) || p.dead) return fail(tr('inventory.cannot_change_equipment'));
   const previous = p.equipment[slot];
-  if (previous && !acceptsEquipment(slot, previous)) return fail(tr('inventory.invalid_item'));
-  if (nextId !== null && (!acceptsEquipment(slot, nextId) || !(p.inventory[nextId] > 0))) return fail(tr('inventory.item_not_in_bag'));
+  if (previous && (!instance(p, previous) || !acceptsEquipment(slot, instance(p, previous).templateId))) return fail(tr('inventory.invalid_item'));
+  if (nextId !== null && (!instance(p, nextId) || !acceptsEquipment(slot, instance(p, nextId).templateId) || p.inventory[nextId] !== 1 || Object.values(p.equipment).includes(nextId))) return fail(tr('inventory.item_not_in_bag'));
   if (nextId === null && !previous) return fail(tr('inventory.slot_is_empty'));
   // Stage both transfers. Removing the new item may free a slot for the old one.
   const inventory = { ...p.inventory };
   if (nextId !== null && --inventory[nextId] === 0) delete inventory[nextId];
   if (previous) {
-    const reason = capacityReason({ inventory }, previous);
-    if (reason) return fail(tr('inventory.cannot_return_equipment', ITEMS[previous].name, reason));
+    const reason = capacityReason({ ...p, inventory }, previous);
+    if (reason) return fail(tr('inventory.cannot_return_equipment', resolveItem(p, previous).name, reason));
     inventory[previous] = (inventory[previous] || 0) + 1;
   }
   p.inventory = inventory;
   p.equipment = { ...p.equipment, [slot]: nextId };
   return { ok: true, id: nextId || previous };
 }
-export const occupiedSlots = p => Object.entries(p.inventory).filter(([id, n]) => Object.hasOwn(ITEMS, id) && n > 0).length;
+export const occupiedSlots = p => Object.entries(p.inventory).filter(([id, n]) => resolveItem(p, id) && n > 0).length;
 export function capacityReason(p, id, count = 1) {
-  if (!Object.hasOwn(ITEMS, id) || !Number.isInteger(count) || count < 1) return tr("inventory.invalid_item");
-  if ((p.inventory[id] || 0) + count > MAX_STACK) return tr("inventory.this_stack_is_full");
-  if (!p.inventory[id] && occupiedSlots(p) >= BAG_SLOTS) return tr("inventory.your_bag_is_full_sell_an_item_to_ivo_to_free_a_slot");
+  const item = resolveItem(p, id);
+  if (!item || !Number.isInteger(count) || count < 1) return tr('inventory.invalid_item');
+  if (item.slot) {
+    if (instance(p, id) && (count !== 1 || p.inventory[id])) return tr('inventory.invalid_item');
+    if (!instance(p, id) && (!Number.isSafeInteger(p.itemSequence) || p.itemSequence + count >= Number.MAX_SAFE_INTEGER)) return tr('inventory.invalid_item');
+    if (occupiedSlots(p) + count > BAG_SLOTS) return tr('inventory.your_bag_is_full_sell_an_item_to_ivo_to_free_a_slot');
+  } else {
+    if ((p.inventory[id] || 0) + count > MAX_STACK) return tr('inventory.this_stack_is_full');
+    if (!p.inventory[id] && occupiedSlots(p) >= BAG_SLOTS) return tr('inventory.your_bag_is_full_sell_an_item_to_ivo_to_free_a_slot');
+  }
   return '';
 }
+// Award templates only; existing equipment must transfer its reference instead.
+export function grantItems(p, id, count = 1) {
+  if (!template(id) || capacityReason(p, id, count)) return false;
+  if (ITEMS[id].slot) {
+    for (let i = 0; i < count; i++) p.inventory[createItemInstance(p, id)] = 1;
+  } else p.inventory[id] = (p.inventory[id] || 0) + count;
+  return true;
+}
 export function bundleCapacityReason(p, items) {
-  const copy = { inventory: { ...p.inventory } };
+  const copy = { ...p, inventory: { ...p.inventory }, itemInstances: { ...p.itemInstances } };
   for (const [id, count] of Object.entries(items)) {
     const reason = capacityReason(copy, id, count);
     if (reason) return reason;
-    copy.inventory[id] = (copy.inventory[id] || 0) + count;
+    if (!grantItems(copy, id, count)) return tr('inventory.invalid_item');
   }
   return '';
 }

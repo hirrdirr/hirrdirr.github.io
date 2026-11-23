@@ -2,227 +2,123 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { ITEMS, NPCS } from '../js/data.js';
-import { createGame, command, stats, addItem, step } from '../js/simulation.js';
-import { BAG_SLOTS, MAX_STACK, EQUIPMENT_SLOTS, occupiedSlots, transferEquipment, emptyEquipment } from '../js/inventory.js';
+import { createGame, command, stats, addItem } from '../js/simulation.js';
+import { BAG_SLOTS, occupiedSlots, transferEquipment, emptyEquipment } from '../js/inventory.js';
 import { serialize, deserialize, SaveStore, SAVE_KEY, SAVE_VERSION } from '../js/save.js';
-import { tradeQuote } from '../js/trading.js';
-import { bagButton, compareEquipment, tradePanel } from '../js/ui-panels.js';
+import { bagId, bagCount, put, setBag, equipTemplate, gearTemplates, bagTemplates, totals, legacyView } from './item-helpers.mjs';
 
-// Generated using the actual v0.3.1 modules at 0da30f1, before changing ownership.
 const legacy = await readFile(new URL('./fixtures/v0.3.1-equipment.json', import.meta.url), 'utf8');
 const data = s => JSON.parse(serialize(s)).data;
-const total = p => Object.fromEntries(Object.keys(ITEMS).map(id => [id,
-  (p.inventory[id] || 0) + EQUIPMENT_SLOTS.filter(slot => p.equipment[slot] === id).length]));
-function fullBag(p, exclude = []) {
-  p.inventory = Object.fromEntries(Object.keys(ITEMS).filter(id => !exclude.includes(id)).slice(0, BAG_SLOTS).map(id => [id, 1]));
-  assert.equal(occupiedSlots(p), BAG_SLOTS);
-}
-function storage(initial = {}) {
-  const map = new Map(Object.entries(initial));
-  return { map, getItem: key => map.get(key), setItem: (key, value) => map.set(key, value) };
-}
+const shop = s => Object.assign(s.player, NPCS.find(n=>n.id==='ivo'), {gold:500});
+const fullBag = p => setBag(p,{copperBand:15,potion:3});
+function storage(initial={}) { const map=new Map(Object.entries(initial)); return {map,getItem:k=>map.get(k),setItem:(k,v)=>map.set(k,v)}; }
 
-test('new characters own exactly one starter sword and coat outside the bag', () => {
-  const s = createGame(), p = s.player;
-  assert.deepEqual(p.inventory, { potion: 3 });
-  assert.deepEqual(p.equipment, { ...emptyEquipment(), weapon: 'trainingSword', armor: 'linenCoat' });
-  assert.equal(occupiedSlots(p), 1); assert.equal(total(p).trainingSword, 1);
-  assert.equal(stats(p).attack, 11); assert.equal(stats(p).defense, 1);
-  assert.deepEqual(data(deserialize(serialize(s))), data(s));
+test('new characters own two distinct starter instances outside the bag',()=>{
+ const s=createGame(),p=s.player;assert.deepEqual(p.inventory,{potion:3});assert.equal(occupiedSlots(p),1);
+ assert.deepEqual(gearTemplates(p),{...emptyEquipment(),weapon:'trainingSword',armor:'linenCoat'});
+ assert.notEqual(p.equipment.weapon,p.equipment.armor);assert.equal(totals(p).trainingSword,1);
+ assert.equal(stats(p).attack,11);assert.equal(stats(p).defense,1);assert.deepEqual(data(deserialize(serialize(s))),data(s));
 });
-
-test('all three slots transfer one copy, swap atomically and clean up empty stacks', () => {
-  for (const [slot, id] of [['weapon', 'moonBlade'], ['armor', 'marshCoat'], ['charm', 'trailCharm']]) {
-    const s = createGame(), p = s.player, previous = p.equipment[slot]; p.inventory[id] = 1;
-    const owned = total(p), hp = p.hp;
-    assert.equal(command(s, { type: 'equip', id }), true);
-    assert.equal(p.inventory[id], undefined); assert.equal(p.equipment[slot], id);
-    if (previous) assert.equal(p.inventory[previous], 1);
-    assert.deepEqual(total(p), owned); assert.equal(p.hp, hp);
-    assert.equal(s.events.at(-1).type, 'equip');
-    assert.equal(command(s, { type: 'unequip', slot }), true);
-    assert.equal(p.equipment[slot], null); assert.equal(p.inventory[id], 1);
-    assert.deepEqual(total(p), owned); assert.equal(s.events.at(-1).type, 'unequip');
+test('primary slots transfer exact instances in both directions and preserve other copies',()=>{
+ for(const [slot,id] of [['weapon','moonBlade'],['armor','marshCoat'],['charm','trailCharm']]){
+  const s=createGame(),p=s.player,previous=p.equipment[slot],[ref]=put(p,id),owned=totals(p),hp=p.hp;
+  assert.equal(command(s,{type:'equip',id:ref}),true);assert.equal(p.inventory[ref],undefined);assert.equal(p.equipment[slot],ref);
+  if(previous)assert.equal(p.inventory[previous],1);assert.deepEqual(totals(p),owned);assert.equal(p.hp,hp);
+  assert.equal(command(s,{type:'unequip',slot}),true);assert.equal(p.inventory[ref],1);assert.deepEqual(totals(p),owned);
+ }
+});
+test('identical swords can swap but never alias the same instance',()=>{
+ const s=createGame(),p=s.player,[a,b]=put(p,'moonBlade',2),owned=totals(p);
+ assert.equal(command(s,{type:'equip',id:a}),true);const st=stats(p);
+ assert.equal(command(s,{type:'equip',id:a}),false);
+ assert.equal(command(s,{type:'equip',id:b}),true);assert.equal(p.inventory[a],1);assert.equal(p.equipment.weapon,b);assert.deepEqual(stats(p),st);
+ command(s,{type:'unequip',slot:'weapon'});assert.equal(p.inventory[b],1);assert.equal(bagCount(p,'moonBlade'),2);assert.deepEqual(totals(p),owned);
+});
+test('invalid, template-only, foreign, worn, mismatched and dead-player transfers are atomic',()=>{
+ const s=createGame(),[ref]=put(s.player,'moonBlade');
+ for(const action of [{type:'equip',id:'__proto__'},{type:'equip',id:'constructor'},{type:'equip',id:'potion'},{type:'equip',id:'moonBlade'},{type:'equip',id:'gear-999'},{type:'equip',id:[ref]},{type:'equip',id:s.player.equipment.weapon},{type:'equip',id:ref,slot:'armor'},{type:'unequip',slot:'__proto__'},{type:'unequip',slot:'charm'}]){
+  const before=data(s);assert.equal(command(s,action),false);assert.deepEqual(data(s),before);
+ }
+ s.player.dead=true;const before=data(s);assert.equal(command(s,{type:'equip',id:ref}),false);assert.equal(transferEquipment(s.player,'weapon',ref).ok,false);assert.deepEqual(data(s),before);
+});
+test('full bag rejects unequip even when another identical item is in the bag',()=>{
+ const s=createGame(),p=s.player;fullBag(p);const before=data(s),st=stats(p);
+ assert.equal(command(s,{type:'unequip',slot:'weapon'}),false);assert.deepEqual(data(s),before);assert.deepEqual(stats(p),st);
+ assert.match(s.events.at(-1).text,/bag is full/);
+});
+test('a full-bag swap frees exactly one slot regardless of duplicate templates',()=>{
+ const s=createGame(),p=s.player;fullBag(p);const [first,second]=Object.keys(p.inventory).filter(k=>k!=='potion');
+ command(s,{type:'equip',id:first,slot:'ring1'});put(p,'copperBand');assert.equal(occupiedSlots(p),BAG_SLOTS);
+ const before=totals(p);assert.equal(command(s,{type:'equip',id:second,slot:'ring1'}),true);
+ assert.equal(p.inventory[first],1);assert.equal(p.equipment.ring1,second);assert.equal(occupiedSlots(p),BAG_SLOTS);assert.deepEqual(totals(p),before);
+});
+test('equipment never stacks while consumables respect their stack cap',()=>{
+ const s=createGame(),p=s.player;assert.equal(addItem(s,'trainingSword',2),true);assert.equal(bagCount(p,'trainingSword'),2);assert.equal(occupiedSlots(p),3);
+ assert.equal(addItem(s,'potion',996),true);assert.equal(addItem(s,'potion'),false);assert.equal(p.inventory.potion,999);
+ for(const ref of Object.keys(p.inventory).filter(k=>k!=='potion'))assert.equal(p.inventory[ref],1);
+});
+test('gear changes do not heal, stack bonuses or change talents and cooldowns',()=>{
+ const s=createGame(),p=s.player;p.level=7;p.talents={vigor:3,guard:1,steel:1};put(p,'forestCoat');p.cooldowns.guard=8;p.hp=75;
+ const baseline=stats(p),owned=totals(p);
+ for(let i=0;i<10;i++){assert.equal(equipTemplate(s,'forestCoat'),true);assert.equal(stats(p).maxHp,baseline.maxHp+12);assert.equal(p.hp,75);assert.equal(equipTemplate(s,'linenCoat'),true);assert.deepEqual(stats(p),baseline);}
+ assert.deepEqual(totals(p),owned);assert.equal(p.cooldowns.guard,8);equipTemplate(s,'forestCoat');p.hp=stats(p).maxHp;equipTemplate(s,'linenCoat');assert.equal(p.hp,baseline.maxHp);
+});
+test('real 0.3.1 migration preserves all progress and total owned quantities',()=>{
+ const original=JSON.parse(legacy),expected=structuredClone(original.data);
+ expected.player.equipment={...emptyEquipment(),...expected.player.equipment};expected.player.inventory.moonBlade=2;delete expected.player.inventory.marshCoat;delete expected.player.inventory.trailCharm;
+ let s=deserialize(legacy);assert.equal(SAVE_VERSION,5);assert.deepEqual(legacyView(data(s)),expected);
+ for(const id of Object.keys(ITEMS))assert.equal(totals(s.player)[id],original.data.player.inventory[id]||0);
+ const stable=data(s),st=stats(s.player);for(let i=0;i<10;i++){s=deserialize(serialize(s));assert.deepEqual(data(s),stable);assert.deepEqual(stats(s.player),st);}
+});
+test('v0 through v3 deduct only valid owned equipped copies before minting identities',()=>{
+ for(const version of [0,1,2,3]){
+  const raw=JSON.parse(legacy);raw.version=version;raw.data.player.inventory={trainingSword:3,moonBlade:1,potion:5};raw.data.player.equipment={weapon:'trainingSword',armor:'moonBlade',charm:'trailCharm',unknown:'moonBlade'};
+  let s=deserialize(JSON.stringify(raw));assert.deepEqual(bagTemplates(s.player),{potion:5,trainingSword:2,moonBlade:1});assert.deepEqual(gearTemplates(s.player),{...emptyEquipment(),weapon:'trainingSword'});
+  const before=data(s);assert.deepEqual(data(deserialize(serialize(s))),before);
+  for(const malformed of [{weapon:['moonBlade'],armor:{id:'marshCoat'},charm:12},{weapon:'__proto__',armor:'constructor',charm:'potion'}]){
+   raw.data.player.equipment=malformed;s=deserialize(JSON.stringify(raw));assert.deepEqual(bagTemplates(s.player),raw.data.player.inventory);assert.deepEqual(s.player.equipment,emptyEquipment());
   }
+ }
 });
-
-test('two identical swords retain their quantities through equip, same-item swap and unequip', () => {
-  const s = createGame(), p = s.player; p.equipment.weapon = null; p.inventory.moonBlade = 2;
-  const owned = total(p);
-  assert.equal(command(s, { type: 'equip', id: 'moonBlade' }), true);
-  assert.equal(p.inventory.moonBlade, 1); const equippedStats = stats(p);
-  assert.equal(command(s, { type: 'equip', id: 'moonBlade' }), true);
-  assert.equal(p.inventory.moonBlade, 1); assert.deepEqual(stats(p), equippedStats);
-  assert.equal(command(s, { type: 'unequip', slot: 'weapon' }), true);
-  assert.equal(p.inventory.moonBlade, 2); assert.deepEqual(total(p), owned);
-  assert.equal(command(s, { type: 'unequip', slot: 'weapon' }), false);
+test('v4 migration retains independently owned equipment without subtracting spare copies',()=>{
+ const raw=JSON.parse(legacy);raw.version=4;raw.data.player.inventory={moonBlade:2,potion:5};const s=deserialize(JSON.stringify(raw));
+ assert.deepEqual(bagTemplates(s.player),raw.data.player.inventory);assert.deepEqual(gearTemplates(s.player),{...emptyEquipment(),...raw.data.player.equipment});assert.equal(totals(s.player).moonBlade,3);assert.equal(bagCount(s.player,'trainingSword'),0);
 });
-
-test('invalid, unowned, consumable, mismatched-slot and dead-player transfers cannot mutate ownership', () => {
-  const s = createGame(); s.player.inventory.moonBlade = 1;
-  for (const action of [
-    { type: 'equip', id: '__proto__' }, { type: 'equip', id: 'constructor' },
-    { type: 'equip', id: 'potion' }, { type: 'equip', id: 'trainingSword' },
-    { type: 'equip', id: 'missing' }, { type: 'equip', id: ['moonBlade'] }, { type: 'unequip', slot: '__proto__' },
-    { type: 'unequip', slot: 'charm' }
-  ]) { const before = data(s); assert.equal(command(s, action), false); assert.deepEqual(data(s), before); }
-  const before = data(s); assert.equal(transferEquipment(s.player, 'armor', 'moonBlade').ok, false); assert.deepEqual(data(s), before);
-  s.player.dead = true; const dead = data(s);
-  assert.equal(command(s, { type: 'equip', id: 'moonBlade' }), false);
-  assert.equal(command(s, { type: 'unequip', slot: 'weapon' }), false); assert.deepEqual(data(s), dead);
+test('legacy over-capacity bags retain every copy and empty slots can reduce overflow',()=>{
+ const raw=JSON.parse(legacy);raw.version=4;raw.data.player.inventory={copperBand:30,potion:999};raw.data.player.equipment={};
+ const s=deserialize(JSON.stringify(raw));assert.equal(occupiedSlots(s.player),31);assert.equal(bagCount(s.player,'copperBand'),30);
+ assert.equal(equipTemplate(s,'copperBand','ring1'),true);assert.equal(occupiedSlots(s.player),30);assert.equal(addItem(s,'moonBlade'),false);
+ assert.deepEqual(data(deserialize(serialize(s))),data(s));
 });
-
-test('a full bag rejects unequip without changing gear, health, inventory or stats', () => {
-  const s = createGame(), p = s.player; fullBag(p, ['trainingSword']);
-  const before = data(s), st = stats(p);
-  assert.equal(command(s, { type: 'unequip', slot: 'weapon' }), false);
-  assert.deepEqual(data(s), before); assert.deepEqual(stats(p), st);
-  assert.match(s.events.at(-1).text, /Cannot return.*bag is full/);
+test('legacy backup survives repeated saves; backup failure blocks automatic replacement',()=>{
+ const mem=storage({[SAVE_KEY]:legacy}),store=new SaveStore(mem);let s=store.load();assert.equal(mem.getItem(SAVE_KEY+'.v3'),legacy);assert.match(store.notice,/equipped items/);
+ for(let i=0;i<4;i++){assert.equal(store.save(s),true);s=new SaveStore(mem).load();}assert.equal(mem.getItem(SAVE_KEY+'.v3'),legacy);assert.equal(bagCount(s.player,'moonBlade'),2);
+ const blocked=new SaveStore({getItem:k=>k===SAVE_KEY?legacy:null,setItem(){throw Error('quota');}});const temporary=blocked.load();assert.ok(temporary);assert.equal(blocked.blocked,true);assert.equal(blocked.save(temporary),false);
 });
-
-test('full-bag swaps use the newly freed slot; keeping the incoming stack requires room', () => {
-  const s = createGame(), p = s.player; fullBag(p, ['trainingSword']);
-  const owned = total(p);
-  assert.equal(command(s, { type: 'equip', id: 'moonBlade' }), true);
-  assert.equal(p.inventory.moonBlade, undefined); assert.equal(p.inventory.trainingSword, 1);
-  assert.equal(occupiedSlots(p), BAG_SLOTS); assert.deepEqual(total(p), owned);
-  command(s, { type: 'equip', id: 'trainingSword' }); p.inventory.moonBlade = 2;
-  const before = data(s);
-  assert.equal(command(s, { type: 'equip', id: 'moonBlade' }), false); assert.deepEqual(data(s), before);
+test('corrupt-save recovery preserves the original and backs up the recovered legacy file',()=>{
+ const mem=storage({[SAVE_KEY]:'broken',[SAVE_KEY+'.backup']:legacy}),store=new SaveStore(mem),s=store.load();
+ assert.equal(mem.getItem(SAVE_KEY+'.recovery'),'broken');assert.equal(mem.getItem(SAVE_KEY+'.v3'),legacy);assert.equal(store.save(s),true);assert.equal(store.save(s),true);assert.equal(mem.getItem(SAVE_KEY+'.v3'),legacy);
 });
-
-test('returning gear may stack in a full bag but cannot overflow a full stack', () => {
-  const s = createGame(), p = s.player; fullBag(p);
-  assert.equal(command(s, { type: 'unequip', slot: 'weapon' }), true);
-  assert.equal(p.inventory.trainingSword, 2); assert.equal(occupiedSlots(p), BAG_SLOTS);
-  command(s, { type: 'equip', id: 'trainingSword' }); p.inventory.trainingSword = MAX_STACK;
-  for (const action of [{ type: 'unequip', slot: 'weapon' }, { type: 'equip', id: 'moonBlade' }]) {
-    const before = data(s); assert.equal(command(s, action), false); assert.deepEqual(data(s), before);
-    assert.match(s.events.at(-1).text, /stack is full/);
-  }
-  assert.equal(command(s, { type: 'equip', id: 'trainingSword' }), true);
-  assert.equal(p.inventory.trainingSword, MAX_STACK);
+test('legacy import preserves both originals; failed replacement leaves current journey intact',()=>{
+ const current=serialize(createGame('Current')),mem=storage({[SAVE_KEY]:current}),store=new SaveStore(mem);
+ assert.equal(store.replace(deserialize(legacy),legacy),true);assert.equal(mem.getItem(SAVE_KEY+'.import.v3'),legacy);assert.equal(mem.getItem(SAVE_KEY+'.recovery'),current);assert.equal(JSON.parse(mem.getItem(SAVE_KEY)).version,5);assert.equal(bagCount(store.load().player,'moonBlade'),2);
+ const failing=storage({[SAVE_KEY]:current});failing.setItem=()=>{throw Error('quota');};assert.equal(new SaveStore(failing).replace(deserialize(legacy),legacy),false);assert.equal(failing.getItem(SAVE_KEY),current);
 });
-
-test('gear changes never heal, permanently stack bonuses or disturb talents and cooldowns', () => {
-  const s = createGame(), p = s.player; p.level = 7; p.talents = { vigor: 3, guard: 1, steel: 1 };
-  p.inventory.forestCoat = 1; p.cooldowns.guard = 8; p.hp = 75;
-  const baseline = stats(p), owned = total(p);
-  for (let i = 0; i < 10; i++) {
-    assert.equal(command(s, { type: 'equip', id: 'forestCoat' }), true);
-    assert.equal(stats(p).maxHp, baseline.maxHp + 12); assert.equal(p.hp, 75);
-    assert.equal(command(s, { type: 'equip', id: 'linenCoat' }), true);
-    assert.deepEqual(stats(p), baseline); assert.equal(p.hp, 75);
-  }
-  assert.deepEqual(total(p), owned); assert.equal(p.cooldowns.guard, 8);
-  command(s, { type: 'equip', id: 'forestCoat' }); p.hp = stats(p).maxHp;
-  command(s, { type: 'equip', id: 'linenCoat' }); assert.equal(p.hp, baseline.maxHp);
+test('selling an exact spare protects worn gear and restores that spare through buyback',()=>{
+ const s=deserialize(legacy),p=s.player;shop(s);const ref=bagId(p,'moonBlade'),worn=p.equipment.weapon,owned=totals(p),money=p.gold;
+ assert.equal(command(s,{type:'sell',id:worn,confirm:true}),false);assert.equal(command(s,{type:'sell',id:ref}),false);assert.equal(command(s,{type:'sell',id:ref,confirm:true}),true);
+ assert.equal(p.inventory[ref],undefined);assert.equal(p.equipment.weapon,worn);assert.equal(s.buyback[0].item,ref);assert.equal(p.gold,money+24);
+ const sale=s.buyback[0].id;assert.equal(command(s,{type:'buyback',id:sale}),true);assert.equal(p.inventory[ref],1);assert.equal(command(s,{type:'buyback',id:sale}),false);assert.equal(p.gold,money);assert.deepEqual(totals(p),owned);
 });
-
-test('real 0.3.1 save migrates exactly one owned copy per slot, preserving all other persisted data', () => {
-  const original = JSON.parse(legacy), expected = structuredClone(original.data);
-  expected.player.equipment = { ...emptyEquipment(), ...expected.player.equipment };
-  expected.player.inventory.moonBlade = 2; delete expected.player.inventory.marshCoat; delete expected.player.inventory.trailCharm;
-  let s = deserialize(legacy); assert.equal(SAVE_VERSION, 4); assert.deepEqual(data(s), expected);
-  for (const id of Object.keys(ITEMS)) assert.equal(total(s.player)[id], original.data.player.inventory[id] || 0, id);
-  const beforeStats = stats(s.player);
-  for (let i = 0; i < 10; i++) { s = deserialize(serialize(s)); assert.deepEqual(data(s), expected); assert.deepEqual(stats(s.player), beforeStats); }
+test('repeated buy/equip/sell/buyback/reload cycles conserve identities and currency',()=>{
+ let s=createGame();shop(s);command(s,{type:'buy',id:'keeperBlade'});const ref=bagId(s.player,'keeperBlade'),starter=s.player.equipment.weapon,gold=s.player.gold,records=structuredClone(s.player.itemInstances);
+ for(let i=0;i<20;i++){
+  for(const id of [ref,starter])assert.equal(command(s,{type:'equip',id}),true);
+  assert.equal(command(s,{type:'sell',id:ref}),true);assert.equal(command(s,{type:'buyback',id:s.buyback[0].id}),true);
+  s=deserialize(serialize(s));assert.deepEqual(s.player.itemInstances,records);assert.equal(s.player.inventory[ref],1);assert.equal(s.player.gold,gold);
+ }
 });
-
-test('all legacy versions migrate once; missing and mismatched references never consume or create items', () => {
-  for (const version of [0, 1, 2, 3]) {
-    const raw = JSON.parse(legacy); raw.version = version;
-    raw.data.player.inventory = { trainingSword: 3, moonBlade: 1, potion: 5 };
-    raw.data.player.equipment = { weapon: 'trainingSword', armor: 'moonBlade', charm: 'trailCharm', unknown: 'moonBlade' };
-    let s = deserialize(JSON.stringify(raw));
-    assert.deepEqual(s.player.inventory, { trainingSword: 2, moonBlade: 1, potion: 5 });
-    assert.deepEqual(s.player.equipment, { ...emptyEquipment(), weapon: 'trainingSword' });
-    const before = data(s); s = deserialize(serialize(s)); assert.deepEqual(data(s), before);
-    raw.data.player.equipment = { weapon: ['moonBlade'], armor: { id: 'marshCoat' }, charm: 12 };
-    s = deserialize(JSON.stringify(raw)); assert.deepEqual(s.player.inventory, raw.data.player.inventory);
-    assert.deepEqual(s.player.equipment, emptyEquipment());
-    raw.data.player.equipment = { weapon: '__proto__', armor: 'constructor', charm: 'potion' };
-    s = deserialize(JSON.stringify(raw)); assert.deepEqual(s.player.inventory, raw.data.player.inventory);
-    assert.deepEqual(s.player.equipment, emptyEquipment());
-  }
-});
-
-test('v4 slots preserve independently owned gear and do not subtract bag duplicates or resurrect sold starters', () => {
-  const raw = JSON.parse(legacy); raw.version = 4;
-  raw.data.player.inventory = { moonBlade: 2, potion: 5 };
-  const s = deserialize(JSON.stringify(raw));
-  assert.deepEqual(s.player.inventory, raw.data.player.inventory);
-  assert.deepEqual(s.player.equipment, { ...emptyEquipment(), ...raw.data.player.equipment });
-  assert.equal(total(s.player).moonBlade, 3); assert.equal(s.player.inventory.trainingSword, undefined);
-});
-
-test('old overflow inventories retain every owned copy while equipment can free bag slots', () => {
-  const raw = JSON.parse(legacy); raw.data.player.inventory = Object.fromEntries(Object.keys(ITEMS).map(id => [id, 2]));
-  const s = deserialize(JSON.stringify(raw)); assert.ok(occupiedSlots(s.player) > BAG_SLOTS);
-  for (const id of Object.keys(ITEMS)) assert.equal(total(s.player)[id], 2);
-});
-
-test('migration keeps the untouched version backup through repeated loads and refuses autosave if backup fails', () => {
-  const mem = storage({ [SAVE_KEY]: legacy }), store = new SaveStore(mem);
-  let s = store.load(); assert.equal(mem.getItem(SAVE_KEY + '.v3'), legacy); assert.match(store.notice, /equipped items/);
-  for (let i = 0; i < 4; i++) { assert.equal(store.save(s), true); s = new SaveStore(mem).load(); }
-  assert.equal(mem.getItem(SAVE_KEY + '.v3'), legacy); assert.equal(s.player.inventory.moonBlade, 2);
-  const blocked = new SaveStore({ getItem: key => key === SAVE_KEY ? legacy : null, setItem() { throw Error('quota'); } });
-  const temporary = blocked.load(); assert.ok(temporary); assert.equal(blocked.blocked, true); assert.equal(blocked.save(temporary), false);
-});
-
-test('corruption recovery also backs up the old schema before subsequent autosaves', () => {
-  const mem = storage({ [SAVE_KEY]: 'broken', [SAVE_KEY + '.backup']: legacy }), store = new SaveStore(mem);
-  const s = store.load(); assert.equal(mem.getItem(SAVE_KEY + '.recovery'), 'broken'); assert.equal(mem.getItem(SAVE_KEY + '.v3'), legacy);
-  assert.equal(store.save(s), true); assert.equal(store.save(s), true); assert.equal(mem.getItem(SAVE_KEY + '.v3'), legacy);
-});
-
-test('legacy import preserves the imported original and current save, and storage failure leaves current journey intact', () => {
-  const current = serialize(createGame('Current')), mem = storage({ [SAVE_KEY]: current }), store = new SaveStore(mem);
-  assert.equal(store.replace(deserialize(legacy), legacy), true);
-  assert.equal(mem.getItem(SAVE_KEY + '.import.v3'), legacy); assert.equal(mem.getItem(SAVE_KEY + '.recovery'), current);
-  assert.equal(JSON.parse(mem.getItem(SAVE_KEY)).version, 4); assert.equal(store.load().player.inventory.moonBlade, 2);
-  const failing = storage({ [SAVE_KEY]: current });
-  failing.setItem = () => { throw Error('quota'); };
-  assert.equal(new SaveStore(failing).replace(deserialize(legacy), legacy), false);
-  assert.equal(failing.getItem(SAVE_KEY), current);
-});
-
-test('merchant sells bag duplicates while keeping worn copies protected, including rare confirmation and buyback', () => {
-  const s = deserialize(legacy), p = s.player, owned = total(p), money = p.gold;
-  assert.equal(tradeQuote(s, { type: 'sell', id: 'marshCoat', confirm: true }).ok, false);
-  assert.equal(command(s, { type: 'sell', id: 'moonBlade' }), false);
-  assert.equal(command(s, { type: 'sell', id: 'moonBlade', confirm: true }), true);
-  assert.equal(p.inventory.moonBlade, 1); assert.equal(p.equipment.weapon, 'moonBlade'); assert.equal(p.gold, money + ITEMS.moonBlade.value);
-  const sale = s.buyback[0].id; assert.equal(command(s, { type: 'buyback', id: sale }), true);
-  assert.equal(command(s, { type: 'buyback', id: sale }), false); assert.equal(p.gold, money); assert.deepEqual(total(p), owned);
-  assert.equal(command(s, { type: 'buy', id: 'keeperBlade' }), true);
-  assert.equal(command(s, { type: 'equip', id: 'keeperBlade' }), true);
-  assert.equal(p.inventory.keeperBlade, undefined); assert.equal(p.inventory.moonBlade, 3);
-  assert.equal(command(s, { type: 'sell', id: 'keeperBlade', confirm: true }), false);
-  command(s, { type: 'unequip', slot: 'weapon' }); assert.equal(command(s, { type: 'sell', id: 'keeperBlade' }), true);
-});
-
-test('repeated buy/equip/unequip/sell/buyback cycles conserve copies without generating currency', () => {
-  let s = createGame(); Object.assign(s.player, NPCS.find(n => n.id === 'ivo'), { gold: 500 });
-  assert.equal(command(s, { type: 'buy', id: 'keeperBlade' }), true);
-  const owned = total(s.player), gold = s.player.gold;
-  for (let i = 0; i < 20; i++) {
-    for (const id of ['keeperBlade', 'trainingSword']) assert.equal(command(s, { type: 'equip', id }), true);
-    assert.equal(command(s, { type: 'sell', id: 'keeperBlade' }), true);
-    assert.equal(command(s, { type: 'buyback', id: s.buyback[0].id }), true);
-    s = deserialize(serialize(s)); assert.deepEqual(total(s.player), owned); assert.equal(s.player.gold, gold);
-  }
-});
-
-test('bag capacity and drops count only bag stacks; UI treats a duplicate as an unequipped copy', () => {
-  const s = createGame(), p = s.player;
-  assert.equal(addItem(s, 'trainingSword'), true); assert.equal(occupiedSlots(p), 2);
-  s.drops = [{ id: 1, x: p.x, y: p.y, item: 'trainingSword', life: 90 }]; step(s);
-  assert.equal(p.inventory.trainingSword, 2); assert.equal(total(p).trainingSword, 3);
-  assert.doesNotMatch(bagButton(p, 'trainingSword', true), /Equipped|<em>/);
-  assert.match(compareEquipment(p, 'trainingSword'), /same combat stats/);
-  Object.assign(p, { x: 640, y: 784 });
-  const html = tradePanel(s, { side: 'bag', id: 'trainingSword' });
-  assert.match(html, /data-action="sell"[^>]*>Sell/); assert.doesNotMatch(html, /data-action="unequip"/);
+test('template-only equip and sale cannot arbitrarily choose among identical owned items',()=>{
+ const s=createGame();shop(s);put(s.player,'copperBand',3);const before=data(s);
+ assert.equal(command(s,{type:'equip',id:'copperBand',slot:'ring1'}),false);assert.equal(command(s,{type:'sell',id:'copperBand'}),false);assert.deepEqual(data(s),before);
 });

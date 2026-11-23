@@ -1,5 +1,6 @@
+import { templateId, resolveItem } from './item-instances.js';
 import { tr } from './i18n.js';
-import { ITEMS, RARITIES, xpForLevel } from './data.js';
+import { RARITIES, xpForLevel } from './data.js';
 import { stats } from './simulation.js';
 import { EQUIPMENT_DEFINITIONS, BAG_SLOTS, occupiedSlots, compatibleSlots, equipmentLabel } from './inventory.js';
 import { availableTalentPoints, spentTalentPoints } from './talents.js';
@@ -32,7 +33,7 @@ export function characterStatGroups(p) {
 
 export function characterItemDetail(p, selection) {
   const equipped = selection.side === 'equipment', slot = equipped ? selection.id : null;
-  const id = equipped ? p.equipment[slot] : selection.id, item = ITEMS[id];
+  const id = equipped ? p.equipment[slot] : selection.id, item = resolveItem(p, id);
   if (!item || (!equipped && !p.inventory[id])) {
     return `<div class="character-detail-empty">${itemIcon(equipped ? slotIcon(slot) : 'sword')}<h3>${equipped ? tr('character.empty_slot', equipmentLabel(slot)) : tr('character.inspect_gear')}</h3><p>${equipped ? tr('character.empty_help') : tr('character.inspect_help')}</p></div>`;
   }
@@ -40,7 +41,7 @@ export function characterItemDetail(p, selection) {
   if (equipped) {
     html += `<button class="primary" data-action="unequip" data-slot="${slot}" data-id="${id}">${tr('ui-panels.unequip', escapeHTML(item.name))}</button><p class="detail-note">${tr('character.unequip_help')}</p>`;
   } else if (item.slot) {
-    const targets = compatibleSlots(id);
+    const targets = compatibleSlots(templateId(p, id));
     if (targets.length > 1) html += `<p class="detail-note">${tr('equipment.ring_help')}</p>`;
     for (const target of targets) {
       html += `<section class="equipment-target">${targets.length > 1 ? `<h4>${tr('equipment.compare_slot', equipmentLabel(target))}</h4>` : ''}${compareEquipment(p, id, target)}<button class="primary" data-action="equip" data-slot="${target}" data-id="${id}">${targets.length > 1 ? tr('equipment.equip_slot', equipmentLabel(target)) : tr('character.equip_named', escapeHTML(item.name))}</button></section>`;
@@ -56,7 +57,7 @@ export function characterItemDetail(p, selection) {
 export function characterPanel(s, selection = { side: 'equipment', id: 'weapon' }) {
   const p = s.player;
   const equipmentSlot = slot => {
-    const id = p.equipment[slot], item = ITEMS[id], selected = selection.side === 'equipment' && selection.id === slot;
+    const id = p.equipment[slot], item = resolveItem(p, id), selected = selection.side === 'equipment' && selection.id === slot;
     const name = item ? item.name : tr('ui.nothing_equipped');
     return `<button class="character-slot ${item?.rarity || 'empty'}${selected ? ' selected' : ''}" data-equipment="${slot}" aria-pressed="${selected}" aria-label="${escapeHTML(tr('character.slot_label', equipmentLabel(slot), name))}" title="${escapeHTML(item ? `${item.name} · ${itemStats(item)}` : tr('character.empty_slot', equipmentLabel(slot)))}"><span class="character-slot-icon">${itemIcon(item?.icon || slotIcon(slot))}</span><span class="character-slot-copy"><small>${equipmentLabel(slot)}</small><strong>${escapeHTML(name)}</strong><span>${item ? RARITIES[item.rarity] : tr('character.empty')}</span></span></button>`;
   };
