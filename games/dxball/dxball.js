@@ -13,6 +13,7 @@
   const uiPowers = document.getElementById("uiPowers");
   const uiCombo = document.getElementById("uiCombo");
   const uiComboHits = document.getElementById("uiComboHits");
+  const uiBank = document.getElementById("uiBank");
   const uiBuild = document.getElementById("uiBuild");
   const upgradeOverlay = document.getElementById("upgradeOverlay");
   const upgradeOptions = document.getElementById("upgradeOptions");
@@ -40,6 +41,8 @@
   // Powerup drop chance per DESTROYED brick (global, from any brick)
   const POWERUP_DROP_CHANCE = 0.18; // 18%
   const MAX_DROPS_ON_SCREEN = 4;
+  const MAX_BALLS = 6;
+  const BANK_BONUS = 30;
 
   // Stor boll = heavy hit. När aktiv: 2 skada per träff.
   const BIGBALL_DAMAGE = 2;
@@ -64,6 +67,7 @@
   // Reuse pre-rendered brick artwork instead of applying blur/shadows to every
   // brick every frame. Cleared on resize and level changes.
   const brickSprites = new Map();
+  const orbSprites = new Map();
   const BRICK_GUTTER = 20;
   const MAX_CANVAS_PIXELS = 2400000;
 
@@ -92,6 +96,7 @@
   }
 
   function resize() {
+    const oldW=W, oldH=H;
     const headerH = getTopbarOffsetPx();
     const rectBefore = wrap.getBoundingClientRect();
     const overlap = headerH > 0 && rectBefore.top < headerH ? (headerH - rectBefore.top) : 0;
@@ -99,20 +104,21 @@
     wrap.style.marginTop = overlap > 0 ? `${Math.round(overlap)}px` : "0px";
 
     const rectAfter = wrap.getBoundingClientRect();
-    const availableH = Math.max(320, Math.floor(window.innerHeight - rectAfter.top));
+    const availableH = Math.max(180, Math.floor(window.innerHeight - rectAfter.top));
     wrap.style.height = availableH + "px";
 
     const rect = wrap.getBoundingClientRect();
     W = Math.max(320, Math.floor(rect.width));
-    H = Math.max(320, Math.floor(rect.height));
+    H = Math.max(180, Math.floor(rect.height));
 
     // Cap backing-buffer size on high-DPI screens. 2x at 1920x1080
     // costs 8.3 million pixels per frame, even for this small arcade game.
-    DPR = Math.max(1, Math.min(
+    DPR = Math.min(
       window.devicePixelRatio || 1, 1.5,
       Math.sqrt(MAX_CANVAS_PIXELS / (W * H))
-    ));
+    );
     brickSprites.clear();
+    orbSprites.clear();
 
     canvas.width = Math.floor(W * DPR);
     canvas.height = Math.floor(H * DPR);
@@ -120,6 +126,23 @@
     canvas.style.height = `${H}px`;
 
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // Initial sizing runs before game state exists. Later resizes preserve the
+    // current board instead of leaving live bricks outside the new viewport.
+    if (canvas.dataset.ready && (W!==oldW || H!==oldH)) {
+      const sx=(W-48)/(oldW-48), sy=(H-140)/(oldH-140);
+      for(const brick of bricks) {
+        brick.x=24+(brick.x-24)*sx; brick.w*=sx;
+        brick.y=70+(brick.y-70)*sy; brick.h*=sy;
+      }
+      paddle.x=clamp(paddle.x*W/oldW,10,W-paddle.w-10);
+      paddle.y=H-54; paddle.targetX=null;
+      for(const item of [...balls,...drops,...turretBullets]) {
+        item.x=10+(item.x-10)*(W-20)/(oldW-20);
+        item.y=10+(item.y-10)*(H-64)/(oldH-64);
+      }
+      for(const ball of balls) {ball.trail=[];ball.piercedBricks.clear();}
+      setPaused(true);
+    }
   }
 
   window.addEventListener("resize", resize);
@@ -188,6 +211,7 @@
   const keys = new Set();
   let usingMouse = false;
   let touchActive = false;
+  let pendingMouseX = 0;
 
   // Sticky aiming – radians from straight up. Normal serves are unchanged.
   const AIM_LIMIT = 1.28; // 73 degrees to either side, enough to bank off the walls.
@@ -208,7 +232,8 @@
   // Balls
   const balls = [];
   function makeBall(x, y, vx, vy, r=8) {
-    return { x, y, vx, vy, r, pierce:false, sticky:false, stuck:false, aiming:false, satSeed:rand(0,Math.PI*2) };
+    return { x, y, vx, vy, r, pierce:false, sticky:false, stuck:false, aiming:false,
+      bankEligible:true, bankCharged:false, piercedBricks:new Set(), satSeed:rand(0,Math.PI*2) };
   }
 
   // Bricks / drops
@@ -267,7 +292,7 @@
     wide:"Bredare platta",
     bigball:"Stor boll, dubbel skada",
     pierce:"Genom vanliga klossar",
-    multiball:"Fler bollar i spel",
+    multiball:"Fler bollar, max 6. Fullt: +100p",
     slow:"Långsammare bollar",
     sticky:"3 fångster med sikte",
     orbit:"+1 satellit i 16 sek",
@@ -470,13 +495,13 @@
     }
   }
 
-  function damageBrick(brick, amount, x, y, source="ball") {
+  function damageBrick(brick, amount, x, y, source="ball", bonus=0) {
     if (brick.hp <= 0 || brick.indestructible) return false;
     brick.hp = Math.max(0, brick.hp - amount);
     brick.flash = .16;
     burst(x, y, brick.hp >= 3 ? COLORS.brick3 : (brick.hp === 2 ? COLORS.brick2 : COLORS.brick1),
       brick.hp === 0 ? 10 : 5);
-    registerCombo(10 + (brick.hp === 0 ? 30 : 0));
+    registerCombo(10 + (brick.hp === 0 ? 30 : 0) + bonus);
     if (brick.hp === 0) {
       if (brick.mystery) {
         applyMystery(brick);
@@ -581,6 +606,12 @@
 
   function setPaused(p) {
     paused = p;
+    // Menus, focus changes and resumes never accumulate simulation debt.
+    physicsAccumulator = 0;
+    lastPhysics = performance.now();
+    keys.clear();
+    paddle.vx = 0;
+    pendingMouseX = 0;
 
     const shouldShowPause = paused && running && hasStarted && !modalOpen && !gameOver;
     overlayPause.classList.toggle("hidden", !shouldShowPause);
@@ -598,12 +629,14 @@
       const value = String(next);
       if (el.textContent !== value) el.textContent = value;
     }
-    textIfChanged(uiLevel, String(levelIndex + 1));
+    textIfChanged(uiLevel, Math.min(LEVEL_COUNT,levelIndex + 1));
     textIfChanged(uiLives, String(lives));
     textIfChanged(uiScore, String(score));
     textIfChanged(uiPowers, powersLabel());
     textIfChanged(uiCombo, "×" + comboMultiplier);
     textIfChanged(uiComboHits, comboHits >= 2 ? comboHits + " träffar" : "COMBO");
+    const hideBank = !balls.some(b => b.bankCharged && !b.stuck);
+    if(uiBank.hidden!==hideBank) uiBank.hidden=hideBank;
     textIfChanged(uiBuild, [
       orbitCount() ? `◉${orbitCount()}` : "",
       turretPairs() ? `✦ TURRETS ×${turretPairs()}` : "",
@@ -705,7 +738,7 @@
     brickSprites.clear();
     scenery.image = null; // A freshly generated level gets its own background.
     const cols = clamp(Math.floor(W / 70), 9, 14);
-    const rows = clamp(Math.floor(H / 52), 6, 9);
+    const rows = clamp(Math.floor((H - 150) / 24), 2, 9);
 
     const grid = levelTemplate(idx, cols, rows);
 
@@ -713,7 +746,10 @@
     const topY = 70;
     const gap = 6;
     const brickW = (W - marginX*2 - gap*(cols-1)) / cols;
-    const brickH = clamp((H*0.26) / rows, 18, 26);
+    // Leave room between the lowest row and paddle even with a two-line site
+    // header on short landscape screens.
+    const brickH = Math.min(clamp((H*.26)/rows,14,26),
+      Math.max(8,(H-topY-100-gap*(rows-1))/rows));
 
     // Ska denna bana ha indestructibles?
     const enableInd = (Math.random() < INDESTRUCTIBLE_LEVEL_CHANCE);
@@ -753,6 +789,10 @@
     }
     // One surprise brick early on; two on later stages. Metal never becomes mystery.
     const candidates = bricks.filter(b => !b.indestructible);
+    if(!candidates.length && bricks.length) {
+      bricks[0].indestructible=false;
+      candidates.push(bricks[0]);
+    }
     const count = Math.min(idx >= 3 ? 2 : 1, candidates.length);
     for(let n=0;n<count;n++) {
       const chosen = candidates.splice(randi(0,candidates.length-1),1)[0];
@@ -792,6 +832,9 @@
       }
       b.stuck = false;
       b.aiming = false;
+      b.bankEligible = true;
+      b.bankCharged = false;
+      b.piercedBricks.clear();
       b.trail = [];
     }
   }
@@ -870,17 +913,36 @@
         break;
       case "multiball": {
         powers.multiball = 2;
-        const newBalls = [];
+        if (balls.length >= MAX_BALLS) {
+          score += 100; // Still useful at the cap, without growing the combo.
+          setEventFeedback("MULTIBOLL FULL • +100 POÄNG", "#ffd166");
+          break;
+        }
+        const newBalls = [], available = Math.min(4, MAX_BALLS - balls.length);
         for (const b of balls) {
           if (b.stuck) continue;
           const speed = len(b.vx, b.vy);
           const a = Math.atan2(b.vy, b.vx);
-          const a1 = a + rand(-0.55, -0.25);
-          const a2 = a + rand(0.25, 0.55);
-          newBalls.push(makeBall(b.x, b.y, Math.cos(a1)*speed, Math.sin(a1)*speed, b.r));
-          newBalls.push(makeBall(b.x, b.y, Math.cos(a2)*speed, Math.sin(a2)*speed, b.r));
+          for (const offset of [rand(-.55,-.25),rand(.25,.55)]) {
+            if (newBalls.length >= available) break;
+            const clone = makeBall(b.x,b.y,Math.cos(a+offset)*speed,Math.sin(a+offset)*speed,b.r);
+            // A split cannot duplicate an earned bank shot or hit a pierced
+            // brick a second time while still inside the same passage.
+            clone.bankEligible = false;
+            clone.piercedBricks = new Set(b.piercedBricks);
+            newBalls.push(clone);
+          }
+          if (newBalls.length >= available) break;
         }
-        balls.push(...newBalls.slice(0, 4));
+        if (!newBalls.length && balls.length) {
+          // Collecting a drop while all balls are caught used to waste it.
+          for (let i=0;i<Math.min(2,available);i++) {
+            const clone=makeBall(paddle.x+paddle.w/2,paddle.y-10,0,0);
+            clone.stuck=true; clone.aiming=balls[0].aiming;
+            newBalls.push(clone);
+          }
+        }
+        balls.push(...newBalls);
         break;
       }
     }
@@ -903,7 +965,8 @@
 
   // --- Input helpers ---
   function startRunIfNeeded() {
-    if (!running) return;
+    if (!running || gameOver || !upgradeOverlay.classList.contains("hidden") ||
+        !overlayRotate.classList.contains("hidden")) return;
     if (!hasStarted) hasStarted = true;
     if (modalOpen) hideStartOverlay();
     if (paused) setPaused(false);
@@ -917,6 +980,10 @@
   // --- Keyboard ---
   window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
+    // Let focused menu buttons receive native Space/Enter activation.
+    if (!upgradeOverlay.classList.contains("hidden") ||
+        e.target?.closest?.("input,textarea,select,[contenteditable]") ||
+        ((k === " " || k === "enter") && e.target?.closest?.("button,summary"))) return;
     handleHiddenCheat(e);
     if (["arrowleft","arrowright"," "].includes(k)) e.preventDefault();
 
@@ -931,14 +998,14 @@
     }
 
     if (k === "escape" || k === "p") {
-      if (!running) return;
+      if (!running || e.repeat) return;
       if (!paused) setPaused(true);
       else startRunIfNeeded();
       return;
     }
 
     keys.add(k);
-    if (k === " ") primaryAction();
+    if (k === " " && !e.repeat) primaryAction();
   }, { passive: false, capture: true });
 
   window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()), { capture: true });
@@ -952,11 +1019,10 @@
 
   function handleMouseMove(e) {
     usingMouse = true;
+    if (paused || modalOpen || gameOver) return;
 
     if (isPointerLocked()) {
-      const prev = paddle.x;
-      paddle.x = clamp(paddle.x + e.movementX, 10, W - paddle.w - 10);
-      paddle.vx = (paddle.x - prev) / (1/60);
+      pendingMouseX += e.movementX;
       paddle.targetX = null;
       return;
     }
@@ -1068,6 +1134,103 @@
     return { hit:true, nx: 0, ny: Math.sign(dy) || 1 };
   }
 
+  function overlapsExpanded(b, brick) {
+    return b.x >= brick.x-b.r && b.x <= brick.x+brick.w+b.r &&
+      b.y >= brick.y-b.r && b.y <= brick.y+brick.h+b.r;
+  }
+
+  function bouncePaddle(b) {
+    burst(b.x, paddle.y, "#80edee", 8);
+    b.y = paddle.y - b.r - .5;
+    b.bankEligible = true;
+    b.bankCharged = false;
+    const rel = clamp((b.x-paddle.x-paddle.w/2)/(paddle.w/2),-1,1);
+    const speed = clamp(len(b.vx,b.vy),420,780);
+    const angle = -Math.PI/2 + rel*Math.PI*.40;
+    const spin = clamp(paddle.vx/900,-.35,.35);
+    b.vx = Math.cos(angle)*speed + spin*260;
+    b.vy = Math.sin(angle)*speed;
+    if (b.sticky && powers.sticky > 0) {
+      powers.sticky--;
+      b.stuck = true; b.aiming = true;
+      b.vx = 0; b.vy = 0; b.trail = [];
+      stickyAimAngle = 0;
+      updateUI();
+    } else speedUp(b,12);
+  }
+
+  function moveBall(b, dt) {
+    // Remember pierced contacts until the whole ball exits. Damage and combo
+    // gains must not depend on FPS, ball size, or Slowmo.
+    for (const brick of b.piercedBricks) {
+      if (brick.hp <= 0 || !overlapsExpanded(b,brick)) b.piercedBricks.delete(brick);
+    }
+    const left=10+b.r, right=W-10-b.r, top=10+b.r;
+    b.x=clamp(b.x,left,right); b.y=Math.max(top,b.y);
+    let remaining=dt;
+    // Bounded time-of-impact loop: after a wall or brick, finish the remaining
+    // movement using the new direction, rather than losing part of the frame.
+    for (let contacts=0; contacts<6 && remaining>1e-8 && !b.stuck; contacts++) {
+      const x=b.x, y=b.y, dx=b.vx*remaining, dy=b.vy*remaining;
+      let hit=null;
+      const consider=(t,type,nx=0,ny=0,brick=null,swept=null)=>{
+        if(t>=0 && t<=1 && (!hit || t<hit.t)) hit={t,type,nx,ny,brick,swept};
+      };
+      if(dx<0) consider((left-x)/dx,"wall",1,0);
+      if(dx>0) consider((right-x)/dx,"wall",-1,0);
+      if(dy<0) consider((top-y)/dy,"wall",0,1);
+      if(dy>0 && y<=paddle.y-b.r+.5) {
+        const swept=rayBoxHit(x,y,dx,dy,paddle,b.r);
+        if(swept) consider(swept.t,"paddle");
+      }
+      for(const brick of bricks) {
+        if(brick.hp<=0 || (b.pierce && b.piercedBricks.has(brick))) continue;
+        // Cheap broad phase avoids allocating sweep results for distant tiles.
+        if(Math.max(x,x+dx)<brick.x-b.r || Math.min(x,x+dx)>brick.x+brick.w+b.r ||
+           Math.max(y,y+dy)<brick.y-b.r || Math.min(y,y+dy)>brick.y+brick.h+b.r) continue;
+        const swept=rayBoxHit(x,y,dx,dy,brick,b.r);
+        if(swept) consider(swept.t,"brick",0,0,brick,swept);
+        else if(collideBallAABB(b,b.r,brick).hit) consider(0,"brick",0,0,brick);
+      }
+      if(!hit) {b.x=x+dx; b.y=y+dy; break;}
+      b.x=x+dx*hit.t; b.y=y+dy*hit.t;
+      remaining*=1-hit.t;
+      if(hit.type==="wall") {
+        reflectBall(b,hit.nx,hit.ny);
+        speedUp(b,hit.nx?8:10);
+        if(hit.nx && b.bankEligible) b.bankCharged=true;
+      } else if(hit.type==="paddle") {
+        bouncePaddle(b);
+      } else {
+        const brick=hit.brick;
+        // Resolve against the full segment: the shared aim-preview normal is
+        // preserved for ordinary and indestructible bricks.
+        b.x=x+dx; b.y=y+dy;
+        const normal=resolveBrickContact(b,brick,x,y,hit.swept);
+        const alreadyHit=b.piercedBricks.has(brick);
+        const bank=b.bankCharged && !brick.indestructible && !alreadyHit;
+        b.bankEligible=false; b.bankCharged=false;
+        if(brick.indestructible || !b.pierce) {
+          if(b.vx*normal.nx+b.vy*normal.ny<0) reflectBall(b,normal.nx,normal.ny);
+        } else {
+          b.x=x+dx*hit.t; b.y=y+dy*hit.t;
+          b.piercedBricks.add(brick);
+        }
+        if(brick.indestructible) {
+          burst(b.x,b.y,"#9bb4cb",3); speedUp(b,6);
+        } else if(!alreadyHit) {
+          const damage=(powers.bigball>0?BIGBALL_DAMAGE:1)+(bank?1:0);
+          const bankPoints=BANK_BONUS*Math.min(5,1+Math.floor(comboHits/4));
+          // A mystery effect may replace this message: explaining a shrink or
+          // chain reaction takes priority over repeating the bank reward.
+          if(bank) setEventFeedback(`BANKSKOTT • +1 SKADA · +${bankPoints}p`,"#ffd48b");
+          damageBrick(brick,damage,b.x,b.y,"ball",bank?BANK_BONUS:0);
+          speedUp(b,10+(normal.nx?4:0));
+        }
+      }
+    }
+  }
+
   // --- Visual feedback only – never alters collisions, damage, or scoring.
   const particles = [];
   let sceneTime = 0;
@@ -1099,30 +1262,46 @@
     }
   }
 
-  // --- Loop ---
-  let last = performance.now();
-  let lastRender = 0;
-  let lastPhysics = last;
+  // --- Loop: simulation time is independent of the display's refresh rate. ---
+  const PHYSICS_DT = 1 / 60;
+  const MAX_CATCHUP_STEPS = 4;
+  let lastPhysics = performance.now(), lastRender = -Infinity;
+  let physicsAccumulator = 0, lastHud = -Infinity;
+
+  function isPlaying() {
+    return running && !paused && !modalOpen && !gameOver && !document.hidden &&
+      overlayRotate.classList.contains("hidden");
+  }
 
   function tick(now) {
     requestAnimationFrame(tick);
-    // 60 FPS max while playing; 8 FPS when paused, in menus, or hidden.
-    // The requestAnimationFrame callback may run faster but no expensive
-    // Canvas draw or game simulation is performed on skipped callbacks.
-    const active = running && !paused && !modalOpen && !gameOver && !document.hidden;
-    const interval = active ? 1000 / 60 : 1000 / 8;
-    if (now - lastRender < interval - 1) return;
-
-    const dtRaw = Math.min(.06, Math.max(0, (now - lastPhysics) / 1000));
+    const elapsed = Math.max(0, (now - lastPhysics) / 1000);
     lastPhysics = now;
-    lastRender = now;
-    const dt = Math.min(.02, dtRaw);
-    sceneTime += dt * (reduceMotion ? 0 : (paused ? 0.20 : 1));
+    if (isPlaying()) {
+      physicsAccumulator += Math.min(elapsed, PHYSICS_DT * MAX_CATCHUP_STEPS);
+      let steps = 0;
+      while (physicsAccumulator + 1e-9 >= PHYSICS_DT && steps++ < MAX_CATCHUP_STEPS && isPlaying()) {
+        physicsAccumulator -= PHYSICS_DT;
+        step(PHYSICS_DT);
+      }
+    } else physicsAccumulator = 0;
 
-    // Portrait/mobile overlay only needs to be recalculated on resize,
-    // not on every rendered frame.
-    if (active) step(dt);
-
+    const interval = isPlaying() ? 1000 / 60 : 1000 / 8;
+    if (now - lastRender + .01 < interval) return;
+    // Preserve the fractional frame remainder (90/144 Hz must not drift).
+    const visualDt = Math.min(.06, Math.max(0, (now - lastRender) / 1000));
+    lastRender = Number.isFinite(lastRender)
+      ? lastRender + Math.max(1,Math.floor((now-lastRender+.01)/interval))*interval
+      : now;
+    sceneTime += visualDt * (reduceMotion ? 0 : (paused ? .2 : 1));
+    if (isPlaying() && !reduceMotion) {
+      for (const b of balls) {
+        if (b.stuck) continue;
+        (b.trail ||= []).push({x:b.x,y:b.y});
+        if (b.trail.length > 10) b.trail.shift();
+      }
+    }
+    if (now - lastHud >= 100) { updateUI(); lastHud = now; }
     draw();
   }
 
@@ -1170,104 +1349,16 @@
         continue;
       }
 
-      if (!b.trail) b.trail = [];
-      b.trail.push({ x: b.x, y: b.y });
-      if (b.trail.length > 10) b.trail.shift();
-      const beforeX = b.x, beforeY = b.y;
-      b.x += b.vx * dt * slowFactor;
-      b.y += b.vy * dt * slowFactor;
-      let bouncedOffWall = false;
-
-      // Walls
-      const left = 10, right = W - 10, top = 10;
-      if (b.x - b.r < left) { b.x = left + b.r; b.vx = Math.abs(b.vx); speedUp(b, 8); bouncedOffWall = true; }
-      if (b.x + b.r > right) { b.x = right - b.r; b.vx = -Math.abs(b.vx); speedUp(b, 8); bouncedOffWall = true; }
-      if (b.y - b.r < top) { b.y = top + b.r; b.vy = Math.abs(b.vy); speedUp(b, 10); bouncedOffWall = true; }
-
-      // Paddle
-      const hitP = collideBallAABB(b, b.r, paddle);
-      if (hitP.hit && b.vy > 0) {
-        burst(b.x, paddle.y, "#80edee", 8);
-        b.y = paddle.y - b.r - 0.5;
-
-        const rel = ((b.x - (paddle.x + paddle.w/2)) / (paddle.w/2));
-        const relC = clamp(rel, -1, 1);
-
-        const baseSpeed = clamp(len(b.vx, b.vy), 420, 780);
-        const angle = (-Math.PI/2) + relC * (Math.PI * 0.40);
-        const spin = clamp(paddle.vx / 900, -0.35, 0.35);
-
-        b.vx = Math.cos(angle) * baseSpeed + spin * 260;
-        b.vy = Math.sin(angle) * baseSpeed;
-
-        if (b.sticky && powers.sticky > 0) {
-          // Consume one catch (not one second). The caught ball retains aiming
-          // even when this was the last charge.
-          powers.sticky -= 1;
-          b.stuck = true;
-          b.aiming = true;
-          b.vx = 0;
-          b.vy = 0;
-          b.trail = [];
-          stickyAimAngle = 0;
-          updateUI();
-        } else speedUp(b, 12);
-      }
-
-      // Bricks – sweep across the frame rather than just checking the end
-      // position. Pick the first impacted brick and keep the ball outside it.
-      // This stops indestructible bricks from trapping a ball inside their AABB.
-      let chosen = null;
-      const travelX = b.x - beforeX, travelY = b.y - beforeY;
-      for (const br of bricks) {
-        if (br.hp <= 0) continue;
-
-        const swept = !bouncedOffWall
-          ? rayBoxHit(beforeX, beforeY, travelX, travelY, br, b.r)
-          : null;
-        const overlapping = collideBallAABB(b, b.r, br).hit;
-        const validSweep = swept && swept.t >= 0 && swept.t <= 1;
-
-        // Swept hits take priority by travel distance. End overlaps are a
-        // fallback for a ball already embedded in a brick (old save state).
-        if (!validSweep && !overlapping) continue;
-        const t = validSweep ? swept.t : 1;
-        if (!chosen || t < chosen.t) chosen = { br, hit: validSweep ? swept : null, t };
-      }
-
-      if (chosen) {
-        const { br, hit } = chosen;
-        const normal = resolveBrickContact(b, br, beforeX, beforeY, hit);
-
-        // Unbreakable bricks always reflect, even with the pierce power-up.
-        if (br.indestructible) {
-          burst(b.x, b.y, "#9bb4cb", 3);
-          if (b.vx * normal.nx + b.vy * normal.ny < 0) {
-            reflectBall(b, normal.nx, normal.ny);
-            speedUp(b, 6);
-          }
-        } else {
-          const dmg = powers.bigball > 0 ? BIGBALL_DAMAGE : 1;
-          if (!b.pierce && b.vx * normal.nx + b.vy * normal.ny < 0) {
-            reflectBall(b, normal.nx, normal.ny);
-          }
-          if (b.pierce) {
-            // Piercing balls keep moving; avoid positional trapping on bricks.
-            b.x = beforeX + travelX;
-            b.y = beforeY + travelY;
-          }
-          damageBrick(br,dmg,b.x,b.y,"ball");
-          speedUp(b, 10 + (Math.abs(normal.nx) ? 4 : 0));
-        }
-      }
+      moveBall(b, dt * slowFactor);
 
       // Fell out
       if (b.y - b.r > H + 40) balls.splice(bi, 1);
     }
 
     // Lost all balls
-    if (balls.length === 0) {
+    if (balls.length === 0 && remainingBricks() > 0) {
       lives -= 1;
+      comboHits=0; comboMultiplier=1; comboTimer=0;
       updateUI();
 
       if (lives <= 0) {
@@ -1318,13 +1409,6 @@
       showUpgradeDraft();
     }
 
-    updateUI();
-  }
-
-  function dropPower(x, y) {
-    if (drops.length >= MAX_DROPS_ON_SCREEN) return;
-    const def = POWER_DEFS[randi(0, POWER_DEFS.length - 1)];
-    drops.push({ id:def.id, label:def.label, x, y, vy: rand(160,240), r:10, color:def.color });
   }
 
   function updatePaddle(dt) {
@@ -1345,7 +1429,10 @@
       paddle.x = clamp(paddle.x, 10, W - paddle.w - 10);
     } else {
       const vx = dir * (paddle.speed * 0.7);
-      paddle.x = clamp(paddle.x + vx * dt, 10, W - paddle.w - 10);
+      const previous=paddle.x;
+      paddle.x = clamp(paddle.x + pendingMouseX + vx*dt,10,W-paddle.w-10);
+      paddle.vx = (paddle.x-previous)/Math.max(dt,.0001);
+      pendingMouseX = 0;
     }
 
     paddle.y = H - 54;
@@ -1844,10 +1931,38 @@
     ctx.restore();
   }
 
+  function orbSprite(radius, color, glow, core=false, pierce=false) {
+    const key=[radius,color,glow,core,pierce].join(":");
+    let sprite=orbSprites.get(key);
+    if(sprite) return sprite;
+    const size=(radius+glow+4)*2, mid=size/2;
+    const image=document.createElement("canvas");
+    image.width=image.height=Math.ceil(size*DPR);
+    const g=image.getContext("2d");
+    g.setTransform(DPR,0,0,DPR,0,0);
+    g.fillStyle=color;g.shadowColor=color;g.shadowBlur=glow;
+    g.beginPath();g.arc(mid,mid,radius,0,Math.PI*2);g.fill();
+    g.shadowBlur=0;
+    if(core) {
+      g.fillStyle="rgba(255,255,255,.88)";
+      g.beginPath();g.arc(mid-radius*.24,mid-radius*.28,Math.max(1,radius*.33),0,Math.PI*2);g.fill();
+    }
+    if(pierce) {
+      g.strokeStyle=color;g.lineWidth=2;
+      g.beginPath();g.arc(mid,mid,radius+4,0,Math.PI*2);g.stroke();
+    }
+    sprite={image,size};orbSprites.set(key,sprite);return sprite;
+  }
+
+  function drawOrb(x,y,radius,color,glow,core=false,pierce=false) {
+    const sprite=orbSprite(radius,color,glow,core,pierce);
+    ctx.drawImage(sprite.image,x-sprite.size/2,y-sprite.size/2,sprite.size,sprite.size);
+  }
+
   function drawBalls() {
     for (const b of balls) {
       const color=b.pierce?"#e1a9ff":(powers.bigball>0?"#ffcc81":"#c8fbf7");
-      if(b.trail && !b.stuck) {
+      if(b.trail && !b.stuck && !reduceMotion) {
         ctx.save();
         for(let i=0;i<b.trail.length;i++) {
           const t=b.trail[i],fade=(i+1)/(b.trail.length+1);
@@ -1856,17 +1971,16 @@
         }
         ctx.restore();
       }
-      ctx.save();
-      ctx.shadowColor=color;ctx.shadowBlur=b.pierce?23:17;
-      ctx.fillStyle=color;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.fillStyle="rgba(255,255,255,.88)";
-      ctx.beginPath();ctx.arc(b.x-b.r*.24,b.y-b.r*.28,Math.max(1,b.r*.33),0,Math.PI*2);ctx.fill();
-      if(b.pierce) {
-        ctx.strokeStyle="#e1a9ff";ctx.lineWidth=2;ctx.beginPath();
-        ctx.arc(b.x,b.y,b.r+4,0,Math.PI*2);ctx.stroke();
+      drawOrb(b.x,b.y,b.r,color,b.pierce?23:17,true,b.pierce);
+      if(b.bankCharged && !b.stuck) {
+        ctx.save();ctx.strokeStyle="#ffd48b";ctx.lineWidth=2;
+        // Distinct from the continuous purple Pierce ring, without another blur.
+        ctx.beginPath();
+        ctx.arc(b.x,b.y,b.r+7,-.6,.6);
+        ctx.moveTo(b.x-Math.cos(.6)*(b.r+7),b.y+Math.sin(.6)*(b.r+7));
+        ctx.arc(b.x,b.y,b.r+7,Math.PI-.6,Math.PI+.6);
+        ctx.stroke();ctx.restore();
       }
-      ctx.restore();
     }
   }
 
@@ -1892,13 +2006,12 @@
     }
     const count = orbitCount();
     if (count) {
-      ctx.shadowColor="#bca0ff";ctx.shadowBlur=12;
+      ctx.shadowBlur=0;
       for(const ball of balls) {
         if(ball.stuck) continue;
         for(let i=0;i<count;i++) {
           const p=satelliteLocation(ball,i,count);
-          ctx.fillStyle=i >= runUpgrades.satellite ? "#ffcbf1" : "#d3adff";
-          ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fill();
+          drawOrb(p.x,p.y,5,i>=runUpgrades.satellite?"#ffcbf1":"#d3adff",12);
         }
       }
     }
@@ -2169,9 +2282,14 @@
   // --- Boot ---
   renderPowerGuides();
   resetGame();
+  canvas.dataset.ready = "true";
   requestAnimationFrame(tick);
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && running) setPaused(true);
+  });
+  window.addEventListener("blur", () => {
+    if (running) setPaused(true);
+    touchActive=false; stickyTouch=null; paddle.targetX=null;
   });
 })();

@@ -128,6 +128,9 @@ body.dxball-noscr{overflow:hidden;overscroll-behavior:none;touch-action:none;}
 .dx-build-readout {top:101px;color:#bed0dd;}
 .dx-combo-readout span,.dx-build-readout span {font:700 9px/1.2 Arial;letter-spacing:1px;}
 .dx-combo-readout strong {font:700 21px/1 "Pixelify Sans",monospace;color:#ffc091;}
+#uiBank {color:#ffda91;border-right:1px solid #8b744f;padding-right:8px;}
+.dxpanel .dx-bank-note {font:11px/1.5 Arial,sans-serif;color:#cbd9e5;margin:10px auto 0;}
+.dx-bank-note b {color:#ffda91;}
 .dx-build-readout strong {font:700 10px/1.3 Arial;color:#e8c9fa;overflow:hidden;text-overflow:ellipsis;}
 .dxhud-upgrade {position:absolute;inset:0;z-index:7;display:flex;align-items:center;justify-content:center;
   padding:16px;pointer-events:auto;background:rgba(5,16,34,.89);backdrop-filter:blur(5px);}
