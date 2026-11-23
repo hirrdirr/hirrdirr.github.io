@@ -1,4 +1,4 @@
-# Character Panel — 0.4.3
+# Character Panel — 0.4.4
 
 ## Presentation and interactions
 
@@ -21,7 +21,8 @@ returned bag copy. A rejected transfer keeps the current selection. The UI
 restores focus using the original button's complete data identity, then selected
 slot/item, then Close. It preserves the dialog's scroll offset when rerendering.
 Identical equipment copies render separate buttons. Technical IDs stay in
-internal action data, while labels and details show the normal item names.
+internal action data. Accessible bag labels and tooltips include the actual stats
+of each copy. Item details show the selected roll and the currently worn item.
 All ownership/capacity validation remains in existing commands. Ring details
 show a comparison and explicit equip button for each ring slot; merchant
 comparisons also show both replacement outcomes. A queued native close event
@@ -53,5 +54,5 @@ It currently returns `renderer.art.player[0]`; equipment does not alter the base
 portrait. Future equipment layers should be composed/cached behind this boundary
 rather than adding ownership rules to the preview. The ten functional slots
 use shared category labels/icons; equipment expansion does not change this lifecycle.
-Save schema is 5; equipment records and ownership are documented in
+Save schema is 6; equipment records and ownership are documented in
 [item-identity.md](item-identity.md).

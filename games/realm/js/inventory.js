@@ -63,10 +63,10 @@ export function capacityReason(p, id, count = 1) {
   return '';
 }
 // Award templates only; existing equipment must transfer its reference instead.
-export function grantItems(p, id, count = 1) {
+export function grantItems(p, id, count = 1, rng) {
   if (!template(id) || capacityReason(p, id, count)) return false;
   if (ITEMS[id].slot) {
-    for (let i = 0; i < count; i++) p.inventory[createItemInstance(p, id)] = 1;
+    for (let i = 0; i < count; i++) p.inventory[createItemInstance(p, id, rng)] = 1;
   } else p.inventory[id] = (p.inventory[id] || 0) + count;
   return true;
 }

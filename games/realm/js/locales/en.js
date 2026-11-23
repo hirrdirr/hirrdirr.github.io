@@ -1,6 +1,9 @@
 // English player-facing copy. Numeric placeholders are supplied by tr(key, ...values).
 // Keep keys stable; gameplay IDs and save data never depend on these labels.
 export default Object.freeze({
+  "save.rolls_migrated": "Your existing equipment keeps its original stats. Newly found or purchased gear can vary.",
+  "gear.stock_preview": "Base stats shown. This item's final stats are rolled on purchase.",
+  "gear.current_stats": "Currently equipped: {0} ({1})",
   "equipment.head": "Head",
   "equipment.shoulders": "Shoulders",
   "equipment.hands": "Hands",
@@ -74,7 +77,7 @@ export default Object.freeze({
   "data.duskweave": "Duskweave",
   "data.woven_for_swift_movement_with_less_protection_than_a_heavy_cloak": "Woven for swift movement, with less protection than a heavy cloak.",
   "data.runeweaver_prism": "Runeweaver Prism",
-  "data.adds_12_of_base_damage_to_lantern_burst_and_glimmerbolt": "Adds 12% of base damage to Lantern Burst and Glimmerbolt.",
+  "data.adds_12_of_base_damage_to_lantern_burst_and_glimmerbolt": "Strengthens Lantern Burst and Glimmerbolt.",
   "data.ember_shard": "Ember Shard",
   "data.a_cooling_emberstone_ivo_buys_it_for_7_gold": "A cooling emberstone. Ivo buys it for 7 gold.",
   "data.thornroot": "Thornroot",
@@ -335,7 +338,7 @@ export default Object.freeze({
   "ui.your_path": "Your path",
   "ui.open_talents": "Open talents ",
   "ui.n": "N",
-  "ui.select_an_item_for_details_identical_items_share_a_slot": "Each piece of equipment has its own slot. Select one to inspect it; consumables and materials stack.",
+  "ui.select_an_item_for_details_identical_items_share_a_slot": "Select a piece to inspect its stats. Two copies can have different bonuses. Consumables and materials stack.",
   "ui.cannot_be_sold": "Cannot be sold.",
   "ui.sell_value_gold_each_at_ivos_shop": "Sell value: {0} gold each at Ivo’s shop.",
   "ui.equip": "Equip",

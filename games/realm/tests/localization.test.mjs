@@ -19,7 +19,7 @@ const swedishCopy = /[åäöÅÄÖ]|\b(?:guld|vandrare|lykt\w*|glöd\w*|talanger
 const source = file => readFile(new URL('../'+file, import.meta.url),'utf8');
 
 test('English catalog interpolates values once, supports locale fallback and rejects incomplete messages', () => {
-  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.4.3');
+  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.4.4');
   const translate=createTranslator({'ui.restores_health':'Heal {0} HP'});
   assert.equal(translate('ui.restores_health',55),'Heal 55 HP');
   assert.equal(translate('data.lanternkeeper_blade'),'Lanternkeeper Blade');
@@ -45,7 +45,7 @@ test('all English messages and referenced keys resolve, with no leftover Swedish
 
 test('committed static page matches the English template, including metadata and accessible controls', async () => {
   const html=await source('index.html');assert.equal(html,await renderHTML());
-  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.4\.3<\/small>/);
+  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.4\.4<\/small>/);
   assert.match(html,/<title>Project Realm · Lantern Vale/);
   assert.match(html,/aria-label="Lantern Ward \(1\)"/);assert.match(html,/aria-label="Close menu"/);
   assert.doesNotMatch(html,swedishCopy);assert.doesNotMatch(html,/\{\{|\{\d+\}/);
@@ -55,7 +55,7 @@ test('committed static page matches the English template, including metadata and
 
 test('a save produced by the Swedish 0.3.0 code preserves progress while transferring equipped copies during migration', () => {
   const before=JSON.parse(fixture),s=deserialize(fixture),after=JSON.parse(serialize(s));
-  assert.equal(SAVE_VERSION,5);assert.equal(after.version,5);
+  assert.equal(SAVE_VERSION,6);assert.equal(after.version,6);
   for(const id of Object.values(before.data.player.equipment)){if(id && --before.data.player.inventory[id]===0)delete before.data.player.inventory[id];}
   before.data.player.equipment={...emptyEquipment(),...before.data.player.equipment};
   assert.deepEqual(legacyView(after.data),before.data);

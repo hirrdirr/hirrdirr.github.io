@@ -1,3 +1,4 @@
+import { canRollGear } from './gear-rolls.js';
 import { instance, templateId, resolveItem } from './item-instances.js';
 import { tr } from './i18n.js';
 import { ITEMS, RARITIES, NPCS } from './data.js';
@@ -26,15 +27,17 @@ export function compareEquipment(p, id, targetSlot) {
     [tr("ui-panels.dodge"), st => st.dodgeCooldown, v => v.toFixed(2) + ' s', true],
     [tr("ui-panels.lantern_burst"), st => st.attack * st.burstMultiplier, v => Math.round(v)]
   ].filter(([, value]) => Math.abs(value(after) - value(before)) > .0001);
-  if (!rows.length) return `<p class="detail-note">${tr("ui-panels.the_same_combat_stats_as_your_current_equipment")}</p>`;
-  return `<table class="compare-table"><caption>${tr("ui-panels.character_stats_before_after_equipping")}</caption><thead><tr><th>${tr("ui-panels.stat")}</th><th>${tr("ui-panels.current")}</th><th>${tr("ui-panels.after")}</th></tr></thead><tbody>${rows.map(([label, value, format, lower]) => {
+  const worn = resolveItem(p, p.equipment[slot]);
+  const current = worn ? `<p class="detail-note">${escapeHTML(tr('gear.current_stats', worn.name, itemStats(worn)))}</p>` : '';
+  if (!rows.length) return current + `<p class="detail-note">${tr("ui-panels.the_same_combat_stats_as_your_current_equipment")}</p>`;
+  return current + `<table class="compare-table"><caption>${tr("ui-panels.character_stats_before_after_equipping")}</caption><thead><tr><th>${tr("ui-panels.stat")}</th><th>${tr("ui-panels.current")}</th><th>${tr("ui-panels.after")}</th></tr></thead><tbody>${rows.map(([label, value, format, lower]) => {
     const a = value(before), b = value(after), good = lower ? b < a : b > a;
     return `<tr><th>${label}</th><td>${format(a)}</td><td class="${good ? 'stat-up' : 'stat-down'}">${format(b)}</td></tr>`;
   }).join('')}</tbody></table>`;
 }
 export function bagButton(p, id, selected, attribute = 'item') {
   const item = resolveItem(p, id), count = p.inventory[id];
-  return `<button class="item-button ${item.rarity}${selected ? ' selected' : ''}" data-${attribute}="${id}" aria-label="${tr("ui-panels.quantity", escapeHTML(item.name), '', count)}" aria-pressed="${selected}" title="${escapeHTML(item.name + ' · ' + itemStats(item))}"><span class="item-symbol">${itemIcon(item.icon)}</span>${item.questItem ? `<em>${tr("ui-panels.bound")}</em>` : ''}${item.slot ? '' : `<small>${count}</small>`}</button>`;
+  return `<button class="item-button ${item.rarity}${selected ? ' selected' : ''}" data-${attribute}="${id}" aria-label="${item.slot ? escapeHTML(item.name + ' · ' + itemStats(item)) : tr("ui-panels.quantity", escapeHTML(item.name), '', count)}" aria-pressed="${selected}" title="${escapeHTML(item.name + ' · ' + itemStats(item))}"><span class="item-symbol">${itemIcon(item.icon)}</span>${item.questItem ? `<em>${tr("ui-panels.bound")}</em>` : ''}${item.slot ? '' : `<small>${count}</small>`}</button>`;
 }
 export function tradePanel(s, selection) {
   const p = s.player, merchant = MERCHANTS.ivo, side = selection.side;
@@ -54,7 +57,7 @@ export function tradePanel(s, selection) {
   if (!s.buyback.length) html += `<p class="panel-hint">${tr("ui-panels.sold_something_by_mistake_buy_it_back_here_for_the_same_price")}</p>`;
   html += '</div></section></div><section class="trade-detail" aria-live="polite">';
   if (item) {
-    html += `<div><span class="item-rarity ${item.rarity}">${RARITIES[item.rarity]}${item.questItem ? tr("ui-panels.quest_bound") : ''}</span><h3>${item.name}</h3><p>${item.description}</p><p class="item-properties">${itemStats(item)}</p></div><div>${compareEquipment(p, id)}</div><div class="trade-actions">`;
+    html += `<div><span class="item-rarity ${item.rarity}">${RARITIES[item.rarity]}${item.questItem ? tr("ui-panels.quest_bound") : ''}</span><h3>${item.name}</h3><p>${item.description}</p>${side === 'stock' && canRollGear(id) ? `<p class="detail-note">${tr('gear.stock_preview')}</p>` : ''}<p class="item-properties">${itemStats(item)}</p></div><div>${compareEquipment(p, id)}</div><div class="trade-actions">`;
     const label = side === 'stock' ? tr("ui-panels.buy_1") : side === 'buyback' ? tr("ui-panels.buyback") : tr("ui-panels.sell_1");
     html += `<button class="primary" data-action="${quote.type}" data-id="${selection.id}" ${quote.ok ? '' : 'disabled'}>${tr("ui-panels.gold_2", label, quote.price)}</button>`;
     if (quote.reason) html += `<p class="panel-hint">${quote.reason}</p>`;

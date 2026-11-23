@@ -98,13 +98,13 @@ existing references. Display events carry template IDs after a transfer.
 The schema-5 loader validates the whole ownership graph before exposing it. A
 legacy migration creates records after applying the original v0–v3 shared-copy
 semantics or v4 separate-copy semantics. All original backups remain available.
-`resolveItem` currently returns the authoritative template; each record's empty
-`modifiers` field is reserved for 0.4.4, and nonempty modifiers are rejected now.
+Schema 6 validates each persisted stat profile. Combat and the UI use
+`resolveItem` for effective values, and only new eligible gear consumes a roll.
 See [item-identity.md](item-identity.md) for the full contract.
 
 ## Current roadmap priority
 
-Next: **0.4.4 — Randomized Gear Stats**, followed by 0.5.x World & Quest Expansion. The networking notes below are
+Next: **0.5.0 — XP Scaling & World Respawn**. The networking notes below are
 long-term architecture considerations, not the next release scope.
 
 ## Stage 1: small authoritative multiplayer

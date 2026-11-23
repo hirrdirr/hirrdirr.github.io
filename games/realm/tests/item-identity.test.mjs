@@ -15,14 +15,14 @@ const near=(s,id)=>Object.assign(s.player,NPCS.find(n=>n.id===id));
 function integrity(s){
  const p=s.player,refs=[...Object.keys(p.inventory).filter(id=>instanceNumber(id)),...Object.values(p.equipment).filter(Boolean),...s.buyback.map(e=>e.item).filter(id=>instanceNumber(id)),...s.drops.map(e=>e.item).filter(id=>instanceNumber(id))];
  assert.equal(new Set(refs).size,refs.length);assert.deepEqual([...refs].sort(),Object.keys(p.itemInstances).sort());
- for(const id of refs){assert.equal(p.itemInstances[id].id,id);assert.ok(ITEMS[p.itemInstances[id].templateId].slot);assert.deepEqual(p.itemInstances[id].modifiers,{});assert.ok(instanceNumber(id)<p.itemSequence);}
+ for(const id of refs){assert.equal(p.itemInstances[id].id,id);assert.ok(ITEMS[p.itemInstances[id].templateId].slot);assert.ok(resolveItem(p,id));assert.ok(instanceNumber(id)<p.itemSequence);}
  for(const id of Object.keys(p.inventory).filter(id=>instanceNumber(id)))assert.equal(p.inventory[id],1);
 }
 function memory(initial={}){const m=new Map(Object.entries(initial));return {getItem:k=>m.get(k),setItem:(k,v)=>m.set(k,v)};}
 
 test('each identical acquisition creates one persistent record and a separate bag slot',()=>{
  let s=createGame();assert.equal(addItem(s,'moonBlade',3),true);const ids=bagIds(s.player,'moonBlade');assert.equal(ids.length,3);assert.equal(new Set(ids).size,3);assert.equal(occupiedSlots(s.player),4);
- for(const id of ids){assert.deepEqual(resolveItem(s.player,id),ITEMS.moonBlade);assert.equal(s.player.inventory[id],1);}
+ for(const id of ids){assert.equal(resolveItem(s.player,id).name,ITEMS.moonBlade.name);assert.equal(s.player.inventory[id],1);}
  const initial=data(s);for(let i=0;i<20;i++){s=deserialize(serialize(s));assert.deepEqual(data(s),initial);integrity(s);}
 });
 test('real v4 fixture preserves every bag copy, all ten slots, buyback and outstanding drops',()=>{
@@ -38,9 +38,9 @@ test('v4 migration preserves legitimate maximum stacks beyond the old file limit
  const s=deserialize(JSON.stringify(raw));for(const id of Object.keys(ITEMS))assert.equal(bagCount(s.player,id),999,id);
  const text=serialize(s);assert.ok(text.length>262144);assert.ok(text.length<MAX_SAVE_BYTES);assert.deepEqual(data(deserialize(text)),data(s));integrity(s);
 });
-test('schema-4 import and startup retain original backups before saving schema 5',()=>{
+test('schema-4 import and startup retain original backups before saving schema 6',()=>{
  const mem=memory({[SAVE_KEY]:fixture}),store=new SaveStore(mem),s=store.load();assert.equal(mem.getItem(SAVE_KEY+'.v4'),fixture);assert.match(store.notice,/individual identities/);
- assert.equal(store.save(s),true);assert.equal(JSON.parse(mem.getItem(SAVE_KEY)).version,5);assert.equal(store.replace(deserialize(fixture),fixture),true);assert.equal(mem.getItem(SAVE_KEY+'.import.v4'),fixture);integrity(store.load());
+ assert.equal(store.save(s),true);assert.equal(JSON.parse(mem.getItem(SAVE_KEY)).version,6);assert.equal(store.replace(deserialize(fixture),fixture),true);assert.equal(mem.getItem(SAVE_KEY+'.import.v4'),fixture);integrity(store.load());
 });
 test('invalid current identity graphs fail as a whole rather than creating or discarding items',()=>{
  const original=data(deserialize(fixture));
@@ -72,7 +72,7 @@ test('invalid current identity graphs fail as a whole rather than creating or di
   d=>d.drops[0].x=-100,
   d=>d.buyback.push({...d.buyback[0]})
  ];
- for(const mutate of mutations){const d=structuredClone(original);mutate(d);assert.throws(()=>deserialize(JSON.stringify({version:5,data:d})),/identities/);}
+ for(const mutate of mutations){const d=structuredClone(original);mutate(d);assert.throws(()=>deserialize(JSON.stringify({version:6,data:d})),/identities/);}
  assert.deepEqual(data(deserialize(serialize(deserialize(fixture)))),original);
 });
 test('corrupt instance graphs preserve original data and recover only from a valid backup',()=>{

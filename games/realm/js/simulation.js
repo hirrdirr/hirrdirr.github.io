@@ -1,3 +1,4 @@
+import { random } from './random.js';
 import { instance, templateId, resolveItem, createItemInstance, discardItem } from './item-instances.js';
 import { tr } from './i18n.js';
 // Pure game rules. No DOM, Canvas, storage, clocks or network access.
@@ -48,14 +49,13 @@ export function emit(s, type, data = {}) {
   s.events.push({ type, ...data });
   if (s.events.length > 100) s.events.shift();
 }
-function random(s) { s.seed = (Math.imul(s.seed, 1664525) + 1013904223) >>> 0; return s.seed / 4294967296; }
 function effect(s, type, x, y, text = '', extra = {}) {
   const life = ['slash', 'finisher', 'impact'].includes(type) ? .24 : .8;
   s.effects.push({ type, x, y, text, life, maxLife: life, ...extra });
   if (s.effects.length > 70) s.effects.shift();
 }
-export function addItem(s, id, quantity = 1) {
-  if (!grantItems(s.player, id, quantity)) return false;
+export function addItem(s, id, quantity = 1, rng = () => random(s)) {
+  if (!grantItems(s.player, id, quantity, rng)) return false;
   emit(s, 'item', { id, quantity });
   return true;
 }
@@ -107,7 +107,7 @@ export function completeQuest(s, id) {
   const rewards = QUESTS[id].rewards;
   giveXP(s, rewards.xp);
   s.player.gold = Math.min(MAX_GOLD, s.player.gold + rewards.gold);
-  for (const [item, count] of Object.entries(rewards.items)) addItem(s, item, count);
+  for (const [item, count] of Object.entries(rewards.items)) addItem(s, item, count, null);
   emit(s, 'questDone', { id });
   return true;
 }
@@ -180,7 +180,7 @@ function kill(s, enemy) {
   const table = LOOT_TABLES[enemy.type];
   let roll = random(s) * table.reduce((sum, [, weight]) => sum + weight, 0), item = table[0][0];
   for (const [id, weight] of table) { roll -= weight; if (roll < 0) { item = id; break; } }
-  if (ITEMS[item].slot) item = createItemInstance(s.player, item);
+  if (ITEMS[item].slot) item = createItemInstance(s.player, item, () => random(s));
   s.drops.push({ id: ++s.sequence, x: enemy.x, y: enemy.y, item, life: 90 });
   if (s.drops.length > 64) discardItem(s.player, s.drops.shift().item);
   emit(s, 'kill', { typeId: enemy.type, xp: def.xp, gold: def.gold });

@@ -1,4 +1,4 @@
-# Equipment ownership — v0.4.3
+# Equipment ownership — v0.4.4
 
 The ten slots are Weapon, Armor, Charm, Head, Shoulders, Hands, Legs, Feet,
 Ring 1 and Ring 2. `EQUIPMENT_DEFINITIONS` centralizes category, label and icon;
@@ -28,10 +28,9 @@ commands cannot choose an arbitrary copy. The UI supplies explicit ring targets.
 | Legacy bag exceeds 16 slots | Preserved; equip into empty slots or sell to make room |
 | Existing consumable stack in a full bag | May grow up to 999 copies |
 
-Stats resolve each worn instance through its template, alongside existing talent
+Stats resolve each worn instance through its template and permanent rolled profile, alongside talent
 bonuses. Transfers clamp health down when necessary and never grant healing or
-accumulate permanent stat bonuses. All prices, stats and combat formulas remain
-unchanged from 0.4.2.
+accumulate permanent stat bonuses. See the [roll rules](item-identity.md#permanent-gear-stats-in-044) for stat ranges.
 
 ## Trading and saving
 
@@ -49,5 +48,4 @@ transactions. Use one active game tab. No networking or backend is introduced.
 
 ## Next milestone
 
-0.4.4 adds randomized per-instance stats. This release only establishes stable
-identities and a reserved customization field; no affixes or random rolls exist.
+**0.5.0 — XP Scaling & World Respawn**.

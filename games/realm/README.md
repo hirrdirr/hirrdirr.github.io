@@ -1,9 +1,21 @@
-# Project Realm — Lantern Vale, v0.4.3
+# Project Realm — Lantern Vale, v0.4.4
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## 0.4.3 — Item Identity System
+## 0.4.4 — Randomized Gear Stats
+
+Compare individual copies before equipping them. For example, a new Moonshard
+can give 11 attack, the base 10 attack, or 9 attack and 6 maximum health. The
+selected copy keeps its stats through equipment changes, sale, buyback and reload.
+Ivo shows base stats before purchase. Bag and buyback details show the actual copy.
+
+Enemy drops, caches and shop purchases can vary. Starter gear, quest rewards
+and every item already in a save retain their authored values. The original
+0.4.3 save is backed up before autosave upgrades it to schema 6.
+See [roll rules and save compatibility](docs/item-identity.md#permanent-gear-stats-in-044).
+
+## Previous release: 0.4.3 — Item Identity System
 
 Every equipment copy now has a persistent identity. Identical swords and rings
 appear separately in the bag and can be selected independently. Equip, swap,
@@ -19,8 +31,7 @@ every copy remains available; sell or equip items to make room.
 
 See [item-identity.md](docs/item-identity.md) for the ownership and migration
 contracts and [verification.md](docs/verification.md) for actual checks.
-Randomized stats are deferred to **0.4.4**; this release only provides the data
-foundation, with unchanged template-derived attributes.
+
 
 ## Previous release: 0.4.2 — Equipment Expansion
 
@@ -228,7 +239,7 @@ desktop boundaries. No networking layer or credentials are included.
 
 ## Saves
 
-The key remains **hirrdirr.realm.save**, with schema version **5**. The DTO
+The key remains **hirrdirr.realm.save**, with schema version **6**. The DTO
 contains character progression, inventory/equipment, talent ranks, respec count,
 quests, permanent flags, discoveries, opened caches, herbs, runes, checkpoint,
 cooldowns, uncollected loot, buyback, elapsed time and the simulation RNG seed.
@@ -248,12 +259,12 @@ The previous readable save is retained as `.backup`; corrupted input is kept
 as `.recovery`. Future-version saves and unrecoverable corruption block automatic
 overwriting. Imports/new journeys require confirmation. Files above 8 MiB are
 rejected; the larger limit accommodates expanded legacy equipment stacks. IDs
-and ownership references are validated. Old v0/v1/v2/v3/v4 saves
-get untouched `.v0`/`.v1`/`.v2`/`.v3`/`.v4` backups before autosave. Imported legacy files
+and ownership references are validated. Old v0–v5 saves
+get an untouched `.vN` backup before autosave. Imported legacy files
 are also retained as `.import.vN` (the latest import for that schema version). If that backup cannot be
 written, the old original stays protected and the temporary journey can be exported.
 
-Schema 5 stores equipment records once, with one reference in the bag, a worn
+Schema 6 stores equipment records once, with one reference in the bag, a worn
 slot, buyback or a ground drop. IDs persist through transfers and reloads. Invalid
 or conflicting references reject the save as a whole and use the existing
 backup/recovery path. v4 migration treats bag copies and worn copies separately;
@@ -272,5 +283,4 @@ animation loop; the talent panel intentionally continues simulation. The 30 FPS 
 
 ## Next roadmap milestone
 
-**0.4.4 — Randomized Gear Stats** will add persistent stat variations to these
-individual equipment records. World & Quest Expansion follows in 0.5.x.
+**0.5.0 — XP Scaling & World Respawn** will introduce level-dependent XP and respawning world enemies and bosses.
