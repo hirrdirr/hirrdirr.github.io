@@ -1,6 +1,6 @@
 import { tr } from './i18n.js';
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.5.1';
+export const VERSION = '0.5.2';
 export const ITEMS = Object.freeze({
   trainingSword: { value: 1, name: tr("data.wanderers_sword"), slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: tr("data.a_worn_blade_a_new_chapter") },
   linenCoat: { value: 1, name: tr("data.travel_coat"), slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: tr("data.light_enough_for_a_long_journey") },
@@ -38,6 +38,9 @@ export const ENEMIES = Object.freeze({
   wolf: { name: tr("data.dusk_wolf"), behavior: 'pounce', level: 2, hp: 68, attack: 12, speed: 65, xp: 26, gold: 5, aggro: 165, leash: 240, radius: 13, cooldown: 2.2 },
   warden: { name: tr("data.rootbound_warden"), behavior: 'melee', level: 4, hp: 300, attack: 21, speed: 40, xp: 95, gold: 28, aggro: 185, leash: 280, radius: 23, cooldown: 2.8, boss: true, respawnSeconds: 120, flag: 'wardenDefeated' },
   wisp: { name: tr("data.emberwing"), behavior: 'ranged', level: 4, hp: 92, attack: 17, speed: 49, xp: 34, gold: 7, aggro: 225, leash: 260, radius: 12, cooldown: 2.1 },
+  skitter: { name: tr('ash.skitter'), behavior: 'pounce', level: 7, hp: 155, attack: 24, speed: 74, xp: 56, gold: 9, aggro: 150, leash: 195, radius: 13, cooldown: 2.3 },
+  sentry: { name: tr('ash.sentry'), behavior: 'ranged', level: 8, hp: 192, attack: 30, speed: 38, xp: 67, gold: 12, aggro: 200, leash: 235, radius: 14, cooldown: 2.5 },
+  striker: { name: tr('ash.elite'), behavior: 'melee', level: 9, hp: 1380, attack: 49, speed: 43, xp: 190, gold: 48, aggro: 180, leash: 240, radius: 22, cooldown: 2.7, boss: true, respawnSeconds: 150 },
   ancient: { name: tr("data.fenheart"), behavior: 'eruption', level: 6, hp: 1350, attack: 44, speed: 30, xp: 145, gold: 40, aggro: 220, leash: 270, radius: 24, cooldown: 2.4, boss: true, respawnSeconds: 180, flag: 'ancientDefeated' }
 });
 // One weighted drop per kill. Copies stay in the bag for individual trading.
@@ -46,6 +49,9 @@ export const LOOT_TABLES = Object.freeze({
   wolf: [['amber', 48], ['potion', 22], ['swiftBlade', 10], ['trailCharm', 8], ['briarPads', 6], ['reedLegs', 6]],
   warden: [['moonBlade', 100]],
   wisp: [['emberShard', 49], ['potion', 22], ['emberCharm', 10], ['duskGrips', 8], ['fenBoots', 6], ['fenCowl', 3], ['emberBand', 2]],
+  skitter: [['emberShard', 56], ['potion', 25], ['briarPads', 12], ['fenBoots', 7]],
+  sentry: [['emberShard', 50], ['potion', 24], ['duskGrips', 18], ['emberBand', 8]],
+  striker: [['emberBand', 55], ['emberBlade', 45]],
   ancient: [['emberCharm', 100]]
 });
 export const QUESTS = Object.freeze({
@@ -61,12 +67,22 @@ export const QUESTS = Object.freeze({
     rewards: { xp: 110, gold: 36, items: { marshCoat: 1, potion: 2 } } },
   heart: { name: tr("data.a_heart_of_embers"), npc: 'signe', requires: 'embers', text: tr("data.the_runes_point_to_fenheart_at_the_old_sluice_in_the_southeast_it"),
     objectives: [{ type: 'kill', target: 'ancient', count: 1, label: tr("data.defeat_fenheart") }, { type: 'seal', target: 'seal', count: 1, label: tr("data.restore_the_fen_seal") }],
-    rewards: { xp: 160, gold: 60, items: { emberBlade: 1 } } }
+    rewards: { xp: 160, gold: 60, items: { emberBlade: 1 } } },
+  thirdStroke: { name: tr('ash.q1'), npc: 'ada', requires: 'heart', text: tr('ash.q1text'),
+    objectives: [{ type: 'inspect', target: 'gauge', count: 1, label: tr('ash.gauge') }, { type: 'inspect', target: 'bell', count: 1, label: tr('ash.bell') }],
+    rewards: { xp: 120, gold: 32, items: { potion: 3 } } },
+  flume: { name: tr('ash.q2'), npc: 'ada', requires: 'thirdStroke', text: tr('ash.q2text'),
+    objectives: [{ type: 'kill', target: 'skitter', count: 2, label: tr('ash.runners') }, { type: 'kill', target: 'sentry', count: 1, label: tr('ash.watchers') }],
+    rewards: { xp: 155, gold: 42, items: { fenBoots: 1 } } },
+  lastCasting: { name: tr('ash.q3'), npc: 'ada', requires: 'flume', text: tr('ash.q3text'),
+    objectives: [{ type: 'kill', target: 'striker', count: 1, label: tr('ash.strike') }],
+    rewards: { xp: 210, gold: 66, items: { emberBand: 1 } } }
 });
 export const NPCS = Object.freeze([
   { id: 'elin', name: tr("data.elin"), role: tr("data.lanternkeeper"), x: 528, y: 832, color: 'gold', greeting: tr("data.welcome_to_lantern_vale_as_long_as_the_village_lantern_burns_ther") },
   { id: 'mira', name: tr("data.mira"), role: tr("data.herbalist_mentor"), x: 352, y: 768, color: 'rose', greeting: tr("data.the_forest_holds_both_wounds_and_remedies_rest_here_a_while_i_wil") },
   { id: 'ivo', name: tr("data.ivo"), role: tr("data.merchant"), x: 640, y: 784, color: 'blue', greeting: tr("data.a_potion_in_your_bag_is_worth_two_on_the_shelf_show_me_what_you_w") },
+  { id: 'ada', name: tr('ash.ada'), role: tr('ash.role'), x: 2024, y: 1176, color: 'copper', greeting: tr('ash.greeting') },
   { id: 'signe', name: tr("data.signe"), role: tr("data.runewalker"), x: 1264, y: 768, color: 'rose', greeting: tr("data.i_saw_the_beacon_light_now_something_beneath_the_fen_is_answering") }
 ]);
 export const SPAWN = Object.freeze({ x: 448, y: 880 });

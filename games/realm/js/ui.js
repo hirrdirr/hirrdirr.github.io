@@ -136,7 +136,7 @@ export class UI {
     if(dialogue) {
       if(!state&&!locked)html+=`<button class="primary" data-action="accept" data-id="${id}">${tr("ui.accept_quest")}</button>`;
       else if(ready)html+=`<button class="primary" data-action="complete" data-id="${id}">${tr("ui.complete_claim_reward")}</button>`;
-    } else if(ready)html+=`<p>${tr("ui.return_to", NPCS.find(n=>n.id===q.npc).name, q.npc==='signe'?tr("ui.at_wanderers_camp"):tr("ui.in_lantern_vale"))}</p>`;
+    } else if(ready)html+=`<p>${tr("ui.return_to", NPCS.find(n=>n.id===q.npc).name, q.npc==='ada'?tr('ash.turn'):q.npc==='signe'?tr("ui.at_wanderers_camp"):tr("ui.in_lantern_vale"))}</p>`;
     if(locked)html+=`<p>${tr("ui.complete_first", QUESTS[q.requires].name)}</p>`;
     return html+'</section>';
   }
@@ -148,7 +148,7 @@ export class UI {
     const npc=NPCS.find(n=>n.id===id);if(!npc)return;
     if(this.view!=='dialogue'||this.npcId!==id)$('panel-feedback').hidden=true;
     this.view='dialogue';this.npcId=id;this.heading(npc.role.toUpperCase(),npc.name);
-    const s=this.state(),greeting=id==='signe'&&!s.flags.beaconLit?tr("ui.the_beacon_to_the_north_has_gone_dark_help_elin_rekindle_it_and_w"):id==='signe'&&s.flags.sealRestored?tr("ui.the_fen_breathes_again_you_have_given_us_time_to_discover_what_li"):npc.greeting;let html='<p class="dialogue-greeting">“'+greeting+'”</p>';
+    const s=this.state(),greeting=id==='ada'&&s.quests.lastCasting?.status==='done'?tr('ash.ending'):id==='signe'&&!s.flags.beaconLit?tr("ui.the_beacon_to_the_north_has_gone_dark_help_elin_rekindle_it_and_w"):id==='signe'&&s.quests.heart?.status==='done'?tr("ui.the_fen_breathes_again_you_have_given_us_time_to_discover_what_li"):npc.greeting;let html='<p class="dialogue-greeting">“'+greeting+'”</p>';
     if(id==='ivo'){this.open('merchant');return;}
     html+=Object.entries(QUESTS).filter(([,q])=>q.npc===id).map(([qid])=>this.questHTML(qid,true)).join('');
     if(id==='mira')html+=`<p>${tr("ui.your_health_is_restored_i_can_also_help_you_choose_a_new_path_you")}</p><button class="primary" data-action="talents">${tr("ui.study_reset_talents")}</button>`;
@@ -211,20 +211,21 @@ export class UI {
     const target=nearestInteraction(s),interaction=$('interaction');
     interaction.hidden=!target||p.dead;
     $('combo-hud').hidden=p.combo===0||Boolean(target)||p.dead;
-    if(target)interaction.querySelector('span').textContent=target.kind==='npc'?tr("ui.talk_to", target.name):target.kind==='herb'?tr("data.gather_glimmerherbs"):target.kind==='chest'?tr("ui.open_cache"):target.kind==='beacon'?tr("ui.inspect_beacon"):target.kind==='sign'?tr("ui.read_signpost"):target.kind==='rune'?tr("ui.read_runestone"):target.kind==='seal'?tr("ui.inspect_seal"):target.kind==='gate'?tr("ui.inspect_sluice"):tr("ui.rest_set_checkpoint");
+    if(target)interaction.querySelector('span').textContent=target.prompt || (target.kind==='npc'?tr("ui.talk_to", target.name):target.kind==='herb'?tr("data.gather_glimmerherbs"):target.kind==='chest'?tr("ui.open_cache"):target.kind==='beacon'?tr("ui.inspect_beacon"):target.kind==='sign'?tr("ui.read_signpost"):target.kind==='rune'?tr("ui.read_runestone"):target.kind==='seal'?tr("ui.inspect_seal"):target.kind==='gate'?tr("ui.inspect_sluice"):tr("ui.rest_set_checkpoint"));
     let tracker='';
     for(const [id,q] of Object.entries(s.quests))if(q.status==='active') {
       const def=QUESTS[id],ready=questReady(s,id);
       tracker+=`<section class="quest-card"><h3>${def.name}</h3>${ready?`<p class="done">${tr("ui.return_to_3", NPCS.find(n=>n.id===def.npc).name)}</p>`:'<ul>'+def.objectives.map((o,i)=>'<li>'+o.label+' <span'+(q.progress[i]>=o.count?' class="done"':'')+'>'+q.progress[i]+'/'+o.count+'</span></li>').join('')+'</ul>'}</section>`;
     }
     if(!tracker) {
-      if(s.quests.heart?.status==='done')tracker=`<section class="quest-card"><h3>${tr("ui.the_embers_are_quiet")}</h3><p class="done">${tr("ui.chapter_02_complete")}</p><p>${tr("ui.find_the_worlds_four_caches_and_try_different_equipment")}</p></section>`;
+      if(s.quests.lastCasting?.status==='done')tracker=`<section class="quest-card"><h3>${tr('ash.complete')}</h3><p class="done">${tr('ash.completeText')}</p></section>`;
+      else if(s.quests.heart?.status==='done')tracker=`<section class="quest-card"><h3>${tr("ui.the_embers_are_quiet")}</h3><p class="done">${tr("ui.chapter_02_complete")}</p><p>${(s.quests.thirdStroke ? tr('ash.next') : tr('ash.lead'))}</p></section>`;
       else if(s.quests.beacon?.status==='done')tracker=`<section class="quest-card"><h3>${tr("ui.a_voice_from_the_fen")}</h3><p>${tr("ui.signe_awaits_at_wanderers_camp_just_east_of_the_bridge_follow_the")}</p></section>`;
       else tracker=`<section class="quest-card"><h3>${tr("ui.a_new_beginning")}</h3><p>${tr("ui.talk_to_elin_by_the_village_lantern")}<br>${tr("ui.mira_also_has_a_quest")}</p></section>`;
     }
     if(availableTalentPoints(p))tracker+=`<section class="quest-card"><h3>${tr("ui.unspent_talent_points", availableTalentPoints(p))}</h3><p>${tr("ui.open_talents_n_to_develop_your_wanderer")}</p></section>`;
     if(tracker!==this.lastTracker){$('quest-tracker').innerHTML=tracker;this.lastTracker=tracker;}
-    setText('field-note',zone.id==='marsh'?tr("ui.emberwing_shots_travel_in_a_straight_line_sidestep_use_the_trees"):zone.id==='camp'?tr("ui.rest_at_the_lantern_with_e_you_will_return_here_if_you_fall_mira"):zone.safe?tr("ui.take_a_breath_the_village_lantern_offers_warmth_rest_and_a_way_ho"):zone.id==='ruins'?tr("ui.the_warden_hits_hard_but_slowly_watch_the_ground_give_the_roots_r"):tr("ui.stray_from_the_path_now_and_then_the_forest_hides_more_than_the_c"));
+    setText('field-note',zone.id==='reach'?tr('ash.hint'):zone.id==='marsh'?tr("ui.emberwing_shots_travel_in_a_straight_line_sidestep_use_the_trees"):zone.id==='camp'?tr("ui.rest_at_the_lantern_with_e_you_will_return_here_if_you_fall_mira"):zone.safe?tr("ui.take_a_breath_the_village_lantern_offers_warmth_rest_and_a_way_ho"):zone.id==='ruins'?tr("ui.the_warden_hits_hard_but_slowly_watch_the_ground_give_the_roots_r"):tr("ui.stray_from_the_path_now_and_then_the_forest_hides_more_than_the_c"));
     renderer.renderMap(s);
   }
 }

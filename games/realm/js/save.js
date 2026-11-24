@@ -4,7 +4,7 @@ import { tr } from './i18n.js';
 import { createGame, stats } from './simulation.js';
 import { ITEMS, QUESTS, SPAWN, CHECKPOINTS, xpForLevel } from './data.js';
 import { respawnSeconds, spawnKey, placeAtHome } from './enemy-life.js';
-import { blocked, LANDMARKS } from './world.js';
+import { blocked, LANDMARKS, sluiceOpen } from './world.js';
 import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
 import { MAX_STACK, EQUIPMENT_SLOTS, emptyEquipment, acceptsEquipment } from './inventory.js';
@@ -109,12 +109,10 @@ export function deserialize(raw) {
   }
   p.hp = integer(old.hp, 0, stats(p).maxHp, stats(p).maxHp);
   p.dead = old.dead === true || p.hp === 0;
-  if (Number.isFinite(old.x) && Number.isFinite(old.y) && !blocked(old.x, old.y)) { p.x = old.x; p.y = old.y; }
-  else Object.assign(p, CHECKPOINTS[p.checkpoint] || SPAWN);
   s.harvested = cleanList(d.harvested, idsOf('herb'));
   s.chests = cleanList(d.chests, idsOf('chest'));
   s.runes = cleanList(d.runes, idsOf('rune'));
-  s.discovered = cleanList(d.discovered, ['village', 'trail', 'forest', 'ruins', 'camp', 'marsh']);
+  s.discovered = cleanList(d.discovered, ['village', 'trail', 'forest', 'ruins', 'camp', 'marsh', 'reach']);
   if (!s.discovered.includes('village')) s.discovered.unshift('village');
   s.flags.wardenDefeated = d.flags?.wardenDefeated === true;
   s.flags.beaconLit = s.flags.wardenDefeated && d.flags?.beaconLit === true;
@@ -127,6 +125,8 @@ export function deserialize(raw) {
   }
   s.seed = integer(d.seed, 0, 4294967295, s.seed);
   s.time = integer(d.time, 0, 100000000, 0);
+  if (Number.isFinite(old.x) && Number.isFinite(old.y) && !blocked(old.x, old.y, 11, sluiceOpen(s))) { p.x = old.x; p.y = old.y; }
+  else Object.assign(p, CHECKPOINTS[p.checkpoint] || SPAWN);
   if (modern && (!Array.isArray(d.buyback) || d.buyback.length > BUYBACK_LIMIT || !Array.isArray(d.drops) || d.drops.length > 64)) damaged();
   if (envelope.version >= 3 && Array.isArray(d.buyback)) for (const entry of d.buyback.slice(0, BUYBACK_LIMIT)) {
     const item = modern ? resolveItem(p, entry?.item) : template(entry?.item);

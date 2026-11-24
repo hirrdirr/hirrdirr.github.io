@@ -1,20 +1,40 @@
 import { tr } from './i18n.js';
 import { SPAWN, NPCS } from './data.js';
 export const TILE = 32;
-export const WIDTH = 1920;
+export const WIDTH = 2688;
 export const HEIGHT = 1280;
 export const SAFE = { x: 176, y: 608, w: 528, h: 416 };
 export const CAMP = { x: 1184, y: 712, w: 160, h: 104 };
 export const inRect = (x, y, r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
-export const inSafe = (x, y) => inRect(x, y, SAFE) || inRect(x, y, CAMP);
+export const SHELTER = { x: 1976, y: 1136, w: 106, h: 80 };
+export const sluiceOpen = s => s.flags.sealRestored && s.quests.heart?.status === 'done';
+export const inSafe = (x, y) => inRect(x, y, SAFE) || inRect(x, y, CAMP) || inRect(x, y, SHELTER);
 export const inMarsh = (x, y) => x > 1360 + Math.sin(y / 80) * 25 && y > 738 + Math.sin(x / 80) * 26;
 export const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const riverLeft = y => 1008 + Math.round(Math.sin(y / 210) * 35);
 export const isBridge = (x, y) => x >= 952 && x <= 1160 && y >= 608 && y <= 688;
+const sluiceEdge = 1888;
+const eastBank = 1952;
+const basaltAt = (x, y) => x > sluiceEdge && (x < eastBank ? y < 1184 : y < 398 + 30 * Math.sin(x / 83));
+function waterAt(x, y) {
+  if (x < 973 || x > 1139 || isBridge(x, y)) return false;
+  const left = riverLeft(y);
+  return x >= left && x <= left + 96;
+}
 export function terrain(x, y) {
-  const river = riverLeft(y);
+  if (basaltAt(x, y)) return 'basalt';
+  if (x > sluiceEdge && x < eastBank) return 'flume';
+  if (x >= eastBank) {
+    const flumeX = Math.min(2496, 1990 + (1200 - y) * .82);
+    if (Math.abs(x - flumeX) < 31 || (x < 2024 && y >= 1184)) return 'flume';
+    return 'ash';
+  }
+  return valeTerrain(x, y);
+}
+
+function valeTerrain(x, y) {
   if (isBridge(x, y)) return 'bridge';
-  if (x >= river && x <= river + 96) return 'water';
+  if (waterAt(x, y)) return 'water';
   if (x > 1400 && x < 1770 && y > 200 && y < 470) return 'ruin';
   if ((Math.abs(y - 848) < 37 && x > 240 && x < 820) ||
       (Math.abs(x - 800) < 35 && y > 620 && y < 880) ||
@@ -50,6 +70,8 @@ export const LANDMARKS = [
   { id: 'rune3', kind: 'rune', x: 1584, y: 1120, text: tr("world.if_the_heart_awakens_do_not_follow_its_glow_heed_the_signs_upon_t") },
   { id: 'seal', kind: 'seal', x: 1776, y: 1056 },
   { id: 'chest4', kind: 'chest', x: 1824, y: 1168, item: 'trailCharm', quantity: 1 },
+  { id: 'gauge', kind: 'gauge', x: 2112, y: 1060, prompt: tr('ash.gauge'), text: tr('ash.gaugeText') },
+  { id: 'bell', kind: 'bell', x: 2272, y: 860, prompt: tr('ash.bell'), text: tr('ash.bellText') },
   { id: 'gate', kind: 'gate', x: 1816, y: 1232 }
 ];
 export const ENEMY_SPAWNS = [
@@ -58,7 +80,9 @@ export const ENEMY_SPAWNS = [
   ['wolf', 1280, 496], ['wolf', 1376, 704], ['wolf', 1232, 864],
   ['wolf', 1536, 552], ['warden', 1568, 384],
   ['wisp', 1432, 880], ['wisp', 1632, 784], ['wisp', 1648, 1056],
-  ['wisp', 1792, 848], ['wisp', 1440, 1120], ['ancient', 1744, 976]
+  ['wisp', 1792, 848], ['wisp', 1440, 1120], ['ancient', 1744, 976],
+  ['skitter', 2216, 1008], ['skitter', 2360, 882], ['sentry', 2448, 768],
+  ['sentry', 2100, 680], ['skitter', 2560, 970], ['striker', 2496, 536]
 ];
 function seeded(seed) { return () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; }; }
 export function makeWorld() {
@@ -69,15 +93,21 @@ export function makeWorld() {
     const x = col * TILE + Math.floor(random() * 18);
     const y = row * TILE + Math.floor(random() * 18);
     const chance = random();
-    const tile = terrain(x, y), marsh = tile === 'marsh';
+    const tile = valeTerrain(x, y), marsh = tile === 'marsh';
     if (!['grass', 'marsh'].includes(tile) || inSafe(x, y)) continue;
     if (important.some(p => Math.hypot(p.x - x, p.y - y) < 72)) continue;
     // Generous clear margins along the road and around the bridge.
-    if ([[60, 0], [-60, 0], [0, 60], [0, -60]].some(([dx, dy]) => !['grass', 'marsh'].includes(terrain(x + dx, y + dy)))) continue;
+    if ([[60, 0], [-60, 0], [0, 60], [0, -60]].some(([dx, dy]) => !['grass', 'marsh'].includes(valeTerrain(x + dx, y + dy)))) continue;
     if (chance < (marsh ? .20 : .30) && !props.some(p => Math.hypot(p.x - x, p.y - y) < 38)) props.push({ kind: chance < (marsh ? .16 : .25) ? 'tree' : 'rock', x, y, variant: marsh ? 3 : Math.floor(random() * 3) });
   }
+  for (let y = 490; y < 1200; y += 80) for (let x = 1980; x < WIDTH - 64; x += 88) {
+    const px = x + Math.floor(random() * 40), py = y + Math.floor(random() * 36);
+    if (terrain(px, py) !== 'ash' || inSafe(px, py) || important.some(p => Math.hypot(p.x - px, p.y - py) < 82)) continue;
+    if (random() < .6) props.push({ kind: random() < .55 ? 'snag' : 'slag', x: px, y: py });
+  }
+  props.push({ kind: 'furnace', x: 2496, y: 458 });
   props.push(...BUILDINGS, ...LANDMARKS);
-  const obstacles = props.filter(p => ['tree', 'rock', 'house', 'beacon'].includes(p.kind));
+  const obstacles = props.filter(p => ['tree', 'rock', 'house', 'beacon', 'snag', 'slag', 'furnace'].includes(p.kind));
   const cells = new Map();
   for (const p of obstacles) {
     const x = p.kind === 'house' ? p.x - p.w / 2 : p.x - 24;
@@ -93,9 +123,12 @@ export function makeWorld() {
   return { props, obstacles, cells };
 }
 export const WORLD = makeWorld();
-export function blocked(x, y, radius = 11) {
+export function blocked(x, y, radius = 11, gateOpen = true) {
+  if (!gateOpen && x + radius > sluiceEdge) return true;
   if (!Number.isFinite(x) || !Number.isFinite(y) || x < 32 + radius || y < 32 + radius || x > WIDTH - 32 - radius || y > HEIGHT - 32 - radius) return true;
-  for (const [dx, dy] of [[-radius, 0], [radius, 0], [0, -radius], [0, radius]]) if (terrain(x + dx, y + dy) === 'water') return true;
+  for (const [dx, dy] of [[-radius, 0], [radius, 0], [0, -radius], [0, radius]]) {
+    if (waterAt(x + dx, y + dy) || basaltAt(x + dx, y + dy)) return true;
+  }
   const candidates = [];
   for (let cx = Math.floor((x - radius) / 128); cx <= Math.floor((x + radius) / 128); cx++)
     for (let cy = Math.floor((y - radius) / 128); cy <= Math.floor((y + radius) / 128); cy++)
@@ -114,15 +147,16 @@ export function lineClear(a, b) {
   }
   return true;
 }
-export function moveBody(body, dx, dy, radius = 11) {
+export function moveBody(body, dx, dy, radius = 11, gateOpen = true) {
   // Substeps prevent a dodge crossing narrow colliders, even under a long frame.
   const steps = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / 6));
   for (let n = 0; n < steps; n++) {
-    if (!blocked(body.x + dx / steps, body.y, radius)) body.x += dx / steps;
-    if (!blocked(body.x, body.y + dy / steps, radius)) body.y += dy / steps;
+    if (!blocked(body.x + dx / steps, body.y, radius, gateOpen)) body.x += dx / steps;
+    if (!blocked(body.x, body.y + dy / steps, radius, gateOpen)) body.y += dy / steps;
   }
 }
 export function zoneAt(x, y) {
+  if (x >= eastBank) return { id: 'reach', name: tr('ash.reach'), subtitle: inSafe(x,y) ? tr('world.safe_area') : tr('ash.subtitle'), safe: inSafe(x,y) };
   if (inRect(x, y, CAMP)) return { id: 'camp', name: tr("world.wanderers_camp"), subtitle: tr("world.safe_area_signe_awaits"), safe: true };
   if (inSafe(x, y)) return { id: 'village', name: tr("world.lantern_vale"), subtitle: tr("world.safe_area"), safe: true };
   if (inMarsh(x, y)) return { id: 'marsh', name: tr("world.emberfen"), subtitle: tr("world.emberwing_territory_level_4_6") };

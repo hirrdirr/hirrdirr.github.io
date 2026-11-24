@@ -1,7 +1,7 @@
 import { tr } from './i18n.js';
 import { resolveItem } from './item-instances.js';
 import { makeArt } from './art.js';
-import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, terrain, riverLeft, LANDMARKS } from './world.js';
+import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, SHELTER, sluiceOpen, terrain, riverLeft, LANDMARKS } from './world.js';
 import { NPCS, ENEMIES, QUESTS } from './data.js';
 import { questReady } from './simulation.js';
 function makeCanvas(w,h) { const c=document.createElement('canvas'); c.width=w;c.height=h;return c; }
@@ -17,6 +17,22 @@ export class Renderer {
     const c=makeCanvas(WIDTH,HEIGHT),g=c.getContext('2d'),random=rand(18075);
     for(let y=0;y<HEIGHT;y+=TILE) for(let x=0;x<WIDTH;x+=TILE) {
       const kind=terrain(x+16,y+16);
+      if (kind==='ash' || kind==='basalt' || kind==='flume') {
+        g.fillStyle = kind==='basalt' ? '#3e383f' : kind==='flume' ? '#98694e' : '#776568';
+        g.fillRect(x,y,TILE,TILE);
+        if (kind==='basalt') {
+          const ledge=(Math.floor(x/TILE)%3)*4;
+          g.fillStyle='#544850';g.fillRect(x+2,y+ledge,27,6);
+          g.fillStyle='#332f37';g.fillRect(x+23,y+ledge+6,6,20);
+        } else if (kind==='flume') {
+          g.fillStyle='#604c48';g.fillRect(x,y+15,TILE,2);g.fillRect(x+8,y,2,15);g.fillRect(x+23,y+17,2,15);
+          g.fillStyle='#bc8c69';g.fillRect(x+10,y+2,13,2);
+        } else {
+          for(let i=0;i<4;i++){g.fillStyle=i%2?'#8d7976':'#68575c';g.fillRect(x+random()*24,y+random()*27,6,2);}
+          if(random()<.08){g.fillStyle='#db9866';g.fillRect(x+12,y+20,4,2);}
+        }
+        continue;
+      }
       const greens=['#426951','#456c51','#486e53','#40674f'];
       g.fillStyle=kind==='water'?'#285c64':kind==='bridge'?'#705c43':kind==='path'?'#a99b72':kind==='ruin'?'#64766b':kind==='marsh'?['#515f50','#596451','#626750'][Math.floor(random()*3)]:greens[Math.floor(random()*4)];
       g.fillRect(x,y,TILE,TILE);
@@ -75,6 +91,17 @@ export class Renderer {
     }
     g.fillStyle='#3d5149';g.fillRect(1790,1200,67,28);
     g.fillStyle='#89917b';for(let x=1794;x<1855;x+=16)g.fillRect(x,1203,13,7);
+    // Fired brick, casting mould and broken rails at the head of the flume.
+    for (let i=0;i<32;i++) {
+      const a=i*Math.PI/16,x=Math.round(2496+Math.cos(a)*103),y=Math.round(536+Math.sin(a)*70);
+      g.fillStyle='#493c40';g.fillRect(x-10,y-4,22,11);
+      g.fillStyle=i%4?'#b38769':'#dcab79';g.fillRect(x-9,y-5,18,3);
+    }
+    for (const x of [2434,2540]) for(let y=562;y<670;y+=16) {
+      g.fillStyle='#50444a';g.fillRect(x,y,5,16);g.fillStyle='#b18365';g.fillRect(x-4,y+6,13,3);
+    }
+    g.fillStyle='#524547';g.fillRect(2000,1166,50,24);
+    g.fillStyle='#b7845d';g.fillRect(2002,1166,46,3);
     // A rolled blanket, supplies and a lantern make Signe's refuge recognizable.
     g.fillStyle='#374e46';g.fillRect(1282,728,42,30);
     g.fillStyle='#8f7370';g.fillRect(1284,730,36,21);g.fillStyle='#c8ad8a';g.fillRect(1284,730,7,21);
@@ -86,10 +113,10 @@ export class Renderer {
     const c=makeCanvas(232,155),g=c.getContext('2d');
     for(let y=0;y<155;y+=2) for(let x=0;x<232;x+=2) {
       const t=terrain(x/232*WIDTH,y/155*HEIGHT);
-      g.fillStyle=t==='water'?'#366974':t==='path'||t==='bridge'?'#b1a279':t==='ruin'?'#7b8b7d':t==='marsh'?'#8a7757':'#355344';
+      g.fillStyle=t==='ash'?'#9b7c79':t==='basalt'?'#493f49':t==='flume'?'#d4a778':t==='water'?'#366974':t==='path'||t==='bridge'?'#b1a279':t==='ruin'?'#7b8b7d':t==='marsh'?'#8a7757':'#355344';
       g.fillRect(x,y,2,2);
     }
-    g.strokeStyle='#91b18b';for(const r of [SAFE,CAMP])g.strokeRect(r.x/WIDTH*232,r.y/HEIGHT*155,r.w/WIDTH*232,r.h/HEIGHT*155);
+    g.strokeStyle='#91b18b';for(const r of [SAFE,CAMP,SHELTER])g.strokeRect(r.x/WIDTH*232,r.y/HEIGHT*155,r.w/WIDTH*232,r.h/HEIGHT*155);
     return c;
   }
   resetCamera() {this.first=true;}
@@ -111,6 +138,12 @@ export class Renderer {
       }
     }
     const visible=o=>o.x>cx-180&&o.x<cx+w+180&&o.y>cy-20&&o.y<cy+h+180;
+    // The lowered grate spans the only crossing through the basalt bank.
+    if (!sluiceOpen(s) && visible({x:1888,y:1216})) {
+      g.fillStyle='#474546';g.fillRect(1886,1184,6,64);
+      g.fillStyle='#9a8471';
+      for (let y=1184;y<1248;y+=8) g.fillRect(1882,y,14,3);
+    }
     const entities=[
       ...WORLD.props.filter(visible).map(o=>({...o,renderType:'prop'})),
       ...NPCS.filter(visible).map(o=>({...o,renderType:'npc'})),
@@ -209,14 +242,15 @@ export class Renderer {
       g.drawImage(this.art.trees[o.variant],Math.round(o.x-56),Math.round(o.y-134));g.globalAlpha=1;return;
     }
     if(o.kind==='house') {g.drawImage(o.roof==='blue'?this.art.houseBlue:this.art.houseRed,o.x-88,o.y-154);return;}
-    const kind=o.kind==='rune'&&s.runes.includes(o.id)?'runeRead':o.kind==='seal'&&s.flags.sealRestored?'sealLit':o.kind==='chest'&&s.chests.includes(o.id)?'chestOpen':o.kind==='beacon'&&s.flags.beaconLit?'beaconLit':o.kind;
+    const kind=o.kind==='gate'&&sluiceOpen(s)?'gateOpen':o.kind==='rune'&&s.runes.includes(o.id)?'runeRead':o.kind==='seal'&&s.flags.sealRestored?'sealLit':o.kind==='chest'&&s.chests.includes(o.id)?'chestOpen':o.kind==='beacon'&&s.flags.beaconLit?'beaconLit':o.kind;
     const sprite=this.art[kind];if(!sprite)return;
     if(kind==='fire'||kind==='beaconLit') {
       const gradient=g.createRadialGradient(o.x,o.y-25,3,o.x,o.y-25,45);
       gradient.addColorStop(0,kind==='fire'?'#f9c1753d':'#83dbc942');gradient.addColorStop(1,'#f9c17500');
       g.fillStyle=gradient;g.fillRect(o.x-45,o.y-70,90,90);
     }
-    g.drawImage(sprite,o.x-32,o.y-71);
+    if (kind==='furnace') g.drawImage(sprite,o.x-64,o.y-142,128,160);
+    else g.drawImage(sprite,o.x-32,o.y-71);
   }
   npc(g,n,s) {
     this.shadow(g,n.x,n.y);g.drawImage(this.art[n.color][0],n.x-20,n.y-41+(this.reduced?0:Math.floor(Math.sin(s.time*1.4+n.x)*.7)));
@@ -293,6 +327,7 @@ export class Renderer {
     for(const l of LANDMARKS) {
       if(l.kind==='herb'&&!s.harvested.includes(l.id))point(l.x,l.y,'#a9d5a2');
       if(l.kind==='rune'&&!s.runes.includes(l.id))point(l.x,l.y,'#edbd85',4);
+      if(l.kind==='gate'||l.kind==='gauge'||l.kind==='bell')point(l.x,l.y,'#eac396',4);
       if(l.kind==='seal')point(l.x,l.y,s.flags.sealRestored?'#a1ede0':'#dc9c82',5);
       if(l.kind==='beacon')point(l.x,l.y,s.flags.beaconLit?'#a1ede0':'#dc9c82',5);
     }

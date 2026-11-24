@@ -1,7 +1,13 @@
-# Project Realm — Lantern Vale, v0.5.1
+# Project Realm — Lantern Vale, v0.5.2
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
+
+## 0.5.2 — Cinder Reach
+
+After restoring Emberfen’s seal and turning in **A Heart of Embers** to Signe, walk east through the southeast sluice. Ada Flint waits on the far bank. Follow her three quests along a broken cooling flume to the casting ring. The Slag Runner lunges, the Flue Watcher fires from range, and the Hollow Striker signals its hammer blow with a ground marker.
+
+The Reach uses the same map, character and save slot as the Vale. World discoveries, inspections and quest completion persist. Ordinary enemies return after 28 seconds and the Striker after 150 seconds of active simulation. The chapter reward can be claimed once.
 
 ## 0.5.1 — Combat HUD
 
@@ -179,16 +185,17 @@ small screens offer branch tabs. Every talent has an implemented game effect.
 - Equipment comparisons and character stats include talent effects. Unequipping
   health gear clamps current health; equipping it again does not grant free healing.
 
-## Explore Lantern Vale and Emberfen
+## Explore Lantern Vale, Emberfen and Cinder Reach
 
-The connected 1920 × 1280 world includes a safe village, forest, river crossing,
-ancient beacon, camp and marsh. Start with **Elin** and **Mira**, follow the
+The connected 2688 × 1280 world includes a safe village, forest, river crossing,
+ancient beacon, camp, marsh and the outskirts of the Ashlands. Start with **Elin** and **Mira**, follow the
 beacon quest, then meet **Signe** east of the bridge. Read the three marsh
-runestones, face **Fenheart** and restore the sluice seal.
+runestones, face **Fenheart** and restore the sluice seal. Report back to Signe
+before crossing the southeast spillway to meet **Ada Flint**.
 
-- Five linked quests, four exploration caches, local discoveries and loot.
-- Five enemy types: ordinary melee, telegraphed wolf pounces, ranged Emberwings
-  and two bosses. All five enemy types return after defeat.
+- Eight quests across three chapters, four exploration caches, local discoveries and loot.
+- Eight enemy types with melee, pounce, projectile and ground attacks. All enemies
+  respawn, including the Warden, Fenheart and the Hollow Striker.
 - Every third connected sword hit deals 35% extra base damage. Lantern Burst
   interrupts ordinary enemy attacks; boss telegraphs still require avoidance.
 - Select a target, read its intent and move or dodge away from warnings.
@@ -197,8 +204,7 @@ runestones, face **Fenheart** and restore the sluice seal.
 
 This is a keyboard-equipped PC release. Menus adapt to narrow screens, but
 there is no touch movement or controller support. There are no online players,
-accounts, shared economy, interiors or backend. This phase expands RPG systems
-and combat styles within the existing world, rather than adding another zone.
+accounts, shared economy, interiors or backend.
 
 ## Controls
 
@@ -308,7 +314,3 @@ cached; offscreen sprites are culled. Player shots (6), enemy shots (32), hazard
 (12), effects (70), drops (64), events (100) and buyback (8) are bounded.
 HUD updates at most 10 times/second. Pausing menus and background tabs cancel the
 animation loop; the talent panel intentionally continues simulation. The 30 FPS setting reduces drawing work without changing game rules.
-
-## Next roadmap milestone
-
-**0.5.1 — Combat HUD Overhaul** will clarify target HP and level, refine the player HUD and move XP directly above the action bar.
