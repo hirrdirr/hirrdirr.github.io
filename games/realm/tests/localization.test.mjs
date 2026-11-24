@@ -7,11 +7,12 @@ import english from '../js/locales/en.js';
 import { tr, createTranslator, LANGUAGE } from '../js/i18n.js';
 import { VERSION, QUESTS, NPCS } from '../js/data.js';
 import { TALENTS, talentRequirement, availableTalentPoints } from '../js/talents.js';
-import { createGame, command, step, TICK, stats } from '../js/simulation.js';
+import { createGame, command, step, TICK, stats, giveXP } from '../js/simulation.js';
 import { deserialize, serialize, SaveStore, SAVE_KEY, SAVE_VERSION } from '../js/save.js';
 import { tradePanel, talentPanel, escapeHTML } from '../js/ui-panels.js';
 import { emptyEquipment } from '../js/inventory.js';
 import { UI } from '../js/ui.js';
+import { Renderer } from '../js/renderer.js';
 import { renderHTML } from '../scripts/localize-html.mjs';
 
 const fixture = await readFile(new URL('./fixtures/v0.3.0-swedish.json', import.meta.url), 'utf8');
@@ -19,7 +20,7 @@ const swedishCopy = /[åäöÅÄÖ]|\b(?:guld|vandrare|lykt\w*|glöd\w*|talanger
 const source = file => readFile(new URL('../'+file, import.meta.url),'utf8');
 
 test('English catalog interpolates values once, supports locale fallback and rejects incomplete messages', () => {
-  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.5.0');
+  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.5.1');
   const translate=createTranslator({'ui.restores_health':'Heal {0} HP'});
   assert.equal(translate('ui.restores_health',55),'Heal 55 HP');
   assert.equal(translate('data.lanternkeeper_blade'),'Lanternkeeper Blade');
@@ -45,7 +46,7 @@ test('all English messages and referenced keys resolve, with no leftover Swedish
 
 test('committed static page matches the English template, including metadata and accessible controls', async () => {
   const html=await source('index.html');assert.equal(html,await renderHTML());
-  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.5\.0<\/small>/);
+  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.5\.1<\/small>/);
   assert.match(html,/<title>Project Realm · Lantern Vale/);
   assert.match(html,/aria-label="Lantern Ward \(1\)"/);assert.match(html,/aria-label="Close menu"/);
   assert.doesNotMatch(html,swedishCopy);assert.doesNotMatch(html,/\{\{|\{\d+\}/);
@@ -101,11 +102,12 @@ test('talent descriptions render at every rank and panels expose localized rank,
 function uiHarness(s) {
   const elements=new Map();
   function element(id){if(!elements.has(id))elements.set(id,{
-    id,open:false,hidden:false,textContent:'',innerHTML:'',dataset:{},scrollTop:0,handlers:{},
+    id,open:false,hidden:false,textContent:'',innerHTML:'',dataset:{},style:{},attributes:{},scrollTop:0,handlers:{},
+    getAttribute(name){return this.attributes[name];},setAttribute(name,value){this.attributes[name]=value;},
     classList:{toggle(){},add(){}},addEventListener(type,fn){this.handlers[type]=fn;},
-    showModal(){this.open=true;},close(){this.open=false;this.handlers.close?.();},focus(){},querySelector(){return null;},querySelectorAll(){return [];}
+    showModal(){this.open=true;},close(){this.open=false;this.handlers.close?.();},focus(){},querySelector(selector){return element(id + ' ' + selector);},querySelectorAll(){return [];}
   });return elements.get(id);}
-  const previous=globalThis.document;globalThis.document={getElementById:element,querySelectorAll:()=>[],activeElement:null};
+  const previous=globalThis.document;globalThis.document={getElementById:element,querySelector:element,querySelectorAll:()=>[],activeElement:null};
   const ui=new UI(()=>s,{started:()=>true,command:a=>command(s,a),resume(){},pause(){}});
   return {ui,element,restore(){if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}};
 }
@@ -161,5 +163,68 @@ test('merchant clicks sell and buy back the selected stack through the UI', () =
     click({ action: 'buyback', id });
     assert.equal(s.player.inventory.amber, 12);
     assert.equal(s.player.gold, 0);
+  } finally { h.restore(); }
+});
+
+test('XP and health follow gains, level-ups, equipment and the cap in separate HUD elements', () => {
+  const s = createGame('Elin'), p = s.player, h = uiHarness(s);
+  const render = () => h.ui.hud({ renderMap() {} });
+  try {
+    p.hp = 0.8;
+    giveXP(s, 20);
+    render();
+    const bar = h.element('xp-progress');
+    assert.equal(h.element('player-name').textContent, 'Elin');
+    assert.equal(h.element('health-value').textContent, '1 / ' + stats(p).maxHp + ' HP');
+    assert.deepEqual([bar.value, bar.max], [20, 60]);
+    assert.equal(h.element('xp-label').textContent, 'Level 1 · 20 / 60 XP');
+    giveXP(s, 47);
+    assert.ok(command(s, {type:'unequip', slot:'armor'}));
+    p.guardTime = 2;
+    render();
+    assert.equal(h.element('player-level').textContent, 'Lv. 2');
+    assert.equal(h.element('health-value').textContent, Math.ceil(p.hp) + ' / ' + stats(p).maxHp + ' HP');
+    assert.equal(h.element('buff-status').hidden, false);
+    assert.deepEqual([bar.value, bar.max], [7, 95]);
+    p.level = 20; p.xp = 0;
+    render();
+    assert.equal(bar.value, bar.max);
+    assert.equal(bar.getAttribute('aria-valuetext'), 'Level 20 · MAX LEVEL');
+  } finally { h.restore(); }
+});
+
+test('selected wolf and boss plates show current target health and the unit frame reports windups', () => {
+  const s = createGame(), h = uiHarness(s);
+  const renderer = Object.create(Renderer.prototype);
+  renderer.canvas = { width: 960, height: 600 };
+  renderer.art = {};
+  const labels = [], widths = [];
+  renderer.label = (_g, text) => labels.push(text);
+  const g = { fillRect(_x, _y, width) { widths.push(width); } };
+  const render = () => h.ui.hud({ renderMap() {} });
+  try {
+    for (const [type, name, level, hp] of [
+      ['wolf', 'Dusk Wolf', 2, 68], ['warden', 'Rootbound Warden', 4, 300], ['ancient', 'Fenheart', 6, 1350]
+    ]) {
+      const e = s.enemies.find(enemy => enemy.type === type);
+      s.targetId = e.id; e.mode = 'windup';
+      renderer.art[type] = [{height: 40}];
+      for (const remaining of [hp, 1]) {
+        e.hp = remaining;
+        render();
+        renderer.selectedHealthbar(g, e, e.x - 300, e.y - 200);
+        assert.equal(h.element('target-hud').hidden, false);
+        assert.equal(h.element('target-name').textContent, name);
+        assert.equal(h.element('target-level').textContent, 'Lv. ' + level);
+        assert.deepEqual(labels.slice(-2), [name + ' · Lv. ' + level, h.element('target-hp').textContent]);
+        assert.equal(labels.at(-1), remaining + ' / ' + hp + ' HP');
+        assert.ok(Math.abs(widths.at(-1) / widths.at(-2) - remaining / hp) < 1e-9);
+        assert.match(h.element('target-intent').textContent, /!/);
+      }
+      e.hp = 0; render();
+      assert.equal(h.element('target-hud').hidden, true);
+      e.hp = hp; s.targetId = null; render();
+      assert.equal(h.element('target-hud').hidden, true);
+    }
   } finally { h.restore(); }
 });

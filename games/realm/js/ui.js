@@ -178,8 +178,18 @@ export class UI {
   }
   hud(renderer) {
     const s=this.state(),p=s.player,st=stats(p),zone=zoneAt(p.x,p.y);
-    setText('player-name',p.name);setText('player-level',tr("simulation.level", p.level));setText('health-value',Math.ceil(p.hp)+' / '+st.maxHp);
-    $('health-fill').style.width=(p.hp/st.maxHp*100).toFixed(1)+'%';$('xp-fill').style.width=(p.xp/xpForLevel(p.level)*100).toFixed(1)+'%';
+    setText('player-name', p.name);
+    setText('player-level', tr('hud.level_short', p.level));
+    setText('health-value', tr('hud.health', Math.ceil(p.hp), st.maxHp));
+    $('health-fill').style.width = (p.hp / st.maxHp * 100).toFixed(1) + '%';
+
+    const capped = p.level >= 20, progress = $('xp-progress');
+    const max = capped ? 1 : xpForLevel(p.level), value = capped ? 1 : p.xp;
+    const label = capped ? tr('hud.xp_cap', p.level) : tr('hud.xp', p.level, value, max);
+    setText('xp-label', label);
+    if (progress.max !== max) progress.max = max;
+    if (progress.value !== value) progress.value = value;
+    if (progress.getAttribute('aria-valuetext') !== label) progress.setAttribute('aria-valuetext', label);
     setText('gold-value',tr("ui-panels.gold_3", p.gold));setText('potion-count',tr("ui.potions", p.inventory.potion||0));setText('zone-name',zone.name);setText('zone-type',zone.subtitle);
     for(const [type,max] of [['attack',st.attackCooldown],['burst',st.burstCooldown],['dodge',st.dodgeCooldown],['potion',8],['guard',st.guardCooldown],['rush',st.rushCooldown],['bolt',st.boltCooldown]]) {
       const b=document.querySelector('[data-command="'+type+'"]');if(['guard','rush','bolt'].includes(type))b.hidden=!talentRank(p,type);b.querySelector('.cooldown').style.height=(Math.min(1,p.cooldowns[type]/max)*100).toFixed(0)+'%';
@@ -189,7 +199,11 @@ export class UI {
     const enemy=s.enemies.find(e=>e.id===s.targetId&&e.hp>0),targetHUD=$('target-hud');
     targetHUD.hidden=!enemy;
     if(enemy){
-      const def=ENEMIES[enemy.type];setText('target-name',def.name);setText('target-hp',tr("ui.level", Math.ceil(enemy.hp), def.hp, def.level));
+      const def = ENEMIES[enemy.type];
+      setText('target-name', def.name);
+      setText('target-level', tr('hud.level_short', def.level));
+      setText('target-hp', tr('hud.health', Math.ceil(enemy.hp), def.hp));
+      targetHUD.classList.toggle('boss-target', Boolean(def.boss));
       $('target-fill').style.width=(enemy.hp/def.hp*100).toFixed(1)+'%';
       setText('target-intent',enemy.mode==='return'?tr("ui.returning_invulnerable"):enemy.mode==='windup'?({pounce:tr("ui.pounce_move_aside"),ranged:tr("ui.shot_break_line_of_sight"),eruption:tr("ui.eruption_leave_the_marker")}[def.behavior]||tr("ui.strike_leave_the_marker")):({pounce:tr("ui.pouncing_hunter"),ranged:tr("ui.ranged_enemy"),eruption:tr("ui.ember_guardian")}[def.behavior]||tr("ui.melee")));
     }

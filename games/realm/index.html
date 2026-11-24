@@ -14,7 +14,7 @@
   <div class="realm-shell">
     <header class="realm-header">
       <a href="/games/" class="back-link" aria-label="Back to Hirrdirr’s games">← <strong>hirrdirr</strong><span>/ games</span></a>
-      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.5.0</small></div>
+      <div class="realm-wordmark"><img src="./assets/realm-mark.svg" width="27" height="32" alt=""><span>PROJECT REALM</span><small>0.5.1</small></div>
       <button id="theme-button" class="icon-button" aria-label="Switch between light and dark themes" title="Switch theme">◐</button>
     </header>
     <main>
@@ -29,31 +29,46 @@
       </div>
       <p id="save-warning" class="notice" role="status" hidden></p>
       <div class="game-layout">
-        <section class="viewport" aria-label="Game world">
-          <canvas id="world" width="960" height="600" tabindex="0" aria-label="Lantern Vale. Move with WASD, attack with Space, interact with E. Controls are listed below the game world.">This game requires a browser with Canvas and JavaScript support.</canvas>
-          <div class="player-hud">
-            <div class="player-hud-top"><span class="portrait" aria-hidden="true"><img src="./assets/realm-mark.svg" width="20" height="26" alt=""></span><div><strong id="player-name">Wanderer</strong><small>Lantern Wanderer · <span id="player-level">Level 1</span></small></div></div>
-            <div class="vital-label"><span>HEALTH</span><span id="health-value">100 / 100</span></div>
-            <div class="meter health"><i id="health-fill"></i></div>
-            <div class="meter experience" aria-label="Experience"><i id="xp-fill"></i></div><small id="buff-status" class="buff-status" hidden></small>
+        <div class="world-column">
+          <div class="unit-frames">
+            <div class="player-hud unit-frame">
+              <div class="unit-heading"><strong id="player-name">Wanderer</strong><span id="player-level">Level 1</span></div>
+              <div class="unit-vitals"><span id="health-value"></span><div class="meter health" aria-hidden="true"><i id="health-fill"></i></div></div>
+              <small id="buff-status" class="buff-status" hidden></small>
+            </div>
+            <div id="target-hud" class="target-hud unit-frame" hidden>
+              <div class="unit-heading"><strong id="target-name"></strong><span id="target-level"></span></div>
+              <div class="unit-vitals"><span id="target-hp"></span><div class="meter" aria-hidden="true"><i id="target-fill"></i></div></div>
+              <small id="target-intent"></small>
+            </div>
           </div>
-          <div class="zone-hud"><strong id="zone-name">Lantern Vale</strong><span id="zone-type">Safe area</span></div>
-          <div id="target-hud" class="target-hud" hidden><strong id="target-name"></strong><span id="target-hp"></span><div class="meter"><i id="target-fill"></i></div><small id="target-intent"></small></div>
-          <button id="pause-button" class="pause-button" title="Pause" aria-label="Pause game">Ⅱ</button>
-          <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
-          <div id="combo-hud" class="combo-hud" title="The third consecutive hit deals 35% more damage"><span id="combo-count">◇◇◇</span><small>Strike combo</small></div>
-          <div class="hotbar" aria-label="Abilities">
-            <button data-command="attack" title="Strike: selected target in range, otherwise the nearest. The third hit deals +35% damage." aria-label="Sword strike (Space)"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>Strike</small><i class="cooldown"></i></button>
-            <button data-command="burst" title="Lantern Burst: hits all nearby enemies and interrupts normal enemies" aria-label="Lantern Burst (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lantern Burst</small><i class="cooldown"></i></button>
-            <button data-command="dodge" title="Dodge in your movement direction" aria-label="Dodge (Shift)"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>Dodge</small><i class="cooldown"></i></button>
-            <button data-command="potion" title="Restores 55 health" aria-label="Drink healing potion (R)"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">3 potions</small><i class="cooldown"></i></button>
-            <button data-command="guard" hidden title="Reduces incoming damage. Improved by Lantern Guardian talents." aria-label="Lantern Ward (1)"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>Lantern Ward</small><i class="cooldown"></i></button>
-            <button data-command="rush" hidden title="Rush toward a target in range and line of sight." aria-label="Rush (2)"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>Rush</small><i class="cooldown"></i></button>
-            <button data-command="bolt" hidden title="Fire a rune of light toward your target or in the direction you face." aria-label="Glimmerbolt (3)"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>Glimmerbolt</small><i class="cooldown"></i></button>
-          </div>
+          <section class="viewport" aria-label="Game world">
+            <canvas id="world" width="960" height="600" tabindex="0" aria-label="Lantern Vale. Move with WASD, attack with Space, interact with E. Controls are listed below the game world.">This game requires a browser with Canvas and JavaScript support.</canvas>
+            <div class="zone-hud"><strong id="zone-name">Lantern Vale</strong><span id="zone-type">Safe area</span></div>
+            <button id="pause-button" class="pause-button" title="Pause" aria-label="Pause game">Ⅱ</button>
+            <div class="combat-dock">
+              <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
+              <div id="combo-hud" class="combo-hud" title="The third consecutive hit deals 35% more damage"><span id="combo-count">◇◇◇</span><small>Strike combo</small></div>
+              <div class="action-tray">
+                <div class="xp-strip">
+                  <span id="xp-label"></span>
+                  <progress id="xp-progress" aria-label="Experience" aria-describedby="xp-label" value="0" max="1"></progress>
+                </div>
+                <div class="hotbar" aria-label="Abilities">
+                  <button data-command="attack" title="Strike: selected target in range, otherwise the nearest. The third hit deals +35% damage." aria-label="Sword strike (Space)"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>Strike</small><i class="cooldown"></i></button>
+                  <button data-command="burst" title="Lantern Burst: hits all nearby enemies and interrupts normal enemies" aria-label="Lantern Burst (Q)"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>Lantern Burst</small><i class="cooldown"></i></button>
+                  <button data-command="dodge" title="Dodge in your movement direction" aria-label="Dodge (Shift)"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>Dodge</small><i class="cooldown"></i></button>
+                  <button data-command="potion" title="Restores 55 health" aria-label="Drink healing potion (R)"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">3 potions</small><i class="cooldown"></i></button>
+                  <button data-command="guard" hidden title="Reduces incoming damage. Improved by Lantern Guardian talents." aria-label="Lantern Ward (1)"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>Lantern Ward</small><i class="cooldown"></i></button>
+                  <button data-command="rush" hidden title="Rush toward a target in range and line of sight." aria-label="Rush (2)"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>Rush</small><i class="cooldown"></i></button>
+                  <button data-command="bolt" hidden title="Fire a rune of light toward your target or in the direction you face." aria-label="Glimmerbolt (3)"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>Glimmerbolt</small><i class="cooldown"></i></button>
+                </div>
+              </div>
+            </div>
+            <div id="focus-overlay" class="focus-overlay" hidden><span>Adventure paused</span><button id="resume-focus" class="primary">Continue</button></div>
+          </section>
           <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
-          <div id="focus-overlay" class="focus-overlay" hidden><span>Adventure paused</span><button id="resume-focus" class="primary">Continue</button></div>
-        </section>
+        </div>
         <aside class="journey-rail">
           <div class="rail-heading"><span class="eyebrow">YOUR JOURNEY</span><span id="gold-value">0 gold</span></div>
           <div id="quest-tracker" class="quest-tracker"></div>

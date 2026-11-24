@@ -1,3 +1,11 @@
+# v0.5.1 combat HUD verification
+
+All 158 Realm tests pass against the 0.5.0 baseline with the wolf and merchant fixes. New HUD tests exercise incremental XP, a level-up, the level cap, low health, equipment changes, guard status, changing targets and HP, boss bars, windup text, death and deselection. The generated page matches the localized template.
+
+Chrome visual checks used prepared encounters with the production HUD and renderer. At 1366×768, 1024×768, 800×600 and 375×667 (125% root text size in the narrow case), the XP strip shared the action bar’s edges and sat 3 CSS pixels above it. All seven ability buttons fit. The combo indicator and the two test notifications had separate space. Dark mode showed a selected Dusk Wolf at 44/68 HP. Light mode covered the Warden and Fenheart, including the level-20 MAX LEVEL state.
+
+In a warmed Chrome Canvas comparison of the same selected wolf, the median CPU time spent issuing draw commands was 0.563 ms per draw on 0.5.0 and 0.567 ms on 0.5.1 (seven alternating batches of 120 draws). This measures renderer CPU time in the test scene only.
+
 # v0.5.0 verification — 2026-11-23
 
 The baseline at `e2e3646` passed 139 tests. The release adds 12 checks for
