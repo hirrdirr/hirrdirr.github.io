@@ -120,4 +120,4 @@ Internal IDs appear only in action data, not visible item names. Comparisons
 resolve the selected record and target slot. Shop comparisons create a read-only
 projection, never allocating a real record or consuming an ID.
 
-The next milestone is **0.5.0 — XP Scaling & World Respawn**.
+The next milestone is **0.5.1 — Combat HUD Overhaul**.

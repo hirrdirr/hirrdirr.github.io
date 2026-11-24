@@ -48,4 +48,4 @@ transactions. Use one active game tab. No networking or backend is introduced.
 
 ## Next milestone
 
-**0.5.0 — XP Scaling & World Respawn**.
+**0.5.1 — Combat HUD Overhaul**.

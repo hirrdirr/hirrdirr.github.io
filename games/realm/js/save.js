@@ -2,7 +2,8 @@ import { gearProfile } from './gear-rolls.js';
 import { instance, instanceNumber, template, resolveItem, createItemInstance } from './item-instances.js';
 import { tr } from './i18n.js';
 import { createGame, stats } from './simulation.js';
-import { ITEMS, QUESTS, SPAWN, ENEMIES, CHECKPOINTS, xpForLevel } from './data.js';
+import { ITEMS, QUESTS, SPAWN, CHECKPOINTS, xpForLevel } from './data.js';
+import { respawnSeconds, spawnKey, placeAtHome } from './enemy-life.js';
 import { blocked, LANDMARKS } from './world.js';
 import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
@@ -19,7 +20,9 @@ const idsOf = kind => LANDMARKS.filter(l => l.kind === kind).map(l => l.id);
 const cleanList = (value, allowed) => Array.isArray(value) ? [...new Set(value.filter(v => allowed.includes(v)))] : [];
 export function serialize(state) {
   const p = state.player;
+  const respawns = state.enemies.filter(e => e.mode === 'dead').map(e => [spawnKey(e), e.respawn]);
   return JSON.stringify({ version: SAVE_VERSION, savedAt: new Date().toISOString(), data: {
+    ...(respawns.length ? { respawns: Object.fromEntries(respawns) } : {}),
     player: { name: p.name, x: p.x, y: p.y, hp: p.hp, level: p.level, xp: p.xp, gold: p.gold, inventory: p.inventory, equipment: p.equipment, itemInstances: p.itemInstances, itemSequence: p.itemSequence, dead: p.dead, talents: p.talents, respecCount: p.respecCount, checkpoint: p.checkpoint, cooldowns: p.cooldowns },
     quests: state.quests, harvested: state.harvested, chests: state.chests, discovered: state.discovered, runes: state.runes,
     flags: state.flags, drops: state.drops, buyback: state.buyback, seed: state.seed, time: state.time
@@ -144,7 +147,13 @@ export function deserialize(raw) {
   // Ambiguous ownership is rejected as a whole. SaveStore retains the original
   // and tries its backup; it never silently deletes or clones an instance.
   if (modern && seen.size !== Object.keys(p.itemInstances).length) damaged();
-  for (const e of s.enemies) if (ENEMIES[e.type].flag && s.flags[ENEMIES[e.type].flag]) Object.assign(e, { hp: 0, mode: 'dead', respawn: Infinity });
+  // Old saves have no remaining times. Story flags still count as quest credit.
+  for (const e of s.enemies) {
+    const remaining = d.respawns?.[spawnKey(e)];
+    if (Number.isFinite(remaining) && remaining > 0) {
+      Object.assign(e, { hp: 0, mode: 'dead', respawn: Math.min(remaining, respawnSeconds(e.type)) });
+    } else placeAtHome(e, p);
+  }
   return s;
 }
 export class SaveStore {

@@ -1,6 +1,6 @@
 import { tr } from './i18n.js';
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.4.4';
+export const VERSION = '0.5.0';
 export const ITEMS = Object.freeze({
   trainingSword: { value: 1, name: tr("data.wanderers_sword"), slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: tr("data.a_worn_blade_a_new_chapter") },
   linenCoat: { value: 1, name: tr("data.travel_coat"), slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: tr("data.light_enough_for_a_long_journey") },
@@ -36,9 +36,9 @@ export const ITEMS = Object.freeze({
 export const ENEMIES = Object.freeze({
   sprout: { name: tr("data.thornroot"), behavior: 'melee', level: 1, hp: 36, attack: 6, speed: 48, xp: 16, gold: 3, aggro: 135, leash: 200, radius: 12, cooldown: 1.6 },
   wolf: { name: tr("data.dusk_wolf"), behavior: 'pounce', level: 2, hp: 68, attack: 12, speed: 65, xp: 26, gold: 5, aggro: 165, leash: 240, radius: 13, cooldown: 2.2 },
-  warden: { name: tr("data.rootbound_warden"), behavior: 'melee', level: 4, hp: 300, attack: 21, speed: 40, xp: 95, gold: 28, aggro: 185, leash: 280, radius: 23, cooldown: 2.8, boss: true, flag: 'wardenDefeated' },
+  warden: { name: tr("data.rootbound_warden"), behavior: 'melee', level: 4, hp: 300, attack: 21, speed: 40, xp: 95, gold: 28, aggro: 185, leash: 280, radius: 23, cooldown: 2.8, boss: true, respawnSeconds: 120, flag: 'wardenDefeated' },
   wisp: { name: tr("data.emberwing"), behavior: 'ranged', level: 4, hp: 92, attack: 17, speed: 49, xp: 34, gold: 7, aggro: 225, leash: 260, radius: 12, cooldown: 2.1 },
-  ancient: { name: tr("data.fenheart"), behavior: 'eruption', level: 6, hp: 1350, attack: 44, speed: 30, xp: 145, gold: 40, aggro: 220, leash: 270, radius: 24, cooldown: 2.4, boss: true, flag: 'ancientDefeated' }
+  ancient: { name: tr("data.fenheart"), behavior: 'eruption', level: 6, hp: 1350, attack: 44, speed: 30, xp: 145, gold: 40, aggro: 220, leash: 270, radius: 24, cooldown: 2.4, boss: true, respawnSeconds: 180, flag: 'ancientDefeated' }
 });
 // One weighted drop per kill. Copies stay in the bag for individual trading.
 export const LOOT_TABLES = Object.freeze({

@@ -104,7 +104,7 @@ See [item-identity.md](item-identity.md) for the full contract.
 
 ## Current roadmap priority
 
-Next: **0.5.0 — XP Scaling & World Respawn**. The networking notes below are
+Next: **0.5.1 — Combat HUD Overhaul**. The networking notes below are
 long-term architecture considerations, not the next release scope.
 
 ## Stage 1: small authoritative multiplayer

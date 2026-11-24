@@ -1,4 +1,5 @@
 // Authoritative enemy rules. Presentation reads intent; it never decides hits.
+import { reviveEnemy } from './enemy-life.js';
 import { ENEMIES } from './data.js';
 import { distance, inSafe, moveBody, blocked, lineClear } from './world.js';
 
@@ -32,7 +33,7 @@ export function stepEnemies(s, dt, { random, hurt, effect }) {
     const def = ENEMIES[e.type];
     if (e.mode === 'dead') {
       e.respawn -= dt;
-      if (e.respawn <= 0 && distance(p, e) > 280) Object.assign(e, { hp: def.hp, x: e.homeX, y: e.homeY, mode: 'idle', cooldown: 1, windup: 0, hit: 0 });
+      if (e.respawn <= 0) reviveEnemy(e, p);
       continue;
     }
     e.hit = Math.max(0, e.hit - dt); e.cooldown = Math.max(0, e.cooldown - dt);
