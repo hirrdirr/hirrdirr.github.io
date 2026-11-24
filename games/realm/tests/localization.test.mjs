@@ -20,7 +20,7 @@ const swedishCopy = /[åäöÅÄÖ]|\b(?:guld|vandrare|lykt\w*|glöd\w*|talanger
 const source = file => readFile(new URL('../'+file, import.meta.url),'utf8');
 
 test('English catalog interpolates values once, supports locale fallback and rejects incomplete messages', () => {
-  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.5.1');
+  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.5.2');
   const translate=createTranslator({'ui.restores_health':'Heal {0} HP'});
   assert.equal(translate('ui.restores_health',55),'Heal 55 HP');
   assert.equal(translate('data.lanternkeeper_blade'),'Lanternkeeper Blade');
@@ -46,7 +46,7 @@ test('all English messages and referenced keys resolve, with no leftover Swedish
 
 test('committed static page matches the English template, including metadata and accessible controls', async () => {
   const html=await source('index.html');assert.equal(html,await renderHTML());
-  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.5\.1<\/small>/);
+  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.5\.2<\/small>/);
   assert.match(html,/<title>Project Realm · Lantern Vale/);
   assert.match(html,/aria-label="Lantern Ward \(1\)"/);assert.match(html,/aria-label="Close menu"/);
   assert.doesNotMatch(html,swedishCopy);assert.doesNotMatch(html,/\{\{|\{\d+\}/);

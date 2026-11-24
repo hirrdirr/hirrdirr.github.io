@@ -1,3 +1,11 @@
+# v0.5.2 Cinder Reach verification
+
+All 163 Realm tests passed. The navigation suite flood-fills from the village to the new landmarks, Ada and every spawn. New regression cases cover the locked crossing, travel in both directions, intermediate objectives, repeated turn-ins, scaled XP, enemy attacks, respawn and the elite fight with level-eight story equipment. A save serialized by 0.5.1 round-trips with the same player data, item rolls, merchant buyback, ground loot and respawn timers.
+
+In Chrome, a level-eight character resumed at the sluice, walked into Cinder Reach, accepted The Third Stroke from Ada and read the flume gauge. After walking back to Emberfen and reloading, the tracker still showed the gauge at 1/1 and the bell at 0/1. At the casting ring, selecting the Hollow Striker showed 1380/1380 HP in the target HUD. The complete three-quest chain and boss defeat were exercised in the simulation suite.
+
+A local Node comparison used 36,000 fixed simulation ticks per sample, a warm-up and five alternating samples per version. Median time per tick was 0.0220 ms on 0.5.1 and 0.0203 ms on 0.5.2. This measures simulation CPU time only.
+
 # v0.5.1 combat HUD verification
 
 All 158 Realm tests pass against the 0.5.0 baseline with the wolf and merchant fixes. New HUD tests exercise incremental XP, a level-up, the level cap, low health, equipment changes, guard status, changing targets and HP, boss bars, windup text, death and deselection. The generated page matches the localized template.

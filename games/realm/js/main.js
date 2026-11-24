@@ -32,7 +32,7 @@ function processEvents() {
   for(const event of state.events.splice(0)) {
     audio.play(event.type);
     if(event.type==='dialogue')ui.dialogue(event.id);
-    else if(event.type==='message')ui.toast(event.text);
+    else if(event.type==='message'||event.type==='inspection')ui.toast(event.text);
     else if(event.type==='item')ui.toast('+'+event.quantity+' '+ITEMS[event.id].name);
     else if(event.type==='level')ui.toast(tr("main.level_your_health_and_attack_have_increased", event.level, event.level>=3?tr("main.unspent_talent_points_n", availableTalentPoints(state.player)):''));
     else if(event.type==='questAccepted')ui.toast(tr("main.new_quest", QUESTS[event.id].name));
@@ -50,7 +50,7 @@ function processEvents() {
     else if(event.type==='trade')ui.toast(tr("main.gold", {buy:tr("main.bought"),sell:tr("main.sold"),buyback:tr("main.bought_back")}[event.action], event.quantity>1?tr('ui.item_count',ITEMS[event.id].name,event.quantity):ITEMS[event.id].name, event.action==='sell'?'+':'−', event.price));
     else if(event.type==='death'){save();ui.open('death');}
     else if(event.type==='respawn'){renderer.resetCamera();ui.view=null;ui.panel.close();}
-    if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','talent','respec','unequip','trade','kill'].includes(event.type))needsSave=true;
+    if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','talent','respec','unequip','trade','kill','inspection'].includes(event.type))needsSave=true;
   }
   if(needsSave)save();
 }

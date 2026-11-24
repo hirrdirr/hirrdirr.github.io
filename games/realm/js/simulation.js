@@ -4,7 +4,7 @@ import { tr, withAwardedXP } from './i18n.js';
 // Pure game rules. No DOM, Canvas, storage, clocks or network access.
 // Clients send commands; step() advances a fixed tick and emits presentation events.
 import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLevel } from './data.js';
-import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, zoneAt } from './world.js';
+import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, sluiceOpen, zoneAt } from './world.js';
 import { createEnemy, respawnSeconds } from './enemy-life.js';
 import { stepEnemies } from './enemy-ai.js';
 import { talentEffects, talentRank, learnTalent, talentRequirement, spentTalentPoints, respecCost } from './talents.js';
@@ -180,8 +180,11 @@ export function interact(s) {
     else if (!s.flags.sealRestored) {
       s.flags.sealRestored = true; questEvent(s, 'seal', 'seal'); emit(s, 'seal');
       effect(s, 'level', target.x, target.y, tr("simulation.the_fen_breathes_again"));
-    } else emit(s, 'message', { text: tr("simulation.the_seal_glows_softly_the_road_beyond_the_sluice_must_wait") });
-  } else if (target.kind === 'gate') emit(s, 'message', { text: tr("simulation.beyond_the_sluice_lie_the_ashlands_your_journey_will_continue_in") });
+    } else emit(s, 'message', { text: sluiceOpen(s) ? tr('ash.open') : tr("simulation.the_seal_glows_softly_the_road_beyond_the_sluice_must_wait") });
+  } else if (target.kind === 'gauge' || target.kind === 'bell') {
+    questEvent(s, 'inspect', target.id);
+    emit(s, 'inspection', { text: target.text });
+  } else if (target.kind === 'gate') emit(s, 'message', { text: sluiceOpen(s) ? tr('ash.open') : tr('ash.locked') });
   else emit(s, 'message', { text: target.id === 'marshSign' ? tr("simulation.old_beacon_signes_camp_emberfen_level_4_6") : tr("simulation.lantern_vale_bridge_old_beacon_to_the_northeast") });
   return true;
 }
@@ -274,7 +277,7 @@ function castAbility(s, id) {
     if (!target) { emit(s, 'message', { text: tr("simulation.shadow_rush_needs_a_target_in_range_and_a_clear_line_of_sight") }); return false; }
     const d = distance(p, target) || 1, fromX = p.x, fromY = p.y, travel = Math.max(0, d - 30);
     p.cooldowns.rush = st.rushCooldown; p.facing = { x: (target.x - p.x) / d, y: (target.y - p.y) / d };
-    moveBody(p, p.facing.x * travel, p.facing.y * travel);
+    moveBody(p, p.facing.x * travel, p.facing.y * travel, 11, sluiceOpen(s));
     p.invulnerable = Math.max(p.invulnerable, .28); p.attackTime = .2; s.targetId = target.id;
     effect(s, 'rush', p.x, p.y, '', { fromX, fromY });
     if (distance(p, target) <= 55 && lineClear(p, target)) hitEnemy(s, target, st.attack * 1.4 * st.meleeMultiplier, st.critChance, st.critMultiplier);
@@ -381,7 +384,7 @@ export function step(s, input = {}, dt = TICK) {
   if (length > 0) { dx /= length; dy /= length; if (p.dodging <= 0) { p.facing = { x: dx, y: dy }; p.moveFacing = { x: dx, y: dy }; } }
   if (p.dodging > 0) { dx = p.dodgeDirection.x; dy = p.dodgeDirection.y; }
   p.moving = Math.abs(dx) + Math.abs(dy) > .01;
-  moveBody(p, dx * (p.dodging > 0 ? 510 : stats(p).speed) * dt, dy * (p.dodging > 0 ? 510 : stats(p).speed) * dt);
+  moveBody(p, dx * (p.dodging > 0 ? 510 : stats(p).speed) * dt, dy * (p.dodging > 0 ? 510 : stats(p).speed) * dt, 11, sluiceOpen(s));
   p.dodging = Math.max(0, p.dodging - dt);
   if (input.attack) command(s, { type: 'attack' });
   if (p.combat === 0) p.hp = Math.min(stats(p).maxHp, p.hp + (inSafe(p.x, p.y) ? 9 : 1.5) * dt);

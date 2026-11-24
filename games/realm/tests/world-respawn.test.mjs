@@ -169,7 +169,7 @@ test('0.4.4 journey keeps its rolled gear, buyback, drops and completed story wi
   const raw=await readFile(new URL('./fixtures/v0.4.4-world.json',import.meta.url),'utf8');
   const s=deserialize(raw), original=JSON.parse(raw);
   assert.deepEqual(JSON.parse(serialize(s)).data, original.data);
-  for (const e of s.enemies.filter(e=>ENEMIES[e.type].boss)) {
+  for (const e of s.enemies.filter(e=>ENEMIES[e.type].flag)) {
     assert.ok(s.flags[ENEMIES[e.type].flag]); assert.equal(e.hp,ENEMIES[e.type].hp);
   }
   const sale=s.buyback[0], record=structuredClone(s.player.itemInstances[sale.item]);
