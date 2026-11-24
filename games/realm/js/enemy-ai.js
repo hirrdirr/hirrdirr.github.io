@@ -1,5 +1,5 @@
 // Authoritative enemy rules. Presentation reads intent; it never decides hits.
-import { reviveEnemy } from './enemy-life.js';
+import { respawnSeconds, reviveEnemy } from './enemy-life.js';
 import { ENEMIES } from './data.js';
 import { distance, inSafe, moveBody, blocked, lineClear } from './world.js';
 
@@ -31,6 +31,11 @@ export function stepEnemies(s, dt, { random, hurt, effect }) {
   const p = s.player;
   for (const e of s.enemies) {
     const def = ENEMIES[e.type];
+    // A spent enemy must finish its countdown even if its AI mode was overwritten.
+    if (e.hp <= 0 && e.mode !== 'dead') {
+      e.mode = 'dead';
+      if (!(e.respawn > 0)) e.respawn = respawnSeconds(e.type);
+    }
     if (e.mode === 'dead') {
       e.respawn -= dt;
       if (e.respawn <= 0) reviveEnemy(e, p);
@@ -67,7 +72,10 @@ export function stepEnemies(s, dt, { random, hurt, effect }) {
     }
     if (e.mode === 'idle' && d < def.aggro && !inSafe(p.x, p.y) && lineClear(e, p)) e.mode = 'chase';
     if (e.mode === 'return') {
-      if (homeDistance < 8) { e.mode = 'idle'; e.hp = def.hp; }
+      e.returnTime += dt;
+      // Allow twice the normal leash traversal time before recovering a blocked route.
+      if (e.returnTime >= 2 * def.leash / def.speed) reviveEnemy(e, p);
+      else if (homeDistance < 8) { e.mode = 'idle'; e.hp = def.hp; e.returnTime = 0; }
       else move(e, (e.homeX - e.x) / homeDistance * def.speed * dt, (e.homeY - e.y) / homeDistance * def.speed * dt, def.radius);
     } else if (e.mode === 'chase') {
       e.facing = p.x < e.x ? -1 : 1;

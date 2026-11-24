@@ -318,7 +318,7 @@ export function command(s, input) {
   if (input.type === 'respawn' && p.dead) {
     Object.assign(p, CHECKPOINTS[p.checkpoint] || SPAWN, { hp: stats(p).maxHp, dead: false, invulnerable: 2, dodging: 0, combat: 0, combo: 0, comboTime: 0, guardTime: 0, counterTime: 0 });
     s.playerShots = []; s.hazards = []; s.projectiles = []; s.targetId = null;
-    for (const e of s.enemies) if (e.hp > 0) Object.assign(e, { x: e.homeX, y: e.homeY, hp: ENEMIES[e.type].hp, mode: 'idle', windup: 0, cooldown: 1 });
+    for (const e of s.enemies) if (e.hp > 0) Object.assign(e, { x: e.homeX, y: e.homeY, hp: ENEMIES[e.type].hp, mode: 'idle', windup: 0, cooldown: 1, returnTime: 0 });
     emit(s, 'respawn'); return true;
   }
   if (p.dead) return false;
@@ -364,7 +364,7 @@ export function command(s, input) {
     case 'buy': case 'sell': case 'buyback': {
       const result = transact(s, input);
       if (!result.ok) { emit(s, 'message', { text: result.reason }); return false; }
-      emit(s, 'trade', { action: result.type, id: result.templateId, price: result.price }); return true;
+      emit(s, 'trade', { action: result.type, id: result.templateId, price: result.price, quantity: result.quantity }); return true;
     }
     default: return false;
   }

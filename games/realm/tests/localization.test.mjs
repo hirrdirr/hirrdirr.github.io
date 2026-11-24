@@ -103,7 +103,7 @@ function uiHarness(s) {
   function element(id){if(!elements.has(id))elements.set(id,{
     id,open:false,hidden:false,textContent:'',innerHTML:'',dataset:{},scrollTop:0,handlers:{},
     classList:{toggle(){},add(){}},addEventListener(type,fn){this.handlers[type]=fn;},
-    showModal(){this.open=true;},close(){this.open=false;this.handlers.close?.();},focus(){},querySelector(){return null;}
+    showModal(){this.open=true;},close(){this.open=false;this.handlers.close?.();},focus(){},querySelector(){return null;},querySelectorAll(){return [];}
   });return elements.get(id);}
   const previous=globalThis.document;globalThis.document={getElementById:element,querySelectorAll:()=>[],activeElement:null};
   const ui=new UI(()=>s,{started:()=>true,command:a=>command(s,a),resume(){},pause(){}});
@@ -142,4 +142,24 @@ test('opening another NPC clears stale panel feedback without hiding current que
     assert.equal(h.element('panel-feedback').hidden,false);
     h.ui.dialogue('mira');assert.equal(h.element('panel-feedback').hidden,true);
   }finally{h.restore();}
+});
+
+test('merchant clicks sell and buy back the selected stack through the UI', () => {
+  const s = createGame(), h = uiHarness(s);
+  Object.assign(s.player, NPCS.find(n => n.id === 'ivo'));
+  s.player.inventory.amber = 12;
+  const content = h.element('panel-content');
+  const click = dataset => content.handlers.click({ target: { closest: () => ({ dataset }) } });
+  try {
+    h.ui.open('merchant');
+    click({ saleItem: 'amber' });
+    assert.match(content.innerHTML, /data-quantity="12"/);
+    click({ action: 'sell', id: 'amber', quantity: '12' });
+    assert.equal(s.player.gold, 48);
+    const id = s.buyback[0].id;
+    click({ buybackItem: id });
+    click({ action: 'buyback', id });
+    assert.equal(s.player.inventory.amber, 12);
+    assert.equal(s.player.gold, 0);
+  } finally { h.restore(); }
 });

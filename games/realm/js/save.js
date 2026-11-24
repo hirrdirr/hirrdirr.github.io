@@ -7,7 +7,7 @@ import { respawnSeconds, spawnKey, placeAtHome } from './enemy-life.js';
 import { blocked, LANDMARKS } from './world.js';
 import { sanitizeTalents, availableTalentPoints } from './talents.js';
 import { MERCHANTS, BUYBACK_LIMIT } from './trading.js';
-import { EQUIPMENT_SLOTS, emptyEquipment, acceptsEquipment } from './inventory.js';
+import { MAX_STACK, EQUIPMENT_SLOTS, emptyEquipment, acceptsEquipment } from './inventory.js';
 export const SAVE_KEY = 'hirrdirr.realm.save';
 export const SAVE_VERSION = 6;
 // A valid legacy bag can contain 999 copies of every template. Expansion into
@@ -133,8 +133,10 @@ export function deserialize(raw) {
     if (!entry || typeof entry.id !== 'string' || !/^sale-\d+$/.test(entry.id) || !item || !Object.hasOwn(MERCHANTS, entry.merchant)) { if (modern) damaged(); else continue; }
     const id = Number(entry.id.slice(5));
     if (!Number.isSafeInteger(id) || id < 1 || id > 1e9 || !item.value || item.questItem || s.buyback.some(e => e.id === entry.id)) { if (modern) damaged(); else continue; }
+    const quantity = entry.quantity === undefined ? 1 : entry.quantity;
+    if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > (item.slot ? 1 : MAX_STACK)) { if (modern) damaged(); else continue; }
     const ref = item.slot ? (modern ? claim(entry.item) : createItemInstance(p, entry.item)) : entry.item;
-    s.buyback.push({ id: entry.id, merchant: entry.merchant, item: ref, price: item.value });
+    s.buyback.push({ id: entry.id, merchant: entry.merchant, item: ref, price: item.value * quantity, ...(quantity > 1 ? { quantity } : {}) });
     s.tradeSequence = Math.max(s.tradeSequence, id + 1);
   }
   // Uncollected equipment is already an instance: pickup transfers that copy.

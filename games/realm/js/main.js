@@ -47,7 +47,7 @@ function processEvents() {
     else if(event.type==='talent')ui.toast(tr("main.rank_learned", TALENTS[event.id].name, state.player.talents[event.id]));
     else if(event.type==='respec')ui.toast(tr("main.your_talents_have_been_reset_points_to_spend", availableTalentPoints(state.player)));
     else if(event.type==='unequip')ui.toast(tr("main.unequipped", ITEMS[event.id].name));
-    else if(event.type==='trade')ui.toast(tr("main.gold", {buy:tr("main.bought"),sell:tr("main.sold"),buyback:tr("main.bought_back")}[event.action], ITEMS[event.id].name, event.action==='sell'?'+':'−', event.price));
+    else if(event.type==='trade')ui.toast(tr("main.gold", {buy:tr("main.bought"),sell:tr("main.sold"),buyback:tr("main.bought_back")}[event.action], event.quantity>1?tr('ui.item_count',ITEMS[event.id].name,event.quantity):ITEMS[event.id].name, event.action==='sell'?'+':'−', event.price));
     else if(event.type==='death'){save();ui.open('death');}
     else if(event.type==='respawn'){renderer.resetCamera();ui.view=null;ui.panel.close();}
     if(['questAccepted','questDone','equip','item','respawn','beacon','rune','seal','checkpoint','talent','respec','unequip','trade','kill'].includes(event.type))needsSave=true;
