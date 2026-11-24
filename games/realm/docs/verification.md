@@ -1,3 +1,22 @@
+# v0.5.0 verification — 2026-11-23
+
+The baseline at `e2e3646` passed 139 tests. The release adds 12 checks for
+kill XP, cap feedback, all five respawn timers, spawn clearance across the map,
+repeat boss mechanics and rewards, reloading timers and a previous-version save.
+The fixture was written by 0.4.4 with rolled gear, buyback, uncollected boss loot
+and completed story flags. The test checks the complete serialized player/world
+payload and repurchases the same rolled item.
+
+In Chromium, a level-5 character killed a Thornroot from a prepared save. The bag
+panel showed 34/200 XP (starting at 30) and the HUD showed 3 gold. In a separate
+save with two seconds remaining on the Warden timer, the player resumed on the
+boss's home. After its return, a strike showed 271/300 HP and the journal listed
+The Silent Beacon as completed. Automated tests run the full boss intervals.
+
+In a local Node simulation comparison with 36,000 fixed ticks per sample, warm-up
+and five alternating samples per version, median step times were 0.0258 ms on
+0.4.4 and 0.0256 ms on 0.5.0. This measures simulation CPU time only.
+
 # v0.4.4 verification — 2026-11-23
 
 Baseline: merged 0.4.3 at `3402c58` (130 passing tests). The 0.4.4 suite

@@ -106,7 +106,7 @@ test('save round-trip restores progress, gear, discoveries, name, death and boss
   s.player.hp=0;s.player.dead=true;
   const copy=deserialize(serialize(s));
   for(const key of ['name','level','xp','equipment','inventory','dead','hp'])assert.deepEqual(copy.player[key],s.player[key]);
-  assert.deepEqual(copy.quests,s.quests);assert.deepEqual(copy.chests,s.chests);assert.equal(copy.enemies.find(e=>e.type==='warden').hp,0);
+  assert.deepEqual(copy.quests,s.quests);assert.deepEqual(copy.chests,s.chests);assert.equal(copy.flags.wardenDefeated,true);assert.equal(copy.enemies.find(e=>e.type==='warden').hp,ENEMIES.warden.hp);
 });
 test('older v0 saves migrate and invalid values are bounded without trusting unknown IDs',()=>{
   const raw=JSON.parse(serialize(createGame()));raw.version=0;raw.data.player.level=999;raw.data.player.gold=-100;raw.data.player.x=-999;raw.data.player.inventory={potion:Infinity,invalid:9,moonBlade:4};raw.data.player.equipment={weapon:'__proto__',armor:'moonBlade'};

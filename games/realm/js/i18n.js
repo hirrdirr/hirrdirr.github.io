@@ -16,3 +16,7 @@ export function createTranslator(messages = english) {
   };
 }
 export const tr = createTranslator();
+
+export function withAwardedXP(message, xp) {
+  return xp > 0 ? tr('feedback.with_xp', message, xp) : message;
+}

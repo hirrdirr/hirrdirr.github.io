@@ -1,4 +1,4 @@
-import { tr } from './i18n.js';
+import { tr, withAwardedXP } from './i18n.js';
 import { createGame, command, step, TICK } from './simulation.js';
 import { MAX_SAVE_BYTES, SaveStore, serialize, deserialize } from './save.js';
 import { Renderer } from './renderer.js';
@@ -38,10 +38,10 @@ function processEvents() {
     else if(event.type==='questAccepted')ui.toast(tr("main.new_quest", QUESTS[event.id].name));
     else if(event.type==='questReady')ui.toast(tr("main.quest_ready_return_to", NPCS.find(n=>n.id===QUESTS[event.id].npc).name));
     else if(event.type==='questDone'){ui.toast(tr("main.quest_completed", QUESTS[event.id].name));if(event.id==='beacon')ui.toast(tr("main.chapter_01_complete_signe_awaits_east_of_the_bridge"));if(event.id==='heart')ui.toast(tr("main.chapter_02_complete_the_fen_breathes_again"));}
-    else if(event.type==='discovery')ui.toast(tr("main.discovered_12_xp", event.name));
+    else if(event.type==='discovery')ui.toast(withAwardedXP(tr('main.discovered', event.name), event.xp));
     else if(event.type==='equip')ui.toast(tr("main.equipped", ITEMS[event.id].name));
     else if(event.type==='beacon')ui.toast(tr("main.the_beacon_shines_again_return_to_elin"));
-    else if(event.type==='rune')ui.toast(tr("main.runestone_read_18_xp"));
+    else if(event.type==='rune')ui.toast(withAwardedXP(tr('main.runestone_read'), event.xp));
     else if(event.type==='seal')ui.toast(tr("main.the_seal_is_restored_return_to_signe"));
     else if(event.type==='checkpoint')ui.toast(tr("main.full_health_checkpoint", event.name));
     else if(event.type==='talent')ui.toast(tr("main.rank_learned", TALENTS[event.id].name, state.player.talents[event.id]));

@@ -1,10 +1,11 @@
 import { random } from './random.js';
 import { instance, templateId, resolveItem, createItemInstance, discardItem } from './item-instances.js';
-import { tr } from './i18n.js';
+import { tr, withAwardedXP } from './i18n.js';
 // Pure game rules. No DOM, Canvas, storage, clocks or network access.
 // Clients send commands; step() advances a fixed tick and emits presentation events.
 import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLevel } from './data.js';
 import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, zoneAt } from './world.js';
+import { createEnemy, respawnSeconds } from './enemy-life.js';
 import { stepEnemies } from './enemy-ai.js';
 import { talentEffects, talentRank, learnTalent, talentRequirement, spentTalentPoints, respecCost } from './talents.js';
 import { capacityReason, bundleCapacityReason, MAX_GOLD, EQUIPMENT_SLOTS, emptyEquipment, transferEquipment, acceptsEquipment, equipmentTarget, grantItems } from './inventory.js';
@@ -42,7 +43,7 @@ export function createGame(name = tr("simulation.wanderer")) {
   };
   state.player.equipment.weapon = createItemInstance(state.player, 'trainingSword');
   state.player.equipment.armor = createItemInstance(state.player, 'linenCoat');
-  state.enemies = ENEMY_SPAWNS.map(([type, x, y], index) => ({ id: 'enemy' + index, type, x, y, homeX: x, homeY: y, hp: ENEMIES[type].hp, mode: 'idle', timer: 0, cooldown: .5, windup: 0, hit: 0, respawn: 0, facing: 1 }));
+  state.enemies = ENEMY_SPAWNS.map(([type, x, y], index) => createEnemy('enemy' + index, type, x, y));
   return state;
 }
 export function emit(s, type, data = {}) {
@@ -59,9 +60,19 @@ export function addItem(s, id, quantity = 1, rng = () => random(s)) {
   emit(s, 'item', { id, quantity });
   return true;
 }
+// Index by enemy level minus player level, from -6 through +2.
+const KILL_XP_PERCENT = [0, 10, 25, 45, 65, 85, 100, 110, 125];
+export function enemyKillXP(baseXP, enemyLevel, playerLevel) {
+  if (!Number.isSafeInteger(baseXP) || baseXP <= 0 || !Number.isSafeInteger(enemyLevel) ||
+      !Number.isSafeInteger(playerLevel) || enemyLevel < 1 || playerLevel < 1 || playerLevel >= 20) return 0;
+  const difference = Math.max(-6, Math.min(2, enemyLevel - playerLevel));
+  const reward = Math.round(baseXP * KILL_XP_PERCENT[difference + 6] / 100);
+  return Number.isSafeInteger(reward) ? reward : 0;
+}
+
 export function giveXP(s, amount) {
   const p = s.player;
-  if (p.level >= 20) return;
+  if (p.level >= 20 || !Number.isSafeInteger(amount) || amount <= 0) return 0;
   p.xp += amount;
   while (p.level < 20 && p.xp >= xpForLevel(p.level)) {
     p.xp -= xpForLevel(p.level);
@@ -70,7 +81,11 @@ export function giveXP(s, amount) {
     effect(s, 'level', p.x, p.y, tr("simulation.level", p.level));
     emit(s, 'level', { level: p.level });
   }
-  if (p.level === 20) p.xp = 0;
+  // The cap discards overflow. Feedback reports only the XP actually used.
+  if (p.level < 20) return amount;
+  const awarded = amount - p.xp;
+  p.xp = 0;
+  return awarded;
 }
 export function questReady(s, id) {
   const q = s.quests[id];
@@ -139,8 +154,8 @@ export function interact(s) {
     s.chests.push(target.id);
     s.player.gold = Math.min(MAX_GOLD, s.player.gold + 12);
     addItem(s, target.item, target.quantity);
-    giveXP(s, 15);
-    emit(s, 'message', { text: tr("simulation.cache_discovered_12_gold_15_xp") });
+    const xp = giveXP(s, 15);
+    emit(s, 'message', { text: withAwardedXP(tr('simulation.cache_discovered'), xp) });
   } else if (target.kind === 'beacon') {
     if (!s.flags.wardenDefeated) emit(s, 'message', { text: tr("simulation.the_wardens_roots_keep_the_beacon_dark") });
     else if (!s.flags.beaconLit) {
@@ -154,7 +169,11 @@ export function interact(s) {
     s.player.checkpoint = target.id === 'campfire' ? 'camp' : 'village';
     emit(s, 'checkpoint', { name: target.id === 'campfire' ? tr("world.wanderers_camp") : tr("world.lantern_vale") });
   } else if (target.kind === 'rune') {
-    if (!s.runes.includes(target.id)) { s.runes.push(target.id); giveXP(s, 18); questEvent(s, 'rune', 'ember'); emit(s, 'rune'); }
+    if (!s.runes.includes(target.id)) {
+      s.runes.push(target.id);
+      const xp = giveXP(s, 18);
+      questEvent(s, 'rune', 'ember'); emit(s, 'rune', { xp });
+    }
     emit(s, 'message', { text: target.text });
   } else if (target.kind === 'seal') {
     if (!s.flags.ancientDefeated) emit(s, 'message', { text: tr("simulation.fenhearts_embers_hold_the_seal_open") });
@@ -168,8 +187,8 @@ export function interact(s) {
 }
 function kill(s, enemy) {
   const def = ENEMIES[enemy.type];
-  enemy.hp = 0; enemy.mode = 'dead'; enemy.respawn = def.boss ? Infinity : 28;
-  giveXP(s, def.xp);
+  enemy.hp = 0; enemy.mode = 'dead'; enemy.respawn = respawnSeconds(enemy.type);
+  const xp = giveXP(s, enemyKillXP(def.xp, def.level, s.player.level));
   s.player.gold = Math.min(MAX_GOLD, s.player.gold + def.gold);
   heal(s, stats(s.player).killHealing);
   questEvent(s, 'kill', enemy.type);
@@ -183,8 +202,8 @@ function kill(s, enemy) {
   if (ITEMS[item].slot) item = createItemInstance(s.player, item, () => random(s));
   s.drops.push({ id: ++s.sequence, x: enemy.x, y: enemy.y, item, life: 90 });
   if (s.drops.length > 64) discardItem(s.player, s.drops.shift().item);
-  emit(s, 'kill', { typeId: enemy.type, xp: def.xp, gold: def.gold });
-  effect(s, 'xp', enemy.x, enemy.y - 16, '+' + def.xp + ' XP');
+  emit(s, 'kill', { typeId: enemy.type, xp, gold: def.gold });
+  if (xp > 0) effect(s, 'xp', enemy.x, enemy.y - 16, '+' + xp + ' XP');
 }
 function heal(s, amount) {
   if (amount <= 0 || s.player.dead) return;
@@ -368,8 +387,8 @@ export function step(s, input = {}, dt = TICK) {
   if (p.combat === 0) p.hp = Math.min(stats(p).maxHp, p.hp + (inSafe(p.x, p.y) ? 9 : 1.5) * dt);
   const zone = zoneAt(p.x, p.y);
   if (!s.discovered.includes(zone.id)) {
-    s.discovered.push(zone.id); giveXP(s, 12);
-    emit(s, 'discovery', { name: zone.name });
+    s.discovered.push(zone.id);
+    emit(s, 'discovery', { name: zone.name, xp: giveXP(s, 12) });
   }
   stepPlayerShots(s, dt);
   stepEnemies(s, dt, { random, hurt, effect });

@@ -1,9 +1,28 @@
-# Project Realm — Lantern Vale, v0.4.4
+# Project Realm — Lantern Vale, v0.5.0
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
 
-## 0.4.4 — Randomized Gear Stats
+## 0.5.0 — XP Scaling & World Respawn
+
+Enemy XP depends on the player's level **when the enemy falls**. A Thornroot
+awards 16 XP at level 1, 10 at level 3, 4 at level 5 and zero from level 7.
+The kill event and floating number use the XP actually credited. Quests and
+exploration still use their authored rewards.
+
+| Enemy level minus player level | ≤ −6 | −5 | −4 | −3 | −2 | −1 | 0 | +1 | ≥ +2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Base kill XP | 0% | 10% | 25% | 45% | 65% | 85% | 100% | 110% | 125% |
+
+Rewards round to the nearest whole XP, rounding halves up. Each open-world
+enemy now returns with full health. Ordinary enemies take 28 seconds of active
+world time, the Rootbound Warden takes 120 and Fenheart takes 180. The longer
+Fenheart interval fits its role as the final encounter. Pausing or closing the
+game pauses the countdown. Camping a spawn moves the returning enemy to a
+clear nearby spot. Repeat victories award combat loot, gold and scaled XP.
+The beacon, seal, quest completion and one-time quest rewards persist.
+
+## Previous release: 0.4.4 — Randomized Gear Stats
 
 Compare individual copies before equipping them. For example, a new Moonshard
 can give 11 attack, the base 10 attack, or 9 attack and 6 maximum health. The
@@ -165,7 +184,7 @@ runestones, face **Fenheart** and restore the sluice seal.
 
 - Five linked quests, four exploration caches, local discoveries and loot.
 - Five enemy types: ordinary melee, telegraphed wolf pounces, ranged Emberwings
-  and two bosses. Boss defeat persists; ordinary enemies eventually respawn.
+  and two bosses. All five enemy types return after defeat.
 - Every third connected sword hit deals 35% extra base damage. Lantern Burst
   interrupts ordinary enemy attacks; boss telegraphs still require avoidance.
 - Select a target, read its intent and move or dodge away from warnings.
@@ -245,8 +264,13 @@ quests, permanent flags, discoveries, opened caches, herbs, runes, checkpoint,
 cooldowns, uncollected loot, buyback, elapsed time and the simulation RNG seed.
 Unspent points are derived from level and validated ranks, never trusted from JSON.
 
-Enemies, projectiles, guard/retaliation buffs, eruption markers, combos and
-particles are transient. Normal enemies reset on load; boss defeat persists.
+An optional schema-6 `respawns` map stores remaining seconds for defeated
+enemies, keyed by type and authored home coordinates. Reloading resumes that time.
+The loader checks known spawns, clamps excessive timers to the configured delay,
+and treats missing or invalid timers as ready. Older journeys without the field
+can encounter previously defeated bosses immediately and keep their story flags.
+Living enemies restart healthy at home. Projectiles, guard/retaliation buffs,
+eruption markers, combos and particles are transient.
 This release does not promise exact encounter continuation or protection from
 intentional offline save editing.
 
@@ -283,4 +307,4 @@ animation loop; the talent panel intentionally continues simulation. The 30 FPS 
 
 ## Next roadmap milestone
 
-**0.5.0 — XP Scaling & World Respawn** will introduce level-dependent XP and respawning world enemies and bosses.
+**0.5.1 — Combat HUD Overhaul** will clarify target HP and level, refine the player HUD and move XP directly above the action bar.
