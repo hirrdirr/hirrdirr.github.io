@@ -1,3 +1,4 @@
+import { tr } from './i18n.js';
 import { resolveItem } from './item-instances.js';
 import { makeArt } from './art.js';
 import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, terrain, riverLeft, LANDMARKS } from './world.js';
@@ -191,6 +192,7 @@ export class Renderer {
         if(visible({x:mx,y:my})){g.fillStyle='#e9b27999';g.fillRect(mx,my,2,2);}
       }
     }
+    if (target && visible(target)) this.selectedHealthbar(g, target, cx, cy);
     g.restore();
     // Gentle, cheap edge shading. No filters or per-frame full-canvas gradients.
     g.fillStyle='#142b3022';g.fillRect(0,0,w,8);g.fillRect(0,h-8,w,8);
@@ -248,12 +250,41 @@ export class Renderer {
     this.shadow(g,e.x,e.y,def.boss?50:30);
     if(e.hit>0)g.globalAlpha=.6;
     g.drawImage(sprite,Math.round(e.x-sprite.width/2),Math.round(e.y-sprite.height+7));g.globalAlpha=1;
-    if(e.mode==='chase'||e.mode==='windup'||e.mode==='pounce'||e.hp<def.hp||s.targetId===e.id) {
+    if(s.targetId!==e.id && (e.mode==='chase'||e.mode==='windup'||e.mode==='pounce'||e.hp<def.hp)) {
       const w=def.boss?70:40,y=e.y-sprite.height-5;
       g.fillStyle='#182d2c';g.fillRect(e.x-w/2-1,y-1,w+2,6);
       g.fillStyle=def.boss?'#ce8e64':'#c3a567';g.fillRect(e.x-w/2,y,w*e.hp/def.hp,4);
-      if(def.boss||s.targetId===e.id)this.label(g,def.name,e.x,y-8,'#f0d7b0',12);
+      if(def.boss)this.label(g,def.name,e.x,y-8,'#f0d7b0',12);
     }
+  }
+  selectedHealthbar(g, enemy, cameraX, cameraY) {
+    const def = ENEMIES[enemy.type];
+    // Cache only presentation text. HP can change while the target stays selected.
+    if (this.plateType !== enemy.type) {
+      this.plateType = enemy.type;
+      this.plateName = tr('hud.enemy_title', def.name, def.level);
+      this.plateHp = undefined;
+    }
+    if (this.plateHp !== enemy.hp) {
+      this.plateHp = enemy.hp;
+      this.plateHealth = tr('hud.health', Math.ceil(enemy.hp), def.hp);
+    }
+    const width = def.boss ? 174 : 142, height = 39;
+    if (enemy.x < cameraX || enemy.x > cameraX + this.canvas.width ||
+        enemy.y < cameraY || enemy.y > cameraY + this.canvas.height) return;
+    const left = Math.round(Math.max(cameraX + 2, Math.min(enemy.x - width / 2, cameraX + this.canvas.width - width - 2)));
+    const top = Math.round(Math.max(cameraY + 2, enemy.y - this.art[enemy.type][0].height - height - 4));
+    const center = left + width / 2;
+    g.fillStyle = def.boss ? '#a98252' : '#728279';
+    g.fillRect(left, top, width, height);
+    g.fillStyle = '#182824';
+    g.fillRect(left + 1, top + 1, width - 2, height - 2);
+    this.label(g, this.plateName, center, top + 14, def.boss ? '#ffda9a' : '#f6f1df', 12);
+    this.label(g, this.plateHealth, center, top + 28, '#ecedde', 11);
+    g.fillStyle = '#463d35';
+    g.fillRect(left + 5, top + 32, width - 10, 4);
+    g.fillStyle = def.boss ? '#e7ae68' : '#df9982';
+    g.fillRect(left + 5, top + 32, (width - 10) * enemy.hp / def.hp, 4);
   }
   renderMap(s) {
     const g=this.map.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(this.mapGround,0,0);

@@ -1,7 +1,11 @@
-# Project Realm — Lantern Vale, v0.5.0
+# Project Realm — Lantern Vale, v0.5.1
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
+
+## 0.5.1 — Combat HUD
+
+The XP strip above the abilities shows your level and progress to the next level. At level 20 it reads MAX LEVEL. Select an enemy with Tab or click it to see its level and exact health above its sprite. The target frame also shows its attack intent.
 
 ## 0.5.0 — XP Scaling & World Respawn
 
