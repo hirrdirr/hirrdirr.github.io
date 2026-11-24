@@ -49,17 +49,26 @@ export function tradePanel(s, selection) {
     const data = ITEMS[offer.id];
     html += `<button class="stock-item ${data.rarity}${side === 'stock' && selection.id === offer.id ? ' selected' : ''}" data-stock="${offer.id}" aria-pressed="${side === 'stock' && selection.id === offer.id}" title="${escapeHTML(itemStats(data) || data.description)}"><span class="stock-icon">${itemIcon(data.icon)}</span><span><strong>${data.name}</strong><small>${RARITIES[data.rarity]}</small></span><b>${tr("ui-panels.g", offer.price)}</b></button>`;
   }
-  html += `</div></section><section class="trade-bag"><div class="bag-heading"><h3>${tr("ui-panels.your_bag")}</h3><span>${tr("ui-panels.slots", occupiedSlots(p), BAG_SLOTS)}</span></div><p class="panel-hint">${tr("ui-panels.select_the_item_you_want_to_sell_one_item_per_transaction")}</p><div class="inventory-grid">`;
+  html += `</div></section><section class="trade-bag"><div class="bag-heading"><h3>${tr("ui-panels.your_bag")}</h3><span>${tr("ui-panels.slots", occupiedSlots(p), BAG_SLOTS)}</span></div><p class="panel-hint">${tr("ui-panels.select_bag_item_to_sell")}</p><div class="inventory-grid">`;
   for (const [key, count] of Object.entries(p.inventory)) if (count > 0) html += bagButton(p, key, side === 'bag' && selection.id === key, 'sale-item');
   if (!occupiedSlots(p)) html += `<p>${tr("ui-panels.your_bag_is_empty")}</p>`;
   html += `</div><div class="buyback-heading"><h4>${tr("ui-panels.buyback")}</h4><span>${tr("ui-panels.your_last_sales", BUYBACK_LIMIT)}</span></div><div class="buyback-list">`;
-  for (const sale of s.buyback) html += `<button class="buyback-item${side === 'buyback' && selection.id === sale.id ? ' selected' : ''}" data-buyback-item="${sale.id}" title="${tr("ui-panels.buyback_gold", escapeHTML(resolveItem(p, sale.item).name), sale.price)}">${itemIcon(resolveItem(p, sale.item).icon)}<span>${resolveItem(p, sale.item).name}</span><b>${tr("ui-panels.g", sale.price)}</b></button>`;
+  for (const sale of s.buyback) {
+    const sold = resolveItem(p, sale.item);
+    const name = sale.quantity > 1 ? tr('ui.item_count', sold.name, sale.quantity) : sold.name;
+    html += `<button class="buyback-item${side === 'buyback' && selection.id === sale.id ? ' selected' : ''}" data-buyback-item="${sale.id}" title="${tr("ui-panels.buyback_gold", escapeHTML(name), sale.price)}">${itemIcon(sold.icon)}<span>${escapeHTML(name)}</span><b>${tr("ui-panels.g", sale.price)}</b></button>`;
+  }
   if (!s.buyback.length) html += `<p class="panel-hint">${tr("ui-panels.sold_something_by_mistake_buy_it_back_here_for_the_same_price")}</p>`;
   html += '</div></section></div><section class="trade-detail" aria-live="polite">';
   if (item) {
     html += `<div><span class="item-rarity ${item.rarity}">${RARITIES[item.rarity]}${item.questItem ? tr("ui-panels.quest_bound") : ''}</span><h3>${item.name}</h3><p>${item.description}</p>${side === 'stock' && canRollGear(id) ? `<p class="detail-note">${tr('gear.stock_preview')}</p>` : ''}<p class="item-properties">${itemStats(item)}</p></div><div>${compareEquipment(p, id)}</div><div class="trade-actions">`;
     const label = side === 'stock' ? tr("ui-panels.buy_1") : side === 'buyback' ? tr("ui-panels.buyback") : tr("ui-panels.sell_1");
     html += `<button class="primary" data-action="${quote.type}" data-id="${selection.id}" ${quote.ok ? '' : 'disabled'}>${tr("ui-panels.gold_2", label, quote.price)}</button>`;
+    if (side === 'bag' && !item.slot && !item.questItem && item.value && p.inventory[id] > 1) {
+      const stack = tradeQuote(s, { type: 'sell', id, quantity: p.inventory[id], confirm: true });
+      html += `<button data-action="sell" data-id="${id}" data-quantity="${stack.quantity}" ${stack.ok ? '' : 'disabled'}>${tr('ui-panels.gold_2', tr('ui-panels.sell_stack', p.inventory[id]), stack.price)}</button>`;
+      if (stack.reason && !quote.reason) html += `<p class="panel-hint">${stack.reason}</p>`;
+    }
     if (quote.reason) html += `<p class="panel-hint">${quote.reason}</p>`;
     else if (side === 'bag' && item.rarity === 'rare') html += `<p class="panel-hint">${tr("ui-panels.rare_items_require_confirmation_before_selling")}</p>`;
     html += '</div>';

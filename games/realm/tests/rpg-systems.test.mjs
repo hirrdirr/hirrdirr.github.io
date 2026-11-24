@@ -204,3 +204,49 @@ test('offensive talent abilities cannot damage enemies from a safe village or ca
   for(const id of ['bolt','rush']){assert.equal(command(s,{type:id}),false);assert.equal(p.cooldowns[id],0);}
   assert.equal(s.playerShots.length,0);assert.equal(command(s,{type:'guard'}),true);
 });
+
+test('Sell Stack quotes and transfers the full Amber stack in one reversible sale', () => {
+  let s = shop();
+  const gold = s.player.gold;
+  s.player.inventory.amber = 12;
+  const action = { type: 'sell', id: 'amber', quantity: 12 };
+  const html = tradePanel(s, { side: 'bag', id: 'amber' });
+  assert.match(html, /data-action="sell" data-id="amber" data-quantity="12"[^>]*>Sell Stack \(×12\).*48 gold/);
+  assert.match(html, /Sell 1.*4 gold/);
+  assert.equal(command(s, action), true);
+  assert.equal(command(s, action), false);
+  assert.equal(s.player.gold, gold + 48);
+  assert.equal(s.player.inventory.amber, undefined);
+  assert.equal(s.buyback.length, 1);
+
+  s = deserialize(serialize(s));
+  const sale = s.buyback[0];
+  assert.equal(sale.quantity, 12);
+  assert.equal(sale.price, 48);
+  assert.match(tradePanel(s, { side: 'buyback', id: sale.id }), /Amber ×12/i);
+  const buyback = { type: 'buyback', id: sale.id };
+  s.player.inventory.amber = 990;
+  assert.equal(command(s, buyback), false);
+  assert.equal(s.player.inventory.amber, 990);
+  assert.equal(s.player.gold, gold + 48);
+  delete s.player.inventory.amber;
+  assert.equal(command(s, buyback), true);
+  assert.equal(command(s, buyback), false);
+  assert.equal(s.player.inventory.amber, 12);
+  assert.equal(s.player.gold, gold);
+});
+
+test('a stale stack or a total above the gold limit cannot partially sell', () => {
+  const s = shop();
+  s.player.inventory.amber = 3;
+  s.player.gold = MAX_GOLD - 4;
+  const sell = { type: 'sell', id: 'amber' };
+  for (const quantity of [2, 3, 4, 0, -1, 1.5, '3']) {
+    assert.equal(command(s, { ...sell, quantity }), false);
+    assert.equal(s.player.inventory.amber, 3);
+    assert.equal(s.player.gold, MAX_GOLD - 4);
+    assert.equal(s.buyback.length, 0);
+  }
+  assert.equal(command(s, sell), true);
+  assert.equal(s.player.inventory.amber, 2);
+});

@@ -16,20 +16,23 @@ export const MERCHANTS = Object.freeze({
 export const nearMerchant = (s, id) => Object.hasOwn(MERCHANTS, id) && NPCS.some(n => n.id === id && Math.hypot(s.player.x - n.x, s.player.y - n.y) <= 80);
 export function tradeQuote(s, action) {
   const p = s.player, merchant = action.merchant || 'ivo';
-  const result = { ok: false, reason: '', merchant, item: action.id, price: 0, type: action.type };
+  const result = { ok: false, reason: '', merchant, item: action.id, quantity: 1, price: 0, type: action.type };
   const fail = reason => ({ ...result, reason });
   if (p.dead || !nearMerchant(s, merchant)) return fail(tr("trading.approach_the_merchant_first"));
-  if (action.quantity !== undefined && action.quantity !== 1) return fail(tr("trading.select_one_item_at_a_time"));
+  if (action.type !== 'sell' && action.quantity !== undefined && action.quantity !== 1) return fail(tr("trading.select_one_item_at_a_time"));
   if (action.type === 'buyback') {
     const entry = s.buyback.find(e => e.id === action.id && e.merchant === merchant);
     if (!entry) return fail(tr("trading.that_item_is_no_longer_available_for_buyback"));
-    result.item = entry.item; result.price = entry.price;
+    result.item = entry.item; result.price = entry.price; result.quantity = entry.quantity ?? 1;
   } else if (!resolveItem(p, action.id)) return fail(tr("trading.select_an_item"));
   const item = resolveItem(p, result.item);
   if (!item || (action.type !== 'buy' && item.slot && !instance(p, result.item))) return fail(tr('trading.select_an_item'));
   result.templateId = templateId(p, result.item);
   if (action.type === 'sell') {
-    result.price = item.value || 0;
+    const quantity = action.quantity === undefined ? 1 : action.quantity;
+    if (quantity !== 1 && (item.slot || !Number.isSafeInteger(quantity) || quantity < 2 || quantity !== p.inventory[action.id])) return fail(tr('trading.select_current_stack'));
+    result.quantity = quantity;
+    result.price = (item.value || 0) * quantity;
     if (!p.inventory[action.id]) return fail(Object.values(p.equipment).includes(action.id) ? tr("trading.unequip_the_item_before_selling_it") : tr("trading.you_do_not_own_that_item"));
     if (item.questItem || !result.price) return fail(tr("trading.quest_items_cannot_be_sold"));
     if (p.gold + result.price > MAX_GOLD) return fail(tr("trading.you_cannot_carry_any_more_gold"));
@@ -41,7 +44,7 @@ export function tradeQuote(s, action) {
       result.price = offer.price;
     }
     if (p.gold < result.price) return fail(tr("trading.you_need_more_gold", result.price - p.gold));
-    const reason = capacityReason(p, result.item);
+    const reason = capacityReason(p, result.item, result.quantity);
     if (reason) return fail(reason);
   } else return fail(tr("trading.invalid_transaction"));
   return { ...result, ok: true };
@@ -50,16 +53,16 @@ export function transact(s, action) {
   const q = tradeQuote(s, action);
   if (!q.ok) return q;
   const p = s.player;
-  // Validate everything first, then transfer exactly one item and its price.
+  // Quotes validate the complete transfer before inventory or gold changes.
   if (q.type === 'sell') {
-    p.inventory[q.item]--;
+    p.inventory[q.item] -= q.quantity;
     if (!p.inventory[q.item]) delete p.inventory[q.item];
     p.gold += q.price;
-    s.buyback.unshift({ id: 'sale-' + s.tradeSequence++, merchant: q.merchant, item: q.item, price: q.price });
+    s.buyback.unshift({ id: 'sale-' + s.tradeSequence++, merchant: q.merchant, item: q.item, price: q.price, ...(q.quantity > 1 ? { quantity: q.quantity } : {}) });
     for (const entry of s.buyback.splice(BUYBACK_LIMIT)) discardItem(p, entry.item);
   } else {
     if (q.type === 'buyback' && instance(p, q.item)) p.inventory[q.item] = 1;
-    else if (!grantItems(p, q.item, 1, () => random(s))) return { ...q, ok: false };
+    else if (!grantItems(p, q.item, q.quantity, () => random(s))) return { ...q, ok: false };
     p.gold -= q.price;
     if (q.type === 'buyback') s.buyback = s.buyback.filter(e => e.id !== action.id);
   }

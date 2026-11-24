@@ -10,7 +10,7 @@ export function createEnemy(id, type, x, y) {
   return {
     id, type, homeX: x, homeY: y, x, y, hp: ENEMIES[type].hp, mode: 'idle',
     timer: 0, cooldown: .5, windup: 0, windupMax: 0, hit: 0, respawn: 0,
-    facing: 1, aim: null, wander: undefined, pounceTime: 0, pounceHit: false
+    facing: 1, aim: null, wander: undefined, pounceTime: 0, pounceHit: false, returnTime: 0
   };
 }
 

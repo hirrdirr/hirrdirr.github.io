@@ -177,3 +177,32 @@ test('0.4.4 journey keeps its rolled gear, buyback, drops and completed story wi
   Object.assign(s.player,NPCS.find(n=>n.id==='ivo')); assert.ok(command(s,{type:'buyback',id:sale.id}));
   assert.deepEqual(s.player.itemInstances[sale.item],record); assert.equal(s.player.inventory[sale.item],1);
 });
+
+test('a wounded Dusk Wolf blocked by terrain completes its evade without awarding a kill', () => {
+  const { s, e } = encounter('wolf');
+  Object.assign(e, { x: 1230, y: 409, hp: 1, mode: 'chase' });
+  Object.assign(s.player, SPAWN);
+  step(s, {}, tick);
+  assert.equal(e.mode, 'return');
+  run(s, 8);
+  assert.equal(e.mode, 'idle');
+  assert.equal(e.hp, ENEMIES.wolf.hp);
+  assert.ok(Math.hypot(e.x - e.homeX, e.y - e.homeY) < 8);
+  assert.equal(s.events.some(event => event.type === 'kill'), false);
+  defeat(s, e);
+});
+
+test('a zero-HP wolf with a stale AI mode resumes its respawn timer without duplicating rewards', () => {
+  for (const remaining of [0, 3]) {
+    const { s, e } = encounter('wolf');
+    Object.assign(e, { hp: 0, mode: 'pounce', respawn: remaining });
+    run(s, (remaining || respawnSeconds('wolf')) - tick);
+    assert.equal(e.mode, 'dead');
+    assert.equal(e.respawn, tick);
+    step(s, {}, tick);
+    assert.equal(e.hp, ENEMIES.wolf.hp);
+    assert.equal(e.mode, 'idle');
+    assert.equal(s.events.some(event => event.type === 'kill'), false);
+    assert.equal(s.drops.length, 0);
+  }
+});

@@ -24,7 +24,7 @@ export class UI {
       this.confirmDialog.close();
       if(!sale)return;
       // The transaction layer revalidates inventory, merchant proximity and currency.
-      this.actions.command({type:'sell',id:sale,merchant:'ivo',confirm:true});
+      this.actions.command({type:'sell',...sale,merchant:'ivo',confirm:true});
       if(this.view==='merchant')this.merchant();
     });
     this.confirmDialog.addEventListener('close',()=>{this.pendingSale=null;});
@@ -45,17 +45,18 @@ export class UI {
       for(const [key,side] of [['stock','stock'],['saleItem','bag'],['buybackItem','buyback']])if(b.dataset[key]){this.tradeSelection={side,id:b.dataset[key]};this.merchant();restore();return;}
       if(b.dataset.action) {
         const action=b.dataset.action;
+        const quantity=b.dataset.quantity === undefined ? 1 : Number(b.dataset.quantity);
         if(action==='talents'){this.open('talents');return;}
         if(['accept','complete','equip','unequip','buy','sell','buyback','respawn','potion','learnTalent','respec'].includes(action)) {
           let confirm=false;
           if(action==='sell'&&resolveItem(this.state().player,b.dataset.id)?.rarity==='rare'){
-            this.confirmRareSale(b.dataset.id);return;
+            this.confirmRareSale(b.dataset.id,quantity);return;
           }
           if(action==='respec'){
             const p=this.state().player,cost=respecCost(p);
             confirm=window.confirm(tr("ui.reset_spent_points", spentTalentPoints(p), cost?tr("ui.this_costs_gold", cost):tr("ui.your_first_respecialization_is_free")));if(!confirm)return;
           }
-          const success=actions.command({type:action,id:b.dataset.id,slot:b.dataset.slot,merchant:'ivo',confirm});
+          const success=actions.command({type:action,id:b.dataset.id,slot:b.dataset.slot,quantity,merchant:'ivo',confirm});
           if(success&&this.view==='inventory'){
             if(action==='equip')this.characterSelection={side:'equipment',id:b.dataset.slot};
             if(action==='unequip')this.characterSelection={side:'bag',id:b.dataset.id};
@@ -79,12 +80,12 @@ export class UI {
   }
   get isOpen(){return this.panel.open||$('welcome').open||this.confirmDialog.open;}
   get allowsSimulation(){return this.panel.open&&this.view==='talents'&&!this.confirmDialog.open;}
-  confirmRareSale(id){
+  confirmRareSale(id,quantity=1){
     const item=resolveItem(this.state().player,id);
     if(this.view!=='merchant'||!item||item.rarity!=='rare')return;
-    this.pendingSale=id;
+    this.pendingSale={id,quantity};
     $('realm-confirm-title').textContent=tr("ui.sell_a_rare_item");
-    $('realm-confirm-description').textContent=tr("ui.sell_for_gold_you_can_buy_it_back_from_ivo_while_it_remains_among", item.name, item.value);
+    $('realm-confirm-description').textContent=tr("ui.sell_for_gold_you_can_buy_it_back_from_ivo_while_it_remains_among", quantity>1?tr('ui.item_count',item.name,quantity):item.name, item.value*quantity);
     this.confirmDialog.showModal();
   }
   refreshTalentCombat(){
