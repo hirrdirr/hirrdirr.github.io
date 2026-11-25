@@ -1,3 +1,13 @@
+# 0.5.3 world content expansion
+
+The baseline is the merged 0.5.2.1 HUD release (PR #89). The schema-6 returning-player fixture was serialized by that baseline with eight completed quests, rolled equipment, an outstanding drop, a respawn timer and two buyback entries. It round-trips unchanged before the character takes a new quest.
+
+- The Realm suite exercises all fifteen commissions, pre-discovered records, the wrong tide gate, ordered repairs across reloads, cross-NPC delivery, final rewards with a full bag and repeat boss kills. The spatial search covers every new NPC, landmark and enemy spawn. Camera tests use the expanded dimensions.
+- A separate continuous simulation walked from the returning character’s position to all fifteen quest givers, objectives and recipients, including a stop to sell at Ivo. Enemies remained active. The road-only storyline took the level-10 fixture to level 13. With all optional quests it reached level 15. The all-quest run took about 3 minutes 39 seconds of simulated movement and combat with known routes, automatic combat and instant dialogue. Human first-play duration has not been measured.
+- Chrome loaded the eight-quest fixture, accepted The Blue Road at Orin, crossed the causeway, read the pilot stone, claimed the reward at Linn and accepted A Tide in Two Places. The journal contained the field note and the follow-up. Local storage contained the completed and active quest after switching themes.
+- Sampling the legacy map at five-pixel intervals with pickup and player radii found all 193,445 previously open samples still open. Old terrain generation keeps its seeded placement stream, then removes obstacles around the new activities.
+- The single static terrain cache grows from 2688 × 1376 to 3456 × 1376 pixels, approximately 14.1 to 18.1 MiB at four bytes per pixel. The minimap and viewport buffers retain their previous sizes. In one Chrome session the median CPU time to issue cached Canvas draws was 0.494 ms on baseline Cinder Reach, 0.521 ms on updated Cinder Reach and 0.526 ms on Tideglass Shelf (seven batches of 120 frames after warm-up). These times exclude GPU composition.
+
 # v0.5.2.1 floating action bar and camera
 
 The Realm suite passed all 165 tests. The camera tests check the full player sprite and cached ground crop at the world edges, the approach to and retreat from the southern edge at dodge speed, and reduced-motion tracking.

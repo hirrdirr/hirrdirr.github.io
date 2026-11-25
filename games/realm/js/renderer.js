@@ -1,11 +1,17 @@
 import { tr } from './i18n.js';
 import { resolveItem } from './item-instances.js';
 import { makeArt } from './art.js';
-import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, SHELTER, sluiceOpen, terrain, riverLeft, LANDMARKS } from './world.js';
-import { NPCS, ENEMIES, QUESTS } from './data.js';
+import { WORLD, WIDTH, HEIGHT, TILE, SAFE, CAMP, SHELTER, SOUNDING_HOUSE, sluiceOpen, terrain, riverLeft, LANDMARKS } from './world.js';
+import { NPCS, ENEMIES, QUESTS, questRecipient } from './data.js';
 import { questReady } from './simulation.js';
 function makeCanvas(w,h) { const c=document.createElement('canvas'); c.width=w;c.height=h;return c; }
 function rand(seed) { return () => { seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}; }
+const shelfPalette = { brine: '#365c70', salt: '#899e9e', shell: '#c7c5a7', chalk: '#99b4b4' };
+const storiesByNpc = new Map(NPCS.map(n => [n.id,
+  Object.entries(QUESTS).filter(([, q]) => q.npc === n.id || questRecipient(q) === n.id)]));
+const operations = new Map(Object.entries(QUESTS).flatMap(([id, q]) => q.objectives.flatMap((o, index) =>
+  o.type === 'operate' ? [[o.target, { id, index }]] : [])));
+
 // Decorative tiles below the collision map let the southernmost player clear the dock.
 const SOUTH_SCENERY = 3 * TILE;
 
@@ -20,6 +26,34 @@ export class Renderer {
     const c=makeCanvas(WIDTH,HEIGHT + SOUTH_SCENERY),g=c.getContext('2d'),random=rand(18075);
     for(let y=0;y<c.height;y+=TILE) for(let x=0;x<WIDTH;x+=TILE) {
       const kind=terrain(x+16,y+16);
+      if (shelfPalette[kind]) {
+        g.fillStyle = shelfPalette[kind];
+        g.fillRect(x, y, TILE, TILE);
+        // Sample the coast and paths at pixel-art resolution on the static cache.
+        // The same terrain function determines which side of a shore can be walked.
+        for (let dy=0; dy<TILE; dy+=8) for (let dx=0; dx<TILE; dx+=8) {
+          const px=x+dx, py=y+dy, sample=terrain(px+4, py+4);
+          if (sample !== kind && shelfPalette[sample]) {
+            g.fillStyle=shelfPalette[sample]; g.fillRect(px, py, 8, 8);
+          }
+          if (sample === 'brine' && (terrain(px+4, py-4) !== 'brine' || terrain(px-4, py+4) !== 'brine')) {
+            g.fillStyle='#88b6b2'; g.fillRect(px, py+2, 8, 3);
+            g.fillStyle='#c4d7c6'; g.fillRect(px, py, 6, 2);
+          }
+        }
+        if (kind === 'brine') {
+          const rx=x+Math.floor(random()*15), ry=y+5+Math.floor(random()*18);
+          g.fillStyle='#497084'; g.fillRect(rx, ry, 12, 2); g.fillRect(rx+12, ry+2, 5, 2);
+        } else {
+          const light = kind === 'shell' ? '#e5ddba' : '#b7c9c1';
+          for (let i=0; i<3; i++) {
+            const px = x + Math.floor(random()*25), py = y + Math.floor(random()*27);
+            g.fillStyle = light; g.fillRect(px, py, 6, 2);
+            g.fillStyle = kind === 'shell' ? '#9b9f8c' : '#718c92'; g.fillRect(px+3, py+2, 5, 2);
+          }
+        }
+        continue;
+      }
       if (kind==='ash' || kind==='basalt' || kind==='flume') {
         g.fillStyle = kind==='basalt' ? '#3e383f' : kind==='flume' ? '#98694e' : '#776568';
         g.fillRect(x,y,TILE,TILE);
@@ -110,6 +144,31 @@ export class Renderer {
     g.fillStyle='#8f7370';g.fillRect(1284,730,36,21);g.fillStyle='#c8ad8a';g.fillRect(1284,730,7,21);
     g.fillStyle='#84613f';g.fillRect(1304,774,20,14);g.fillStyle='#b99a61';g.fillRect(1304,774,20,4);
     for(let x=1190;x<1339;x+=25) {g.fillStyle='#a3ab79';g.fillRect(x,811,9,3);}
+    // Radiating stone courses and a bronze meridian mark the Moon Dial at walking scale.
+    for (const radius of [59, 116]) {
+      for (let i=0; i<48; i++) {
+        const a = i * Math.PI / 24;
+        const x = Math.round(3110 + Math.cos(a)*radius), y = Math.round(251 + Math.sin(a)*radius*.69);
+        g.fillStyle = '#567378'; g.fillRect(x-6, y, 13, 5);
+        g.fillStyle = i % 4 ? '#c3d0be' : '#f0cc84'; g.fillRect(x-5, y-2, 11, 3);
+      }
+    }
+    g.fillStyle = '#b99463'; g.fillRect(3108, 168, 4, 172);
+    for (let x=2640; x<2780; x+=16) {
+      g.fillStyle = '#798b84'; g.fillRect(x, 757, 15, 39);
+      g.fillStyle = '#ced0b9'; g.fillRect(x+1, 757, 13, 3);
+      if (x % 32 === 0) { g.fillStyle = '#456479'; g.fillRect(x, 749, 5, 13); }
+    }
+    for (let i=0; i<13; i++) {
+      const x=3214+i*15, y=1100+i*3;
+      g.fillStyle='#5b716f'; g.fillRect(x, y, 12, 35);
+      g.fillStyle='#b6a583'; g.fillRect(x, y, 11, 4);
+    }
+    // Shell cairns and reed tufts lead off the road to two unmarked caches.
+    for (let i=0; i<7; i++) {
+      g.fillStyle='#e3dac0'; g.fillRect(2788+i*12, 1032+Math.round(Math.sin(i)*5), 5, 3);
+      g.fillStyle='#ac9a69'; g.fillRect(1330+Math.round(Math.cos(i)*7), 986+i*8, 3, 6);
+    }
     // A shaded verge marks the end of the playable ground. Paint it once with the tiles.
     const verge = g.createLinearGradient(0, HEIGHT-32, 0, c.height);
     verge.addColorStop(0, 'rgba(21,32,29,0)');
@@ -122,10 +181,10 @@ export class Renderer {
     const c=makeCanvas(232,155),g=c.getContext('2d');
     for(let y=0;y<155;y+=2) for(let x=0;x<232;x+=2) {
       const t=terrain(x/232*WIDTH,y/155*HEIGHT);
-      g.fillStyle=t==='ash'?'#9b7c79':t==='basalt'?'#493f49':t==='flume'?'#d4a778':t==='water'?'#366974':t==='path'||t==='bridge'?'#b1a279':t==='ruin'?'#7b8b7d':t==='marsh'?'#8a7757':'#355344';
+      g.fillStyle=shelfPalette[t] || (t==='ash'?'#9b7c79':t==='basalt'?'#493f49':t==='flume'?'#d4a778':t==='water'?'#366974':t==='path'||t==='bridge'?'#b1a279':t==='ruin'?'#7b8b7d':t==='marsh'?'#8a7757':'#355344');
       g.fillRect(x,y,2,2);
     }
-    g.strokeStyle='#91b18b';for(const r of [SAFE,CAMP,SHELTER])g.strokeRect(r.x/WIDTH*232,r.y/HEIGHT*155,r.w/WIDTH*232,r.h/HEIGHT*155);
+    g.strokeStyle='#91b18b';for(const r of [SAFE,CAMP,SHELTER,SOUNDING_HOUSE])g.strokeRect(r.x/WIDTH*232,r.y/HEIGHT*155,r.w/WIDTH*232,r.h/HEIGHT*155);
     return c;
   }
   resetCamera() {this.first=true;}
@@ -183,7 +242,12 @@ export class Renderer {
         g.fillStyle='#efb98966';g.fillRect(0,-20,145*progress,40);
         g.beginPath();g.moveTo(120,-10);g.lineTo(132,0);g.lineTo(120,10);g.stroke();g.restore();
       } else if(def.behavior==='ranged') {
-        g.setLineDash([5,7]);g.beginPath();g.moveTo(e.x,e.y);g.lineTo(e.x+e.aim.x*240,e.y+e.aim.y*240);g.stroke();g.setLineDash([]);
+        const direction = Math.atan2(e.aim.y, e.aim.x);
+        g.setLineDash([5,7]); g.beginPath();
+        for (const angle of def.spread ? [-def.spread, 0, def.spread] : [0]) {
+          g.moveTo(e.x, e.y); g.lineTo(e.x+Math.cos(direction+angle)*240, e.y+Math.sin(direction+angle)*240);
+        }
+        g.stroke(); g.setLineDash([]);
       } else if(def.behavior!=='eruption') {
         const radius=def.boss?100:45;
         g.beginPath();g.arc(e.x,e.y,radius,0,Math.PI*2);g.fill();g.stroke();
@@ -192,6 +256,13 @@ export class Renderer {
     }
     for(const hazard of s.hazards) {
       const progress=1-hazard.delay/hazard.maxDelay;
+      if (hazard.inner) {
+        g.beginPath(); g.arc(hazard.x, hazard.y, hazard.radius, 0, Math.PI*2);
+        g.moveTo(hazard.x+hazard.inner, hazard.y); g.arc(hazard.x, hazard.y, hazard.inner, 0, Math.PI*2);
+        g.fillStyle='#cc804262'; g.fill('evenodd'); g.lineWidth=3; g.strokeStyle='#ffe0a3'; g.stroke();
+        g.beginPath(); g.arc(hazard.x, hazard.y, hazard.inner+(hazard.radius-hazard.inner)*progress, 0, Math.PI*2); g.stroke();
+        continue;
+      }
       g.fillStyle='#e8844838';g.strokeStyle='#ffd39a';g.lineWidth=2;
       g.beginPath();g.arc(hazard.x,hazard.y,hazard.radius,0,Math.PI*2);g.fill();g.stroke();
       g.fillStyle='#e99a645f';g.beginPath();g.arc(hazard.x,hazard.y,hazard.radius*progress,0,Math.PI*2);g.fill();
@@ -261,20 +332,36 @@ export class Renderer {
     }
     if(o.kind==='house') {g.drawImage(o.roof==='blue'?this.art.houseBlue:this.art.houseRed,o.x-88,o.y-154);return;}
     const kind=o.kind==='gate'&&sluiceOpen(s)?'gateOpen':o.kind==='rune'&&s.runes.includes(o.id)?'runeRead':o.kind==='seal'&&s.flags.sealRestored?'sealLit':o.kind==='chest'&&s.chests.includes(o.id)?'chestOpen':o.kind==='beacon'&&s.flags.beaconLit?'beaconLit':o.kind;
-    const sprite=this.art[kind];if(!sprite)return;
+    const op = operations.get(o.id);
+    const worked = op && s.quests[op.id]?.progress[op.index];
+    const sprite = this.art[o.sprite === 'lamp' && !worked ? 'lampCold' : o.sprite || kind];
+    if (!sprite) return;
     if(kind==='fire'||kind==='beaconLit') {
       const gradient=g.createRadialGradient(o.x,o.y-25,3,o.x,o.y-25,45);
       gradient.addColorStop(0,kind==='fire'?'#f9c1753d':'#83dbc942');gradient.addColorStop(1,'#f9c17500');
       g.fillStyle=gradient;g.fillRect(o.x-45,o.y-70,90,90);
     }
     if (kind==='furnace') g.drawImage(sprite,o.x-64,o.y-142,128,160);
-    else g.drawImage(sprite,o.x-32,o.y-71);
+    else g.drawImage(sprite, Math.round(o.x-sprite.width/2), o.y-sprite.height+9);
+    if (o.id === 'dialBrake' && worked) {
+      const angle = this.reduced ? -.8 : s.time * .35;
+      const cx = o.x+1, cy = o.y-28;
+      g.strokeStyle='#f8d384'; g.lineWidth=3;
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx+Math.round(Math.cos(angle)*14), cy+Math.round(Math.sin(angle)*14)); g.stroke();
+    } else if (worked) {
+      g.fillStyle = '#ffe4a3'; g.fillRect(o.x-2, o.y-25, 5, 5);
+    }
+    if (o.id === 'westStaff' || o.id === 'eastStaff') {
+      const level = s.quests.soundings?.progress[2] ? 14 : o.id === 'westStaff' ? 6 : 22;
+      g.fillStyle='#629da8'; g.fillRect(o.x-8, o.y-level, 16, 3);
+      g.fillStyle='#cfebe0'; g.fillRect(o.x-7, o.y-level, 9, 1);
+    }
   }
   npc(g,n,s) {
     this.shadow(g,n.x,n.y);g.drawImage(this.art[n.color][0],n.x-20,n.y-41+(this.reduced?0:Math.floor(Math.sin(s.time*1.4+n.x)*.7)));
-    const quests=Object.entries(QUESTS).filter(([,q])=>q.npc===n.id);
-    const ready=quests.some(([id])=>questReady(s,id));
-    const available=quests.some(([id,q])=>!s.quests[id]&&(!q.requires||s.quests[q.requires]?.status==='done'));
+    const quests=storiesByNpc.get(n.id);
+    const ready=quests.some(([id,q])=>questRecipient(q)===n.id && questReady(s,id));
+    const available=quests.some(([id,q])=>q.npc===n.id && !s.quests[id]&&(!q.requires||s.quests[q.requires]?.status==='done'));
     if(ready||available)this.label(g,ready?'◆':'!',n.x,n.y-64,'#f0ce84',20);
     this.label(g,n.name,n.x,n.y-45,'#f0dca6',12);
   }
@@ -345,6 +432,7 @@ export class Renderer {
     for(const l of LANDMARKS) {
       if(l.kind==='herb'&&!s.harvested.includes(l.id))point(l.x,l.y,'#a9d5a2');
       if(l.kind==='rune'&&!s.runes.includes(l.id))point(l.x,l.y,'#edbd85',4);
+      if(l.id==='pilot'||l.id==='dialBrake'||l.id==='soundingFire')point(l.x,l.y,'#a7e5dd',4);
       if(l.kind==='gate'||l.kind==='gauge'||l.kind==='bell')point(l.x,l.y,'#eac396',4);
       if(l.kind==='seal')point(l.x,l.y,s.flags.sealRestored?'#a1ede0':'#dc9c82',5);
       if(l.kind==='beacon')point(l.x,l.y,s.flags.beaconLit?'#a1ede0':'#dc9c82',5);

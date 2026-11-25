@@ -1,7 +1,22 @@
-# Project Realm — Lantern Vale, v0.5.2.1
+# Project Realm — Lantern Vale, v0.5.3
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
+
+## 0.5.3 — World Content Expansion
+
+After **The Last Casting**, speak to **Orin Pike** at the eastern edge of Cinder Reach. The causeway leads to **Linn Vale** at the Sounding House on Tideglass Shelf. Rest at its lantern before exploring the shell roads, tidal pools, Drowned Post Yard and Moon Dial.
+
+| Area | New quests | Where to start |
+| --- | ---: | --- |
+| Lantern Vale and Mossglade | 4 | Speak to Mira, Elin and Nell at the west bridge landing. |
+| Duskwood and Emberfen | 4 | After relighting the beacon, visit Signe and return to Nell. Look for the dry toll arch west of the beacon. |
+| Cinder Reach | 2 | Orin knows what happened to the last shift and how to silence the return pipe. |
+| Tideglass Shelf | 5 | Pick up **The Blue Road** from Orin. Four linked quests restore the Moon Dial. An optional delivery connects the packet yard with the old ferry. |
+
+The journal groups quests by status, identifies the giver and recipient, and keeps field notes for re-reading. Finding an inscription before meeting its quest giver counts. Repairs need instructions, and the twin sluice gates respond to the pool readings. The tracker shows two active quests at a time.
+
+Four regular enemies join the world. Knell fires three diverging shots at the forest toll arch. The Ebbwright alternates a ring with a safe centre and a targeted surge. They return after 90 and 160 seconds of active play respectively. The two hidden caches and quest rewards can each be claimed once.
 
 ## 0.5.2.1 — Floating abilities and viewport HUD
 
@@ -189,16 +204,16 @@ small screens offer branch tabs. Every talent has an implemented game effect.
 - Equipment comparisons and character stats include talent effects. Unequipping
   health gear clamps current health; equipping it again does not grant free healing.
 
-## Explore Lantern Vale, Emberfen and Cinder Reach
+## Explore Lantern Vale, Emberfen, Cinder Reach and Tideglass Shelf
 
-The connected 2688 × 1280 world includes a safe village, forest, river crossing,
-ancient beacon, camp, marsh and the outskirts of the Ashlands. Start with **Elin** and **Mira**, follow the
+The connected 3456 × 1280 world includes a safe village, forest, river crossing,
+ancient beacon, camp, marsh and a salt coast beyond the Ashlands. Start with **Elin** and **Mira**, follow the
 beacon quest, then meet **Signe** east of the bridge. Read the three marsh
 runestones, face **Fenheart** and restore the sluice seal. Report back to Signe
 before crossing the southeast spillway to meet **Ada Flint**.
 
-- Eight quests across three chapters, four exploration caches, local discoveries and loot.
-- Eight enemy types with melee, pounce, projectile and ground attacks. All enemies
+- Twenty-three quests, six exploration caches, persistent field notes and regional discoveries.
+- Fourteen enemy types with melee, pounce, projectile and ground attacks. All enemies
   respawn, including the Warden, Fenheart and the Hollow Striker.
 - Every third connected sword hit deals 35% extra base damage. Lantern Burst
   interrupts ordinary enemy attacks; boss telegraphs still require avoidance.
@@ -250,7 +265,7 @@ See [verification.md](docs/verification.md) for coverage and observed limitation
 | --- | --- |
 | js/i18n.js / js/locales/en.js | Plain-text English catalog and locale fallback |
 | templates/index.html / scripts/localize-html.mjs | Static HTML source and generation |
-| js/data.js | Stable item, enemy, NPC, loot and quest content |
+| js/data.js / js/tideglass.js | Stable items, enemies, NPCs, loot, quest objectives and fieldwork |
 | js/talents.js | Talent definitions, effects, point budgets and rank validation |
 | js/item-instances.js | Persistent equipment identities and template resolution |
 | js/inventory.js | Equipment slot definitions, atomic transfers, bag capacity and reward preflight |
@@ -259,7 +274,7 @@ See [verification.md](docs/verification.md) for coverage and observed limitation
 | js/simulation.js | Commands, player combat, progression and fixed ticks |
 | js/enemy-ai.js | Enemy intents, pounces, projectiles and eruptions |
 | js/save.js | Save DTO, validation, migrations and persistence adapter |
-| js/art.js | Original pixel sprites, rasterized once |
+| js/art.js / js/tideglass-art.js | Original pixel sprites, rasterized once |
 | js/renderer.js | Cached ground, culled sprites, camera, effects and minimap |
 | js/ui-panels.js | Trading/talent markup and shared item comparisons |
 | js/ui.js | DOM dialogs, interaction, inventory, quests and HUD |

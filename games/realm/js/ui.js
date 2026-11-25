@@ -1,14 +1,18 @@
 import { resolveItem } from './item-instances.js';
 import { tr } from './i18n.js';
-import { ITEMS, QUESTS, NPCS, ENEMIES, xpForLevel } from './data.js';
+import { ITEMS, QUESTS, NPCS, ENEMIES, questRecipient, checkpointName, xpForLevel } from './data.js';
 import { stats, questReady, nearestInteraction } from './simulation.js';
-import { zoneAt } from './world.js';
+import { LANDMARKS, zoneAt } from './world.js';
 import { TALENTS, availableTalentPoints, spentTalentPoints, talentRank, respecCost } from './talents.js';
 import { escapeHTML, tradePanel, talentPanel } from './ui-panels.js';
 import { characterPanel } from './character-panel.js';
 export { escapeHTML } from './ui-panels.js';
 const $ = id => document.getElementById(id);
-const rewardsText = q => tr("ui.xp_gold", q.rewards.xp, q.rewards.gold, Object.entries(q.rewards.items).map(([id,n])=>(n>1?n+' × ':'')+ITEMS[id].name).join(' · '));
+const locations = { elin: 'tide.atVillage', mira: 'tide.atVillage', signe: 'tide.atCamp', ada: 'tide.atAda',
+  nell: 'tide.atNell', orin: 'tide.atOrin', linn: 'tide.atLinn' };
+const npcName = id => NPCS.find(n => n.id === id).name;
+const reportTo = id => tr('tide.deliver', npcName(id), tr(locations[id]));
+const rewardsText = q => !Object.keys(q.rewards.items).length ? tr('tide.xpGold', q.rewards.xp, q.rewards.gold) : tr("ui.xp_gold", q.rewards.xp, q.rewards.gold, Object.entries(q.rewards.items).map(([id,n])=>(n>1?n+' × ':'')+ITEMS[id].name).join(' · '));
 function setText(id,value) {const el=$(id);if(el.textContent!==String(value))el.textContent=String(value);}
 export class UI {
   constructor(getState,actions) {
@@ -63,7 +67,7 @@ export class UI {
           }
           if(action==='respawn'){this.close();return;}
           if(this.view==='inventory')this.inventory();
-          else if(this.view==='dialogue')this.dialogue(this.npcId);
+          else if(this.view==='dialogue')this.dialogue(this.npcId, success && action==='complete' ? b.dataset.id : null);
           else if(this.view==='merchant')this.merchant();
           else if(this.view==='talents'){this.talents();if(action==='learnTalent')$('panel-content').querySelector('[data-talent="'+b.dataset.id+'"]').classList.add('just-learned');}
           restore();
@@ -127,30 +131,62 @@ export class UI {
     $('panel-content').innerHTML=characterPanel(this.state(),this.characterSelection);
     this.preview?.mount($('character-preview'),this.state().player);
   }
-  questHTML(id,dialogue=false) {
-    const s=this.state(),q=QUESTS[id],state=s.quests[id],ready=questReady(s,id);
-    const locked=q.requires&&s.quests[q.requires]?.status!=='done';
-    let html=`<section class="quest-entry"><span class="quest-status">${state?.status==='done'?tr("ui.completed"):ready?tr("ui.ready_to_turn_in"):state?tr("ui.in_progress"):locked?tr("ui.locked"):tr("ui.available")}</span><h3>${q.name}</h3><p>${q.text}</p><ul>`;
-    q.objectives.forEach((o,i)=>{html+='<li>'+o.label+' · '+(state?.progress[i]||0)+' / '+o.count+'</li>';});
-    html+='</ul><p class="quest-rewards">'+rewardsText(q)+'</p>';
-    if(dialogue) {
-      if(!state&&!locked)html+=`<button class="primary" data-action="accept" data-id="${id}">${tr("ui.accept_quest")}</button>`;
-      else if(ready)html+=`<button class="primary" data-action="complete" data-id="${id}">${tr("ui.complete_claim_reward")}</button>`;
-    } else if(ready)html+=`<p>${tr("ui.return_to", NPCS.find(n=>n.id===q.npc).name, q.npc==='ada'?tr('ash.turn'):q.npc==='signe'?tr("ui.at_wanderers_camp"):tr("ui.in_lantern_vale"))}</p>`;
-    if(locked)html+=`<p>${tr("ui.complete_first", QUESTS[q.requires].name)}</p>`;
-    return html+'</section>';
+  questHTML(id, speaker = null, justCompleted = false) {
+    const s = this.state(), q = QUESTS[id], state = s.quests[id], recipient = questRecipient(q);
+    const ready = questReady(s, id), done = state?.status === 'done';
+    const locked = !state && q.requires && s.quests[q.requires]?.status !== 'done';
+    const status = done ? tr('ui.completed') : ready ? tr('ui.ready_to_turn_in') : state ? tr('ui.in_progress') :
+      locked ? tr('ui.locked') : tr('ui.available');
+    const category = q.optional || id === 'herbs' ? tr('tide.side') : tr('tide.main');
+    let body = '<p>' + (done && q.ending ? q.ending : q.text) + '</p>';
+    if (!done) {
+      body += '<ul>' + q.objectives.map((o,i) => '<li>'+o.label+' · '+(state?.progress[i] || 0)+' / '+o.count+'</li>').join('')+'</ul>';
+      if (state || !speaker || recipient !== speaker) {
+        const where = state || speaker ? reportTo(recipient) : tr('tide.giver', npcName(q.npc), tr(locations[q.npc]));
+        body += '<p>' + where + '</p>';
+      }
+      body += '<p class="quest-rewards">' + rewardsText(q) + '</p>';
+      if (locked) body += '<p>' + tr('ui.complete_first', QUESTS[q.requires].name) + '</p>';
+      if (!state && !locked && speaker === q.npc)
+        body += `<button class="primary" data-action="accept" data-id="${id}">${tr('ui.accept_quest')}</button>`;
+      if (ready && speaker === recipient)
+        body += `<button class="primary" data-action="complete" data-id="${id}">${tr('ui.complete_claim_reward')}</button>`;
+    }
+    const expanded = justCompleted || (!done && !locked && (speaker || state));
+    return `<details class="quest-entry" ${expanded ? 'open' : ''}><summary><strong>${q.name}</strong>
+      <span class="quest-status">${category} · ${status}</span></summary>${body}</details>`;
   }
   journal() {
-    this.heading(tr("ui.five_quests_two_chapters"),tr("ui.quest_journal"));
-    $('panel-content').innerHTML=`<p>${tr("ui.accept_and_turn_in_quests_with_elin_mira_and_signe_your_journey_s")}</p>${Object.keys(QUESTS).map(id=>this.questHTML(id)).join('')}`;
+    const s = this.state(), groups = { active: [], available: [], locked: [], done: [] };
+    for (const [id, q] of Object.entries(QUESTS)) {
+      const status = s.quests[id]?.status || (q.requires && s.quests[q.requires]?.status !== 'done' ? 'locked' : 'available');
+      groups[status].push(id);
+    }
+    this.heading(tr('tide.summary', groups.done.length, Object.keys(QUESTS).length), tr('ui.quest_journal'));
+    const titles = { active: 'tide.active', available: 'ui.available', locked: 'ui.locked', done: 'ui.completed' };
+    let html = Object.entries(groups).filter(([, ids]) => ids.length).map(([status, ids]) =>
+      '<section class="journal-group"><h3>'+tr(titles[status])+' ('+ids.length+')</h3>'+ids.map(id=>this.questHTML(id)).join('')+'</section>').join('');
+    if (s.records.length) {
+      const notes = LANDMARKS.filter(p => s.records.includes(p.id));
+      html += '<details class="quest-entry"><summary>'+tr('tide.notes', notes.length)+'</summary><ul>'+
+        notes.map(p => '<li>'+p.text+'</li>').join('')+'</ul></details>';
+    }
+    $('panel-content').innerHTML = html;
   }
-  dialogue(id) {
+  dialogue(id, justCompleted = null) {
     const npc=NPCS.find(n=>n.id===id);if(!npc)return;
     if(this.view!=='dialogue'||this.npcId!==id)$('panel-feedback').hidden=true;
     this.view='dialogue';this.npcId=id;this.heading(npc.role.toUpperCase(),npc.name);
     const s=this.state(),greeting=id==='ada'&&s.quests.lastCasting?.status==='done'?tr('ash.ending'):id==='signe'&&!s.flags.beaconLit?tr("ui.the_beacon_to_the_north_has_gone_dark_help_elin_rekindle_it_and_w"):id==='signe'&&s.quests.heart?.status==='done'?tr("ui.the_fen_breathes_again_you_have_given_us_time_to_discover_what_li"):npc.greeting;let html='<p class="dialogue-greeting">“'+greeting+'”</p>';
     if(id==='ivo'){this.open('merchant');return;}
-    html+=Object.entries(QUESTS).filter(([,q])=>q.npc===id).map(([qid])=>this.questHTML(qid,true)).join('');
+    const stories = Object.entries(QUESTS).filter(([qid,q]) => q.npc === id || (questRecipient(q) === id && s.quests[qid]));
+    const priority = ([qid,q]) => {
+      if (qid === justCompleted || (questRecipient(q) === id && questReady(s,qid))) return 0;
+      if (s.quests[qid]?.status === 'done' || (q.requires && s.quests[q.requires]?.status !== 'done')) return 3;
+      return q.optional ? 2 : 1;
+    };
+    stories.sort((a,b) => priority(a) - priority(b));
+    html += stories.map(([qid]) => this.questHTML(qid, id, qid === justCompleted)).join('');
     if(id==='mira')html+=`<p>${tr("ui.your_health_is_restored_i_can_also_help_you_choose_a_new_path_you")}</p><button class="primary" data-action="talents">${tr("ui.study_reset_talents")}</button>`;
     $('panel-content').innerHTML=html;
     if(!this.panel.open)this.panel.showModal();
@@ -168,7 +204,7 @@ export class UI {
   }
   death() {
     this.heading(tr("ui.the_lantern_guides_you_home"),tr("ui.you_fell_in_battle"));
-    $('panel-content').innerHTML=`<div class="death-message"><h3>${tr("ui.your_journey_is_not_over")}</h3><p>${tr("ui.the_lanterns_light_guides_you_back_to_your_last_resting_place_you")}</p><button class="primary" data-action="respawn">${tr("ui.return_to_2", this.state().player.checkpoint==='camp'?tr("world.wanderers_camp"):tr("world.lantern_vale"))}</button></div>`;
+    $('panel-content').innerHTML=`<div class="death-message"><h3>${tr("ui.your_journey_is_not_over")}</h3><p>${tr("ui.the_lanterns_light_guides_you_back_to_your_last_resting_place_you")}</p><button class="primary" data-action="respawn">${tr("ui.return_to_2", checkpointName(this.state().player.checkpoint))}</button></div>`;
   }
   toast(text) {
     if(this.panel.open){$('panel-feedback').textContent=text;$('panel-feedback').hidden=false;}
@@ -209,7 +245,7 @@ export class UI {
       setText('target-hp', tr('hud.health', Math.ceil(enemy.hp), def.hp));
       targetHUD.classList.toggle('boss-target', Boolean(def.boss));
       $('target-fill').style.width=(enemy.hp/def.hp*100).toFixed(1)+'%';
-      setText('target-intent',enemy.mode==='return'?tr("ui.returning_invulnerable"):enemy.mode==='windup'?({pounce:tr("ui.pounce_move_aside"),ranged:tr("ui.shot_break_line_of_sight"),eruption:tr("ui.eruption_leave_the_marker")}[def.behavior]||tr("ui.strike_leave_the_marker")):({pounce:tr("ui.pouncing_hunter"),ranged:tr("ui.ranged_enemy"),eruption:tr("ui.ember_guardian")}[def.behavior]||tr("ui.melee")));
+      setText('target-intent',enemy.mode==='return'?tr("ui.returning_invulnerable"):enemy.mode==='windup'?({pounce:tr("ui.pounce_move_aside"),ranged:def.spread ? tr('tide.fan') : tr("ui.shot_break_line_of_sight"),eruption:def.ringAttack && enemy.risingTide ? tr('tide.ringWarning') : tr("ui.eruption_leave_the_marker")}[def.behavior]||tr("ui.strike_leave_the_marker")):({pounce:tr("ui.pouncing_hunter"),ranged:tr("ui.ranged_enemy"),eruption:enemy.type==='ebbwright'?tr('tide.aoe'):tr("ui.ember_guardian")}[def.behavior]||tr("ui.melee")));
     }
     setText('combo-count',p.combo?('◆'.repeat(p.combo)+'◇'.repeat(3-p.combo)):'◇◇◇');
     const target=nearestInteraction(s),interaction=$('interaction');
@@ -217,19 +253,22 @@ export class UI {
     $('combo-hud').hidden=p.combo===0||Boolean(target)||p.dead;
     if(target)interaction.querySelector('span').textContent=target.prompt || (target.kind==='npc'?tr("ui.talk_to", target.name):target.kind==='herb'?tr("data.gather_glimmerherbs"):target.kind==='chest'?tr("ui.open_cache"):target.kind==='beacon'?tr("ui.inspect_beacon"):target.kind==='sign'?tr("ui.read_signpost"):target.kind==='rune'?tr("ui.read_runestone"):target.kind==='seal'?tr("ui.inspect_seal"):target.kind==='gate'?tr("ui.inspect_sluice"):tr("ui.rest_set_checkpoint"));
     let tracker='';
-    for(const [id,q] of Object.entries(s.quests))if(q.status==='active') {
+    const active = Object.entries(s.quests).filter(([,q]) => q.status === 'active');
+    active.sort(([a],[b]) => Number(Boolean(QUESTS[a].optional)) - Number(Boolean(QUESTS[b].optional)));
+    for(const [id,q] of active.slice(0, 2)) {
       const def=QUESTS[id],ready=questReady(s,id);
-      tracker+=`<section class="quest-card"><h3>${def.name}</h3>${ready?`<p class="done">${tr("ui.return_to_3", NPCS.find(n=>n.id===def.npc).name)}</p>`:'<ul>'+def.objectives.map((o,i)=>'<li>'+o.label+' <span'+(q.progress[i]>=o.count?' class="done"':'')+'>'+q.progress[i]+'/'+o.count+'</span></li>').join('')+'</ul>'}</section>`;
+      tracker+=`<section class="quest-card"><h3>${def.name}</h3>${ready?`<p class="done">${reportTo(questRecipient(def))}</p>`:'<ul>'+def.objectives.map((o,i)=>'<li>'+o.label+' <span'+(q.progress[i]>=o.count?' class="done"':'')+'>'+q.progress[i]+'/'+o.count+'</span></li>').join('')+'</ul>'}</section>`;
     }
+    if(active.length > 2) tracker += '<p>'+tr('tide.more', active.length - 2)+'</p>';
     if(!tracker) {
-      if(s.quests.lastCasting?.status==='done')tracker=`<section class="quest-card"><h3>${tr('ash.complete')}</h3><p class="done">${tr('ash.completeText')}</p></section>`;
+      if(s.quests.lastCasting?.status==='done')tracker=`<section class="quest-card"><h3>${tr('tide.chapter')}</h3><p class="done">${s.quests.moonDial?.status==='done' ? tr('tide.end') : s.quests.blueRoad?.status==='done' ? tr('tide.continue') : tr('tide.lead')}</p></section>`;
       else if(s.quests.heart?.status==='done')tracker=`<section class="quest-card"><h3>${tr("ui.the_embers_are_quiet")}</h3><p class="done">${tr("ui.chapter_02_complete")}</p><p>${(s.quests.thirdStroke ? tr('ash.next') : tr('ash.lead'))}</p></section>`;
       else if(s.quests.beacon?.status==='done')tracker=`<section class="quest-card"><h3>${tr("ui.a_voice_from_the_fen")}</h3><p>${tr("ui.signe_awaits_at_wanderers_camp_just_east_of_the_bridge_follow_the")}</p></section>`;
       else tracker=`<section class="quest-card"><h3>${tr("ui.a_new_beginning")}</h3><p>${tr("ui.talk_to_elin_by_the_village_lantern")}<br>${tr("ui.mira_also_has_a_quest")}</p></section>`;
     }
     if(availableTalentPoints(p))tracker+=`<section class="quest-card"><h3>${tr("ui.unspent_talent_points", availableTalentPoints(p))}</h3><p>${tr("ui.open_talents_n_to_develop_your_wanderer")}</p></section>`;
     if(tracker!==this.lastTracker){$('quest-tracker').innerHTML=tracker;this.lastTracker=tracker;}
-    setText('field-note',zone.id==='reach'?tr('ash.hint'):zone.id==='marsh'?tr("ui.emberwing_shots_travel_in_a_straight_line_sidestep_use_the_trees"):zone.id==='camp'?tr("ui.rest_at_the_lantern_with_e_you_will_return_here_if_you_fall_mira"):zone.safe?tr("ui.take_a_breath_the_village_lantern_offers_warmth_rest_and_a_way_ho"):zone.id==='ruins'?tr("ui.the_warden_hits_hard_but_slowly_watch_the_ground_give_the_roots_r"):tr("ui.stray_from_the_path_now_and_then_the_forest_hides_more_than_the_c"));
+    setText('field-note',['shelf', 'postyard'].includes(zone.id)?tr('tide.shelfHint'):zone.id==='reach'?tr('ash.hint'):zone.id==='marsh'?tr("ui.emberwing_shots_travel_in_a_straight_line_sidestep_use_the_trees"):zone.id==='camp'?tr("ui.rest_at_the_lantern_with_e_you_will_return_here_if_you_fall_mira"):zone.safe?tr("ui.take_a_breath_the_village_lantern_offers_warmth_rest_and_a_way_ho"):zone.id==='ruins'?tr("ui.the_warden_hits_hard_but_slowly_watch_the_ground_give_the_roots_r"):tr("ui.stray_from_the_path_now_and_then_the_forest_hides_more_than_the_c"));
     renderer.renderMap(s);
   }
 }

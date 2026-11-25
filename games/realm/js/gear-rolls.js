@@ -3,7 +3,7 @@ import { ITEMS } from './data.js';
 // Only authored loot and shop templates participate. Starter and story gear
 // have no entry. Each eligible template has three equally likely outcomes.
 const groups = {
-  attack: ['keeperBlade', 'swiftBlade', 'moonBlade'],
+  attack: ['keeperBlade', 'swiftBlade', 'moonBlade', 'seaGrips'],
   defense: ['forestCoat', 'barkCoat', 'ironCharm', 'briarPads'],
   haste: ['workGloves', 'runnerWrap', 'duskGrips', 'emberCharm'],
   spellPower: ['runeFocus', 'fenCowl', 'emberBand'],

@@ -5,7 +5,7 @@ import { Renderer } from './renderer.js';
 import { UI } from './ui.js';
 import { CharacterPreview } from './character-preview.js';
 import { AudioBus } from './audio.js';
-import { ITEMS, QUESTS, NPCS } from './data.js';
+import { ITEMS, QUESTS, NPCS, questRecipient } from './data.js';
 import { TALENTS, availableTalentPoints } from './talents.js';
 const $=id=>document.getElementById(id);
 // Storage can throw even when merely accessing window.localStorage.
@@ -36,7 +36,7 @@ function processEvents() {
     else if(event.type==='item')ui.toast('+'+event.quantity+' '+ITEMS[event.id].name);
     else if(event.type==='level')ui.toast(tr("main.level_your_health_and_attack_have_increased", event.level, event.level>=3?tr("main.unspent_talent_points_n", availableTalentPoints(state.player)):''));
     else if(event.type==='questAccepted')ui.toast(tr("main.new_quest", QUESTS[event.id].name));
-    else if(event.type==='questReady')ui.toast(tr("main.quest_ready_return_to", NPCS.find(n=>n.id===QUESTS[event.id].npc).name));
+    else if(event.type==='questReady')ui.toast(tr("main.quest_ready_return_to", NPCS.find(n=>n.id===questRecipient(QUESTS[event.id])).name));
     else if(event.type==='questDone'){ui.toast(tr("main.quest_completed", QUESTS[event.id].name));if(event.id==='beacon')ui.toast(tr("main.chapter_01_complete_signe_awaits_east_of_the_bridge"));if(event.id==='heart')ui.toast(tr("main.chapter_02_complete_the_fen_breathes_again"));}
     else if(event.type==='discovery')ui.toast(withAwardedXP(tr('main.discovered', event.name), event.xp));
     else if(event.type==='equip')ui.toast(tr("main.equipped", ITEMS[event.id].name));
