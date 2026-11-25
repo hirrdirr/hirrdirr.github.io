@@ -30,39 +30,66 @@
       <p id="save-warning" class="notice" role="status" hidden></p>
       <div class="game-layout">
         <div class="world-column">
-          <div class="unit-frames">
-            <div class="player-hud unit-frame">
-              <div class="unit-heading"><strong id="player-name">{{simulation.wanderer}}</strong><span id="player-level">{{static.level_1}}</span></div>
-              <div class="unit-vitals"><span id="health-value"></span><div class="meter health" aria-hidden="true"><i id="health-fill"></i></div></div>
-              <small id="buff-status" class="buff-status" hidden></small>
-            </div>
-            <div id="target-hud" class="target-hud unit-frame" hidden>
-              <div class="unit-heading"><strong id="target-name"></strong><span id="target-level"></span></div>
-              <div class="unit-vitals"><span id="target-hp"></span><div class="meter" aria-hidden="true"><i id="target-fill"></i></div></div>
-              <small id="target-intent"></small>
-            </div>
-          </div>
           <section class="viewport" aria-label="{{static.game_world}}">
-            <canvas id="world" width="960" height="600" tabindex="0" aria-label="{{static.lantern_vale_move_with_wasd_attack_with_space_interact_with_e_con}}">{{static.this_game_requires_a_browser_with_canvas_and_javascript_support}}</canvas>
-            <div class="zone-hud"><strong id="zone-name">{{world.lantern_vale}}</strong><span id="zone-type">{{world.safe_area}}</span></div>
-            <button id="pause-button" class="pause-button" title="{{static.pause}}" aria-label="{{static.pause_game}}">Ⅱ</button>
-            <div class="combat-dock">
-              <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
-              <div id="combo-hud" class="combo-hud" title="{{static.the_third_consecutive_hit_deals_35_more_damage}}"><span id="combo-count">◇◇◇</span><small>{{static.strike_combo}}</small></div>
-              <div class="action-tray">
-                <div class="xp-strip">
-                  <span id="xp-label"></span>
-                  <progress id="xp-progress" aria-label="{{ui.experience}}" aria-describedby="xp-label" value="0" max="1"></progress>
+            <div class="top-hud">
+              <div class="unit-frames">
+                <div class="player-hud unit-frame">
+                  <div class="unit-heading"><strong id="player-name">{{simulation.wanderer}}</strong><span id="player-level">{{static.level_1}}</span></div>
+                  <div class="unit-vitals"><span id="health-value"></span><div class="meter health" aria-hidden="true"><i id="health-fill"></i></div></div>
+                  <small id="buff-status" class="buff-status" hidden></small>
                 </div>
-                <div class="hotbar" aria-label="{{static.abilities}}">
-                  <button data-command="attack" title="{{static.strike_selected_target_in_range_otherwise_the_nearest_the_third_h}}" aria-label="{{static.sword_strike_space}}"><kbd>SPACE</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg></span><small>{{static.strike}}</small><i class="cooldown"></i></button>
-                  <button data-command="burst" title="{{static.lantern_burst_hits_all_nearby_enemies_and_interrupts_normal_enemi}}" aria-label="{{static.lantern_burst_q}}"><kbd>Q</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg></span><small>{{ui-panels.lantern_burst}}</small><i class="cooldown"></i></button>
-                  <button data-command="dodge" title="{{static.dodge_in_your_movement_direction}}" aria-label="{{static.dodge_shift}}"><kbd>SHIFT</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg></span><small>{{ui-panels.dodge}}</small><i class="cooldown"></i></button>
-                  <button data-command="potion" title="{{static.restores_55_health}}" aria-label="{{static.drink_healing_potion_r}}"><kbd>R</kbd><span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg></span><small id="potion-count">{{static.3_potions}}</small><i class="cooldown"></i></button>
-                  <button data-command="guard" hidden title="{{static.reduces_incoming_damage_improved_by_lantern_guardian_talents}}" aria-label="{{static.lantern_ward_1}}"><kbd>1</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg></span><small>{{talents.lantern_ward}}</small><i class="cooldown"></i></button>
-                  <button data-command="rush" hidden title="{{static.rush_toward_a_target_in_range_and_line_of_sight}}" aria-label="{{static.rush_2}}"><kbd>2</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg></span><small>{{static.rush}}</small><i class="cooldown"></i></button>
-                  <button data-command="bolt" hidden title="{{static.fire_a_rune_of_light_toward_your_target_or_in_the_direction_you_f}}" aria-label="{{static.glimmerbolt_3}}"><kbd>3</kbd><span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg></span><small>{{talents.glimmerbolt}}</small><i class="cooldown"></i></button>
+                <div id="target-hud" class="target-hud unit-frame" hidden>
+                  <div class="unit-heading"><strong id="target-name"></strong><span id="target-level"></span></div>
+                  <div class="unit-vitals"><span id="target-hp"></span><div class="meter" aria-hidden="true"><i id="target-fill"></i></div></div>
+                  <small id="target-intent"></small>
                 </div>
+              </div>
+              <div class="zone-hud"><strong id="zone-name">{{world.lantern_vale}}</strong><span id="zone-type">{{world.safe_area}}</span></div>
+              <button id="pause-button" class="pause-button" title="{{static.pause}}" aria-label="{{static.pause_game}}"></button>
+              <div class="xp-strip">
+                <span id="xp-label"></span>
+                <progress id="xp-progress" aria-label="{{ui.experience}}" aria-describedby="xp-label" value="0" max="1"></progress>
+              </div>
+            </div>
+            <div class="playfield">
+              <canvas id="world" width="960" height="600" tabindex="0" aria-label="{{static.lantern_vale_move_with_wasd_attack_with_space_interact_with_e_con}}">{{static.this_game_requires_a_browser_with_canvas_and_javascript_support}}</canvas>
+              <div class="combat-dock">
+                <div class="combat-cue">
+                  <div id="interaction" class="interaction" hidden><kbd>E</kbd><span></span></div>
+                  <div id="combo-hud" hidden class="combo-hud" title="{{static.the_third_consecutive_hit_deals_35_more_damage}}"><span id="combo-count">◇◇◇</span><small>{{static.strike_combo}}</small></div>
+                </div>
+                <div class="hotbar" role="group" aria-label="{{static.abilities}}">
+                  <button data-command="attack" title="{{static.strike_selected_target_in_range_otherwise_the_nearest_the_third_h}}" aria-label="{{static.sword_strike_space}}">
+                    <span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#sword"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>SPACE</kbd>
+                  </button>
+                  <button data-command="burst" title="{{static.lantern_burst_hits_all_nearby_enemies_and_interrupts_normal_enemi}}" aria-label="{{static.lantern_burst_q}}">
+                    <span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#burst"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>Q</kbd>
+                  </button>
+                  <button data-command="dodge" title="{{static.dodge_in_your_movement_direction}}" aria-label="{{static.dodge_shift}}">
+                    <span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#dodge"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>SHIFT</kbd>
+                  </button>
+                  <button data-command="potion" aria-describedby="potion-stock" title="{{static.restores_55_health}}" aria-label="{{static.drink_healing_potion_r}}">
+                    <span class="ability-symbol potion-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#potion"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>R</kbd>
+                    <small id="potion-count" class="potion-count" aria-hidden="true">3</small>
+                  </button>
+                  <button data-command="guard" hidden title="{{static.reduces_incoming_damage_improved_by_lantern_guardian_talents}}" aria-label="{{static.lantern_ward_1}}">
+                    <span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#shield"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>1</kbd>
+                  </button>
+                  <button data-command="rush" hidden title="{{static.rush_toward_a_target_in_range_and_line_of_sight}}" aria-label="{{static.rush_2}}">
+                    <span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#fang"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>2</kbd>
+                  </button>
+                  <button data-command="bolt" hidden title="{{static.fire_a_rune_of_light_toward_your_target_or_in_the_direction_you_f}}" aria-label="{{static.glimmerbolt_3}}">
+                    <span class="ability-symbol"><svg class="ability-icon" viewBox="0 0 32 32" aria-hidden="true"><use href="./assets/icons.svg#bolt"></use></svg><i class="cooldown" aria-hidden="true"></i></span>
+                    <kbd>3</kbd>
+                  </button>
+                </div>
+                <span id="potion-stock" hidden></span>
               </div>
             </div>
             <div id="focus-overlay" class="focus-overlay" hidden><span>{{static.adventure_paused}}</span><button id="resume-focus" class="primary">{{static.continue}}</button></div>

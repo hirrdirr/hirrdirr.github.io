@@ -6,16 +6,19 @@ import { NPCS, ENEMIES, QUESTS } from './data.js';
 import { questReady } from './simulation.js';
 function makeCanvas(w,h) { const c=document.createElement('canvas'); c.width=w;c.height=h;return c; }
 function rand(seed) { return () => { seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}; }
+// Decorative tiles below the collision map let the southernmost player clear the dock.
+const SOUTH_SCENERY = 3 * TILE;
+
 export class Renderer {
   constructor(canvas, minimap) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.map=minimap;this.art=makeArt();this.camera={x:0,y:0};this.first=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.ground=this.makeGround();this.mapGround=this.makeMap();
+    this.dockInset=0;this.ground=this.makeGround();this.mapGround=this.makeMap();
     this.metrics={frames:0,total:0,max:0};
   }
   makeGround() {
-    const c=makeCanvas(WIDTH,HEIGHT),g=c.getContext('2d'),random=rand(18075);
-    for(let y=0;y<HEIGHT;y+=TILE) for(let x=0;x<WIDTH;x+=TILE) {
+    const c=makeCanvas(WIDTH,HEIGHT + SOUTH_SCENERY),g=c.getContext('2d'),random=rand(18075);
+    for(let y=0;y<c.height;y+=TILE) for(let x=0;x<WIDTH;x+=TILE) {
       const kind=terrain(x+16,y+16);
       if (kind==='ash' || kind==='basalt' || kind==='flume') {
         g.fillStyle = kind==='basalt' ? '#3e383f' : kind==='flume' ? '#98694e' : '#776568';
@@ -56,7 +59,7 @@ export class Renderer {
       }
     }
     // Irregular river banks, bridge rails, warm village paving and ruin fragments.
-    for(let y=32;y<HEIGHT-32;y+=12) {
+    for(let y=32;y<c.height;y+=12) {
       if(y>594&&y<700)continue;
       const x=riverLeft(y);
       g.fillStyle='#7c956c';g.fillRect(x-5,y,5,12);g.fillRect(x+96,y,6,12);
@@ -107,6 +110,12 @@ export class Renderer {
     g.fillStyle='#8f7370';g.fillRect(1284,730,36,21);g.fillStyle='#c8ad8a';g.fillRect(1284,730,7,21);
     g.fillStyle='#84613f';g.fillRect(1304,774,20,14);g.fillStyle='#b99a61';g.fillRect(1304,774,20,4);
     for(let x=1190;x<1339;x+=25) {g.fillStyle='#a3ab79';g.fillRect(x,811,9,3);}
+    // A shaded verge marks the end of the playable ground. Paint it once with the tiles.
+    const verge = g.createLinearGradient(0, HEIGHT-32, 0, c.height);
+    verge.addColorStop(0, 'rgba(21,32,29,0)');
+    verge.addColorStop(1, 'rgba(21,32,29,.64)');
+    g.fillStyle = verge;
+    g.fillRect(0, HEIGHT-32, WIDTH, SOUTH_SCENERY+32);
     return c;
   }
   makeMap() {
@@ -120,11 +129,20 @@ export class Renderer {
     return c;
   }
   resetCamera() {this.first=true;}
+  followPlayer(player, dt) {
+    const {width, height} = this.canvas;
+    const inset = this.dockInset;
+    const maxY = Math.min(this.ground.height - height, HEIGHT - height + Math.max(0, inset - 32));
+    const targetX = Math.max(0, Math.min(WIDTH - width, player.x - width / 2));
+    const targetY = Math.max(0, Math.min(maxY, player.y - (height - inset) / 2));
+    const follow = this.first || this.reduced ? 1 : Math.min(1, dt * 13);
+    this.camera.x += (targetX - this.camera.x) * follow;
+    this.camera.y += (targetY - this.camera.y) * follow;
+    this.first = false;
+  }
   render(s,dt) {
     const started=performance.now(),g=this.ctx,w=this.canvas.width,h=this.canvas.height,p=s.player;
-    const tx=Math.max(0,Math.min(WIDTH-w,p.x-w/2)),ty=Math.max(0,Math.min(HEIGHT-h,p.y-h/2));
-    const smoothing=this.first||this.reduced?1:Math.min(1,dt*13);
-    this.camera.x+=(tx-this.camera.x)*smoothing;this.camera.y+=(ty-this.camera.y)*smoothing;this.first=false;
+    this.followPlayer(p, dt);
     const cx=Math.round(this.camera.x),cy=Math.round(this.camera.y);
     g.imageSmoothingEnabled=false;
     g.drawImage(this.ground,cx,cy,w,h,0,0,w,h);
