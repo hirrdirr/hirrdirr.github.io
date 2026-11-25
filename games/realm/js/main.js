@@ -71,7 +71,10 @@ const ui=new UI(()=>state,{
   frameLimit:value=>{frameLimit=value===30?30:60;preferences();},
   settings:()=>({volume:audio.volume,fps:frameLimit,diagnostics:tr("main.canvas_ms_average_draw_time_enemies", $('world').width, $('world').height, (renderer.metrics.frames?renderer.metrics.total/renderer.metrics.frames:0).toFixed(1), state.enemies.length)}),
   fullscreen:async()=>{
-    try{if(document.fullscreenElement)await document.exitFullscreen();else{document.querySelector('.realm-shell').classList.add('fullscreen-shell');await document.querySelector('.realm-shell').requestFullscreen();}}
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    }
     catch{ui.toast(tr("main.fullscreen_is_not_available_in_this_browser"));}
   },
   import:async file=>{
@@ -119,6 +122,7 @@ window.addEventListener('keydown',event=>{
     if(document.activeElement===$('world')){event.preventDefault();if(!event.repeat&&!focusPaused)dispatch({type:'target'});}
     return;
   }
+  if (event.code === 'Space' && event.target.closest?.('button')) return;
   if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.code))event.preventDefault();
   if(focusPaused)return;
   keys.add(event.code);audio.unlock();
@@ -148,12 +152,25 @@ document.addEventListener('visibilitychange',()=>{
 $('resume-focus').addEventListener('click',()=>{focusPaused=false;$('focus-overlay').hidden=true;audio.unlock();resume();$('world').focus({preventScroll:true});});
 window.addEventListener('pagehide',()=>save());
 $('theme-button').addEventListener('click',()=>{document.body.classList.toggle('light');try{storage.setItem('hirrdirr_theme',document.body.classList.contains('light')?'light':'dark');}catch{}});
-const observer=new ResizeObserver(entries=>{
-  const box=entries[0].contentRect;
-  const width=Math.max(320,Math.min(960,Math.round(box.width))),height=Math.max(320,Math.min(720,Math.round(width*box.height/box.width)));
-  if($('world').width!==width||$('world').height!==height){$('world').width=width;$('world').height=height;renderer.resetCamera();renderer.render(state,0);}
+// Measure only when layout changes. Both the camera and pointer input use canvas pixels.
+const playfield = document.querySelector('.playfield');
+const dock = document.querySelector('.combat-dock');
+const observer = new ResizeObserver(() => {
+  const width = playfield.clientWidth, height = playfield.clientHeight;
+  if (!width || !height) return;
+  const scale = Math.min(1, 960 / width, 720 / height);
+  const canvas = renderer.canvas;
+  const w = Math.round(width * scale), h = Math.round(height * scale);
+  const inset = Math.ceil(dock.offsetHeight * h / height);
+  if (canvas.width === w && canvas.height === h && renderer.dockInset === inset) return;
+  if (canvas.width !== w) canvas.width = w;
+  if (canvas.height !== h) canvas.height = h;
+  renderer.dockInset = inset;
+  renderer.resetCamera();
+  renderer.render(state, 0);
 });
-observer.observe(document.querySelector('.viewport'));
+observer.observe(playfield);
+observer.observe(dock);
 $('welcome').addEventListener('cancel',event=>event.preventDefault());
 $('start-form').addEventListener('submit',event=>{
   event.preventDefault();

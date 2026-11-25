@@ -190,7 +190,11 @@ export class UI {
     if (progress.max !== max) progress.max = max;
     if (progress.value !== value) progress.value = value;
     if (progress.getAttribute('aria-valuetext') !== label) progress.setAttribute('aria-valuetext', label);
-    setText('gold-value',tr("ui-panels.gold_3", p.gold));setText('potion-count',tr("ui.potions", p.inventory.potion||0));setText('zone-name',zone.name);setText('zone-type',zone.subtitle);
+    setText('gold-value',tr("ui-panels.gold_3", p.gold));
+    const potions = p.inventory.potion || 0;
+    setText('potion-count', String(potions));
+    setText('potion-stock', tr('ui.potions', potions));
+    setText('zone-name',zone.name);setText('zone-type',zone.subtitle);
     for(const [type,max] of [['attack',st.attackCooldown],['burst',st.burstCooldown],['dodge',st.dodgeCooldown],['potion',8],['guard',st.guardCooldown],['rush',st.rushCooldown],['bolt',st.boltCooldown]]) {
       const b=document.querySelector('[data-command="'+type+'"]');if(['guard','rush','bolt'].includes(type))b.hidden=!talentRank(p,type);b.querySelector('.cooldown').style.height=(Math.min(1,p.cooldowns[type]/max)*100).toFixed(0)+'%';
     }

@@ -1,7 +1,11 @@
-# Project Realm — Lantern Vale, v0.5.2
+# Project Realm — Lantern Vale, v0.5.2.1
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
+
+## 0.5.2.1 — Floating abilities and viewport HUD
+
+Level and XP share the upper HUD with health, target, zone and pause. The floating ability buttons keep their shortcuts and cooldowns. Near the southern edge the camera reveals a shaded strip of scenery below the playable map, leaving room for both the player and the interaction prompt.
 
 ## 0.5.2 — Cinder Reach
 

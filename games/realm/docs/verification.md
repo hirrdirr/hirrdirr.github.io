@@ -1,3 +1,11 @@
+# v0.5.2.1 floating action bar and camera
+
+The Realm suite passed all 165 tests. The camera tests check the full player sprite and cached ground crop at the world edges, the approach to and retreat from the southern edge at dodge speed, and reduced-motion tracking.
+
+In Chrome, the HUD passed six window sizes from 320×500 to 1366×768 in both themes with all seven abilities unlocked. Checks covered the four map edges, the Emberfen sluice, Cinder Reach, mouse and keyboard activation, cooldown overlays, XP gain, level-up and the level cap. The fullscreen stylesheet was exercised with layout scaling up to 150%. The test browser declined native fullscreen, so the operating-system transition was not verified.
+
+In a warmed Cinder Reach scene, the median time spent issuing Canvas draw commands was 0.102 ms in 0.5.2 and 0.123 ms in 0.5.2.1 across five paired batches of 60 draws.
+
 # v0.5.2 Cinder Reach verification
 
 All 163 Realm tests passed. The navigation suite flood-fills from the village to the new landmarks, Ada and every spawn. New regression cases cover the locked crossing, travel in both directions, intermediate objectives, repeated turn-ins, scaled XP, enemy attacks, respawn and the elite fight with level-eight story equipment. A save serialized by 0.5.1 round-trips with the same player data, item rolls, merchant buyback, ground loot and respawn timers.
