@@ -35,5 +35,6 @@ export function placeAtHome(e, player) {
 export function reviveEnemy(e, player) {
   Object.assign(e, createEnemy(e.id, e.type, e.homeX, e.homeY));
   e.cooldown = 1;
+  e.risingTide = false;
   placeAtHome(e, player);
 }

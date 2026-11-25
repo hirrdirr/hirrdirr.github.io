@@ -144,7 +144,7 @@ test('current saves preserve pending loot and cooldowns, and repairs unknown new
 test('spatial collision index agrees with a full obstacle scan across the entire world',()=>{
   const original=(x,y,r)=>{
     if(x<32+r||y<32+r||x>WIDTH-32-r||y>HEIGHT-32-r)return true;
-    if([[-r,0],[r,0],[0,-r],[0,r]].some(([dx,dy])=>['water','basalt'].includes(terrain(x+dx,y+dy))))return true;
+    if([[-r,0],[r,0],[0,-r],[0,r]].some(([dx,dy])=>['water','basalt','brine'].includes(terrain(x+dx,y+dy))))return true;
     return WORLD.obstacles.some(p=>p.kind==='house'?x+r>p.x-p.w/2&&x-r<p.x+p.w/2&&y+r>p.y-42&&y-r<p.y+8:Math.hypot(p.x-x,p.y-y)<(p.kind==='beacon'?21:p.kind==='rock'?13:10)+r);
   };
   for(let y=32;y<HEIGHT;y+=13)for(let x=32;x<WIDTH;x+=17)for(const radius of [2,11,24])assert.equal(blocked(x,y,radius),original(x,y,radius));

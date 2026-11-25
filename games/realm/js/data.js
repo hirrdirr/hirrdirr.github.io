@@ -1,7 +1,11 @@
+import { TIDE_QUESTS, TIDE_NPCS } from './tideglass.js';
 import { tr } from './i18n.js';
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.5.2.1';
+export const VERSION = '0.5.3';
 export const ITEMS = Object.freeze({
+  seaGrips: { name: tr('tide.seaGrips'), slot: 'hands', rarity: 'rare', attack: 2, hp: 5, value: 24, icon: 'gloves', description: tr('tide.gripText') },
+  saltMantle: { name: tr('tide.saltMantle'), slot: 'shoulders', rarity: 'uncommon', defense: 1, hp: 8, value: 21, icon: 'shoulders', description: tr('tide.mantleText') },
+  pilotRing: { name: tr('tide.pilotRing'), slot: 'ring', rarity: 'rare', hp: 8, haste: .03, value: 26, icon: 'band', description: tr('tide.ringText') },
   trainingSword: { value: 1, name: tr("data.wanderers_sword"), slot: 'weapon', rarity: 'common', attack: 2, icon: 'sword', description: tr("data.a_worn_blade_a_new_chapter") },
   linenCoat: { value: 1, name: tr("data.travel_coat"), slot: 'armor', rarity: 'common', defense: 1, icon: 'armor', description: tr("data.light_enough_for_a_long_journey") },
   keeperBlade: { value: 14, name: tr("data.lanternkeeper_blade"), slot: 'weapon', rarity: 'uncommon', attack: 7, icon: 'sword', description: tr("data.forged_to_keep_the_darkness_at_bay") },
@@ -34,6 +38,12 @@ export const ITEMS = Object.freeze({
   emberBand: { name: tr('gear.emberBand.name'), slot: 'ring', rarity: 'rare', icon: 'band', value: 24, attack: 1, spellPower: 0.03, description: tr('gear.emberBand.description') }
 });
 export const ENEMIES = Object.freeze({
+  knell: { name: tr('tide.knell'), behavior: 'ranged', spread: .30, level: 5, hp: 340, attack: 17, speed: 42, xp: 66, gold: 17, aggro: 160, leash: 190, radius: 18, cooldown: 2.7, boss: true, respawnSeconds: 90, flag: 'knellDefeated' },
+  shearwing: { name: tr('tide.shearwing'), behavior: 'pounce', level: 5, hp: 108, attack: 18, speed: 68, xp: 36, gold: 6, aggro: 125, leash: 170, radius: 12, cooldown: 2.6 },
+  claw: { name: tr('tide.claw'), behavior: 'melee', level: 10, hp: 320, attack: 35, speed: 34, xp: 73, gold: 12, aggro: 120, leash: 175, radius: 18, cooldown: 2 },
+  manta: { name: tr('tide.manta'), behavior: 'pounce', level: 11, hp: 235, attack: 34, speed: 77, xp: 81, gold: 12, aggro: 142, leash: 188, radius: 14, cooldown: 2.5 },
+  heron: { name: tr('tide.heron'), behavior: 'ranged', level: 12, hp: 240, attack: 36, speed: 52, xp: 90, gold: 14, aggro: 170, leash: 195, radius: 12, cooldown: 2.6 },
+  ebbwright: { name: tr('tide.ebbwright'), behavior: 'eruption', level: 13, hp: 1650, attack: 58, speed: 31, xp: 235, gold: 56, aggro: 175, leash: 215, radius: 23, cooldown: 2.8, boss: true, ringAttack: true, flag: 'ebbwrightDefeated', respawnSeconds: 160 },
   sprout: { name: tr("data.thornroot"), behavior: 'melee', level: 1, hp: 36, attack: 6, speed: 48, xp: 16, gold: 3, aggro: 135, leash: 200, radius: 12, cooldown: 1.6 },
   wolf: { name: tr("data.dusk_wolf"), behavior: 'pounce', level: 2, hp: 68, attack: 12, speed: 65, xp: 26, gold: 5, aggro: 165, leash: 240, radius: 13, cooldown: 2.2 },
   warden: { name: tr("data.rootbound_warden"), behavior: 'melee', level: 4, hp: 300, attack: 21, speed: 40, xp: 95, gold: 28, aggro: 185, leash: 280, radius: 23, cooldown: 2.8, boss: true, respawnSeconds: 120, flag: 'wardenDefeated' },
@@ -45,6 +55,12 @@ export const ENEMIES = Object.freeze({
 });
 // One weighted drop per kill. Copies stay in the bag for individual trading.
 export const LOOT_TABLES = Object.freeze({
+  knell: [['duskGrips', 45], ['reedLegs', 35], ['trailCharm', 20]],
+  shearwing: [['amber', 44], ['potion', 34], ['reedLegs', 22]],
+  claw: [['emberShard', 50], ['potion', 29], ['seaGrips', 21]],
+  manta: [['potion', 40], ['emberShard', 38], ['fenBoots', 22]],
+  heron: [['emberShard', 44], ['potion', 35], ['fenCowl', 21]],
+  ebbwright: [['seaGrips', 64], ['emberBand', 36]],
   sprout: [['amber', 56], ['potion', 25], ['barkCoat', 7], ['mossMantle', 6], ['trailBoots', 6]],
   wolf: [['amber', 48], ['potion', 22], ['swiftBlade', 10], ['trailCharm', 8], ['briarPads', 6], ['reedLegs', 6]],
   warden: [['moonBlade', 100]],
@@ -76,16 +92,20 @@ export const QUESTS = Object.freeze({
     rewards: { xp: 155, gold: 42, items: { fenBoots: 1 } } },
   lastCasting: { name: tr('ash.q3'), npc: 'ada', requires: 'flume', text: tr('ash.q3text'),
     objectives: [{ type: 'kill', target: 'striker', count: 1, label: tr('ash.strike') }],
-    rewards: { xp: 210, gold: 66, items: { emberBand: 1 } } }
+    rewards: { xp: 210, gold: 66, items: { emberBand: 1 } } },
+  ...TIDE_QUESTS
 });
+export const questRecipient = q => q.turnIn || q.npc;
 export const NPCS = Object.freeze([
   { id: 'elin', name: tr("data.elin"), role: tr("data.lanternkeeper"), x: 528, y: 832, color: 'gold', greeting: tr("data.welcome_to_lantern_vale_as_long_as_the_village_lantern_burns_ther") },
   { id: 'mira', name: tr("data.mira"), role: tr("data.herbalist_mentor"), x: 352, y: 768, color: 'rose', greeting: tr("data.the_forest_holds_both_wounds_and_remedies_rest_here_a_while_i_wil") },
   { id: 'ivo', name: tr("data.ivo"), role: tr("data.merchant"), x: 640, y: 784, color: 'blue', greeting: tr("data.a_potion_in_your_bag_is_worth_two_on_the_shelf_show_me_what_you_w") },
   { id: 'ada', name: tr('ash.ada'), role: tr('ash.role'), x: 2024, y: 1176, color: 'copper', greeting: tr('ash.greeting') },
-  { id: 'signe', name: tr("data.signe"), role: tr("data.runewalker"), x: 1264, y: 768, color: 'rose', greeting: tr("data.i_saw_the_beacon_light_now_something_beneath_the_fen_is_answering") }
+  { id: 'signe', name: tr("data.signe"), role: tr("data.runewalker"), x: 1264, y: 768, color: 'rose', greeting: tr("data.i_saw_the_beacon_light_now_something_beneath_the_fen_is_answering") },
+  ...TIDE_NPCS
 ]);
 export const SPAWN = Object.freeze({ x: 448, y: 880 });
-export const CHECKPOINTS = Object.freeze({ village: SPAWN, camp: { x: 1232, y: 784 } });
+export const CHECKPOINTS = Object.freeze({ village: SPAWN, camp: { x: 1232, y: 784 }, sounding: { x: 2784, y: 800 } });
+export const checkpointName = id => id === 'sounding' ? tr('tide.refuge') : id === 'camp' ? tr('world.wanderers_camp') : tr('world.lantern_vale');
 export const xpForLevel = level => 60 + (level - 1) * 35;
 export const RARITIES = { common: tr("data.common"), uncommon: tr("data.uncommon"), rare: tr("data.rare") };

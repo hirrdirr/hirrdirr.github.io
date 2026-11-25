@@ -18,8 +18,17 @@ function beginAttack(s, e, def) {
   const p = s.player, d = distance(p, e) || 1;
   e.aim = { x: (p.x - e.x) / d, y: (p.y - e.y) / d };
   e.mode = 'windup';
-  e.windup = e.windupMax = def.behavior === 'pounce' ? .7 : def.behavior === 'ranged' ? .65 : def.boss ? 1 : .5;
+  e.windup = e.windupMax = def.behavior === 'pounce' ? .7 : def.behavior === 'ranged' ? (def.spread ? 1 : .65) : def.boss ? 1 : .5;
   if (def.behavior === 'eruption') {
+    // The tide clock alternates a ring around its feet with a marked surge under the player.
+    if (def.ringAttack) {
+      e.risingTide = !e.risingTide;
+      if (e.risingTide) {
+        if (s.hazards.length < 12) s.hazards.push({ x: e.x, y: e.y, owner: e.id, radius: 133,
+          inner: 50, delay: 1.05, maxDelay: 1.05, damage: def.attack });
+        return;
+      }
+    }
     const spots = [{ x: p.x, y: p.y }];
     if (e.hp < def.hp / 2) spots.push({ x: p.x + p.facing.x * 90, y: p.y + p.facing.y * 90 });
     for (const pos of spots) if (!inSafe(pos.x, pos.y) && s.hazards.length < 12) {
@@ -55,7 +64,12 @@ export function stepEnemies(s, dt, { random, hurt, effect }) {
         e.mode = 'chase';
         if (def.behavior === 'pounce') { e.mode = 'pounce'; e.pounceTime = .42; e.pounceHit = false; }
         else if (def.behavior === 'ranged') {
-          if (s.projectiles.length < 32) s.projectiles.push({ x: e.x, y: e.y, vx: e.aim.x * 190, vy: e.aim.y * 190, damage: def.attack, owner: e.id, life: 2.4 });
+          const direction = Math.atan2(e.aim.y, e.aim.x);
+          for (const offset of def.spread ? [-def.spread, 0, def.spread] : [0]) {
+            if (s.projectiles.length >= 32) break;
+            s.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(direction + offset) * 190,
+              vy: Math.sin(direction + offset) * 190, damage: def.attack, owner: e.id, life: 2.4 });
+          }
         } else if (def.behavior !== 'eruption') {
           if (d < (def.boss ? 100 : 45) && lineClear(e, p)) hurt(s, def.attack);
           if (def.boss) effect(s, 'slam', e.x, e.y);
@@ -110,8 +124,9 @@ export function stepEnemies(s, dt, { random, hurt, effect }) {
   s.hazards = s.hazards.filter(h => {
     h.delay -= dt;
     if (h.delay > 0) return true;
-    if (distance(h, p) < h.radius + 8) hurt(s, h.damage);
-    effect(s, 'eruption', h.x, h.y);
+    const d = distance(h, p);
+    if (d < h.radius + 8 && (!h.inner || d > h.inner - 8)) hurt(s, h.damage);
+    effect(s, 'eruption', h.x, h.y, '', { radius: h.radius });
     return false;
   });
 }

@@ -403,6 +403,10 @@ h1 span {
   gap:16px;
   min-height:93px
 }
+.journal-group + .journal-group { margin-top: 1.2rem; }
+details.quest-entry summary { cursor: pointer; padding: .35rem 0; }
+details.quest-entry summary .quest-status { display: block; margin-left: 1rem; }
+details.quest-entry[open] summary { margin-bottom: .45rem; }
 .quest-card {
   padding-left:12px;
   position:relative;

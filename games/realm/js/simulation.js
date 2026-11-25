@@ -3,7 +3,7 @@ import { instance, templateId, resolveItem, createItemInstance, discardItem } fr
 import { tr, withAwardedXP } from './i18n.js';
 // Pure game rules. No DOM, Canvas, storage, clocks or network access.
 // Clients send commands; step() advances a fixed tick and emits presentation events.
-import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, LOOT_TABLES, xpForLevel } from './data.js';
+import { ITEMS, ENEMIES, QUESTS, NPCS, SPAWN, CHECKPOINTS, questRecipient, checkpointName, LOOT_TABLES, xpForLevel } from './data.js';
 import { distance, inSafe, moveBody, blocked, lineClear, LANDMARKS, ENEMY_SPAWNS, sluiceOpen, zoneAt } from './world.js';
 import { createEnemy, respawnSeconds } from './enemy-life.js';
 import { stepEnemies } from './enemy-ai.js';
@@ -39,7 +39,7 @@ export function createGame(name = tr("simulation.wanderer")) {
     player: { name: name.trim().slice(0, 18) || tr("simulation.wanderer"), ...SPAWN, hp: 100, level: 1, xp: 0, gold: 0, facing: { x: 0, y: 1 }, moveFacing: { x: 0, y: 1 }, dodgeDirection: { x: 0, y: 1 },
       inventory: { potion: 3 }, equipment: emptyEquipment(), itemInstances: {}, itemSequence: 1,
       cooldowns: { attack: 0, burst: 0, dodge: 0, potion: 0, guard: 0, rush: 0, bolt: 0 }, talents: {}, respecCount: 0, guardTime: 0, counterTime: 0, checkpoint: 'village', combo: 0, comboTime: 0, invulnerable: 0, dodging: 0, attackTime: 0, moving: false, combat: 0, dead: false },
-    quests: {}, harvested: [], chests: [], runes: [], discovered: ['village'], flags: { beaconLit: false, wardenDefeated: false, ancientDefeated: false, sealRestored: false }, enemies: []
+    quests: {}, records: [], harvested: [], chests: [], runes: [], discovered: ['village'], flags: { beaconLit: false, wardenDefeated: false, ancientDefeated: false, sealRestored: false }, enemies: []
   };
   state.player.equipment.weapon = createItemInstance(state.player, 'trainingSword');
   state.player.equipment.armor = createItemInstance(state.player, 'linenCoat');
@@ -95,7 +95,12 @@ export function questEvent(s, type, target) {
   for (const [id, q] of Object.entries(s.quests)) {
     if (q.status !== 'active') continue;
     const before = questReady(s, id);
-    QUESTS[id].objectives.forEach((o, i) => { if (o.type === type && o.target === target) q.progress[i] = Math.min(o.count, q.progress[i] + 1); });
+    const def = QUESTS[id];
+    const next = def.ordered ? def.objectives.findIndex((o, i) => q.progress[i] < o.count) : -1;
+    def.objectives.forEach((o, i) => {
+      if ((!def.ordered || i === next) && o.type === type && o.target === target)
+        q.progress[i] = Math.min(o.count, q.progress[i] + 1);
+    });
     if (!before && questReady(s, id)) emit(s, 'questReady', { id });
   }
 }
@@ -104,9 +109,10 @@ export function acceptQuest(s, id) {
   const q = QUESTS[id];
   if (!q || s.quests[id] || !nearNpc(s, q.npc) || s.player.dead || (q.requires && s.quests[q.requires]?.status !== 'done')) return false;
   s.quests[id] = { status: 'active', progress: q.objectives.map(o => {
+    if (o.type === 'record') return Number(s.records.includes(o.target));
     if (o.type === 'gather') return Math.min(s.harvested.length, o.count);
     if (o.type === 'rune') return Math.min(s.runes.length, o.count);
-    if (o.type === 'kill' && ENEMIES[o.target]?.flag) return Number(s.flags[ENEMIES[o.target].flag]);
+    if (o.type === 'kill' && ENEMIES[o.target]?.flag) return Number(Boolean(s.flags[ENEMIES[o.target].flag]));
     if (o.type === 'beacon') return Number(s.flags.beaconLit);
     if (o.type === 'seal') return Number(s.flags.sealRestored);
     return 0;
@@ -115,7 +121,7 @@ export function acceptQuest(s, id) {
   return true;
 }
 export function completeQuest(s, id) {
-  if (!QUESTS[id] || !questReady(s, id) || !nearNpc(s, QUESTS[id].npc) || s.player.dead) return false;
+  if (!QUESTS[id] || !questReady(s, id) || !nearNpc(s, questRecipient(QUESTS[id])) || s.player.dead) return false;
   const reason = bundleCapacityReason(s.player, QUESTS[id].rewards.items);
   if (reason) { emit(s, 'message', { text: tr("simulation.your_reward_will_stay_here", reason) }); return false; }
   s.quests[id].status = 'done'; // Commit before rewarding: repeated commands cannot duplicate rewards.
@@ -166,8 +172,8 @@ export function interact(s) {
     } else emit(s, 'message', { text: tr("simulation.the_beacon_shines_over_lantern_vale_once_more") });
   } else if (target.kind === 'fire') {
     s.player.hp = stats(s.player).maxHp;
-    s.player.checkpoint = target.id === 'campfire' ? 'camp' : 'village';
-    emit(s, 'checkpoint', { name: target.id === 'campfire' ? tr("world.wanderers_camp") : tr("world.lantern_vale") });
+    s.player.checkpoint = target.checkpoint || (target.id === 'campfire' ? 'camp' : 'village');
+    emit(s, 'checkpoint', { name: checkpointName(s.player.checkpoint) });
   } else if (target.kind === 'rune') {
     if (!s.runes.includes(target.id)) {
       s.runes.push(target.id);
@@ -181,6 +187,25 @@ export function interact(s) {
       s.flags.sealRestored = true; questEvent(s, 'seal', 'seal'); emit(s, 'seal');
       effect(s, 'level', target.x, target.y, tr("simulation.the_fen_breathes_again"));
     } else emit(s, 'message', { text: sluiceOpen(s) ? tr('ash.open') : tr("simulation.the_seal_glows_softly_the_road_beyond_the_sluice_must_wait") });
+  } else if (target.kind === 'record') {
+    if (!s.records.includes(target.id)) s.records.push(target.id);
+    questEvent(s, 'record', target.id);
+    emit(s, 'inspection', { text: target.text });
+  } else if (target.kind === 'operate') {
+    const objective = target.alternativeFor || target.id;
+    const [id, def] = Object.entries(QUESTS).find(([, q]) => q.objectives.some(o => o.type === 'operate' && o.target === objective));
+    const quest = s.quests[id], index = def.objectives.findIndex(o => o.target === objective);
+    let text;
+    if (!quest) text = tr('tide.inactive', target.prompt);
+    else if (quest.progress[index]) text = tr('tide.already');
+    else if (target.readings?.some(note => !s.records.includes(note))) text = tr('tide.readBoth');
+    else if (target.alternativeFor) text = target.text;
+    else {
+      const next = def.objectives.findIndex((o, i) => quest.progress[i] < o.count);
+      if (def.ordered && next !== index) text = tr('tide.first', def.objectives[next].label);
+      else { questEvent(s, 'operate', target.id); text = target.text; }
+    }
+    emit(s, 'inspection', { text });
   } else if (target.kind === 'gauge' || target.kind === 'bell') {
     questEvent(s, 'inspect', target.id);
     emit(s, 'inspection', { text: target.text });

@@ -24,6 +24,7 @@ export function serialize(state) {
   return JSON.stringify({ version: SAVE_VERSION, savedAt: new Date().toISOString(), data: {
     ...(respawns.length ? { respawns: Object.fromEntries(respawns) } : {}),
     player: { name: p.name, x: p.x, y: p.y, hp: p.hp, level: p.level, xp: p.xp, gold: p.gold, inventory: p.inventory, equipment: p.equipment, itemInstances: p.itemInstances, itemSequence: p.itemSequence, dead: p.dead, talents: p.talents, respecCount: p.respecCount, checkpoint: p.checkpoint, cooldowns: p.cooldowns },
+    ...(state.records.length ? { records: state.records } : {}),
     quests: state.quests, harvested: state.harvested, chests: state.chests, discovered: state.discovered, runes: state.runes,
     flags: state.flags, drops: state.drops, buyback: state.buyback, seed: state.seed, time: state.time
   } });
@@ -109,11 +110,15 @@ export function deserialize(raw) {
   }
   p.hp = integer(old.hp, 0, stats(p).maxHp, stats(p).maxHp);
   p.dead = old.dead === true || p.hp === 0;
+  s.records = cleanList(d.records, idsOf('record'));
   s.harvested = cleanList(d.harvested, idsOf('herb'));
   s.chests = cleanList(d.chests, idsOf('chest'));
   s.runes = cleanList(d.runes, idsOf('rune'));
-  s.discovered = cleanList(d.discovered, ['village', 'trail', 'forest', 'ruins', 'camp', 'marsh', 'reach']);
+  s.discovered = cleanList(d.discovered, ['village', 'trail', 'forest', 'ruins', 'camp', 'marsh', 'reach', 'shelf', 'postyard']);
   if (!s.discovered.includes('village')) s.discovered.unshift('village');
+  for (const flag of ['ebbwrightDefeated', 'knellDefeated']) {
+    if (d.flags?.[flag] === true) s.flags[flag] = true;
+  }
   s.flags.wardenDefeated = d.flags?.wardenDefeated === true;
   s.flags.beaconLit = s.flags.wardenDefeated && d.flags?.beaconLit === true;
   s.flags.ancientDefeated = d.flags?.ancientDefeated === true;
@@ -123,6 +128,7 @@ export function deserialize(raw) {
     if (!q || !['active', 'done'].includes(q.status)) continue;
     s.quests[id] = { status: q.status, progress: QUESTS[id].objectives.map((o, i) => q.status === 'done' ? o.count : integer(q.progress?.[i], 0, o.count, 0)) };
   }
+  if (p.checkpoint === 'sounding' && !sluiceOpen(s)) p.checkpoint = 'village';
   s.seed = integer(d.seed, 0, 4294967295, s.seed);
   s.time = integer(d.time, 0, 100000000, 0);
   if (Number.isFinite(old.x) && Number.isFinite(old.y) && !blocked(old.x, old.y, 11, sluiceOpen(s))) { p.x = old.x; p.y = old.y; }

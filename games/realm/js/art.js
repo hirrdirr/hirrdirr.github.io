@@ -1,5 +1,7 @@
 // Original, code-native pixel artwork. Rasterized once into a small sprite atlas.
 // World rendering only blits cached sprites; no per-frame pixel construction.
+import { addTideglassArt } from './tideglass-art.js';
+
 function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 const palette = { o: '#152d31', h: '#543b35', H: '#956749', s: '#e4b584', S: '#f8d5a0', t: '#328d86', T: '#69b5a0', d: '#21565d', b: '#354650', B: '#60757d', g: '#d4a956', G: '#f4d784', w: '#d3e1d9', r: '#ad6572', R: '#e69c9c', l: '#87b86c', L: '#b7d582', v: '#496c47', c: '#6cd3d1' };
 const person = [
@@ -277,7 +279,7 @@ function prop(kind) {
 }
 export function makeArt() {
   const art = {};
-  for (const [id, colors] of Object.entries({ player:{},copper:{t:'#96553f',T:'#d59260',H:'#b1a69a',h:'#82766e',d:'#4a4146'},gold:{t:'#a67a3e',T:'#e0bd6a'},rose:{t:'#a4657b',T:'#df9a9b'},blue:{t:'#4b6c8b',T:'#82a9bb'} })) {
+  for (const [id, colors] of Object.entries({ player:{},reed:{t:'#68764e',T:'#a0ad76',H:'#aaa89e'},brine:{t:'#357b85',T:'#99caca',h:'#b4a999'},copper:{t:'#96553f',T:'#d59260',H:'#b1a69a',h:'#82766e',d:'#4a4146'},gold:{t:'#a67a3e',T:'#e0bd6a'},rose:{t:'#a4657b',T:'#df9a9b'},blue:{t:'#4b6c8b',T:'#82a9bb'} })) {
     art[id] = [0,1,2].map(f=>pixelSprite(person,colors,f));
     art[id+'Back'] = [0,1,2].map(f=>pixelSprite(person,colors,f,true));
   }
@@ -287,5 +289,6 @@ export function makeArt() {
   art.trees = [0,1,2,3].map(tree);
   art.houseRed=house('red'); art.houseBlue=house('blue');
   for (const id of ['rock','fire','chest','chestOpen','beacon','beaconLit','herb','sign','rune','runeRead','seal','sealLit','gate','gateOpen']) art[id]=prop(id);
+  addTideglassArt(art);
   return art;
 }
