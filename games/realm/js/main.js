@@ -2,6 +2,7 @@ import { tr, withAwardedXP } from './i18n.js';
 import { createGame, command, step, TICK } from './simulation.js';
 import { MAX_SAVE_BYTES, SaveStore, serialize, deserialize } from './save.js';
 import { Renderer } from './renderer.js';
+import { HudLayout } from './hud-layout.js';
 import { UI } from './ui.js';
 import { CharacterPreview } from './character-preview.js';
 import { AudioBus } from './audio.js';
@@ -11,6 +12,7 @@ const $=id=>document.getElementById(id);
 // Storage can throw even when merely accessing window.localStorage.
 let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('storage blocked');},setItem(){throw Error('storage blocked');}};}
 const saves=new SaveStore(storage),loaded=saves.load();
+let saveStatus=tr("static.your_journey_is_saved_on_this_device");
 let state=loaded||createGame(),started=false,focusPaused=false,raf=0,last=0,accumulator=0,lastDraw=0,lastHUD=0,lastSave=0,frameLimit=60;
 const renderer=new Renderer($('world'),$('minimap')),audio=new AudioBus(),keys=new Set();
 try{const prefs=JSON.parse(storage.getItem('hirrdirr.realm.settings')||'{}');if([30,60].includes(prefs.fps))frameLimit=prefs.fps;if(Number.isFinite(prefs.volume))audio.volume=Math.max(0,Math.min(1,prefs.volume));}catch{}
@@ -19,13 +21,13 @@ function warning(){const message=saves.message;$('save-warning').hidden=!message
 function save(manual=false) {
   if(!started)return;
   const success=saves.save(state);
-  $('save-status').textContent=success?tr("main.saved_on_this_device"):tr("main.not_saved_export_from_the_menu");
+  saveStatus=success?tr("main.saved_on_this_device"):tr("main.not_saved_export_from_the_menu");
   warning();if(manual)ui.toast(success?tr("main.your_journey_is_saved"):saves.message||tr("main.the_existing_save_is_protected_export_your_journey_from_the_menu"));
 }
 function pause(){keys.clear();accumulator=0;if(raf)cancelAnimationFrame(raf);raf=0;}
 function resume(){
   keys.clear();last=performance.now();lastDraw=0;accumulator=0;
-  if(started&&(!ui.isOpen||ui.allowsSimulation)&&!focusPaused&&!document.hidden&&!raf)raf=requestAnimationFrame(loop);
+  if(started&&!hud.editing&&(!ui.isOpen||ui.allowsSimulation)&&!focusPaused&&!document.hidden&&!raf)raf=requestAnimationFrame(loop);
 }
 function processEvents() {
   let needsSave=false;
@@ -55,7 +57,7 @@ function processEvents() {
   if(needsSave)save();
 }
 function dispatch(input) {
-  if(!started)return;
+  if(!started||hud.editing)return;
   audio.unlock();const result=command(state,input);processEvents();ui.hud(renderer);renderer.render(state,0);return result;
 }
 function download(raw,name) {
@@ -64,18 +66,26 @@ function download(raw,name) {
 }
 const ui=new UI(()=>state,{
   started:()=>started,pause,resume,command:dispatch,
+  editing:()=>hud.editing,
+  editHUD:()=>{pause();ui.close();hud.begin();},
   preview:new CharacterPreview(()=>renderer.art.player[0]),
   save:()=>save(true),
   export:()=>download(serialize(state),'project-realm-save.json'),
   volume:value=>{audio.volume=value;audio.unlock();preferences();},
   frameLimit:value=>{frameLimit=value===30?30:60;preferences();},
-  settings:()=>({volume:audio.volume,fps:frameLimit,diagnostics:tr("main.canvas_ms_average_draw_time_enemies", $('world').width, $('world').height, (renderer.metrics.frames?renderer.metrics.total/renderer.metrics.frames:0).toFixed(1), state.enemies.length)}),
+  settings:()=>({fullscreen:Boolean(document.fullscreenElement)||document.documentElement.classList.contains('window-fullscreen'),status:saveStatus,volume:audio.volume,fps:frameLimit,diagnostics:tr("main.canvas_ms_average_draw_time_enemies", $('world').width, $('world').height, (renderer.metrics.frames?renderer.metrics.total/renderer.metrics.frames:0).toFixed(1), state.enemies.length)}),
   fullscreen:async()=>{
+    const root = document.documentElement;
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
-      else await document.documentElement.requestFullscreen();
+      else if (root.classList.contains('window-fullscreen')) root.classList.remove('window-fullscreen');
+      else await root.requestFullscreen();
+    } catch {
+      // Embedded browsers can deny native fullscreen. Use their entire available window.
+      root.classList.toggle('window-fullscreen',!document.fullscreenElement);
+      ui.toast(tr('hud.window_fullscreen'));
     }
-    catch{ui.toast(tr("main.fullscreen_is_not_available_in_this_browser"));}
+    ui.close();
   },
   import:async file=>{
     try{
@@ -90,6 +100,9 @@ const ui=new UI(()=>state,{
   },
   newGame:()=>newJourney()
 });
+document.addEventListener('fullscreenchange', () => {
+  if (ui.view === 'settings') ui.settings();
+});
 function newJourney() {
   if(!window.confirm(tr("main.start_a_new_journey_this_replaces_the_current_local_save_export_i")))return;
   pause();state=createGame();started=false;focusPaused=false;ui.view=null;ui.panel.close();
@@ -99,7 +112,7 @@ function newJourney() {
 }
 function loop(now) {
   raf=0;
-  if(!started||(ui.isOpen&&!ui.allowsSimulation)||focusPaused||document.hidden)return;
+  if(!started||hud.editing||(ui.isOpen&&!ui.allowsSimulation)||focusPaused||document.hidden)return;
   const delta=Math.min(.1,Math.max(0,(now-last)/1000));last=now;accumulator+=delta;
   const input=ui.isOpen?{}:{x:Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')),y:Number(keys.has('KeyS')||keys.has('ArrowDown'))-Number(keys.has('KeyW')||keys.has('ArrowUp')),attack:keys.has('Space')};
   while(accumulator>=TICK&&!state.player.dead){step(state,input,TICK);accumulator-=TICK;}
@@ -111,6 +124,10 @@ function loop(now) {
 }
 const shortcut={KeyQ:'burst',ShiftLeft:'dodge',ShiftRight:'dodge',KeyR:'potion',KeyE:'interact',Digit1:'guard',Digit2:'rush',Digit3:'bolt'};
 window.addEventListener('keydown',event=>{
+  if(hud.editing) {
+    if(event.code==='Escape'){event.preventDefault();hud.finish(false);}
+    return;
+  }
   if(event.ctrlKey||event.metaKey||event.altKey||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;
   if(!started)return;
   if(ui.isOpen) {
@@ -134,19 +151,19 @@ window.addEventListener('keydown',event=>{
   else if(['Escape','KeyP'].includes(event.code)){event.preventDefault();ui.open('settings');}
 });
 window.addEventListener('keyup',event=>keys.delete(event.code));
-document.querySelectorAll('[data-command]').forEach(b=>b.addEventListener('click',()=>{if(!ui.isOpen&&!focusPaused){dispatch({type:b.dataset.command});$('world').focus({preventScroll:true});}}));
+document.querySelectorAll('[data-command]').forEach(b=>b.addEventListener('click',()=>{if(!hud.editing&&!ui.isOpen&&!focusPaused){dispatch({type:b.dataset.command});$('world').focus({preventScroll:true});}}));
 $('world').addEventListener('pointerdown',event=>{
-  if(event.button!==0||ui.isOpen||focusPaused)return;
+  if(event.button!==0||hud.editing||ui.isOpen||focusPaused)return;
   const canvas=$('world'),rect=canvas.getBoundingClientRect();
-  const x=(event.clientX-rect.left)/rect.width*canvas.width+renderer.camera.x,y=(event.clientY-rect.top)/rect.height*canvas.height+renderer.camera.y;
+  const x=(event.clientX-rect.left)/rect.width*canvas.width+Math.round(renderer.camera.x),y=(event.clientY-rect.top)/rect.height*canvas.height+Math.round(renderer.camera.y);
   const target=state.enemies.filter(e=>e.hp>0&&Math.abs(e.x-x)<32&&y>e.y-65&&y<e.y+12).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];
   canvas.focus({preventScroll:true});if(target)dispatch({type:'target',id:target.id});dispatch({type:'attack'});
 });
 $('pause-button').addEventListener('click',()=>ui.open('settings'));
-window.addEventListener('blur',()=>{if(started&&!ui.isOpen){focusPaused=true;$('focus-overlay').hidden=false;}pause();save();});
+window.addEventListener('blur',()=>{if(started&&!hud.editing&&!ui.isOpen){focusPaused=true;$('focus-overlay').hidden=false;}pause();save();});
 window.addEventListener('focus',()=>{if(ui.allowsSimulation&&!document.hidden&&!focusPaused)resume();});
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){focusPaused=started;$('focus-overlay').hidden=!started;pause();save();}
+  if(document.hidden){focusPaused=started&&!hud.editing;$('focus-overlay').hidden=!focusPaused;pause();save();}
   else if(ui.isOpen){focusPaused=false;$('focus-overlay').hidden=true;if(ui.allowsSimulation)resume();}
 });
 $('resume-focus').addEventListener('click',()=>{focusPaused=false;$('focus-overlay').hidden=true;audio.unlock();resume();$('world').focus({preventScroll:true});});
@@ -154,23 +171,25 @@ window.addEventListener('pagehide',()=>save());
 $('theme-button').addEventListener('click',()=>{document.body.classList.toggle('light');try{storage.setItem('hirrdirr_theme',document.body.classList.contains('light')?'light':'dark');}catch{}});
 // Measure only when layout changes. Both the camera and pointer input use canvas pixels.
 const playfield = document.querySelector('.playfield');
-const dock = document.querySelector('.combat-dock');
+const hud = new HudLayout(playfield, storage, () => {
+  ui.hud(renderer);
+  $('world').focus({preventScroll:true});
+  resume();
+});
 const observer = new ResizeObserver(() => {
   const width = playfield.clientWidth, height = playfield.clientHeight;
   if (!width || !height) return;
-  const scale = Math.min(1, 960 / width, 720 / height);
+  const scale = Math.min(1, 1280 / width, 768 / height, Math.sqrt(720000 / (width * height)));
   const canvas = renderer.canvas;
   const w = Math.round(width * scale), h = Math.round(height * scale);
-  const inset = Math.ceil(dock.offsetHeight * h / height);
-  if (canvas.width === w && canvas.height === h && renderer.dockInset === inset) return;
+  if (canvas.width === w && canvas.height === h) return;
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
-  renderer.dockInset = inset;
   renderer.resetCamera();
   renderer.render(state, 0);
 });
 observer.observe(playfield);
-observer.observe(dock);
+
 $('welcome').addEventListener('cancel',event=>event.preventDefault());
 $('start-form').addEventListener('submit',event=>{
   event.preventDefault();

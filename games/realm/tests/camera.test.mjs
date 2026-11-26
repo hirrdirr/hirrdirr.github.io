@@ -1,14 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Renderer } from '../js/renderer.js';
+import { Renderer, PLAY_BAND } from '../js/renderer.js';
 import { WIDTH, HEIGHT, TILE } from '../js/world.js';
 
-function camera(width, height, inset) {
+function camera(width, height) {
   const renderer = Object.create(Renderer.prototype);
   renderer.canvas = {width, height};
-  renderer.ground = {width: WIDTH, height: HEIGHT + 3 * TILE};
+  renderer.ground = {width: WIDTH, height: HEIGHT + 24 * TILE};
   renderer.camera = {x: 0, y: 0};
-  renderer.dockInset = inset;
   renderer.resetCamera();
   return renderer;
 }
@@ -17,15 +16,15 @@ function assertVisible(renderer, player) {
   const {width, height} = renderer.canvas;
   const x = Math.round(renderer.camera.x), y = Math.round(renderer.camera.y);
   assert.ok(x >= 0 && x + width <= renderer.ground.width, 'horizontal crop');
-  assert.ok(y >= 0 && y + height <= renderer.ground.height, 'vertical crop');
+  assert.ok(y + 14 * TILE >= 0 && y + 14 * TILE + height <= renderer.ground.height, 'vertical crop');
   assert.ok(player.x - x >= 20 && player.x - x <= width - 20, 'sprite sides');
-  assert.ok(player.y - y >= 43, 'sprite head during strike');
-  assert.ok(player.y - y + 7 <= height - renderer.dockInset, 'feet above prompt and abilities');
+  assert.ok(player.y - y - 43 >= height * PLAY_BAND.top - 1, 'sprite head during strike');
+  assert.ok(player.y - y + 7 <= height * PLAY_BAND.bottom + 1, 'feet above prompt and abilities');
 }
 
 test('camera keeps the whole player above the dock on every map edge and in Cinder Reach', () => {
-  for (const [w, h, inset] of [[960, 524, 76], [675, 346, 87], [298, 245, 88], [920, 305, 82]]) {
-    const renderer = camera(w, h, inset);
+  for (const [w, h] of [[1280, 562], [720, 768], [960, 524], [675, 346], [298, 245], [920, 305]]) {
+    const renderer = camera(w, h);
     for (const x of [43, 450, WIDTH / 2, 1877, 2024, 2496, WIDTH - 43]) {
       for (const y of [43, 536, 1000, HEIGHT - 43]) {
         renderer.resetCamera();
@@ -48,7 +47,7 @@ test('camera keeps the whole player above the dock on every map edge and in Cind
 });
 
 test('reduced motion follows immediately and interior movement keeps normal easing', () => {
-  const r = camera(920, 490, 83), p = {x: 730, y: 680};
+  const r = camera(920, 490), p = {x: 730, y: 680};
   r.followPlayer(p, 0);
   const previous = {...r.camera};
   p.x += 20; p.y += 20;

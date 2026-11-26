@@ -1,7 +1,7 @@
 import { TIDE_QUESTS, TIDE_NPCS } from './tideglass.js';
 import { tr } from './i18n.js';
 // Content IDs are stable: saves and a future server refer to IDs, never UI labels.
-export const VERSION = '0.5.3';
+export const VERSION = '0.5.4';
 export const ITEMS = Object.freeze({
   seaGrips: { name: tr('tide.seaGrips'), slot: 'hands', rarity: 'rare', attack: 2, hp: 5, value: 24, icon: 'gloves', description: tr('tide.gripText') },
   saltMantle: { name: tr('tide.saltMantle'), slot: 'shoulders', rarity: 'uncommon', defense: 1, hp: 8, value: 21, icon: 'shoulders', description: tr('tide.mantleText') },

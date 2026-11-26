@@ -1,7 +1,13 @@
-# Project Realm — Lantern Vale, v0.5.3
+# Project Realm — Lantern Vale, v0.5.4
 
 An original, single-player, top-down fantasy RPG for Hirrdirr.se.
 Play at [/games/realm/](https://hirrdirr.se/games/realm/).
+
+## 0.5.4 — Immersive HUD
+
+The world fills the game window. Level and XP sit at the top center. The target frame shows exact health and attack intent, while the smaller plate above the enemy shows its name, level and remaining health. Click the zone name or **Quests** to fold either overlay. Press **J** for the full journal.
+
+Open **Menu → Edit HUD** to move the player frame, target frame, minimap, tracker or ability bar. Drag a frame or use the position and scale fields with the keyboard. The world pauses while you edit. **Save layout** keeps the settings in this browser. **Reset HUD Layout** restores the defaults when saved. A clear band across the world keeps the character visible during combat. If the saved layout cannot fit a smaller window, the game uses its responsive defaults.
 
 ## 0.5.3 — World Content Expansion
 

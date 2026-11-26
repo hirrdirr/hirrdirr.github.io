@@ -20,7 +20,7 @@ const swedishCopy = /[åäöÅÄÖ]|\b(?:guld|vandrare|lykt\w*|glöd\w*|talanger
 const source = file => readFile(new URL('../'+file, import.meta.url),'utf8');
 
 test('English catalog interpolates values once, supports locale fallback and rejects incomplete messages', () => {
-  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.5.3');
+  assert.equal(LANGUAGE,'en'); assert.equal(VERSION,'0.5.4');
   const translate=createTranslator({'ui.restores_health':'Heal {0} HP'});
   assert.equal(translate('ui.restores_health',55),'Heal 55 HP');
   assert.equal(translate('data.lanternkeeper_blade'),'Lanternkeeper Blade');
@@ -46,12 +46,12 @@ test('all English messages and referenced keys resolve, with no leftover Swedish
 
 test('committed static page matches the English template, including metadata and accessible controls', async () => {
   const html=await source('index.html');assert.equal(html,await renderHTML());
-  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.5\.3<\/small>/);
+  assert.match(html,/<html lang="en">/);assert.match(html,/<small>0\.5\.4<\/small>/);
   assert.match(html,/<title>Project Realm · Lantern Vale/);
   assert.match(html,/aria-label="Lantern Ward \(1\)"/);assert.match(html,/aria-label="Close menu"/);
   assert.doesNotMatch(html,swedishCopy);assert.doesNotMatch(html,/\{\{|\{\d+\}/);
   assert.doesNotMatch(await source('realm.css'),swedishCopy);
-  assert.match(html,/class="nav-label-short" aria-hidden="true">Bag<\/span>/);
+  assert.match(html,/aria-controls="tracker-body"/);
 });
 
 test('a save produced by the Swedish 0.3.0 code preserves progress while transferring equipped copies during migration', () => {
@@ -216,8 +216,9 @@ test('selected wolf and boss plates show current target health and the unit fram
         assert.equal(h.element('target-hud').hidden, false);
         assert.equal(h.element('target-name').textContent, name);
         assert.equal(h.element('target-level').textContent, 'Lv. ' + level);
-        assert.deepEqual(labels.slice(-2), [name + ' · Lv. ' + level, h.element('target-hp').textContent]);
-        assert.equal(labels.at(-1), remaining + ' / ' + hp + ' HP');
+        assert.equal(labels.at(-1), name + ' · Lv. ' + level);
+        assert.equal(widths.at(-3), type === 'wolf' ? 106 : 134);
+        assert.equal(h.element('target-hp').textContent, remaining + ' / ' + hp + ' HP');
         assert.ok(Math.abs(widths.at(-1) / widths.at(-2) - remaining / hp) < 1e-9);
         assert.match(h.element('target-intent').textContent, /!/);
       }

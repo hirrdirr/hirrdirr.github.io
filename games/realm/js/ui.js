@@ -20,7 +20,7 @@ export class UI {
     this.tradeSelection={side:'stock',id:'potion'};this.selectedTalent='vigor';this.activeTree='guardian';this.pendingSale=null;this.confirmDialog=$('realm-confirm');
     document.querySelectorAll('[data-panel]').forEach(button=>button.addEventListener('click',()=>this.open(button.dataset.panel)));
     $('close-panel').addEventListener('click',()=>this.close());
-    this.panel.addEventListener('close',()=>{if(this.panel.open)return;this.preview?.unmount();this.view=null;actions.resume();$('world').focus({preventScroll:true});});
+    this.panel.addEventListener('close',()=>{if(this.panel.open)return;this.preview?.unmount();this.view=null;if(actions.editing?.())return;actions.resume();$('world').focus({preventScroll:true});});
     this.panel.addEventListener('cancel',e=>{if(this.view==='death')e.preventDefault();});
     $('realm-confirm-cancel').addEventListener('click',()=>this.confirmDialog.close());
     $('realm-confirm-accept').addEventListener('click',()=>{
@@ -50,7 +50,7 @@ export class UI {
       if(b.dataset.action) {
         const action=b.dataset.action;
         const quantity=b.dataset.quantity === undefined ? 1 : Number(b.dataset.quantity);
-        if(action==='talents'){this.open('talents');return;}
+        if(['inventory','journal','talents','help'].includes(action)){this.open(action);return;}
         if(['accept','complete','equip','unequip','buy','sell','buyback','respawn','potion','learnTalent','respec'].includes(action)) {
           let confirm=false;
           if(action==='sell'&&resolveItem(this.state().player,b.dataset.id)?.rarity==='rare'){
@@ -107,7 +107,7 @@ export class UI {
     }
   }
   open(view) {
-    if(!this.actions.started())return;
+    if(!this.actions.started()||this.actions.editing?.())return;
     if(this.state().player.dead&&view!=='death')view='death';
     if(this.view!==view){this.panel.scrollTop=0;$('panel-feedback').hidden=true;}
     this.view=view;
@@ -195,12 +195,12 @@ export class UI {
   settings() {
     this.heading(tr("ui.a_moment_by_the_lantern"),tr("ui.game_paused"));
     const settings=this.actions.settings();
-    $('panel-content').innerHTML=`<div class="settings-grid"><label class="setting" for="volume-control">${tr("ui.sound_volume")}<input id="volume-control" type="range" min="0" max="1" step=".05" value="${settings.volume}"></label><label class="setting" for="frame-limit">${tr("ui.frame_rate")}<select id="frame-limit"><option value="60" ${settings.fps===60?'selected':''}>${tr("ui.60_fps_standard")}</option><option value="30" ${settings.fps===30?'selected':''}>${tr("ui.30_fps_low_power")}</option></select></label></div><div class="menu-actions"><button class="primary" data-action="save">${tr("ui.save_now")}</button><button data-action="export">${tr("ui.export_save")}</button><button data-action="fullscreen">${tr("ui.fullscreen")}</button></div><label class="file-label">${tr("ui.import_save")}<input id="import-save" type="file" accept=".json,application/json"></label><p style="margin-top:16px">${tr("ui.your_journey_is_saved_locally_in_this_browser_export_a_backup_to")}</p><p style="margin-top:12px">${escapeHTML(settings.diagnostics)}</p><button class="danger-link" data-action="newGame">${tr("ui.start_a_new_journey")}</button><p>${tr("ui.press_esc_to_close_and_continue")}</p>`;
+    $('panel-content').innerHTML=`<nav class="menu-actions" aria-label="${tr('static.game_menus')}"><button data-action="inventory">${tr('ui.character_bag')} <kbd>I</kbd></button><button data-action="journal">${tr('ui.quest_journal')} <kbd>J</kbd></button><button data-action="talents">${tr('static.talents')} <kbd>N</kbd></button><button data-action="help">${tr('ui.controls_tips')}</button></nav><div class="settings-grid"><label class="setting" for="volume-control">${tr("ui.sound_volume")}<input id="volume-control" type="range" min="0" max="1" step=".05" value="${settings.volume}"></label><label class="setting" for="frame-limit">${tr("ui.frame_rate")}<select id="frame-limit"><option value="60" ${settings.fps===60?'selected':''}>${tr("ui.60_fps_standard")}</option><option value="30" ${settings.fps===30?'selected':''}>${tr("ui.30_fps_low_power")}</option></select></label></div><div class="menu-actions"><button class="primary" data-action="save">${tr("ui.save_now")}</button><button data-action="export">${tr("ui.export_save")}</button><button data-action="editHUD">${tr('hud.edit')}</button><button data-action="fullscreen">${settings.fullscreen ? tr('hud.exit_fullscreen') : tr('ui.fullscreen')}</button></div><label class="file-label">${tr("ui.import_save")}<input id="import-save" type="file" accept=".json,application/json"></label><p style="margin-top:16px">${tr("ui.your_journey_is_saved_locally_in_this_browser_export_a_backup_to")}</p><p style="margin-top:12px">${escapeHTML(settings.status)} · ${escapeHTML(settings.diagnostics)}</p><button class="danger-link" data-action="newGame">${tr("ui.start_a_new_journey")}</button><p>${tr("ui.press_esc_to_close_and_continue")}</p>`;
   }
   help() {
     this.heading(tr("ui.travel_light_keep_your_lantern_close"),tr("ui.controls_tips"));
     const controls=[[tr("ui.wasd_arrow_keys"),tr("ui.move")],[tr("ui.space_click"),tr("ui.strike_within_reach_hold_space_to_chain_attacks_the_third_hit_dea")],[tr("ui.tab_click_an_enemy"),tr("ui.select_a_target_space_prioritizes_your_selected_target_when_in_ra")],['Q',tr("ui.lantern_burst_area_attack_that_interrupts_normal_enemies_5_s_cool")],['Shift',tr("ui.dodge_2_5_s_cooldown")],['R',tr("ui.healing_potion_55_health_8_s_cooldown")],['E',tr("ui.talk_read_runes_gather_open_caches_and_activate_lanterns")],['I / C',tr("ui.character_equipment_and_bag")],['N',tr("ui.talent_trees_one_point_per_level_from_level_3")],['1 / 2 / 3',tr("ui.lantern_ward_shadow_rush_glimmerbolt_once_learned")],['J',tr("ui.quest_journal")],['Esc / P',tr("ui.pause_and_open_the_menu")]];
-    $('panel-content').innerHTML=`<p>${tr("ui.talk_to_elin_by_the_village_lantern_and_mira_to_her_west_accept_b")}</p><table class="help-table">${controls.map(([key,description])=>'<tr><td><kbd>'+key+'</kbd></td><td>'+description+'</td></tr>').join('')}</table><p class="help-tip">${tr("ui.orange_markers_warn_of_the_next_enemy_attack_move_or_press_shift")}</p><p style="margin-top:14px">${tr("ui.most_menus_and_an_inactive_tab_pause_the_world_the_talent_panel_k")}</p>`;
+    $('panel-content').innerHTML=`<p>${tr("ui.talk_to_elin_by_the_village_lantern_and_mira_to_her_west_accept_b")}</p><p class="help-tip">${tr('hud.map_key')}</p><p class="help-tip">${escapeHTML(this.fieldNote || '')}</p><table class="help-table">${controls.map(([key,description])=>'<tr><td><kbd>'+key+'</kbd></td><td>'+description+'</td></tr>').join('')}</table><p class="help-tip">${tr("ui.orange_markers_warn_of_the_next_enemy_attack_move_or_press_shift")}</p><p style="margin-top:14px">${tr("ui.most_menus_and_an_inactive_tab_pause_the_world_the_talent_panel_k")}</p>`;
   }
   death() {
     this.heading(tr("ui.the_lantern_guides_you_home"),tr("ui.you_fell_in_battle"));
@@ -266,9 +266,8 @@ export class UI {
       else if(s.quests.beacon?.status==='done')tracker=`<section class="quest-card"><h3>${tr("ui.a_voice_from_the_fen")}</h3><p>${tr("ui.signe_awaits_at_wanderers_camp_just_east_of_the_bridge_follow_the")}</p></section>`;
       else tracker=`<section class="quest-card"><h3>${tr("ui.a_new_beginning")}</h3><p>${tr("ui.talk_to_elin_by_the_village_lantern")}<br>${tr("ui.mira_also_has_a_quest")}</p></section>`;
     }
-    if(availableTalentPoints(p))tracker+=`<section class="quest-card"><h3>${tr("ui.unspent_talent_points", availableTalentPoints(p))}</h3><p>${tr("ui.open_talents_n_to_develop_your_wanderer")}</p></section>`;
     if(tracker!==this.lastTracker){$('quest-tracker').innerHTML=tracker;this.lastTracker=tracker;}
-    setText('field-note',['shelf', 'postyard'].includes(zone.id)?tr('tide.shelfHint'):zone.id==='reach'?tr('ash.hint'):zone.id==='marsh'?tr("ui.emberwing_shots_travel_in_a_straight_line_sidestep_use_the_trees"):zone.id==='camp'?tr("ui.rest_at_the_lantern_with_e_you_will_return_here_if_you_fall_mira"):zone.safe?tr("ui.take_a_breath_the_village_lantern_offers_warmth_rest_and_a_way_ho"):zone.id==='ruins'?tr("ui.the_warden_hits_hard_but_slowly_watch_the_ground_give_the_roots_r"):tr("ui.stray_from_the_path_now_and_then_the_forest_hides_more_than_the_c"));
-    renderer.renderMap(s);
+    this.fieldNote=(['shelf', 'postyard'].includes(zone.id)?tr('tide.shelfHint'):zone.id==='reach'?tr('ash.hint'):zone.id==='marsh'?tr("ui.emberwing_shots_travel_in_a_straight_line_sidestep_use_the_trees"):zone.id==='camp'?tr("ui.rest_at_the_lantern_with_e_you_will_return_here_if_you_fall_mira"):zone.safe?tr("ui.take_a_breath_the_village_lantern_offers_warmth_rest_and_a_way_ho"):zone.id==='ruins'?tr("ui.the_warden_hits_hard_but_slowly_watch_the_ground_give_the_roots_r"):tr("ui.stray_from_the_path_now_and_then_the_forest_hides_more_than_the_c"));
+    if (!$('map-body').hidden) renderer.renderMap(s);
   }
 }

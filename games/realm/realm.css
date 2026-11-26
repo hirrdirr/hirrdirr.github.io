@@ -85,18 +85,10 @@ kbd {
   opacity:.7;
   white-space:nowrap
 }
-.realm-shell {
-  width:min(1440px,calc(100% - 72px));
-  margin:auto
-}
-.realm-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  height:76px;
-  border-bottom:1px solid var(--line);
-  gap:12px
-}
+.realm-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+.realm-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 40px; flex: none; padding: 0 clamp(8px,1.5vw,24px); border-bottom: 1px solid var(--line); }
+.realm-header img { height: 22px; width: auto; }
+.realm-header .icon-button { width: 32px; height: 32px; border: 0; }
 .back-link {
   display:flex;
   align-items:center;
@@ -135,96 +127,24 @@ kbd {
   display:grid;
   place-items:center
 }
-.world-heading {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:16px;
-  padding:23px 0 20px
-}
 .eyebrow {
   font-size:9px;
   letter-spacing:2px;
   font-weight:600;
   color:var(--muted)
 }
-h1 {
-  font:normal 37px/1.25 RealmSerif,Georgia,serif;
-  letter-spacing:-1px;
-  margin-top:4px
+.playfield {
+  flex: 1; min-height: 0; container-type: size; position: relative; overflow: hidden; isolation: isolate;
+  background: #334d3e; --edge: clamp(8px,1.2vw,20px); --hud-top: var(--edge);
+  --map-w: clamp(146px,13vw,186px); --unit-w: clamp(148px,14vw,190px);
+  --veil: #10241fe6; --hud-ink: #f2eedf; --hud-muted: #d5d9c6; --hud-gold: #f2d293;
 }
-h1 span {
-  color:var(--gold)
-}
-.game-nav .nav-label-short { display: none; }
-.game-nav {
-  display:flex;
-  gap:8px
-}
-.game-nav button {
-  font-size:12px;
-  display:flex;
-  gap:14px;
-  align-items:center;
-  padding:9px 12px
-}
-.game-layout {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 268px;
-  border:1px solid var(--line);
-  border-radius:9px;
-  overflow:hidden;
-  background:var(--surface)
-}
-.viewport {
-  position:relative;
-  display:grid;
-  grid-template-rows:auto minmax(0,1fr);
-  width:100%;
-  aspect-ratio:8/5;
-  background:#334d3e;
-  min-width:0;
-  overflow:hidden;
-  isolation:isolate
-}
-.playfield { position: relative; min-height: 0; overflow: hidden; }
-.playfield>canvas {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  display:block;
-  image-rendering:pixelated;
-  outline-offset:-3px
-}
-.world-column { position: relative; min-width: 0; }
-.top-hud {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto 36px;
-  grid-template-areas: "units zone pause" "xp xp xp";
-  align-items: center;
-  column-gap: 14px;
-  padding: 7px 12px 4px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
-}
-.unit-frames {
-  grid-area: units;
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,164px));
-  align-items: start;
-  gap: 14px;
-  min-height: 60px;
-}
-.unit-frame {
-  min-width: 0;
-  padding-left: 7px;
-  border-left: 2px solid var(--accent);
-  color: var(--ink);
-  --frame-accent: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.target-hud { border-color: #c28567; }
+.light .playfield { --veil: #f4f0dfea; --hud-ink: #20362b; --hud-muted: #405544; --hud-gold: #69481b; }
+#world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; outline-offset: -3px; }
+[data-widget] { position: absolute; transform-origin: top left; }
+.unit-frame, .hud-surface { color: var(--hud-ink); background: var(--veil); border-radius: 3px; }
+.unit-frame { left: var(--edge); top: var(--hud-top); width: var(--unit-w); padding: 6px 9px; border-left: 2px solid #a4c581; pointer-events: none; --frame-accent: var(--hud-muted); font-variant-numeric: tabular-nums; }
+.target-hud { top: calc(var(--hud-top) + 80px); border-color: #c28567; }
 .unit-heading { display: flex; gap: 6px; align-items: baseline; justify-content: space-between; }
 .unit-heading strong {
   font: bold .91rem/1.15 RealmSerif, Georgia, serif;
@@ -250,27 +170,6 @@ h1 span {
   width:100%;
   transition:width .1s linear
 }
-.zone-hud { grid-area: zone; text-align: right; min-width: 0; line-height: 1.2; }
-.zone-hud strong { display: block; font: 18px/1.15 RealmSerif, Georgia, serif; }
-.zone-hud span { font-size: 10px; color: var(--muted); }
-.pause-button {
-  grid-area: pause;
-  align-self: start;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  font-weight: bold;
-  color: var(--gold);
-}
-.pause-button::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 12px;
-  border-inline: 2px solid currentColor;
-  vertical-align: middle;
-}
-.light .pause-button { color: var(--ink); }
 .interaction {
   pointer-events:none;
   background:#142920ed;
@@ -292,45 +191,19 @@ h1 span {
   border:0
 }
 .xp-strip {
-  grid-area: xp;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-  color: var(--gold);
-  font: 600 10px/1.3 system-ui,sans-serif;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  --xp-fill: #d9b669;
-  --xp-track: #3b4c40;
+  position: absolute; left: 50%; top: 6px; transform: translateX(-50%); width: min(32%,380px);
+  display: flex; flex-direction: column-reverse; gap: 2px; align-items: center;
+  color: #ffebba; text-shadow: 0 1px 2px #101e18, 1px 0 2px #101e18;
+  font: 600 10px/1.4 system-ui,sans-serif; font-variant-numeric: tabular-nums;
+  white-space: nowrap; pointer-events: none; --xp-fill: #e6c278; --xp-track: #26372c;
 }
-.light .xp-strip { color: #664d22; --xp-fill: #947132; --xp-track: #d4d8c5; }
-.xp-strip progress {
-  flex: 1;
-  min-width: 0;
-  height: 3px;
-  appearance: none;
-  overflow: hidden;
-  border: 0;
-  border-radius: 2px;
-  color: var(--xp-fill);
-  background: var(--xp-track);
-}
+.xp-strip progress { width: 100%; height: 4px; appearance: none; border: 0; border-radius: 2px; overflow: hidden; background: var(--xp-track); box-shadow: 0 0 0 1px #eee2bb65; }
 .xp-strip progress::-webkit-progress-bar { background: var(--xp-track); }
 .xp-strip progress::-webkit-progress-value { background: var(--xp-fill); }
 .xp-strip progress::-moz-progress-bar { background: var(--xp-fill); }
 
-.combat-dock {
-  position: absolute;
-  grid-template-columns: minmax(0,1fr);
-  inset: auto 0 0;
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  padding: 4px 3px 6px;
-  pointer-events: none;
-}
-.combat-cue { display: grid; place-items: center; width: 100%; min-height: 32px; }
+.combat-dock { left: 50%; bottom: var(--edge); transform: translateX(-50%); width: min(324px,calc(100% - 8px)); display: grid; justify-items: center; pointer-events: none; }
+.combat-cue { height: 30px; display: grid; place-items: center; max-width: 100%; }
 .hotbar { display: flex; justify-content: center; gap: 2px; width: max-content; max-width: 100%; min-width: 0; }
 .hotbar button {
   position: relative;
@@ -382,174 +255,93 @@ h1 span {
   box-shadow: inset 0 1px #ffe3a1;
   pointer-events: none;
 }
-.journey-rail {
-  padding:20px 17px;
-  display:flex;
-  flex-direction:column;
-  border-left:1px solid var(--line);
-  gap:17px
-}
-.rail-heading {
-  display:flex;
-  justify-content:space-between;
-  align-items:center
-}
-.rail-heading>span:last-child {
-  font:11px ui-monospace,monospace;
-  color:var(--gold)
-}
-.quest-tracker {
-  display:grid;
-  gap:16px;
-  min-height:93px
-}
 .journal-group + .journal-group { margin-top: 1.2rem; }
 details.quest-entry summary { cursor: pointer; padding: .35rem 0; }
 details.quest-entry summary .quest-status { display: block; margin-left: 1rem; }
 details.quest-entry[open] summary { margin-bottom: .45rem; }
-.quest-card {
-  padding-left:12px;
-  position:relative;
-  border-left:1px solid var(--line)
+.map-hud { pointer-events: none; }
+.map-hud .fold { pointer-events: auto; }
+.map-hud, .tracker-hud { right: var(--edge); width: var(--map-w); }
+.map-hud { top: var(--hud-top); }
+.tracker-hud { top: calc(var(--hud-top) + var(--map-height,160px) + 6px); width: clamp(164px,16vw,220px); }
+.fold { display: flex; align-items: center; gap: 5px; width: 100%; min-height: 28px; text-align: left; padding: 4px 8px; border: 0; color: inherit; font: 600 12px/1.2 RealmSerif,Georgia,serif; }
+.fold::after { content: '▾'; margin-left: auto; color: var(--hud-gold); }
+.fold[aria-expanded="false"]::after { content: '▸'; }
+.fold:hover, .journal-link:hover { background: #899c822b; }
+.compass { font: 9px ui-monospace,monospace; color: var(--hud-gold); }
+#minimap { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+#zone-type { display: block; padding: 3px 8px; font-size: 9px; }
+#tracker-body { padding: 0 8px 4px; max-height: clamp(30px,calc(46cqh - var(--hud-top) - var(--map-height,160px) - 38px),200px); overflow-y: auto; scrollbar-width: thin; }
+#quest-tracker { font-size: 11px; line-height: 1.35; color: var(--hud-muted); }
+.quest-card { padding: 3px 0 4px; }
+.quest-card h3 { margin-bottom: 2px; color: var(--hud-ink); font: 600 13px/1.15 RealmSerif,Georgia,serif; }
+.quest-card ul { margin: 0; padding-left: 12px; }
+.quest-card .done, .journal-link { color: var(--hud-gold); }
+.journal-link { border: 0; padding: 3px 0; font-size: 10px; }
+.journal-link kbd { border: 0; }
+.game-tools { position: absolute; bottom: var(--edge); left: var(--edge); display: grid; justify-items: start; gap: 2px; pointer-events: none; }
+.game-tools button, #gold-value { background: var(--veil); color: var(--hud-ink); }
+.game-tools button { pointer-events: auto; border: 0; padding: 6px 9px; font-size: 12px; }
+.game-tools button span { margin-right: 4px; color: var(--hud-gold); }
+#gold-value { padding: 1px 5px; font-size: 10px; border-radius: 3px; }
+.messages { display: flex; flex-direction: column; justify-content: end; height: min(13cqh,110px); overflow: hidden; position: absolute; bottom: calc(var(--edge) + 60px); left: var(--edge); width: min(21%,270px); pointer-events: none; }
+.toast, .messages .notice { margin: 2px 0; border-radius: 3px; background: var(--veil); color: var(--hud-ink); padding: 4px 7px; font-size: 11px; }
+:root:fullscreen .realm-header, .window-fullscreen .realm-header { display: none; }
+@media (max-width: 740px) {
+  .playfield { --hud-top: 32px; --unit-w: min(33%,154px); --map-w: min(32%,152px); }
+  .tracker-hud { width: min(33%,168px); }
+  .realm-wordmark { letter-spacing: 1px; }
+  .back-link > span { display: none; }
+  .messages { width: min(32%,180px); }
 }
-.quest-card:before {
-  content:"◆";
-  position:absolute;
-  left:-5px;
-  top:0;
-  color:var(--gold);
-  font-size:9px;
-  background:var(--surface)
+@media (max-width: 510px) {
+  .realm-header { height: 32px; }
+  .unit-frame { padding: 5px; }
+  .compass { display: none; }
+  .game-tools { bottom: calc(var(--edge) + 80px); }
+  .messages { top: 27%; bottom: auto; max-height: 12cqh; left: 35%; width: 30%; }
+  .messages .toast:not(:last-child) { display: none; }
+  .target-hud { top: calc(var(--hud-top) + 70px); }
+
 }
-.quest-card h3 {
-  font:17px/1.2 RealmSerif,Georgia,serif;
-  margin-bottom:7px;
-  color:var(--ink)
+
+@media (max-height: 450px) {
+  .playfield { --hud-top: 27px; --unit-w: min(25%,152px); }
+  .target-hud { top: var(--hud-top); left: calc(var(--edge) + var(--unit-w) + 5px); }
+  .map-hud, .tracker-hud { width: min(28%,160px); }
+  .map-hud #minimap { height: min(10cqh,48px); object-fit: contain; }
+  .map-hud #zone-type { display: none; }
+  .messages { top: var(--hud-top); left: 52%; width: 16%; max-height: 21cqh; bottom: auto; }
+  .messages .toast:not(:last-child) { display: none; }
 }
-.quest-card p,.quest-card li {
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.8
+@media (max-width: 510px) and (max-height: 550px) {
+  .game-tools { bottom: 3px; display: flex; gap: 4px; align-items: center; }
+  .game-tools button { padding: 3px 6px; }
+  .combat-dock { bottom: 28px; }
 }
-.quest-card ul {
-  list-style:none;
-  margin:0;
-  padding:0
+/* The target keeps a measurable footprint while absent, including in the layout editor. */
+.target-placeholder { display: none; }
+#target-hud[hidden] { display: block !important; visibility: hidden; min-height: 70px; }
+.editing #target-hud[hidden] { visibility: visible; }
+.editing #target-hud[hidden] > * { display: none; }
+.editing #target-hud[hidden] .target-placeholder { display: block; font: 600 14px RealmSerif,Georgia,serif; }
+[data-widget].placed { left: var(--hud-x); top: var(--hud-y); right: auto; bottom: auto; transform: scale(var(--hud-scale)); }
+.pause-mark { display: inline-block; width: 7px; height: 10px; border-inline: 2px solid currentColor; }
+.editing [data-widget] { outline: 1px dashed #ece0ae; cursor: grab; touch-action: none; pointer-events: auto; }
+.editing [data-widget] * { pointer-events: none; }
+.editing .selected-widget { outline: 2px solid #ffdb85; }
+.editing .game-tools, .editing .messages { pointer-events: none; opacity: .5; }
+#hud-editor {
+  position: absolute; z-index: 2; top: 57%; left: 50%; transform: translate(-50%,-50%);
+  width: min(350px,calc(100% - 12px)); max-height: 90%; overflow: auto; padding: 10px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink);
 }
-.quest-card .done {
-  color:var(--gold)
-}
-.map-section {
-  margin-top:auto;
-  border-top:1px solid var(--line);
-  padding-top:14px
-}
-.map-title {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:9px
-}
-.map-title h2 {
-  font-size:10px;
-  font-weight:500;
-  color:var(--muted)
-}
-.map-title span {
-  color:var(--gold);
-  font:10px ui-monospace,monospace
-}
-#minimap {
-  width:100%;
-  height:auto;
-  display:block;
-  border:1px solid var(--line);
-  border-radius:4px;
-  image-rendering:pixelated
-}
-.map-legend {
-  display:flex;
-  justify-content:space-between;
-  font-size:9px;
-  color:var(--muted);
-  margin-top:6px
-}
-.map-legend span:nth-child(2) {
-  color:var(--gold)
-}
-.field-note {
-  border-top:1px solid var(--line);
-  padding-top:12px
-}
-.field-note .eyebrow {
-  font-size:8px;
-  letter-spacing:1.3px
-}
-.field-note p {
-  font:italic 13px/1.6 RealmSerif,Georgia,serif;
-  color:var(--muted);
-  margin-top:8px
-}
-.rail-link {
-  border:0;
-  padding:0;
-  font-size:10px;
-  color:var(--muted);
-  text-align:left;
-  display:flex;
-  justify-content:space-between
-}
-.rail-link:hover {
-  background:transparent;
-  color:var(--ink)
-}
-.game-footer {
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:center;
-  padding:13px 0;
-  font-size:10px;
-  color:var(--muted)
-}
-.game-footer>div {
-  display:flex;
-  gap:16px
-}
-.game-footer kbd {
-  font-size:9px;
-  margin-right:3px
-}
-.bottom-line {
-  border-top:1px solid var(--line);
-  display:flex;
-  justify-content:space-between;
-  margin:15px 0 25px;
-  padding-top:16px;
-  color:var(--muted);
-  font-size:10px
-}
-.pc-note {
-  display:none;
-  color:var(--muted);
-  font-size:11px
-}
-.toasts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  background: var(--surface);
-}
-.toasts:not(:empty) { padding: 5px 8px; }
-.toast {
-  font-size:11px;
-  background:#173026ed;
-  color:#ecdec1;
-  border:1px solid #6d815d;
-  padding:7px 10px;
-  border-radius:4px;
-  animation:appear .2s ease-out
-}
+#hud-editor label { display: grid; gap: 2px; font-size: 11px; }
+#hud-editor input, #hud-editor select { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); padding: 3px 5px; }
+.hud-numbers { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 5px 0; }
+#hud-editor p { min-height: 1.5em; font-size: 11px; color: var(--muted); }
+.hud-actions { display: flex; justify-content: space-between; gap: 3px; margin-top: 4px; }
+.hud-actions button { padding: 5px 7px; font-size: 12px; }
 .focus-overlay {
   position:absolute;
   inset:0;
@@ -927,40 +719,6 @@ input,select {
 .death-message h3 {
   font:30px RealmSerif,Georgia,serif
 }
-:root:fullscreen .realm-shell {
-  padding:0 22px;
-  background:var(--bg);
-  width:100%;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  height:100%
-}
-:root:fullscreen .realm-shell main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-:root:fullscreen .realm-shell .realm-header {
-  height:46px
-}
-:root:fullscreen .realm-shell .world-heading {
-  padding:10px 0
-}
-:root:fullscreen .realm-shell .game-layout {
-  flex: 1;
-  width: 100%;
-  max-width: 1450px;
-  min-height: 0;
-  grid-auto-rows: minmax(320px,100%);
-  overflow: auto;
-  margin: 0 auto
-}
-:root:fullscreen .realm-shell .world-column {
-  display: grid;
-  grid-template-rows: minmax(0,1fr) 2.6em;
-}
-:root:fullscreen .realm-shell .viewport { min-height: 0; max-height: none; aspect-ratio: auto; }
-:root:fullscreen .realm-shell .toasts { align-content: start; overflow: auto; }
-:root:fullscreen .realm-shell .bottom-line {
-  display:none
-}
 @keyframes appear {
   from {
     opacity:0;
@@ -971,174 +729,7 @@ input,select {
     transform:none
   }
 }
-@media(min-width:1600px) {
-  .realm-shell {
-    padding-top:12px
-  }
-  .world-heading {
-    padding:28px 0 24px
-  }
-}
-@media(max-width:1150px) {
-  .realm-shell {
-    width:calc(100% - 36px)
-  }
-  .game-layout {
-    grid-template-columns:minmax(0,1fr) 225px
-  }
-  .journey-rail {
-    padding:15px 12px;
-    gap:12px
-  }
-  .field-note {
-    display:none
-  }
-  .game-footer>div {
-    gap:7px
-  }
-
-  .toast {
-    font-size:10px
-  }
-}
-@media(max-width:900px) {
-  .game-layout {
-    grid-template-columns:1fr
-  }
-  .journey-rail {
-    display:grid;
-    grid-template-columns:1fr 230px;
-    border-left:0;
-    border-top:1px solid var(--line)
-  }
-  .rail-heading {
-    grid-column:1
-  }
-  .quest-tracker {
-    grid-column:1
-  }
-  .map-section {
-    grid-column:2;
-    grid-row:1/4;
-    margin:0;
-    border:0;
-    padding:0
-  }
-  .rail-link {
-    grid-column:1
-  }
-  .viewport {
-    max-height:70dvh;
-    min-height:360px;
-    aspect-ratio:8/5
-  }
-  .game-nav button {
-    padding:8px;
-    font-size:11px;
-    gap:7px
-  }
-  .game-nav kbd {
-    display:none
-  }
-  .world-heading {
-    padding:17px 0
-  }
-  h1 {
-    font-size:31px
-  }
-  .realm-wordmark {
-    font-size:9px;
-    letter-spacing:2px
-  }
-  .realm-header {
-    height:62px
-  }
-  .back-link {
-    gap:6px
-  }
-  .game-footer {
-    align-items:flex-start;
-    flex-direction:column;
-    gap:8px
-  }
-  .game-footer>div {
-    gap:14px
-  }
-  .bottom-line {
-    margin-top:12px
-  }
-  .pc-note {
-    display:block
-  }
-}
 @media(max-width:580px) {
-  .realm-shell {
-    width:calc(100% - 20px)
-  }
-  .realm-header {
-    height:56px
-  }
-  .realm-wordmark span {
-    font-size:8px;
-    letter-spacing:1px
-  }
-  .realm-wordmark img {
-    width:19px;
-    height:25px
-  }
-  .realm-wordmark small,.back-link>span {
-    display:none
-  }
-  .back-link strong {
-    font-size:16px
-  }
-  .world-heading {
-    align-items:flex-end;
-    gap:8px
-  }
-  .eyebrow {
-    font-size:7px;
-    letter-spacing:1px
-  }
-  .game-nav {
-    gap:4px
-  }
-  .game-nav button {
-    font-size:10px;
-    padding:7px
-  }
-  .game-nav .nav-label-full { display: none; }
-  .game-nav .nav-label-short { display: inline; }
-  h1 {
-    font-size:28px
-  }
-  .viewport {
-    min-height:350px
-  }
-  .journey-rail {
-    grid-template-columns:1fr 145px;
-    gap:10px
-  }
-  .quest-card h3 {
-    font-size:15px
-  }
-  .quest-card p,.quest-card li {
-    font-size:10px
-  }
-  .map-title h2 {
-    font-size:8px
-  }
-  .map-legend {
-    font-size:7px
-  }
-  .bottom-line {
-    font-size:8px;
-    gap:12px
-  }
-  .game-footer>div {
-    gap:8px;
-    font-size:9px
-  }
   .welcome-dialog[open] {
     grid-template-columns:1fr
   }
@@ -1232,26 +823,6 @@ input,select {
 .light .stat-up { color: #316b37; }
 .light .stat-down { color: #9a4c32; }
 .detail-note { line-height: 1.6; }
-@media (max-width: 650px) {
-  .top-hud {
-    grid-template-columns: minmax(90px,.7fr) minmax(0,1fr) 36px;
-    grid-template-areas: "units units pause" "zone xp xp";
-    padding: 6px 8px;
-    gap: 2px 8px;
-  }
-  .unit-frames { gap: 8px; min-height: 64px; }
-  .zone-hud { text-align: left; }
-  .zone-hud strong { font-size: 13px; }
-  .zone-hud span { display: none; }
-  .xp-strip { gap: 5px; }
-  :root:fullscreen .realm-shell { padding: 0; }
-}
-@media (max-width: 390px) {
-  .hotbar { gap: 0; }
-  .unit-frames { min-height: 78px; }
-  .unit-heading strong { white-space: normal; overflow-wrap: anywhere; }
-}
-
 /* Trading and talent panels share the site's ink, parchment and lantern colors. */
 .merchant-panel { width: 960px; }
 .talents-panel { width: 1120px; }
@@ -1364,10 +935,7 @@ input,select {
   .trade-detail { grid-template-columns: 1fr; }
   .trade-summary p { font-size: 15px !important; }
 }
-@media (max-width: 580px) {
-  .world-heading { flex-wrap: wrap; }
-  .game-nav { flex-wrap: wrap; }
-}
+
 
 /* Rare-item sales use an accessible in-game modal. */
 .realm-confirm-dialog {
