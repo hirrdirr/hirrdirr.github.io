@@ -12,19 +12,21 @@ const storiesByNpc = new Map(NPCS.map(n => [n.id,
 const operations = new Map(Object.entries(QUESTS).flatMap(([id, q]) => q.objectives.flatMap((o, index) =>
   o.type === 'operate' ? [[o.target, { id, index }]] : [])));
 
-// Decorative tiles below the collision map let the southernmost player clear the dock.
-const SOUTH_SCENERY = 3 * TILE;
-
+// Scenery beyond the collision map is painted once, in world coordinates.
+const NORTH_SCENERY = 14 * TILE;
+const SOUTH_SCENERY = 10 * TILE;
+export const PLAY_BAND = { top: .46, bottom: .70 };
 export class Renderer {
   constructor(canvas, minimap) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.map=minimap;this.art=makeArt();this.camera={x:0,y:0};this.first=true;this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.dockInset=0;this.ground=this.makeGround();this.mapGround=this.makeMap();
+    this.ground=this.makeGround();this.mapGround=this.makeMap();
     this.metrics={frames:0,total:0,max:0};
   }
   makeGround() {
-    const c=makeCanvas(WIDTH,HEIGHT + SOUTH_SCENERY),g=c.getContext('2d'),random=rand(18075);
-    for(let y=0;y<c.height;y+=TILE) for(let x=0;x<WIDTH;x+=TILE) {
+    const c=makeCanvas(WIDTH,NORTH_SCENERY + HEIGHT + SOUTH_SCENERY),g=c.getContext('2d'),random=rand(18075);
+    g.translate(0,NORTH_SCENERY);
+    for(let y=-NORTH_SCENERY;y<HEIGHT+SOUTH_SCENERY;y+=TILE) for(let x=0;x<WIDTH;x+=TILE) {
       const kind=terrain(x+16,y+16);
       if (shelfPalette[kind]) {
         g.fillStyle = shelfPalette[kind];
@@ -93,7 +95,7 @@ export class Renderer {
       }
     }
     // Irregular river banks, bridge rails, warm village paving and ruin fragments.
-    for(let y=32;y<c.height;y+=12) {
+    for(let y=-NORTH_SCENERY;y<HEIGHT+SOUTH_SCENERY;y+=12) {
       if(y>594&&y<700)continue;
       const x=riverLeft(y);
       g.fillStyle='#7c956c';g.fillRect(x-5,y,5,12);g.fillRect(x+96,y,6,12);
@@ -170,7 +172,10 @@ export class Renderer {
       g.fillStyle='#ac9a69'; g.fillRect(1330+Math.round(Math.cos(i)*7), 986+i*8, 3, 6);
     }
     // A shaded verge marks the end of the playable ground. Paint it once with the tiles.
-    const verge = g.createLinearGradient(0, HEIGHT-32, 0, c.height);
+    const mist = g.createLinearGradient(0,-NORTH_SCENERY,0,16);
+    mist.addColorStop(0,'#15201dea'); mist.addColorStop(.8,'#15201d70'); mist.addColorStop(1,'#15201d00');
+    g.fillStyle = mist; g.fillRect(0,-NORTH_SCENERY,WIDTH,NORTH_SCENERY+16);
+    const verge = g.createLinearGradient(0, HEIGHT-32, 0, HEIGHT+SOUTH_SCENERY);
     verge.addColorStop(0, 'rgba(21,32,29,0)');
     verge.addColorStop(1, 'rgba(21,32,29,.64)');
     g.fillStyle = verge;
@@ -190,13 +195,16 @@ export class Renderer {
   resetCamera() {this.first=true;}
   followPlayer(player, dt) {
     const {width, height} = this.canvas;
-    const inset = this.dockInset;
-    const maxY = Math.min(this.ground.height - height, HEIGHT - height + Math.max(0, inset - 32));
+    // A clear horizontal lane protects both the sprite and its strike animation at any X.
+    const head = height * PLAY_BAND.top + 43, feet = height * PLAY_BAND.bottom - 7;
+    const anchor = (head + feet) / 2;
     const targetX = Math.max(0, Math.min(WIDTH - width, player.x - width / 2));
-    const targetY = Math.max(0, Math.min(maxY, player.y - (height - inset) / 2));
+    const targetY = Math.max(43 - head, Math.min(HEIGHT - 43 - feet, player.y - anchor));
     const follow = this.first || this.reduced ? 1 : Math.min(1, dt * 13);
     this.camera.x += (targetX - this.camera.x) * follow;
     this.camera.y += (targetY - this.camera.y) * follow;
+    // Bound easing during a dodge or after teleporting.
+    this.camera.y = Math.max(player.y - feet, Math.min(player.y - head, this.camera.y));
     this.first = false;
   }
   render(s,dt) {
@@ -204,7 +212,7 @@ export class Renderer {
     this.followPlayer(p, dt);
     const cx=Math.round(this.camera.x),cy=Math.round(this.camera.y);
     g.imageSmoothingEnabled=false;
-    g.drawImage(this.ground,cx,cy,w,h,0,0,w,h);
+    g.drawImage(this.ground,cx,cy+NORTH_SCENERY,w,h,0,0,w,h);
     g.save();g.translate(-cx,-cy);
     if(!this.reduced) {
       g.fillStyle='#a0c2b448';
@@ -321,8 +329,8 @@ export class Renderer {
     const elapsed=performance.now()-started;this.metrics.frames++;this.metrics.total+=elapsed;this.metrics.max=Math.max(this.metrics.max,elapsed);
   }
   shadow(g,x,y,w=28) {g.fillStyle='#122e3050';g.fillRect(x-w/2,y-4,w,7);}
-  label(g,text,x,y,color='#f1e9d2',size=12) {
-    g.font='600 '+size+'px system-ui, sans-serif';g.textAlign='center';g.fillStyle='#10252c';g.fillText(text,Math.round(x)+1,Math.round(y)+1);g.fillStyle=color;g.fillText(text,Math.round(x),Math.round(y));
+  label(g,text,x,y,color='#f1e9d2',size=12,maxWidth=8192) {
+    g.font='600 '+size+'px system-ui, sans-serif';g.textAlign='center';g.fillStyle='#10252c';g.fillText(text,Math.round(x)+1,Math.round(y)+1,maxWidth);g.fillStyle=color;g.fillText(text,Math.round(x),Math.round(y),maxWidth);
   }
   prop(g,o,s,p) {
     if(o.kind==='herb'&&s.harvested.includes(o.id))return;
@@ -398,32 +406,23 @@ export class Renderer {
   }
   selectedHealthbar(g, enemy, cameraX, cameraY) {
     const def = ENEMIES[enemy.type];
-    // Cache only presentation text. HP can change while the target stays selected.
     if (this.plateType !== enemy.type) {
       this.plateType = enemy.type;
       this.plateName = tr('hud.enemy_title', def.name, def.level);
-      this.plateHp = undefined;
     }
-    if (this.plateHp !== enemy.hp) {
-      this.plateHp = enemy.hp;
-      this.plateHealth = tr('hud.health', Math.ceil(enemy.hp), def.hp);
-    }
-    const width = def.boss ? 174 : 142, height = 39;
+    const width = def.boss ? 134 : 106, height = 19;
     if (enemy.x < cameraX || enemy.x > cameraX + this.canvas.width ||
         enemy.y < cameraY || enemy.y > cameraY + this.canvas.height) return;
     const left = Math.round(Math.max(cameraX + 2, Math.min(enemy.x - width / 2, cameraX + this.canvas.width - width - 2)));
     const top = Math.round(Math.max(cameraY + 2, enemy.y - this.art[enemy.type][0].height - height - 4));
     const center = left + width / 2;
-    g.fillStyle = def.boss ? '#a98252' : '#728279';
+    g.fillStyle = '#14231fd9';
     g.fillRect(left, top, width, height);
-    g.fillStyle = '#182824';
-    g.fillRect(left + 1, top + 1, width - 2, height - 2);
-    this.label(g, this.plateName, center, top + 14, def.boss ? '#ffda9a' : '#f6f1df', 12);
-    this.label(g, this.plateHealth, center, top + 28, '#ecedde', 11);
-    g.fillStyle = '#463d35';
-    g.fillRect(left + 5, top + 32, width - 10, 4);
+    this.label(g, this.plateName, center, top + 11, def.boss ? '#ffda9a' : '#f6f1df', 10, width - 6);
+    g.fillStyle = '#514641';
+    g.fillRect(left + 3, top + 14, width - 6, 3);
     g.fillStyle = def.boss ? '#e7ae68' : '#df9982';
-    g.fillRect(left + 5, top + 32, (width - 10) * enemy.hp / def.hp, 4);
+    g.fillRect(left + 3, top + 14, (width - 6) * enemy.hp / def.hp, 3);
   }
   renderMap(s) {
     const g=this.map.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(this.mapGround,0,0);

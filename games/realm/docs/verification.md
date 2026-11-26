@@ -1,3 +1,17 @@
+# 0.5.4 immersive HUD
+
+Tested against merged 0.5.3 (PR #90). The Realm suite covers the compact enemy plates, HP and intent in the target frame, XP and level-cap states, camera bounds, and rejection of invalid or overlapping stored layouts.
+
+Chrome layout checks covered 1920×1080, 1440×900, 1366×768, 1280×720, 800×600, 480×720, 375×667, 320×500 and 700×370. Checks measured the XP midpoint and tested visible HUD bounds and intersections. The camera check placed the player along all four edges, including corners and the Cinder Reach meridian, and compared the projected sprite against the controls. Short landscape windows put the two unit frames beside each other.
+
+The interaction check exercised mouse targeting on the resized Canvas, ability clicks and shortcuts, cooldown display, independent disclosures, menu focus, target preview and pausing. A mouse-dragged frame retained its position after reloading. Keyboard edits, scale changes, cancellation, collision rejection and reset were also exercised. At CSS viewport sizes equivalent to 125%, 150% and 200% browser zoom, enemy selection and XP centering passed. Native browser zoom was not measured.
+
+The browser declined native fullscreen. The game's fallback filled its 1363×936 content area, kept the XP bar centered and restored the 40-pixel site header on exit. Dark and light themes were inspected during play.
+
+At 1440×900, the median draw plus synchronous Canvas readback in a static encounter was 0.97 ms in 0.5.3 and 1.36 ms in 0.5.4 across five warmed batches. The backing buffer grew from 960×524 to 1098×656 pixels in that comparison. This measurement does not include display composition.
+
+The same Dusk Wolf encounter is shown in both releases at [1280×720](hud-1280.jpg) and [1920×1080](hud-1920.jpg).
+
 # 0.5.3 world content expansion
 
 The baseline is the merged 0.5.2.1 HUD release (PR #89). The schema-6 returning-player fixture was serialized by that baseline with eight completed quests, rolled equipment, an outstanding drop, a respawn timer and two buyback entries. It round-trips unchanged before the character takes a new quest.
