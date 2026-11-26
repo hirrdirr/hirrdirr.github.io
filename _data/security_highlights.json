@@ -1,27 +1,29 @@
 {
-  "digest_date": "2026-11-25",
+  "digest_date": "2026-11-26",
   "articles": [
     {
-      "source": "CERT-SE",
-      "title": "Facit för CERT-SE CTF 2026",
-      "url": "https://www.cert.se/2026/11/facit-for-cert-se-ctf-2026.html"
-    },
-    {
       "source": "BleepingComputer",
-      "title": "CISA warns of critical unpatched flaw in Danfoss refrigeration controllers",
-      "url": "https://www.bleepingcomputer.com/news/security/cisa-warns-of-critical-unpatched-flaw-in-danfoss-refrigeration-controllers/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/25/danfoss.jpg"
+      "title": "Remus malware steals Gmail messages via fake Google Sheets extension",
+      "url": "https://www.bleepingcomputer.com/news/security/remus-malware-steals-gmail-messages-via-fake-google-sheets-extension/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/25/Gmail.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "AI agents found an unpatched flaw after being told to “break in”",
-      "url": "https://www.malwarebytes.com/blog/ai/2026/11/ai-agents-found-an-unpatched-flaw-after-being-told-to-break-in",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/ai-breaking-in.jpg"
+      "title": "Anthropic built a honeypot to see if AI agents will break out",
+      "url": "https://www.malwarebytes.com/blog/ai/2026/11/anthropic-built-a-honeypot-to-see-if-ai-agents-will-break-out",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/honeypot.png"
     },
     {
-      "source": "SANS ISC Diary",
-      "title": "ISC Stormcast For Wednesday, November 25th, 2026 https://isc.sans.edu/podcastdetail/10194, (Wed, Nov 25th)",
-      "url": "https://isc.sans.edu/diary/rss/33554"
+      "source": "BleepingComputer",
+      "title": "SYS010 malware abuses browser management to spy on Gmail, Outlook",
+      "url": "https://www.bleepingcomputer.com/news/security/sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/26/Gmail,Outlook_browser_inboxe.png"
+    },
+    {
+      "source": "BleepingComputer",
+      "title": "Palo Alto Networks warns of Fragnesia flaw exploited in PAN-OS attacks",
+      "url": "https://www.bleepingcomputer.com/news/security/palo-alto-networks-warns-of-fragnesia-flaw-exploited-in-pan-os-attacks/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/25/paloalto.jpg"
     }
   ]
 }
