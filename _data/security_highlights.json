@@ -1,29 +1,28 @@
 {
-  "digest_date": "2026-11-26",
+  "digest_date": "2026-11-27",
   "articles": [
     {
+      "source": "CERT-SE",
+      "title": "NCSC – CERT-SE veckobrev v.48",
+      "url": "https://www.cert.se/2026/11/ncsc-cert-se-veckobrev-v48.html"
+    },
+    {
       "source": "BleepingComputer",
-      "title": "Remus malware steals Gmail messages via fake Google Sheets extension",
-      "url": "https://www.bleepingcomputer.com/news/security/remus-malware-steals-gmail-messages-via-fake-google-sheets-extension/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/25/Gmail.jpg"
+      "title": "US Air Force cloud platform reportedly hacked in latest federal breach",
+      "url": "https://www.bleepingcomputer.com/news/security/us-air-force-cloud-platform-reportedly-hacked-in-latest-federal-breach/",
+      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/27/air-force-red-blue-2.jpg"
     },
     {
       "source": "Malwarebytes",
-      "title": "Anthropic built a honeypot to see if AI agents will break out",
-      "url": "https://www.malwarebytes.com/blog/ai/2026/11/anthropic-built-a-honeypot-to-see-if-ai-agents-will-break-out",
-      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/honeypot.png"
+      "title": "Drupal sites are being hijacked, and a follow-up flaw is already under attack",
+      "url": "https://www.malwarebytes.com/blog/bugs/2026/11/drupal-sites-are-being-hijacked-and-a-follow-up-flaw-is-already-under-attack",
+      "image": "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/11/Drupal_logo.png"
     },
     {
       "source": "BleepingComputer",
-      "title": "SYS010 malware abuses browser management to spy on Gmail, Outlook",
-      "url": "https://www.bleepingcomputer.com/news/security/sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/26/Gmail,Outlook_browser_inboxe.png"
-    },
-    {
-      "source": "BleepingComputer",
-      "title": "Palo Alto Networks warns of Fragnesia flaw exploited in PAN-OS attacks",
-      "url": "https://www.bleepingcomputer.com/news/security/palo-alto-networks-warns-of-fragnesia-flaw-exploited-in-pan-os-attacks/",
-      "image": "https://www.bleepstatic.com/content/hl-images/2026/11/25/paloalto.jpg"
+      "title": "Your Firewall Isn't Enough: The Hidden Risk of Unmanaged VMs",
+      "url": "https://www.bleepingcomputer.com/news/security/your-firewall-isnt-enough-the-hidden-risk-of-unmanaged-vms/",
+      "image": "https://www.bleepstatic.com/content/posts/2026/11/23/ispsystem-vm.jpg"
     }
   ]
 }
